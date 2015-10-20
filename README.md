@@ -202,13 +202,13 @@ When the project key in Backlog and Redmine matches, they will be considered as 
 "The project will not be imported and the following message will be shown.  Join the project to migrate data.
 ""Importing to this project failed.  You are not a member of this project. Join the project to add issues."""
 
+
 | Item | Specifications |
 |: ----------- | ------------ |
 | User | The account will not be added when there is an account with same ID. |
 | Group | The group will not be added when there is a group with same name. |
 | Project | The project will not be added when there is a project with same project key.  The issues and wikis will be added to the existing project. |
-"| Issues | The issue will not be added when there is the link to the Redmine's issue in the description.  i.e. ""Ref: From Redmine #1""
- is included in the description. |"
+| Issues | The issue will not be added when there is the link to the Redmine's issue in the description.  i.e. ""Ref: From Redmine #1"" is included in the  description. |
 | Wiki | The wiki will be not added when there is a wiki with same name. |
 | Custom fields | The custom field will not be added when there is a custom field with same name. |
 
