@@ -1,0 +1,30 @@
+<configuration>
+
+  <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+    <file>log/backlog-migration-redmine-debug.log</file>
+
+    <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+      <!-- daily rollover -->
+      <fileNamePattern>log/%d{yyyy-MM-dd}.backlog-migration-redmine-debug.log.zip</fileNamePattern>
+
+      <!-- keep 10 days' worth of history -->
+      <maxHistory>10</maxHistory>
+    </rollingPolicy>
+
+    <append>true</append>
+    <encoder>
+      <pattern>%d{yyyy/dd/MM HH:mm:ss.SSS} %-4relative [%thread] %-5level %logger{35} - %msg%n</pattern>
+    </encoder>
+  </appender>
+
+  <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+    <encoder>
+      <pattern>%msg%n</pattern>
+    </encoder>
+  </appender>
+
+  <root level="DEBUG">
+    <appender-ref ref="FILE" />
+  </root>
+
+</configuration>
