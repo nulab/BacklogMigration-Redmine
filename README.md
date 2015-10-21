@@ -204,7 +204,7 @@ When the project key in Backlog and Redmine matches, they will be considered as 
 
 
 | Item | Specifications |
-|: ----------- | ------------ |
+|:-----------|------------|
 | User | The account will not be added when there is an account with same ID. |
 | Group | The group will not be added when there is a group with same name. |
 | Project | The project will not be added when there is a project with same project key.  The issues and wikis will be added to the existing project. |
