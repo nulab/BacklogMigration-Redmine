@@ -179,7 +179,7 @@ Following items cannot be migrated
 ### Resources that can be migrated by Redmine version
 
 | Resource | Availability |
-|: ----------- |: ------------: |
+|:-----------|------------|
 | Issue | 1.1 |
 | Project | 1.1 |
 | Project member | 1.4 |
