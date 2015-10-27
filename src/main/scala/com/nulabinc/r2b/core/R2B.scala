@@ -51,8 +51,6 @@ object R2B extends Logging {
 
   implicit val userLang = if (Locale.getDefault.equals(Locale.JAPAN)) Lang("ja") else Lang("en")
 
-  private lazy val log = org.slf4j.LoggerFactory.getLogger(getClass)
-
   def main(args: Array[String]) {
     try {
       val cli: CommandLineInterface = new CommandLineInterface(args)

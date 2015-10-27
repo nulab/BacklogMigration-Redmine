@@ -7,7 +7,7 @@ import org.slf4j.{LoggerFactory, Logger}
  */
 trait Logging {
 
-  private val log: Logger = LoggerFactory.getLogger("CommonCommand")
+  val log: Logger = LoggerFactory.getLogger("CommonCommand")
 
   def printlog() = {
     println("")
