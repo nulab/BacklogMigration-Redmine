@@ -4,12 +4,15 @@ import com.nulabinc.backlog.importer.core.BacklogConfig
 import com.nulabinc.backlog4j._
 import com.nulabinc.backlog4j.api.option.GetIssuesParams
 import com.nulabinc.backlog4j.conf.{BacklogConfigure, BacklogPackageConfigure}
+import org.slf4j.{LoggerFactory, Logger}
 import scala.collection.JavaConverters._
 
 /**
  * @author uchida
  */
 class BacklogService(conf: BacklogConfig) {
+
+  private val log: Logger = LoggerFactory.getLogger("BacklogService")
 
   val backlog: BacklogClient = getBacklogClient
 
@@ -31,7 +34,9 @@ class BacklogService(conf: BacklogConfig) {
   def getProject(projectKey: String): Either[Throwable, Project] = try {
     Right(backlog.getProject(projectKey))
   } catch {
-    case e: BacklogAPIException => Left(e)
+    case e: BacklogAPIException =>
+      log.error(e.getMessage,e)
+      Left(e)
   }
 
   private def getBacklogClient: BacklogClient = {

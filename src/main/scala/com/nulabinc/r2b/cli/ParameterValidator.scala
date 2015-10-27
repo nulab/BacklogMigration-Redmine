@@ -8,6 +8,7 @@ import com.nulabinc.r2b.conf.R2BConfig
 import com.nulabinc.r2b.service.{BacklogService, RedmineService}
 import com.osinka.i18n.{Lang, Messages}
 import com.taskadapter.redmineapi.{RedmineAuthenticationException, RedmineTransportException}
+import org.slf4j.{LoggerFactory, Logger}
 
 /**
  * @author uchida
@@ -15,6 +16,8 @@ import com.taskadapter.redmineapi.{RedmineAuthenticationException, RedmineTransp
 class ParameterValidator(r2bConf: R2BConfig) {
 
   implicit val userLang = if (Locale.getDefault.equals(Locale.JAPAN)) Lang("ja") else Lang("en")
+
+  private val log: Logger = LoggerFactory.getLogger("ParameterValidator")
 
   def validate(): Seq[String] = {
     val backlogErrors: Seq[String] = validateLoadBacklog()
@@ -59,10 +62,13 @@ class ParameterValidator(r2bConf: R2BConfig) {
       Seq.empty[String]
     } catch {
       case unknown: BacklogAPIException if unknown.getStatusCode == 404 =>
+        log.error(unknown.getMessage, unknown)
         Seq("- " + Messages("message.transport_error_backlog", r2bConf.backlogUrl))
       case api: BacklogAPIException =>
+        log.error(api.getMessage, api)
         Seq("- " + Messages("message.disable_access_backlog"))
       case e: Throwable =>
+        log.error(e.getMessage, e)
         Seq("- " + Messages("message.disable_access_backlog"))
     }
 
@@ -73,10 +79,13 @@ class ParameterValidator(r2bConf: R2BConfig) {
       Seq.empty[String]
     } catch {
       case auth: RedmineAuthenticationException =>
+        log.error(auth.getMessage, auth)
         Seq("- " + Messages("message.auth_error_redmine"))
       case transport: RedmineTransportException =>
+        log.error(transport.getMessage, transport)
         Seq("- " + Messages("message.transport_error_redmine", r2bConf.redmineUrl))
       case e: Throwable =>
+        log.error(e.getMessage, e)
         Seq("- " + Messages("message.disable_access_redmine"))
     }
 

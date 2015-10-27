@@ -96,7 +96,9 @@ trait MappingManager extends Logging {
       val wrapper: MappingsWrapper = JsonParser(json).convertTo[MappingsWrapper]
       Right(wrapper)
     } catch {
-      case e: Throwable => Left(e)
+      case e: Throwable =>
+        log.error(e.getMessage,e)
+        Left(e)
     }
   }
 

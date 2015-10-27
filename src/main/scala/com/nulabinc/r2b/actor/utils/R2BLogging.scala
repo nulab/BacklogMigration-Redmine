@@ -34,8 +34,7 @@ trait R2BLogging extends Actor with ActorLogging {
   //    super.postStop()
   //  }
 
-  def errorLog(e: Exception) = {
-    e.printStackTrace()
+  def errorLog(e: Throwable) = {
     val message = e match {
       case bae: BacklogAPIException => bae.getMessage
       case rte: RedmineTransportException => rte.getMessage

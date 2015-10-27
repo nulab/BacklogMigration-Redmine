@@ -9,6 +9,7 @@ import com.nulabinc.r2b.conf.R2BConfig
 import com.nulabinc.r2b.domain.{RedmineJsonProtocol, RedmineIssuesWrapper}
 import com.taskadapter.redmineapi._
 import com.taskadapter.redmineapi.bean._
+import org.slf4j.{LoggerFactory, Logger}
 import spray.json.JsonParser
 
 import scala.collection.JavaConversions._
@@ -19,6 +20,8 @@ import scala.io.Source
  */
 class RedmineService(r2bConf: R2BConfig) {
   import RedmineJsonProtocol._
+
+  private val log: Logger = LoggerFactory.getLogger("RedmineService")
 
   val redmine: RedmineManager = RedmineManagerFactory.createWithApiKey(r2bConf.redmineUrl, r2bConf.redmineKey)
 
@@ -40,7 +43,9 @@ class RedmineService(r2bConf: R2BConfig) {
     try {
       Right(redmine.getCustomFieldManager.getCustomFieldDefinitions)
     } catch {
-      case e: NotFoundException => Left(e)
+      case e: NotFoundException =>
+        log.error(e.getMessage,e)
+        Left(e)
     }
   }
 
@@ -53,14 +58,18 @@ class RedmineService(r2bConf: R2BConfig) {
     try {
       Right(redmine.getProjectManager.getProjectByKey(projectKey.redmine))
     } catch {
-      case e: NotFoundException => Left(e)
+      case e: NotFoundException =>
+        log.error(e.getMessage, e)
+        Left(e)
     }
 
   def getMemberships(projectKey: String): Either[Throwable, Seq[Membership]] = {
     try {
       Right(redmine.getMembershipManager.getMemberships(projectKey))
     } catch {
-      case e: NotFoundException => Left(e)
+      case e: NotFoundException =>
+        log.error(e.getMessage, e)
+        Left(e)
     }
   }
 
@@ -68,7 +77,9 @@ class RedmineService(r2bConf: R2BConfig) {
     try {
       Right(redmine.getIssueManager.getCategories(projectId))
     } catch {
-      case e: NotFoundException => Left(e)
+      case e: NotFoundException =>
+        log.error(e.getMessage,e)
+        Left(e)
     }
   }
 
@@ -76,7 +87,9 @@ class RedmineService(r2bConf: R2BConfig) {
     try {
       Right(redmine.getIssueManager.getTrackers)
     } catch {
-      case e: NotFoundException => Left(e)
+      case e: NotFoundException =>
+        log.error(e.getMessage,e)
+        Left(e)
     }
   }
 
@@ -84,7 +97,9 @@ class RedmineService(r2bConf: R2BConfig) {
     try {
       Right(redmine.getWikiManager.getWikiPagesByProject(projectKey))
     } catch {
-      case e: RedmineAuthenticationException => Left(e)
+      case e: RedmineAuthenticationException =>
+        log.error(e.getMessage,e)
+        Left(e)
     }
   }
 
@@ -109,7 +124,9 @@ class RedmineService(r2bConf: R2BConfig) {
     try {
       Right(redmine.getUserManager.getGroups)
     } catch {
-      case e: RedmineAuthenticationException => Left(e)
+      case e: RedmineAuthenticationException =>
+        log.error(e.getMessage, e)
+        Left(e)
     }
   }
 
@@ -121,7 +138,9 @@ class RedmineService(r2bConf: R2BConfig) {
     try {
       Right(redmine.getIssueManager.getStatuses)
     } catch {
-      case e: NotFoundException => Left(e)
+      case e: NotFoundException =>
+        log.error(e.getMessage,e)
+        Left(e)
     }
   }
 
@@ -129,7 +148,9 @@ class RedmineService(r2bConf: R2BConfig) {
     try {
       Right(redmine.getIssueManager.getIssuePriorities)
     } catch {
-      case e: NotFoundException => Left(e)
+      case e: NotFoundException =>
+        log.error(e.getMessage,e)
+        Left(e)
     }
   }
 
@@ -144,7 +165,9 @@ class RedmineService(r2bConf: R2BConfig) {
     try {
       Right(redmine.getProjectManager.getVersions(projectID))
     } catch {
-      case e: RedmineAuthenticationException => Left(e)
+      case e: RedmineAuthenticationException =>
+        log.error(e.getMessage,e)
+        Left(e)
     }
   }
 
@@ -152,7 +175,9 @@ class RedmineService(r2bConf: R2BConfig) {
     try {
       Right(redmine.getMembershipManager.getMemberships(projectID))
     } catch {
-      case e: NotFoundException => Left(e)
+      case e: NotFoundException =>
+        log.error(e.getMessage, e)
+        Left(e)
     }
   }
 
