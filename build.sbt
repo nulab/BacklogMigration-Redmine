@@ -2,7 +2,7 @@ name := "backlog-migration-redmine"
 
 organization := "com.nulabinc"
 
-version := "0.9.0b13"
+version := "0.9.0b14"
 
 scalaVersion := "2.11.6"
 
