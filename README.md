@@ -15,6 +15,7 @@ Migrate your projects from Redmine to [Backlog].
 * Java 8
 
 ## Requirements
+* 2015/10/28 0.9.0b14 released
 * 2015/10/27 0.9.0b13 released
 * 2015/10/10 0.9.0b12 released
 https://github.com/nulab/BacklogMigration-Redmine/releases
@@ -232,6 +233,7 @@ Redmineのプロジェクトを[Backlog]に移行するためのツールです�
 * Java 8
 
 ## 更新履歴
+* 2015/10/28 0.9.0b14 リリース
 * 2015/10/27 0.9.0b13 リリース
 * 2015/10/10 0.9.0b12 リリース
 https://github.com/nulab/BacklogMigration-Redmine/releases
@@ -438,4 +440,4 @@ MIT License
 
 [Backlog]: http://www.backlog.jp/
 
-[Jar]: https://github.com/nulab/BacklogMigration-Redmine/releases/download/v0.9.0b13/backlog-migration-redmine-0.9.0b13.jar
+[Jar]: https://github.com/nulab/BacklogMigration-Redmine/releases/download/v0.9.0b14/backlog-migration-redmine-0.9.0b14.jar
