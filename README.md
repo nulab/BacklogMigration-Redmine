@@ -3,7 +3,7 @@
 Migrate your projects from Redmine to [Backlog].
 (英語の下に日本文が記載されています)
 
-** <span style="color:red">Backlog Migration for Redmine is in beta.  To avoid problems, create a new project and import data before importing data to the existing project in Backlog.  </span> **
+**Backlog Migration for Redmine is in beta.  To avoid problems, create a new project and import data before importing data to the existing project in Backlog.**
 
 ![Backlog icon](https://raw.githubusercontent.com/nulab/BacklogMigration-Redmine/master/icon.png)
 
@@ -25,7 +25,11 @@ Download
 
 Download the [jar], and run from the command line as follows.
 
-    java -jar backlog-migration-redmine-<latest version>.jar
+    java -jar backlog-migration-redmine-<latest version>.jar
+
+To use via proxy server, run from the command line as follows.
+
+    java -Dhttp.proxyHost=<proxy host name> -Dhttp.proxyPort=<proxy port> -jar backlog-migration-redmine-<latest version>.jar
 
 ## How to use
 ### Preparation
@@ -223,7 +227,7 @@ MIT License
 # Backlog Migration for Redmine
 Redmineのプロジェクトを[Backlog]に移行するためのツールです。
 
-** <span style="color:red">Backlog Migration for Redmineはベータバージョンです。Backlog上の既存プロジェクトにインポートする場合は、先に新しく別プロジェクトを作成し、こちらにインポートし内容を確認後。正式なプロジェクトにインポートしてください</span> **
+**Backlog Migration for Redmineはベータバージョンです。Backlog上の既存プロジェクトにインポートする場合は、先に新しく別プロジェクトを作成し、こちらにインポートし内容を確認後。正式なプロジェクトにインポートしてください**
 
 * Backlog 
     * [http://backlog.jp](http://backlog.jp)
@@ -244,6 +248,10 @@ https://github.com/nulab/BacklogMigration-Redmine/releases
 [jar]をダウンロードし、以下のようにコマンドラインから実行します。
 
     java -jar backlog-migration-redmine-<latest version>.jar
+    
+プロキシ経由で使用する場合は、以下のように実行します。
+
+    java -Dhttp.proxyHost=<プロキシサーバのホスト名> -Dhttp.proxyPort=<プロキシサーバのポート番号> -jar backlog-migration-redmine-<latest version>.jar
 
 ## 使い方
 ### 前準備
