@@ -29,7 +29,7 @@ class RedmineService(r2bConf: R2BConfig) {
   val redmine: RedmineManager = RedmineManagerFactory.createWithApiKey(r2bConf.redmineUrl, r2bConf.redmineKey)
 
   def getIssuesCount(projectId: Int): Int = {
-    val url = r2bConf.redmineUrl + "/issues.json?limit=1&project_id=" + projectId + "&key=" + r2bConf.redmineKey
+    val url = r2bConf.redmineUrl + "/issues.json?limit=1&project_id=" + projectId + "&key=" + r2bConf.redmineKey + "&status_id=*"
     val str: String = httpGet(url)
     val redmineIssuesWrapper: RedmineIssuesWrapper = JsonParser(str).convertTo[RedmineIssuesWrapper]
     redmineIssuesWrapper.total_count

@@ -1,6 +1,7 @@
 package com.nulabinc.r2b.core
 
 import java.util.Locale
+import javax.lang.model.SourceVersion
 
 import com.nulabinc.backlog.importer.actor.backlog.BacklogActor
 import com.nulabinc.backlog.importer.core.BacklogConfig
@@ -9,6 +10,7 @@ import com.nulabinc.r2b.actor.redmine.RedmineActor
 import com.nulabinc.r2b.actor.utils.Logging
 import com.nulabinc.r2b.cli.{ExecuteCommand, InitCommand, ParamProjectKey, ParameterValidator}
 import com.nulabinc.r2b.conf.{ConfigBase, R2BConfig}
+import com.nulabinc.r2b.utils.ClassVersion
 import com.osinka.i18n.{Lang, Messages}
 import org.rogach.scallop._
 
@@ -52,16 +54,20 @@ object R2B extends Logging {
   implicit val userLang = if (Locale.getDefault.equals(Locale.JAPAN)) Lang("ja") else Lang("en")
 
   def main(args: Array[String]) {
-    try {
-      val cli: CommandLineInterface = new CommandLineInterface(args)
-
-      execute(cli)
-      System.exit(0)
-    } catch {
-      case e: Throwable ⇒
-        e.printStackTrace()
-        log.error(e.getMessage, e)
-        System.exit(1)
+    if (ClassVersion.isValid()) {
+      try {
+        val cli: CommandLineInterface = new CommandLineInterface(args)
+        execute(cli)
+        System.exit(0)
+      } catch {
+        case e: Throwable ⇒
+          e.printStackTrace()
+          log.error(e.getMessage, e)
+          System.exit(1)
+      }
+    } else {
+      printlog(Messages("requirements_java8", System.getProperty("java.specification.version")))
+      System.exit(1)
     }
   }
 

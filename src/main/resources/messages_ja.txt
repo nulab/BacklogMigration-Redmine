@@ -1,3 +1,4 @@
+requirements_java8=現在のJavaのバージョンは「{0}」です。Java8以上が必須になります。
 help=オプションのヘルプを見るには`java -jar backlog-migration-redmine-<latest version>.jar --help`を実行してください。
 error.unknown=予期しないエラーが発生しました。
 projects=プロジェクト

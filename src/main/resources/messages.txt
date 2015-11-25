@@ -1,3 +1,4 @@
+requirements_java8=The current version of Java is "{0}". Java 8 is required for this program.
 help=help=Run `java -jar backlog-migration-redmine-<latest version>.jar --help` command for help
 error.unknown=Unknown error
 projects=projects
