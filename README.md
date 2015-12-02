@@ -13,6 +13,7 @@ Migrate your projects from Redmine to [Backlog].
     
 ## Requirements
 * Java 8
+* The Backlog Space's administrator roles. 
 
 ## Update
 * 2015/11/25 0.9.0b15 released
@@ -133,6 +134,9 @@ When import has been completed, the R2b directory will be created and data file 
 ### Supported Redmine versions
 Redmine ** 1.1.1 or later ** are supported.
 
+### Backlog's user roles
+This program is for the users with the Space's administrator roles. 
+
 ### Resources that cannot be migrated
 * Shared files
 * Sentences
@@ -236,6 +240,7 @@ Redmineのプロジェクトを[Backlog]に移行するためのツールです�
     
 ## 必須要件
 * Java 8
+* Backlogの管理者権限
 
 ## 更新履歴
 * 2015/11/25 0.9.0b15 リリース
@@ -357,6 +362,9 @@ descriptionにある項目を使い、空白を埋める必要が有ります。
 
 ### Redmineの対応バージョン
 Redmineの対応バージョンは**1.1.1以降**になります。
+
+### 実行できるユーザー
+Backlogの管理者権限が必要になります。
 
 ### 移行できないリソース
 * 共有ファイル
