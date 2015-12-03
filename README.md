@@ -137,6 +137,9 @@ Redmine ** 1.1.1 or later ** are supported.
 ### Backlog's user roles
 This program is for the users with the Space's administrator roles. 
 
+### Migration project with custom fields
+Only applied to max or platina plan. 
+
 ### Resources that cannot be migrated
 * Shared files
 * Sentences
@@ -365,6 +368,9 @@ Redmineの対応バージョンは**1.1.1以降**になります。
 
 ### 実行できるユーザー
 Backlogの管理者権限が必要になります。
+
+### カスタムフィールドを使用しているプロジェクトの移行
+Backlogでマックスプラン以上のプランを契約している必要があります。
 
 ### 移行できないリソース
 * 共有ファイル
