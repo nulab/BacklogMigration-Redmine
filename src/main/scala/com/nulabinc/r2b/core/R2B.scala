@@ -118,7 +118,7 @@ object R2B extends Logging {
 
       case _ =>
         printlog()
-        println(ConfigBase.NAME + " " + ConfigBase.VERSION + " (c) nulab.inc")
+        printlog(ConfigBase.NAME + " " + ConfigBase.VERSION + " (c) nulab.inc")
         printlog("--------------------------------------------------")
         println(Messages("help.sample_command"))
         println(Messages("help"))
@@ -127,7 +127,7 @@ object R2B extends Logging {
 
   private def showTitle() = {
     printlog()
-    println(ConfigBase.NAME + " " + ConfigBase.VERSION + " (c) nulab.inc")
+    printlog(ConfigBase.NAME + " " + ConfigBase.VERSION + " (c) nulab.inc")
     printlog("--------------------------------------------------")
   }
 
