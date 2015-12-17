@@ -13,8 +13,8 @@ import com.taskadapter.redmineapi.bean.{Project, User, WikiPage, WikiPageDetail}
 import scala.collection.mutable.Set
 
 /**
- * @author uchida
- */
+  * @author uchida
+  */
 class WikisActor(r2bConf: R2BConfig, project: Project) extends Actor with R2BLogging {
 
   override val supervisorStrategy = AllForOneStrategy(maxNrOfRetries = 0) {
@@ -29,7 +29,7 @@ class WikisActor(r2bConf: R2BConfig, project: Project) extends Actor with R2BLog
       val users = Set.empty[Option[User]]
       val redmineService: RedmineService = new RedmineService(r2bConf)
       redmineService.getWikiPagesByProject(project.getIdentifier).fold(
-        e => log.debug(e.getMessage),
+        e => log.error(e.getMessage, e),
         wikiPages =>
           wikiPages.foreach(page => {
             val detail: WikiPageDetail = redmineService.getWikiPageDetailByProjectAndTitle(project.getIdentifier, page.getTitle)
