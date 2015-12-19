@@ -3,8 +3,8 @@ package com.nulabinc.r2b.conf
 import java.io.File
 
 /**
- * @author uchida
- */
+  * @author uchida
+  */
 object ConfigBase {
   val LOG_APPLICATION_LABEL = "[R2B]"
   val NAME: String = "Backlog Migration for Redmine"
@@ -51,6 +51,7 @@ object ConfigBase {
       val ESTIMATED_HOURS: String = "estimated_hours"
       val CATEGORY: String = "category_id"
     }
+
   }
 
   object Redmine {
@@ -66,45 +67,35 @@ object ConfigBase {
     val TRACKERS = PATH + "/trackers.json"
     val USERS = PATH + "/users.json"
 
-    def getIssuesDir(projectIdentifier: String): String = {
+    def getIssuesDir(projectIdentifier: String): String =
       PATH + s"/projects/$projectIdentifier/issues"
-    }
 
-    def getIssuePath(projectIdentifier: String, issueId: Int): String = {
+    def getIssuePath(projectIdentifier: String, issueId: Int): String =
       getIssuesDir(projectIdentifier) + s"/$issueId/$ISSUE_FILE_NAME"
-    }
 
-    def getIssueAttachmentDir(projectIdentifier: String, issueId: Int, attachmentId: Int): String = {
+    def getIssueAttachmentDir(projectIdentifier: String, issueId: Int, attachmentId: Int): String =
       getIssuesDir(projectIdentifier) + s"/$issueId/attachment/$attachmentId"
-    }
 
-    def getMembershipsPath(projectIdentifier: String): String = {
+    def getMembershipsPath(projectIdentifier: String): String =
       PATH + s"/projects/$projectIdentifier/memberships.json"
-    }
 
-    def getIssueCategoriesPath(projectIdentifier: String): String = {
+    def getIssueCategoriesPath(projectIdentifier: String): String =
       PATH + s"/projects/$projectIdentifier/issue_categories.json"
-    }
 
-    def getVersionsPath(projectIdentifier: String): String = {
+    def getVersionsPath(projectIdentifier: String): String =
       PATH + s"/projects/$projectIdentifier/versions.json"
-    }
 
-    def getNewsPath(projectIdentifier: String): String = {
+    def getNewsPath(projectIdentifier: String): String =
       PATH + s"/projects/$projectIdentifier/news.json"
-    }
 
-    def getWikisDir(projectIdentifier: String): String = {
+    def getWikisDir(projectIdentifier: String): String =
       PATH + s"/projects/$projectIdentifier/wikis"
-    }
 
-    def getWikiPath(projectIdentifier: String, wikiTitle: String): String = {
+    def getWikiPath(projectIdentifier: String, wikiTitle: String): String =
       getWikisDir(projectIdentifier) + s"/$wikiTitle/$WIKI_FILE_NAME"
-    }
 
-    def getWikiAttachmentDir(projectIdentifier: String, wikiTitle: String, attachmentId: Int): String = {
+    def getWikiAttachmentDir(projectIdentifier: String, wikiTitle: String, attachmentId: Int): String =
       getWikisDir(projectIdentifier) + s"/$wikiTitle/attachment/$attachmentId"
-    }
 
   }
 

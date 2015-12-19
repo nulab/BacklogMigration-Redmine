@@ -3,8 +3,8 @@ package com.nulabinc.r2b.utils
 import scalax.file.Path
 
 /**
- * @author uchida
- */
+  * @author uchida
+  */
 object IOUtil {
 
   def createDirectory(path: String) = {
@@ -34,6 +34,11 @@ object IOUtil {
     val directory: Path = Path.fromString(strPath)
     if (directory.isDirectory) directory.toAbsolute.children().toSeq
     else Seq.empty[Path]
+  }
+
+  def isDirectory(path: String): Boolean = {
+    val filePath: Path = Path.fromString(path).toAbsolute
+    filePath.isDirectory
   }
 
 }

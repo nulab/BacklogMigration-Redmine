@@ -44,7 +44,7 @@ case class RedmineJournal(
                            user: Option[String],
                            createdOn: Option[String])
 
-case class RedmineJournalDetail(property: String, name: String, oldValue: Option[String], newValue: String)
+case class RedmineJournalDetail(property: String, name: String, oldValue: Option[String], newValue: Option[String])
 
 case class RedmineAttachment(
                               id: Int,

@@ -49,7 +49,7 @@ class IssuesActor(r2bConf: R2BConfig, projectInfo: ProjectInfo) extends Actor wi
         //Convert and output backlog issue
         val redmineCustomFieldDefinitions: Seq[RedmineCustomFieldDefinition] = RedmineUnmarshaller.customFieldDefinitions().getOrElse(Seq.empty[RedmineCustomFieldDefinition])
 
-        val backlogIssue: BacklogIssue = ConvertService.Issue(projectEnumerations, redmineIssue, redmineCustomFieldDefinitions, r2bConf.redmineUrl)
+        val backlogIssue: BacklogIssue = ConvertService.Issue(projectInfo.projectKey.redmine,projectEnumerations, redmineIssue, redmineCustomFieldDefinitions, r2bConf.redmineUrl)
         IOUtil.output(BacklogConfigBase.Backlog.getIssuePath(projectInfo.projectKey.backlog, redmineIssue.id), backlogIssue.toJson.prettyPrint)
 
         //Copy attachments
