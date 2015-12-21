@@ -2,9 +2,8 @@ package com.nulabinc.r2b.actor.prepare
 
 import java.util.UUID._
 
-import akka.actor.SupervisorStrategy.Escalate
 import akka.actor._
-import com.nulabinc.r2b.actor.utils.{R2BLogging, Subtasks}
+import com.nulabinc.r2b.actor.utils.R2BLogging
 import com.nulabinc.r2b.conf.ConfigBase.Redmine
 import com.nulabinc.r2b.conf.{ConfigBase, R2BConfig}
 import com.nulabinc.r2b.service.RedmineService
@@ -18,12 +17,7 @@ import scala.collection.mutable.Set
 /**
  * @author uchida
  */
-class IssuesActor(r2bConf: R2BConfig, project: Project) extends Actor with R2BLogging with Subtasks {
-
-  override val supervisorStrategy = AllForOneStrategy(maxNrOfRetries = 0) {
-    case _: Exception =>
-      Escalate
-  }
+class IssuesActor(r2bConf: R2BConfig, project: Project) extends Actor with R2BLogging {
 
   private val users = Set.empty[Option[User]]
   private val redmineService: RedmineService = new RedmineService(r2bConf)
