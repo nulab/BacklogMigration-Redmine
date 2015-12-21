@@ -5,6 +5,7 @@ import java.util.Locale
 import com.nulabinc.backlog.importer.conf.{ConfigBase => BacklogConfigBase}
 import com.nulabinc.backlog.importer.domain._
 import com.nulabinc.backlog4j.CustomField.FieldType
+import com.nulabinc.r2b.actor.convert.utils.ConvertComments
 import com.nulabinc.r2b.actor.utils.IssueTag
 import com.nulabinc.r2b.cli.ParamProjectKey
 import com.nulabinc.r2b.conf.ConfigBase
@@ -12,8 +13,8 @@ import com.nulabinc.r2b.domain._
 import com.osinka.i18n.{Lang, Messages}
 
 /**
- * @author uchida
- */
+  * @author uchida
+  */
 object ConvertService {
 
   implicit val userLang = if (Locale.getDefault.equals(Locale.JAPAN)) Lang("ja") else Lang("en")
@@ -80,7 +81,7 @@ object ConvertService {
 
   object Issue {
 
-    def apply(projectEnumerations: ProjectEnumerations, redmineIssue: RedmineIssue, redmineCustomFieldDefinitions: Seq[RedmineCustomFieldDefinition], redmineUrl: String): BacklogIssue =
+    def apply(projectIdentifier: String, projectEnumerations: ProjectEnumerations, redmineIssue: RedmineIssue, redmineCustomFieldDefinitions: Seq[RedmineCustomFieldDefinition], redmineUrl: String): BacklogIssue =
       BacklogIssue(
         id = redmineIssue.id,
         summary = redmineIssue.subject,
@@ -97,7 +98,7 @@ object ConvertService {
         priorityName = priorityMapping.convert(redmineIssue.priority),
         assigneeUserId = redmineIssue.assigneeId.map(userMapping.convert),
         attachments = getBacklogAttachments(redmineIssue.attachments),
-        comments = getBacklogComments(projectEnumerations, redmineIssue.journals),
+        comments = ConvertComments(projectIdentifier, redmineIssue.id, projectEnumerations, userMapping, redmineIssue.journals),
         customFields = getBacklogCustomFields(projectEnumerations, redmineIssue.customFields, redmineCustomFieldDefinitions),
         createdUserId = redmineIssue.author.map(userMapping.convert),
         created = redmineIssue.createdOn,
@@ -128,98 +129,10 @@ object ConvertService {
         case ConfigBase.FieldFormat.VERSION => projectEnumerations.Version.convertValue(redmineCustomField.value)
         case ConfigBase.FieldFormat.USER => projectEnumerations.Membership.convertValue(redmineCustomField.value)
         case ConfigBase.FieldFormat.INT | ConfigBase.FieldFormat.FLOAT =>
-          if (redmineCustomField.value.nonEmpty) redmineCustomField.value
-          else
-          if (redmineCustomFieldDefinition.defaultValue.isDefined) redmineCustomFieldDefinition.defaultValue
-          else None
+          redmineCustomField.value.orElse(redmineCustomFieldDefinition.defaultValue)
         case _ => redmineCustomField.value
       }
     }
-
-    private def getBacklogComments(projectEnumerations: ProjectEnumerations, journals: Seq[RedmineJournal]): Seq[BacklogComment] =
-      journals.map(journal => getBacklogComment(projectEnumerations, journal))
-
-    private def getBacklogComment(projectEnumerations: ProjectEnumerations, redmineJournal: RedmineJournal): BacklogComment =
-      BacklogComment(
-        content = redmineJournal.notes + "\n" + getOtherProperty(redmineJournal.details),
-        details = redmineJournal.details.filter(detail => !isOtherProperty(detail)).map(detail => getBacklogCommentDetail(projectEnumerations, detail)),
-        createdUserId = redmineJournal.user.map(userMapping.convert),
-        created = redmineJournal.createdOn)
-
-    private def getOtherProperty(details: Seq[RedmineJournalDetail]): String =
-      details.filter(isOtherProperty).map(getOtherPropertyMessage).mkString("\n")
-
-    private def getOtherPropertyMessage(detail: RedmineJournalDetail): String = {
-      val label: String = if (detail.property == ConfigBase.Property.ATTR) {
-        if (detail.name == "done_ratio") "label.done_ratio" else "label.private"
-      } else if (detail.property == "relation") "label.relation"
-      else ""
-      if (label.nonEmpty) Messages("label.change_comment", Messages(label), getStringMessage(detail.oldValue), getStringMessage(Some(detail.newValue)))
-      else ""
-    }
-
-    private def isOtherProperty(detail: RedmineJournalDetail): Boolean =
-      (detail.property == ConfigBase.Property.ATTR && (detail.name == "is_private" || detail.name == "done_ratio")) || detail.property == "relation"
-
-    private def getStringMessage(value: Option[String]): String =
-      if (value.isEmpty) Messages("label.not_set")
-      else value.get
-
-    private def getBacklogCommentDetail(projectEnumerations: ProjectEnumerations, redmineJournalDetail: RedmineJournalDetail): BacklogCommentDetail =
-      BacklogCommentDetail(
-        property = redmineJournalDetail.property,
-        name = convertName(projectEnumerations, redmineJournalDetail.property, redmineJournalDetail.name),
-        oldValue = convertValue(projectEnumerations, redmineJournalDetail.property, redmineJournalDetail.name, redmineJournalDetail.oldValue),
-        newValue = convertValue(projectEnumerations, redmineJournalDetail.property, redmineJournalDetail.name, Some(redmineJournalDetail.newValue)))
-
-    private def convertName(projectEnumerations: ProjectEnumerations, property: String, name: String): String = property match {
-      case ConfigBase.Property.CF => projectEnumerations.CustomFieldDefinitions.convertValue(Some(name)).get
-      case _ => convertBacklogName(name)
-    }
-
-    private def convertBacklogName(name:String ):String = name match {
-      case ConfigBase.Property.Attr.SUBJECT => BacklogConfigBase.Property.Attr.SUMMARY
-      case ConfigBase.Property.Attr.TRACKER => BacklogConfigBase.Property.Attr.ISSUE_TYPE
-      case ConfigBase.Property.Attr.STATUS => BacklogConfigBase.Property.Attr.STATUS
-      case ConfigBase.Property.Attr.PRIORITY => BacklogConfigBase.Property.Attr.PRIORITY
-      case ConfigBase.Property.Attr.ASSIGNED => BacklogConfigBase.Property.Attr.ASSIGNED
-      case ConfigBase.Property.Attr.VERSION => BacklogConfigBase.Property.Attr.VERSION
-      case ConfigBase.Property.Attr.PARENT => BacklogConfigBase.Property.Attr.PARENT
-      case ConfigBase.Property.Attr.START_DATE => BacklogConfigBase.Property.Attr.START_DATE
-      case ConfigBase.Property.Attr.DUE_DATE => BacklogConfigBase.Property.Attr.DUE_DATE
-      case ConfigBase.Property.Attr.ESTIMATED_HOURS => BacklogConfigBase.Property.Attr.ESTIMATED_HOURS
-      case ConfigBase.Property.Attr.CATEGORY => BacklogConfigBase.Property.Attr.CATEGORY
-      case _ => name
-    }
-
-    private def convertValue(projectEnumerations: ProjectEnumerations, property: String, name: String, value: Option[String]): Option[String] = property match {
-      case ConfigBase.Property.ATTR => convertAttr(projectEnumerations, name, value)
-      case ConfigBase.Property.CF => convertCf(projectEnumerations, name, value)
-      case ConfigBase.Property.ATTACHMENT => value
-      case "relation" => value
-    }
-
-    private def convertAttr(projectEnumerations: ProjectEnumerations, name: String, value: Option[String]): Option[String] = name match {
-      case ConfigBase.Property.Attr.STATUS => projectEnumerations.IssueStatus.convertValue(value)
-      case ConfigBase.Property.Attr.PRIORITY => projectEnumerations.Priority.convertValue(value)
-      case ConfigBase.Property.Attr.ASSIGNED => projectEnumerations.User.convertValue(value).map(userMapping.convert)
-      case ConfigBase.Property.Attr.VERSION => projectEnumerations.Version.convertValue(value)
-      case ConfigBase.Property.Attr.TRACKER => projectEnumerations.Tracker.convertValue(value)
-      case ConfigBase.Property.Attr.CATEGORY => projectEnumerations.Category.convertValue(value)
-      case _ => value
-    }
-
-    private def convertCf(projectEnumerations: ProjectEnumerations, name: String, value: Option[String]): Option[String] =
-      RedmineUnmarshaller.customFieldDefinitions() match {
-        case Some(customFields) =>
-          val redmineCustomFieldDefinition: RedmineCustomFieldDefinition = customFields.find(customField => name.toInt == customField.id).get
-          redmineCustomFieldDefinition.fieldFormat match {
-            case "version" => projectEnumerations.Version.convertValue(value)
-            case "user" => projectEnumerations.UserId.convertValue(projectEnumerations.User.convertValue(value))
-            case _ => value
-          }
-        case None => None
-      }
 
   }
 

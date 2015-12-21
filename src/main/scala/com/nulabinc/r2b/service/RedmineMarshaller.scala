@@ -242,7 +242,7 @@ object RedmineMarshaller {
       property = journalDetail.getProperty,
       name = journalDetail.getName,
       oldValue = if (journalDetail.getOldValue == null || journalDetail.getOldValue.isEmpty) None else Some(journalDetail.getOldValue),
-      newValue = journalDetail.getNewValue)
+      newValue = if (journalDetail.getNewValue == null || journalDetail.getNewValue.isEmpty) None else Some(journalDetail.getNewValue))
 
   private def getRedmineUser(user: User): RedmineUser =
     RedmineUser(

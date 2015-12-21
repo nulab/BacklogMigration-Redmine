@@ -1,7 +1,6 @@
 package com.nulabinc.r2b.core
 
 import java.util.Locale
-import javax.lang.model.SourceVersion
 
 import com.nulabinc.backlog.importer.actor.backlog.BacklogActor
 import com.nulabinc.backlog.importer.core.BacklogConfig
@@ -118,7 +117,7 @@ object R2B extends Logging {
 
       case _ =>
         printlog()
-        println(ConfigBase.NAME + " " + ConfigBase.VERSION + " (c) nulab.inc")
+        printlog(ConfigBase.NAME + " " + ConfigBase.VERSION + " (c) nulab.inc")
         printlog("--------------------------------------------------")
         println(Messages("help.sample_command"))
         println(Messages("help"))
@@ -127,7 +126,7 @@ object R2B extends Logging {
 
   private def showTitle() = {
     printlog()
-    println(ConfigBase.NAME + " " + ConfigBase.VERSION + " (c) nulab.inc")
+    printlog(ConfigBase.NAME + " " + ConfigBase.VERSION + " (c) nulab.inc")
     printlog("--------------------------------------------------")
   }
 

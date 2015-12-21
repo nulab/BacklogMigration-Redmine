@@ -2,26 +2,20 @@ package com.nulabinc.r2b.actor.redmine
 
 import java.util.UUID._
 
-import akka.actor.SupervisorStrategy.Escalate
 import akka.actor._
 import com.nulabinc.r2b.actor.utils.R2BLogging
 import com.nulabinc.r2b.conf.ConfigBase.Redmine
 import com.nulabinc.r2b.conf.{ConfigBase, R2BConfig}
-import com.nulabinc.r2b.service.{RedmineMarshaller, RedmineService}
+import com.nulabinc.r2b.service.{AttachmentDownloader, RedmineMarshaller, RedmineService}
 import com.nulabinc.r2b.utils.IOUtil
 import com.osinka.i18n.Messages
 import com.taskadapter.redmineapi.Include
-import com.taskadapter.redmineapi.bean.{Attachment, Issue, Project, User}
+import com.taskadapter.redmineapi.bean.{Issue, Project, User}
 
 /**
- * @author uchida
- */
+  * @author uchida
+  */
 class IssuesActor(r2bConf: R2BConfig, project: Project) extends Actor with R2BLogging {
-
-  override val supervisorStrategy = AllForOneStrategy(maxNrOfRetries = 0) {
-    case _: Exception =>
-      Escalate
-  }
 
   private val redmineService: RedmineService = new RedmineService(r2bConf)
 
@@ -34,17 +28,17 @@ class IssuesActor(r2bConf: R2BConfig, project: Project) extends Actor with R2BLo
 
       if (allCount != 0) printlog(Messages("message.execute_redmine_issues_export", project.getName, allCount))
 
-      issuesLoop(0)
+      loop(0)
       context.stop(self)
   }
 
-  private def issuesLoop(n: Int): Unit =
-    if (n < allCount) {
-      searchIssues(n)
-      issuesLoop(n + Redmine.ISSUE_GET_LIMIT)
+  private def loop(offset: Int): Unit =
+    if (offset < allCount) {
+      search(offset)
+      loop(offset + Redmine.ISSUE_GET_LIMIT)
     }
 
-  private def searchIssues(offset: Int) = {
+  private def search(offset: Int) = {
     val params: Map[String, String] = Map("offset" -> offset.toString, "limit" -> Redmine.ISSUE_GET_LIMIT.toString, "project_id" -> project.getId.toString, "status_id" -> "*")
     val issues: Seq[Issue] = redmineService.getIssues(params)
     issues.foreach(output)
@@ -55,18 +49,10 @@ class IssuesActor(r2bConf: R2BConfig, project: Project) extends Actor with R2BLo
     val users: Seq[User] = redmineService.getUsers
 
     IOUtil.output(ConfigBase.Redmine.getIssuePath(project.getIdentifier, searchIssue.getId), RedmineMarshaller.Issue(issue, project, users))
-
-    val attachments: Array[Attachment] = issue.getAttachments.toArray(new Array[Attachment](issue.getAttachments.size()))
-    attachments.foreach(attachment => downloadAttachmentContent(issue, attachment))
+    AttachmentDownloader.issue(r2bConf.redmineKey, project.getIdentifier,issue)
 
     count += 1
     printlog(Messages("message.execute_redmine_issue_export", project.getName, count, allCount))
-  }
-
-  private def downloadAttachmentContent(searchIssue: Issue, attachment: Attachment) = {
-    val dir: String = ConfigBase.Redmine.getIssueAttachmentDir(project.getIdentifier, searchIssue.getId, attachment.getId)
-    IOUtil.createDirectory(dir)
-    redmineService.downloadAttachmentContent(attachment, dir)
   }
 
 }

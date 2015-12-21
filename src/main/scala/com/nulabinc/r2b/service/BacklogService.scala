@@ -35,7 +35,7 @@ class BacklogService(conf: BacklogConfig) {
     Right(backlog.getProject(projectKey))
   } catch {
     case e: BacklogAPIException =>
-      log.error(e.getMessage,e)
+      if(!e.getMessage.contains("No project")) log.error(e.getMessage,e)
       Left(e)
   }
 

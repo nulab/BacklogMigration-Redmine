@@ -165,13 +165,6 @@ class RedmineService(r2bConf: R2BConfig) {
     }
   }
 
-  def downloadAttachmentContent(attachment: Attachment, path: String) = {
-    val website: URL = new URL(attachment.getContentURL + "?key=" + r2bConf.redmineKey)
-    val rbc: ReadableByteChannel = Channels.newChannel(website.openStream())
-    val fos: FileOutputStream = new FileOutputStream(path + File.separator + attachment.getFileName)
-    fos.getChannel.transferFrom(rbc, 0, java.lang.Long.MAX_VALUE)
-  }
-
   def getVersions(projectID: Int): Either[Throwable, Seq[Version]] = {
     try {
       Right(redmine.getProjectManager.getVersions(projectID))

@@ -23,6 +23,8 @@
     </encoder>
   </appender>
 
+  <logger name="scala.slick" level="INFO"/>
+
   <root level="DEBUG">
     <appender-ref ref="FILE" />
   </root>
