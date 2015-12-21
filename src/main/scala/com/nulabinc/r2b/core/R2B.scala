@@ -1,7 +1,6 @@
 package com.nulabinc.r2b.core
 
 import java.util.Locale
-import javax.lang.model.SourceVersion
 
 import com.nulabinc.backlog.importer.actor.backlog.BacklogActor
 import com.nulabinc.backlog.importer.core.BacklogConfig

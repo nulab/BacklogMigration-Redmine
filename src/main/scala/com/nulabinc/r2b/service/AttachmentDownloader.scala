@@ -17,14 +17,27 @@ object AttachmentDownloader {
 
   def issue(apiKey: String, projectIdentifier: String, issue: Issue) = {
     val attachments: Array[Attachment] = issue.getAttachments.toArray(new Array[Attachment](issue.getAttachments.size()))
-    issueDownloadInfos(apiKey, projectIdentifier, issue)(attachments).foreach(download)
+    getDownloadInfos(apiKey, projectIdentifier, issue)(attachments).foreach(download)
   }
 
-  private def issueDownloadInfos(apiKey: String, projectIdentifier: String, issue: Issue)(attachments: Array[Attachment]) =
+  def wiki(apiKey: String, projectIdentifier: String, wikiPageDetail: WikiPageDetail) = {
+    val attachments: Array[Attachment] = wikiPageDetail.getAttachments.toArray(new Array[Attachment](wikiPageDetail.getAttachments.size()))
+    getDownloadInfos(apiKey, projectIdentifier, wikiPageDetail)(attachments).foreach(download)
+  }
+
+  private def getDownloadInfos(apiKey: String, projectIdentifier: String, issue: Issue)(attachments: Array[Attachment]) =
     attachments.map(attachment => getDownloadInfo(apiKey, projectIdentifier, issue, attachment))
+
+  private def getDownloadInfos(apiKey: String, projectIdentifier: String, wikiPageDetail: WikiPageDetail)(attachments: Array[Attachment]) =
+    attachments.map(attachment => getDownloadInfo(apiKey, projectIdentifier, wikiPageDetail, attachment))
 
   private def getDownloadInfo(apiKey: String, projectIdentifier: String, issue: Issue, attachment: Attachment): DownloadInfo = {
     val directoryPath: String = ConfigBase.Redmine.getIssueAttachmentDir(projectIdentifier, issue.getId, attachment.getId)
+    getDownloadInfo(apiKey, attachment, directoryPath)
+  }
+
+  private def getDownloadInfo(apiKey: String, projectIdentifier: String, wikiPageDetail: WikiPageDetail, attachment: Attachment): DownloadInfo = {
+    val directoryPath: String = ConfigBase.Redmine.getWikiAttachmentDir(projectIdentifier, wikiPageDetail.getTitle, attachment.getId)
     getDownloadInfo(apiKey, attachment, directoryPath)
   }
 
