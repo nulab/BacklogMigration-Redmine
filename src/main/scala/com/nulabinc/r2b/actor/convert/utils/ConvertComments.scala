@@ -68,8 +68,10 @@ object ConvertComments {
       isAttachmentNotFound(projectIdentifier, issueId, detail: RedmineJournalDetail)
 
   private def isAttachmentNotFound(projectIdentifier: String, issueId: Int, detail: RedmineJournalDetail): Boolean = {
-    val path: String = ConfigBase.Redmine.getIssueAttachmentDir(projectIdentifier, issueId, detail.name.toInt)
-    !IOUtil.isDirectory(path)
+    if (detail.property == ConfigBase.Property.ATTACHMENT) {
+      val path: String = ConfigBase.Redmine.getIssueAttachmentDir(projectIdentifier, issueId, detail.name.toInt)
+      !IOUtil.isDirectory(path)
+    } else false
   }
 
   private def isRelationJournal(detail: RedmineJournalDetail) = detail.property == "relation"
