@@ -7,7 +7,7 @@ import com.nulabinc.r2b.actor.utils.R2BLogging
 import com.nulabinc.r2b.conf.{ConfigBase, R2BConfig}
 import com.nulabinc.r2b.service.{AttachmentDownloader, RedmineMarshaller, RedmineService}
 import com.nulabinc.r2b.utils.IOUtil
-import com.taskadapter.redmineapi.bean.{Attachment, Project, User, WikiPageDetail}
+import com.taskadapter.redmineapi.bean.{Project, User, WikiPageDetail}
 
 /**
  * @author uchida
