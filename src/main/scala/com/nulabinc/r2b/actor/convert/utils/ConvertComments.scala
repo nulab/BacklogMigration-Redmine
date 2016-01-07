@@ -52,6 +52,7 @@ object ConvertComments {
   private def getOtherPropertyMessage(projectIdentifier: String, issueId: Int, detail: RedmineJournalDetail): String =
     if (isDoneRatioJournal(detail)) createMessage("label.done_ratio", detail)
     else if (isPrivateJournal(detail)) createMessage("label.private", detail)
+    else if (isProjectId(detail)) createMessage("label.project", detail)
     else if (isRelationJournal(detail)) createMessage("label.relation", detail)
     else if (isAttachmentNotFound(projectIdentifier, issueId, detail: RedmineJournalDetail)) {
       if (detail.newValue.isDefined) Messages("message.add_attachment", detail.newValue.get)
@@ -64,7 +65,7 @@ object ConvertComments {
     Messages("label.change_comment", Messages(label), getStringMessage(detail.oldValue), getStringMessage(detail.newValue))
 
   private def isOtherProperty(projectIdentifier: String, issueId: Int, detail: RedmineJournalDetail): Boolean =
-    isRelationJournal(detail) || isDoneRatioJournal(detail) || isPrivateJournal(detail) ||
+    isRelationJournal(detail) || isDoneRatioJournal(detail) || isPrivateJournal(detail) || isProjectId(detail) ||
       isAttachmentNotFound(projectIdentifier, issueId, detail: RedmineJournalDetail)
 
   private def isAttachmentNotFound(projectIdentifier: String, issueId: Int, detail: RedmineJournalDetail): Boolean = {
@@ -81,6 +82,9 @@ object ConvertComments {
 
   private def isPrivateJournal(detail: RedmineJournalDetail) =
     detail.property == ConfigBase.Property.ATTR && detail.name == "is_private"
+
+  private def isProjectId(detail: RedmineJournalDetail) =
+    detail.property == ConfigBase.Property.ATTR && detail.name == "project_id"
 
   private def getStringMessage(value: Option[String]): String =
     if (value.isEmpty) Messages("label.not_set")

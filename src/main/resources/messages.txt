@@ -50,6 +50,7 @@ invalid_setup=Setup is incomplete. Please complete the set up with the sub-comma
 start=Start import.
 import_uncompleted=Importing failed.
 label.relation=Related issue:
+label.project=Project
 label.done_ratio=% done
 label.private=Private
 label.not_set=New

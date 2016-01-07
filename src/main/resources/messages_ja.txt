@@ -50,6 +50,7 @@ invalid_setup=セットアップが不十分です。サブコマンド「init�
 start=インポートを開始します。
 import_uncompleted=インポートを完了できませんでした。
 label.relation=関連している課題:
+label.project=プロジェクト
 label.done_ratio=進捗率
 label.private=プライベート
 label.not_set=新規
