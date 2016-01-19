@@ -8,7 +8,8 @@ scalaVersion := "2.11.6"
 
 libraryDependencies ++= Seq(
   "org.rogach" %% "scallop" % "0.9.5",
-  "org.specs2" %% "specs2-core" % "3.6.2" % "test",
+  "org.scalactic" %% "scalactic" % "2.2.6",
+  "org.scalatest" %% "scalatest" % "2.2.6" % "test",
   "org.slf4j" % "slf4j-api" % "1.7.12",
   "ch.qos.logback" % "logback-classic" % "1.1.3",
   "ch.qos.logback" % "logback-core" % "1.1.3",

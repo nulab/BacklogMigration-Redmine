@@ -7,18 +7,22 @@ import com.nulabinc.backlog4j.conf.{BacklogConfigure, BacklogPackageConfigure}
 import com.nulabinc.backlog4j.{BacklogClient, BacklogClientFactory, Project => BacklogProject}
 import com.nulabinc.r2b.cli.ParamProjectKey
 import com.nulabinc.r2b.conf.R2BConfig
+import com.nulabinc.r2b.service.{ConvertPriorityMapping, ConvertStatusMapping, ConvertUserMapping}
 import com.taskadapter.redmineapi.bean.{Project => RedmineProject}
 import com.taskadapter.redmineapi.{RedmineManager, RedmineManagerFactory}
-import org.specs2.specification.Scope
 
 /**
   * @author uchida
   */
-trait R2BSimpleFixture extends Scope {
+trait SimpleFixture {
 
   val conf: R2BConfig = getConfig
   val redmine: RedmineManager = RedmineManagerFactory.createWithApiKey(conf.redmineUrl, conf.redmineKey)
   val backlog: BacklogClient = getBacklogClient(conf)
+
+  val userMapping: ConvertUserMapping = new ConvertUserMapping()
+  val statusMapping: ConvertStatusMapping = new ConvertStatusMapping()
+  val priorityMapping: ConvertPriorityMapping = new ConvertPriorityMapping()
 
   def getConfig: R2BConfig = {
     val prop: Properties = new Properties()
