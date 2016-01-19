@@ -81,5 +81,17 @@ class R2BSpec extends FlatSpec with ShouldMatchers with BeforeAndAfterAll with S
     })
   }
 
+  "Version" should "match" in {
+    val backlogVersions = backlog.getVersions(conf.projects(0).getBacklogKey())
+    val redmineProject = redmine.getProjectManager.getProjectByKey(conf.projects(0).redmine)
+    val redmineVersions = redmine.getProjectManager.getVersions(redmineProject.getId)
+    redmineVersions.foreach(redmineVersion => {
+      val backlogVersion = backlogVersions.find(backlogVersion => redmineVersion.getName == backlogVersion.getName).get
+      redmineVersion.getName should equal(backlogVersion.getName)
+      redmineVersion.getDescription should equal(backlogVersion.getDescription)
+      dateToString(redmineVersion.getDueDate) should equal(dateToString(backlogVersion.getReleaseDueDate))
+    })
+  }
+
 
 }

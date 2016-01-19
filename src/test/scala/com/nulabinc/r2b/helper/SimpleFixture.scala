@@ -10,11 +10,15 @@ import com.nulabinc.r2b.conf.R2BConfig
 import com.nulabinc.r2b.service.{ConvertPriorityMapping, ConvertStatusMapping, ConvertUserMapping}
 import com.taskadapter.redmineapi.bean.{Project => RedmineProject}
 import com.taskadapter.redmineapi.{RedmineManager, RedmineManagerFactory}
+import org.joda.time.DateTime
+import java.util.Date
 
 /**
   * @author uchida
   */
 trait SimpleFixture {
+
+  val dateFormat = "yyyy-MM-dd"
 
   val conf: R2BConfig = getConfig
   val redmine: RedmineManager = RedmineManagerFactory.createWithApiKey(conf.redmineUrl, conf.redmineKey)
@@ -48,5 +52,7 @@ trait SimpleFixture {
     val configure: BacklogConfigure = backlogPackageConfigure.apiKey(conf.backlogKey)
     new BacklogClientFactory(configure).newClient()
   }
+
+  def dateToString(date: Date) = new DateTime(date).toString(dateFormat)
 
 }
