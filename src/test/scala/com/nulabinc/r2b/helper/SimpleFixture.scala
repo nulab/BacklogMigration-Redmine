@@ -1,24 +1,26 @@
 package com.nulabinc.r2b.helper
 
 import java.io.FileInputStream
-import java.util.Properties
+import java.util.{Date, Locale, Properties}
 
 import com.nulabinc.backlog4j.conf.{BacklogConfigure, BacklogPackageConfigure}
-import com.nulabinc.backlog4j.{BacklogClient, BacklogClientFactory, Project => BacklogProject}
+import com.nulabinc.backlog4j.{BacklogClient, BacklogClientFactory}
 import com.nulabinc.r2b.cli.ParamProjectKey
 import com.nulabinc.r2b.conf.R2BConfig
 import com.nulabinc.r2b.service.{ConvertPriorityMapping, ConvertStatusMapping, ConvertUserMapping}
-import com.taskadapter.redmineapi.bean.{Project => RedmineProject}
+import com.osinka.i18n.Lang
 import com.taskadapter.redmineapi.{RedmineManager, RedmineManagerFactory}
 import org.joda.time.DateTime
-import java.util.Date
 
 /**
   * @author uchida
   */
 trait SimpleFixture {
 
+  implicit val userLang = if (Locale.getDefault.equals(Locale.JAPAN)) Lang("ja") else Lang("en")
+
   val dateFormat = "yyyy-MM-dd"
+  val timestampFormat: String = "yyyy-MM-dd'T'HH:mm:ssZ"
 
   val conf: R2BConfig = getConfig
   val redmine: RedmineManager = RedmineManagerFactory.createWithApiKey(conf.redmineUrl, conf.redmineKey)
@@ -54,5 +56,7 @@ trait SimpleFixture {
   }
 
   def dateToString(date: Date) = new DateTime(date).toString(dateFormat)
+
+  def timestampToString(date: Date) = new DateTime(date).toString(timestampFormat)
 
 }
