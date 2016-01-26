@@ -56,18 +56,15 @@ class RedmineService(r2bConf: R2BConfig) {
     }
   }
 
-  def getProjects: Seq[Project] = {
-    val projects: Seq[Either[Throwable, Project]] = r2bConf.projects.map(getProject)
-    projects.filter(_.isRight).map(_.right.get)
-  }
+  def getProjects: Seq[Project] = r2bConf.projects.flatMap(getProject)
 
-  def getProject(projectKey: ParamProjectKey): Either[Throwable, Project] =
+  def getProject(projectKey: ParamProjectKey): Option[Project] =
     try {
-      Right(redmine.getProjectManager.getProjectByKey(projectKey.redmine))
+      Some(redmine.getProjectManager.getProjectByKey(projectKey.redmine))
     } catch {
       case e: NotFoundException =>
         log.error(e.getMessage, e)
-        Left(e)
+        None
     }
 
   def getMemberships(projectKey: String): Seq[Membership] = {

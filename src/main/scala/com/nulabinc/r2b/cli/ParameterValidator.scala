@@ -27,10 +27,10 @@ class ParameterValidator(r2bConf: R2BConfig) extends R2BLogging {
 
   private def validateLoadRedmineProject(projectKey: ParamProjectKey): Seq[String] = {
     val redmineService: RedmineService = new RedmineService(r2bConf)
-    redmineService.getProject(projectKey) match {
-      case Right(_) => Seq.empty[String]
-      case Left(_) => Seq("- " + Messages("message.can_not_load_project", projectKey.redmine))
-    }
+    val option = redmineService.getProject(projectKey)
+
+    if(option.isEmpty) Seq("- " + Messages("message.can_not_load_project", projectKey.redmine))
+    else Seq.empty[String]
   }
 
   private def validateLoadBacklogProjects(): Seq[String] =
