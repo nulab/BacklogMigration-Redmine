@@ -31,7 +31,9 @@ class RedmineActor(r2bConf: R2BConfig) extends Actor with R2BLogging with Subtas
     case RedmineActor.Do =>
       title(Messages("message.start_redmine_export"), TOP)
 
-      users()
+      info(Messages("message.execute_redmine_user_export"))
+      val users: Seq[User] = redmineService.getUsers
+      IOUtil.output(ConfigBase.Redmine.USERS, RedmineMarshaller.Users(users))
 
       info(Messages("message.execute_redmine_custom_fields_export"))
       IOUtil.output(Redmine.CUSTOM_FIELDS, RedmineMarshaller.CustomFieldDefinition(redmineService.getCustomFieldDefinitions))
@@ -45,6 +47,7 @@ class RedmineActor(r2bConf: R2BConfig) extends Actor with R2BLogging with Subtas
       IOUtil.output(ConfigBase.Redmine.PRIORITY, RedmineMarshaller.IssuePriority(redmineService.getIssuePriorities()))
 
       start(Props(new ProjectsActor(r2bConf)), ProjectsActor.actorName) ! ProjectsActor.Do
+
     case Terminated(ref) =>
       complete(ref)
       if (subtasks.isEmpty) {
@@ -53,12 +56,6 @@ class RedmineActor(r2bConf: R2BConfig) extends Actor with R2BLogging with Subtas
         newLine()
         context.system.shutdown()
       }
-  }
-
-  private def users() = {
-    info(Messages("message.execute_redmine_user_export"))
-    val users: Seq[User] = redmineService.getUsers
-    IOUtil.output(ConfigBase.Redmine.USERS, RedmineMarshaller.Users(users))
   }
 
 }
