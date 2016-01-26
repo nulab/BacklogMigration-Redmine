@@ -45,7 +45,8 @@ class ProjectsActor(r2bConf: R2BConfig) extends Actor with R2BLogging with Subta
 
     issueCategories(project)
 
-    versions(project)
+    info(Messages("message.execute_redmine_versions_export", project.getName))
+    IOUtil.output(Redmine.getVersionsPath(project.getIdentifier), RedmineMarshaller.Versions(redmineService.getVersions(project.getId)))
 
     start(Props(new NewsActor(r2bConf, project)), NewsActor.actorName) ! NewsActor.Do
 
@@ -74,17 +75,6 @@ class ProjectsActor(r2bConf: R2BConfig) extends Actor with R2BLogging with Subta
     either match {
       case Right(issueCategories) =>
         IOUtil.output(Redmine.getIssueCategoriesPath(project.getIdentifier), RedmineMarshaller.IssueCategory(issueCategories))
-      case Left(e) =>
-    }
-  }
-
-  private def versions(project: Project) = {
-    info(Messages("message.execute_redmine_versions_export", project.getName))
-    val redmineService: RedmineService = new RedmineService(r2bConf)
-    val either: Either[Throwable, Seq[Version]] = redmineService.getVersions(project.getId)
-    either match {
-      case Right(versions) =>
-        IOUtil.output(Redmine.getVersionsPath(project.getIdentifier), RedmineMarshaller.Versions(versions))
       case Left(e) =>
     }
   }

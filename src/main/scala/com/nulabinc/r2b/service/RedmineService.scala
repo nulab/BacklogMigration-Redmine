@@ -161,13 +161,13 @@ class RedmineService(r2bConf: R2BConfig) {
     }
   }
 
-  def getVersions(projectID: Int): Either[Throwable, Seq[Version]] = {
+  def getVersions(projectID: Int): Seq[Version] = {
     try {
-      Right(redmine.getProjectManager.getVersions(projectID))
+      redmine.getProjectManager.getVersions(projectID)
     } catch {
       case e: RedmineAuthenticationException =>
         log.error(e.getMessage, e)
-        Left(e)
+        Seq.empty[Version]
     }
   }
 
