@@ -20,13 +20,6 @@ import scala.concurrent.{Await, Future}
  */
 class FindUsersActor(r2bConf: R2BConfig) extends Actor with R2BLogging {
 
-  override val supervisorStrategy = AllForOneStrategy(maxNrOfRetries = 0) {
-    case e: Exception =>
-      error(e)
-      context.system.shutdown()
-      Stop
-  }
-
   implicit val timeout = Timeout(60 minutes)
 
   private val allUsers = Set.empty[User]

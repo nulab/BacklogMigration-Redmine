@@ -15,7 +15,7 @@ import com.taskadapter.redmineapi.bean.{Project, WikiPage}
  */
 class WikisActor(r2bConf: R2BConfig, project: Project) extends Actor with R2BLogging with Subtasks {
 
-  override val supervisorStrategy = AllForOneStrategy(maxNrOfRetries = 0) {
+  override val supervisorStrategy = OneForOneStrategy(maxNrOfRetries = 0) {
     case _: Exception =>
       Escalate
   }

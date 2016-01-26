@@ -22,7 +22,7 @@ import scala.concurrent.{Await, Future}
  */
 class ProjectsActor(r2bConf: R2BConfig) extends Actor with R2BLogging {
 
-  override val supervisorStrategy = AllForOneStrategy(maxNrOfRetries = 0) {
+  override val supervisorStrategy = OneForOneStrategy(maxNrOfRetries = 0) {
     case _: Exception =>
       Escalate
   }

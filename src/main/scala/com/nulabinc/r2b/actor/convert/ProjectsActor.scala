@@ -3,7 +3,7 @@ package com.nulabinc.r2b.actor.convert
 import java.util.UUID._
 
 import akka.actor.SupervisorStrategy.Escalate
-import akka.actor.{Actor, AllForOneStrategy, Props, Terminated}
+import akka.actor._
 import com.nulabinc.backlog.importer.conf.{ConfigBase => BacklogConfigBase}
 import com.nulabinc.backlog.importer.domain._
 import com.nulabinc.r2b.actor.utils.{R2BLogging, Subtasks}
@@ -22,7 +22,7 @@ class ProjectsActor(r2bConf: R2BConfig) extends Actor with R2BLogging with Subta
 
   import BacklogJsonProtocol._
 
-  override val supervisorStrategy = AllForOneStrategy(maxNrOfRetries = 0) {
+  override val supervisorStrategy = OneForOneStrategy(maxNrOfRetries = 0) {
     case _: Exception =>
       Escalate
   }

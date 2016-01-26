@@ -18,7 +18,7 @@ import scala.language.postfixOps
 
 class RedmineActor(r2bConf: R2BConfig) extends Actor with R2BLogging with Subtasks {
 
-  override val supervisorStrategy = AllForOneStrategy(maxNrOfRetries = 0) {
+  override val supervisorStrategy = OneForOneStrategy(maxNrOfRetries = 0) {
     case e: Exception =>
       error(e)
       context.system.shutdown()

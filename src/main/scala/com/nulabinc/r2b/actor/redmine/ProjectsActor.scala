@@ -17,7 +17,7 @@ import com.taskadapter.redmineapi.bean._
  */
 class ProjectsActor(r2bConf: R2BConfig) extends Actor with R2BLogging with Subtasks {
 
-  override val supervisorStrategy = AllForOneStrategy(maxNrOfRetries = 0) {
+  override val supervisorStrategy = OneForOneStrategy(maxNrOfRetries = 0) {
     case _: Exception =>
       Escalate
   }
