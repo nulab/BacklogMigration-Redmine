@@ -38,7 +38,8 @@ class RedmineActor(r2bConf: R2BConfig) extends Actor with R2BLogging with Subtas
       info(Messages("message.execute_redmine_issue_statuses_export"))
       IOUtil.output(ConfigBase.Redmine.ISSUE_STATUSES, RedmineMarshaller.IssueStatus(redmineService.getStatuses))
 
-      priorities()
+      IOUtil.output(ConfigBase.Redmine.PRIORITY, RedmineMarshaller.IssuePriority(redmineService.getIssuePriorities()))
+
       start(Props(new ProjectsActor(r2bConf)), ProjectsActor.actorName) ! ProjectsActor.Do
     case Terminated(ref) =>
       complete(ref)
@@ -74,16 +75,6 @@ class RedmineActor(r2bConf: R2BConfig) extends Actor with R2BLogging with Subtas
     either match {
       case Right(trackers) =>
         IOUtil.output(ConfigBase.Redmine.TRACKERS, RedmineMarshaller.Tracker(trackers))
-      case Left(e) =>
-    }
-  }
-
-  private def priorities() = {
-    val redmineService: RedmineService = new RedmineService(r2bConf)
-    val either: Either[Throwable, Seq[IssuePriority]] = redmineService.getIssuePriorities
-    either match {
-      case Right(issuePriorities) =>
-        IOUtil.output(ConfigBase.Redmine.PRIORITY, RedmineMarshaller.IssuePriority(issuePriorities))
       case Left(e) =>
     }
   }

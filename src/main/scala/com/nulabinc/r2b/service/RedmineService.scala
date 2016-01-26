@@ -151,13 +151,13 @@ class RedmineService(r2bConf: R2BConfig) {
     }
   }
 
-  def getIssuePriorities: Either[Throwable, Seq[IssuePriority]] = {
+  def getIssuePriorities(): Seq[IssuePriority] = {
     try {
-      Right(redmine.getIssueManager.getIssuePriorities)
+      redmine.getIssueManager.getIssuePriorities
     } catch {
       case e: NotFoundException =>
         log.error(e.getMessage, e)
-        Left(e)
+        Seq.empty[IssuePriority]
     }
   }
 
