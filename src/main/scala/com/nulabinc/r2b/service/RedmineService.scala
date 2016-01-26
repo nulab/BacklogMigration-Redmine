@@ -14,8 +14,8 @@ import spray.json.JsonParser
 import scala.collection.JavaConversions._
 
 /**
- * @author uchida
- */
+  * @author uchida
+  */
 class RedmineService(r2bConf: R2BConfig) {
 
   import RedmineJsonProtocol._
@@ -141,13 +141,13 @@ class RedmineService(r2bConf: R2BConfig) {
     redmine.getUserManager.getGroupById(id)
   }
 
-  def getStatuses: Either[Throwable, Seq[IssueStatus]] = {
+  def getStatuses(): Seq[IssueStatus] = {
     try {
-      Right(redmine.getIssueManager.getStatuses)
+      redmine.getIssueManager.getStatuses
     } catch {
       case e: NotFoundException =>
         log.error(e.getMessage, e)
-        Left(e)
+        Seq.empty[IssueStatus]
     }
   }
 

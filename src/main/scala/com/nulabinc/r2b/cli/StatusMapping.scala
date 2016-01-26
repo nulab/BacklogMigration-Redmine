@@ -6,11 +6,10 @@ import com.nulabinc.r2b.conf.{ConfigBase, R2BConfig}
 import com.nulabinc.r2b.domain.MappingItem
 import com.nulabinc.r2b.service.{BacklogService, RedmineService}
 import com.osinka.i18n.Messages
-import com.taskadapter.redmineapi.bean.IssueStatus
 
 /**
- * @author uchida
- */
+  * @author uchida
+  */
 class StatusMapping(r2bConf: R2BConfig) extends MappingManager {
 
   private val backlogDatas = loadBacklog()
@@ -19,11 +18,7 @@ class StatusMapping(r2bConf: R2BConfig) extends MappingManager {
   private def loadRedmine(): Seq[MappingItem] = {
     info("- " + Messages("mapping.load_redmine", itemName))
     val redmineService: RedmineService = new RedmineService(r2bConf)
-    val either: Either[Throwable, Seq[IssueStatus]] = redmineService.getStatuses
-    val redmineStatuses: Seq[IssueStatus] = either match {
-      case Right(statuses) => statuses
-      case Left(e) => Seq.empty[IssueStatus]
-    }
+    val redmineStatuses = redmineService.getStatuses
     val redmines: Seq[MappingItem] = redmineStatuses.map(redmineStatus => MappingItem(redmineStatus.getName, redmineStatus.getName))
     redmines
   }
