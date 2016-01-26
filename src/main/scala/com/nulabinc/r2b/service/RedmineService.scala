@@ -46,13 +46,13 @@ class RedmineService(r2bConf: R2BConfig) {
     redmine.getIssueManager.getIssueById(id, include: _*)
   }
 
-  def getCustomFieldDefinitions: Either[Throwable, Seq[CustomFieldDefinition]] = {
+  def getCustomFieldDefinitions(): Seq[CustomFieldDefinition] = {
     try {
-      Right(redmine.getCustomFieldManager.getCustomFieldDefinitions)
+      redmine.getCustomFieldManager.getCustomFieldDefinitions
     } catch {
       case e: NotFoundException =>
         log.error(e.getMessage, e)
-        Left(e)
+        Seq.empty[CustomFieldDefinition]
     }
   }
 
