@@ -33,7 +33,9 @@ class RedmineActor(r2bConf: R2BConfig) extends Actor with R2BLogging with Subtas
 
       users()
       customFields()
-      trackers()
+
+      info(Messages("message.execute_redmine_issue_trackers_export"))
+      IOUtil.output(ConfigBase.Redmine.TRACKERS, RedmineMarshaller.Tracker(redmineService.getTrackers))
 
       info(Messages("message.execute_redmine_issue_statuses_export"))
       IOUtil.output(ConfigBase.Redmine.ISSUE_STATUSES, RedmineMarshaller.IssueStatus(redmineService.getStatuses))
@@ -64,17 +66,6 @@ class RedmineActor(r2bConf: R2BConfig) extends Actor with R2BLogging with Subtas
     either match {
       case Right(customFieldDefinitions) =>
         IOUtil.output(Redmine.CUSTOM_FIELDS, RedmineMarshaller.CustomFieldDefinition(customFieldDefinitions))
-      case Left(e) =>
-    }
-  }
-
-  private def trackers() = {
-    info(Messages("message.execute_redmine_issue_trackers_export"))
-    val redmineService: RedmineService = new RedmineService(r2bConf)
-    val either: Either[Throwable, Seq[Tracker]] = redmineService.getTrackers
-    either match {
-      case Right(trackers) =>
-        IOUtil.output(ConfigBase.Redmine.TRACKERS, RedmineMarshaller.Tracker(trackers))
       case Left(e) =>
     }
   }

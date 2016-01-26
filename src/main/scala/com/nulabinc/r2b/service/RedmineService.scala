@@ -90,13 +90,13 @@ class RedmineService(r2bConf: R2BConfig) {
     }
   }
 
-  def getTrackers: Either[Throwable, Seq[Tracker]] = {
+  def getTrackers(): Seq[Tracker] = {
     try {
-      Right(redmine.getIssueManager.getTrackers)
+      redmine.getIssueManager.getTrackers
     } catch {
       case e: NotFoundException =>
         log.error(e.getMessage, e)
-        Left(e)
+        Seq.empty[Tracker]
     }
   }
 
