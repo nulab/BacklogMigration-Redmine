@@ -127,16 +127,6 @@ class RedmineService(r2bConf: R2BConfig) {
     redmine.getProjectManager.getNews(projectKey)
   }
 
-  def getGroups: Either[Throwable, Seq[Group]] = {
-    try {
-      Right(redmine.getUserManager.getGroups)
-    } catch {
-      case e: RedmineAuthenticationException =>
-        log.error(e.getMessage, e)
-        Left(e)
-    }
-  }
-
   def getGroupById(id: Int): Group = {
     redmine.getUserManager.getGroupById(id)
   }
