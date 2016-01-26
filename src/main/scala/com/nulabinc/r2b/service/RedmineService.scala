@@ -80,13 +80,13 @@ class RedmineService(r2bConf: R2BConfig) {
     }
   }
 
-  def getCategories(projectId: Int): Either[Throwable, Seq[IssueCategory]] = {
+  def getCategories(projectId: Int): Seq[IssueCategory] = {
     try {
-      Right(redmine.getIssueManager.getCategories(projectId))
+      redmine.getIssueManager.getCategories(projectId)
     } catch {
       case e: NotFoundException =>
         log.error(e.getMessage, e)
-        Left(e)
+        Seq.empty[IssueCategory]
     }
   }
 

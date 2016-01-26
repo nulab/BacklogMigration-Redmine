@@ -43,7 +43,8 @@ class ProjectsActor(r2bConf: R2BConfig) extends Actor with R2BLogging with Subta
 
     memberships(project)
 
-    issueCategories(project)
+    info(Messages("message.execute_redmine_issue_categories_export", project.getName))
+    IOUtil.output(Redmine.getIssueCategoriesPath(project.getIdentifier), RedmineMarshaller.IssueCategory(redmineService.getCategories(project.getId)))
 
     info(Messages("message.execute_redmine_versions_export", project.getName))
     IOUtil.output(Redmine.getVersionsPath(project.getIdentifier), RedmineMarshaller.Versions(redmineService.getVersions(project.getId)))
@@ -64,17 +65,6 @@ class ProjectsActor(r2bConf: R2BConfig) extends Actor with R2BLogging with Subta
 
         val groups:Seq[Group] = memberships.flatMap(membership => Option(membership.getGroup))
         IOUtil.output(ConfigBase.Redmine.GROUP_USERS, RedmineMarshaller.Group(groups))
-      case Left(e) =>
-    }
-  }
-
-  private def issueCategories(project: Project) = {
-    info(Messages("message.execute_redmine_issue_categories_export", project.getName))
-    val redmineService: RedmineService = new RedmineService(r2bConf)
-    val either: Either[Throwable, Seq[IssueCategory]] = redmineService.getCategories(project.getId)
-    either match {
-      case Right(issueCategories) =>
-        IOUtil.output(Redmine.getIssueCategoriesPath(project.getIdentifier), RedmineMarshaller.IssueCategory(issueCategories))
       case Left(e) =>
     }
   }
