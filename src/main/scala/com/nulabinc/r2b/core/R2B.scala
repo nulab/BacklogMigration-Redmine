@@ -59,7 +59,7 @@ object R2B extends R2BLogging {
       } catch {
         case e: Throwable ⇒
           e.printStackTrace()
-          log.error(e.getMessage, e)
+          error(e)
           System.exit(1)
       }
     } else {

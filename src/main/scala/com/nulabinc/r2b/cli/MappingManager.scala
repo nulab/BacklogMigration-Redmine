@@ -89,7 +89,7 @@ trait MappingManager extends R2BLogging {
       Right(wrapper)
     } catch {
       case e: Throwable =>
-        log.error(e.getMessage, e)
+        error(e)
         Left(e)
     }
   }

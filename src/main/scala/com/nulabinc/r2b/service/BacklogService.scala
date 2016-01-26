@@ -4,15 +4,14 @@ import com.nulabinc.backlog.importer.core.BacklogConfig
 import com.nulabinc.backlog4j._
 import com.nulabinc.backlog4j.api.option.GetIssuesParams
 import com.nulabinc.backlog4j.conf.{BacklogConfigure, BacklogPackageConfigure}
-import org.slf4j.{LoggerFactory, Logger}
+import com.nulabinc.r2b.actor.utils.R2BLogging
+
 import scala.collection.JavaConverters._
 
 /**
  * @author uchida
  */
-class BacklogService(conf: BacklogConfig) {
-
-  private val log: Logger = LoggerFactory.getLogger("BacklogService")
+class BacklogService(conf: BacklogConfig) extends R2BLogging {
 
   val backlog: BacklogClient = getBacklogClient
 
@@ -35,7 +34,7 @@ class BacklogService(conf: BacklogConfig) {
     Right(backlog.getProject(projectKey))
   } catch {
     case e: BacklogAPIException =>
-      if(!e.getMessage.contains("No project")) log.error(e.getMessage,e)
+      if(!e.getMessage.contains("No project")) error(e)
       Left(e)
   }
 

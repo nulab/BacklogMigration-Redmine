@@ -73,13 +73,13 @@ class ParameterValidator(r2bConf: R2BConfig) extends R2BLogging {
       Seq.empty[String]
     } catch {
       case auth: RedmineAuthenticationException =>
-        log.error(auth.getMessage, auth)
+        error(auth)
         Seq("- " + Messages("message.auth_error_redmine"))
       case transport: RedmineTransportException =>
-        log.error(transport.getMessage, transport)
+        error(transport)
         Seq("- " + Messages("message.transport_error_redmine", r2bConf.redmineUrl))
       case e: Throwable =>
-        log.error(e.getMessage, e)
+        error(e)
         Seq("- " + Messages("message.disable_access_redmine"))
     }
 
