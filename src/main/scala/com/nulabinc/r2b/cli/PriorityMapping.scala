@@ -17,7 +17,7 @@ class PriorityMapping(r2bConf: R2BConfig) extends MappingManager {
   private val redmineDatas = loadRedmine()
 
   private def loadRedmine(): Seq[MappingItem] = {
-    printlog("- " + Messages("mapping.load_redmine", itemName))
+    info("- " + Messages("mapping.load_redmine", itemName))
     val redmineService: RedmineService = new RedmineService(r2bConf)
     val either: Either[Throwable, Seq[IssuePriority]] = redmineService.getIssuePriorities
     val redminePriorities: Seq[IssuePriority] = either match {
@@ -29,7 +29,7 @@ class PriorityMapping(r2bConf: R2BConfig) extends MappingManager {
   }
 
   private def loadBacklog(): Seq[MappingItem] = {
-    printlog("- " + Messages("mapping.load_backlog", itemName))
+    info("- " + Messages("mapping.load_backlog", itemName))
     val backlogService: BacklogService = new BacklogService(BacklogConfig(r2bConf.backlogUrl, r2bConf.backlogKey))
     val backlogPriorities: Seq[Priority] = backlogService.getPriorities
     val backlogs: Seq[MappingItem] = backlogPriorities.map(backlogPriority => MappingItem(backlogPriority.getName, backlogPriority.getName))

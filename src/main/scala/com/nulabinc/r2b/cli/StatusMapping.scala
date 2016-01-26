@@ -17,7 +17,7 @@ class StatusMapping(r2bConf: R2BConfig) extends MappingManager {
   private val redmineDatas = loadRedmine()
 
   private def loadRedmine(): Seq[MappingItem] = {
-    printlog("- " + Messages("mapping.load_redmine", itemName))
+    info("- " + Messages("mapping.load_redmine", itemName))
     val redmineService: RedmineService = new RedmineService(r2bConf)
     val either: Either[Throwable, Seq[IssueStatus]] = redmineService.getStatuses
     val redmineStatuses: Seq[IssueStatus] = either match {
@@ -29,7 +29,7 @@ class StatusMapping(r2bConf: R2BConfig) extends MappingManager {
   }
 
   private def loadBacklog(): Seq[MappingItem] = {
-    printlog("- " + Messages("mapping.load_backlog", itemName))
+    info("- " + Messages("mapping.load_backlog", itemName))
     val backlogService: BacklogService = new BacklogService(BacklogConfig(r2bConf.backlogUrl, r2bConf.backlogKey))
     val backlogStatuses: Seq[Status] = backlogService.getStatuses
     val backlogs: Seq[MappingItem] = backlogStatuses.map(backlogStatus => MappingItem(backlogStatus.getName, backlogStatus.getName))

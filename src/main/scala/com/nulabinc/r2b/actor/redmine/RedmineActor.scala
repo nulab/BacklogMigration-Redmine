@@ -20,7 +20,7 @@ class RedmineActor(r2bConf: R2BConfig) extends Actor with R2BLogging with Subtas
 
   override val supervisorStrategy = AllForOneStrategy(maxNrOfRetries = 0) {
     case e: Exception =>
-      errorLog(e)
+      error(e)
       context.system.shutdown()
       Stop
   }
@@ -29,40 +29,32 @@ class RedmineActor(r2bConf: R2BConfig) extends Actor with R2BLogging with Subtas
 
   def receive: Receive = {
     case RedmineActor.Do =>
-      printlog(Messages("message.start_redmine_export"))
-      printlog("--------------------------------------------------")
+      title(Messages("message.start_redmine_export"), TOP)
 
       users()
-
       customFields()
-
       trackers()
-
       issueStatuses()
-
       priorities()
-
       start(Props(new ProjectsActor(r2bConf)), ProjectsActor.actorName) ! ProjectsActor.Do
-
     case Terminated(ref) =>
       complete(ref)
       if (subtasks.isEmpty) {
-        printlog("--------------------------------------------------")
-        printlog(Messages("message.completed_redmine_export"))
-        printlog()
-        printlog()
+        title(Messages("message.completed_redmine_export"), BOTTOM)
+        newLine()
+        newLine()
         context.system.shutdown()
       }
   }
 
   private def users() = {
-    printlog(Messages("message.execute_redmine_user_export"))
+    info(Messages("message.execute_redmine_user_export"))
     val users: Seq[User] = redmineService.getUsers
     IOUtil.output(ConfigBase.Redmine.USERS, RedmineMarshaller.Users(users))
   }
 
   private def customFields() = {
-    printlog(Messages("message.execute_redmine_custom_fields_export"))
+    info(Messages("message.execute_redmine_custom_fields_export"))
     val redmineService: RedmineService = new RedmineService(r2bConf)
     val either: Either[Throwable, Seq[CustomFieldDefinition]] = redmineService.getCustomFieldDefinitions
     either match {
@@ -73,7 +65,7 @@ class RedmineActor(r2bConf: R2BConfig) extends Actor with R2BLogging with Subtas
   }
 
   private def trackers() = {
-    printlog(Messages("message.execute_redmine_issue_trackers_export"))
+    info(Messages("message.execute_redmine_issue_trackers_export"))
     val redmineService: RedmineService = new RedmineService(r2bConf)
     val either: Either[Throwable, Seq[Tracker]] = redmineService.getTrackers
     either match {
@@ -84,7 +76,7 @@ class RedmineActor(r2bConf: R2BConfig) extends Actor with R2BLogging with Subtas
   }
 
   private def issueStatuses() = {
-    printlog(Messages("message.execute_redmine_issue_statuses_export"))
+    info(Messages("message.execute_redmine_issue_statuses_export"))
     val redmineService: RedmineService = new RedmineService(r2bConf)
     val either: Either[Throwable, Seq[IssueStatus]] = redmineService.getStatuses
     either match {

@@ -34,7 +34,7 @@ class ProjectsActor(r2bConf: R2BConfig) extends Actor with R2BLogging {
   def receive: Receive = {
     case ProjectsActor.Do =>
       val caller = sender
-      printlog("-  " + Messages("message.load_redmine_projects"))
+      info("-  " + Messages("message.load_redmine_projects"))
       val projects: Seq[Project] = redmineService.getProjects
 
       val futures: Seq[Future[Set[User]]] = projects.foldLeft(Seq.empty[Future[Set[User]]])((fs: Seq[Future[Set[User]]], project: Project) => {
@@ -62,7 +62,7 @@ class ProjectsActor(r2bConf: R2BConfig) extends Actor with R2BLogging {
   private def memberships(projects: Seq[Project]): Set[User] = {
     val users: Set[User] = Set.empty[User]
     projects.foreach(project => {
-      printlog("-  " + Messages("message.load_redmine_memberships", project.getName))
+      info("-  " + Messages("message.load_redmine_memberships", project.getName))
       redmineService.getMemberships(project.getIdentifier) match {
         case Right(memberships) => memberships.foreach(membership => {
           if (Option(membership.getUser).isDefined) users += membership.getUser

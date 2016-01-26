@@ -30,13 +30,13 @@ class WikisActor(r2bConf: R2BConfig, project: Project) extends Actor with R2BLog
         case Right(wikiPages) =>
           if (wikiPages.nonEmpty) {
             wikiSize = wikiPages.size
-            printlog(Messages("message.execute_redmine_wikis_export", project.getName, wikiSize))
+            info(Messages("message.execute_redmine_wikis_export", project.getName, wikiSize))
             wikiPages.foreach(doWikiActor)
           } else context.stop(self)
         case Left(e) => context.stop(self)
       }
     case Terminated(ref) =>
-      printlog(Messages("message.execute_redmine_wiki_export", project.getName, wikiSize - subtasks.size + 1, wikiSize))
+      info(Messages("message.execute_redmine_wiki_export", project.getName, wikiSize - subtasks.size + 1, wikiSize))
       complete(ref)
       if (subtasks.isEmpty) context.stop(self)
   }

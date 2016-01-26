@@ -26,7 +26,7 @@ class IssuesActor(r2bConf: R2BConfig, project: Project) extends Actor with R2BLo
     case IssuesActor.Do =>
       allCount = redmineService.getIssuesCount(project.getId)
 
-      if (allCount != 0) printlog(Messages("message.execute_redmine_issues_export", project.getName, allCount))
+      if (allCount != 0) info(Messages("message.execute_redmine_issues_export", project.getName, allCount))
 
       loop(0)
       context.stop(self)
@@ -52,7 +52,7 @@ class IssuesActor(r2bConf: R2BConfig, project: Project) extends Actor with R2BLo
     AttachmentDownloader.issue(r2bConf.redmineKey, project.getIdentifier,issue)
 
     count += 1
-    printlog(Messages("message.execute_redmine_issue_export", project.getName, count, allCount))
+    info(Messages("message.execute_redmine_issue_export", project.getName, count, allCount))
   }
 
 }

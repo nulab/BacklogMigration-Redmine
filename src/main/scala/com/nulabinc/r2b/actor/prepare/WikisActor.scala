@@ -29,7 +29,7 @@ class WikisActor(r2bConf: R2BConfig, project: Project) extends Actor with R2BLog
             val detail: WikiPageDetail = redmineService.getWikiPageDetailByProjectAndTitle(project.getIdentifier, page.getTitle)
             users += Option(detail.getUser)
             count += 1
-            printlog("-  " + Messages("message.load_redmine_wikis", project.getName, count, wikiPages.size))
+            info("-  " + Messages("message.load_redmine_wikis", project.getName, count, wikiPages.size))
           })
       )
       sender ! users.flatten

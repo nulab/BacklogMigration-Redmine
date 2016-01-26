@@ -18,23 +18,22 @@ import scala.concurrent.duration._
 import scala.language.postfixOps
 
 /**
- * @author uchida
- */
+  * @author uchida
+  */
 class ConvertActor(r2bConf: R2BConfig) extends Actor with R2BLogging with Subtasks {
 
   import BacklogJsonProtocol._
 
   override val supervisorStrategy = AllForOneStrategy(maxNrOfRetries = 0) {
     case e: Exception =>
-      errorLog(e)
+      error(e)
       context.system.shutdown()
       Stop
   }
 
   def receive: Receive = {
     case ConvertActor.Do =>
-      printlog(Messages("message.start_convert"))
-      printlog("--------------------------------------------------")
+      title(Messages("message.start_convert"), TOP)
 
       groups()
 
@@ -43,10 +42,9 @@ class ConvertActor(r2bConf: R2BConfig) extends Actor with R2BLogging with Subtas
     case Terminated(ref) =>
       complete(ref)
       if (subtasks.isEmpty) {
-        printlog("--------------------------------------------------")
-        printlog(Messages("message.completed_convert"))
-        printlog()
-        printlog()
+        title(Messages("message.completed_convert"), BOTTOM)
+        newLine()
+        newLine()
         context.system.shutdown()
       }
   }
@@ -55,7 +53,7 @@ class ConvertActor(r2bConf: R2BConfig) extends Actor with R2BLogging with Subtas
     for {redmineUsers <- RedmineUnmarshaller.users()
          redmineGroups <- RedmineUnmarshaller.groups()} yield {
 
-      printlog(Messages("message.start_groups_convert"))
+      info(Messages("message.start_groups_convert"))
 
       val backlogGroupsWrapper: BacklogGroupsWrapper = ConvertService.Groups(redmineGroups, redmineUsers)
       IOUtil.output(BacklogConfigBase.Backlog.GROUPS, backlogGroupsWrapper.toJson.prettyPrint)

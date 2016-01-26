@@ -20,8 +20,8 @@ class UserMapping(r2bConf: R2BConfig) extends MappingManager {
   private def loadRedmine(): Seq[MappingItem] = {
     val redmineService: RedmineService = new RedmineService(r2bConf)
 
-    printlog("- " + Messages("mapping.load_redmine", itemName))
-    printlog("-  " + Messages("message.collect_project_user"))
+    info("- " + Messages("mapping.load_redmine", itemName))
+    info("-  " + Messages("message.collect_project_user"))
     
     val redmineUsers: Seq[RedmineUser] = FindUsersActor(r2bConf).toSeq.map(user => {
       if (Option(user.getLogin).isDefined && Option(user.getFullName).isDefined) user
@@ -33,7 +33,7 @@ class UserMapping(r2bConf: R2BConfig) extends MappingManager {
   }
 
   private def loadBacklog(): Seq[MappingItem] = {
-    printlog("- " + Messages("mapping.load_backlog", itemName))
+    info("- " + Messages("mapping.load_backlog", itemName))
     val backlogService: BacklogService = new BacklogService(BacklogConfig(r2bConf.backlogUrl, r2bConf.backlogKey))
     val backlogUsers: Seq[BacklogUser] = backlogService.getUsers
     val backlogs: Seq[MappingItem] = backlogUsers.map(backlogUser => MappingItem(backlogUser.getUserId, backlogUser.getName))

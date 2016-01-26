@@ -2,7 +2,7 @@ package com.nulabinc.r2b.service
 
 import com.nulabinc.r2b.cli.ParamProjectKey
 import com.nulabinc.r2b.conf.R2BConfig
-import com.nulabinc.r2b.domain.RedmineIssuesWrapper
+import com.nulabinc.r2b.domain.{RedmineJsonProtocol, RedmineIssuesWrapper}
 import com.taskadapter.redmineapi._
 import com.taskadapter.redmineapi.bean._
 import org.apache.http.client.methods.HttpGet
@@ -17,6 +17,8 @@ import scala.collection.JavaConversions._
  * @author uchida
  */
 class RedmineService(r2bConf: R2BConfig) {
+
+  import RedmineJsonProtocol._
 
   private val log: Logger = LoggerFactory.getLogger("RedmineService")
 

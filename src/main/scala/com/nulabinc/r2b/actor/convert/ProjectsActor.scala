@@ -33,7 +33,7 @@ class ProjectsActor(r2bConf: R2BConfig) extends Actor with R2BLogging with Subta
         val backlogProjectsWrapper: BacklogProjectsWrapper = ConvertService.Projects(redmineProjects, r2bConf.projects)
         IOUtil.output(BacklogConfigBase.Backlog.PROJECTS, backlogProjectsWrapper.toJson.prettyPrint)
         if (redmineProjects.nonEmpty) {
-          printlog(Messages("message.start_projects_convert"))
+          info(Messages("message.start_projects_convert"))
           redmineProjects.foreach(startActors)
         } else context.stop(self)
       }
@@ -75,7 +75,7 @@ class ProjectsActor(r2bConf: R2BConfig) extends Actor with R2BLogging with Subta
     for {redmineUsers <- RedmineUnmarshaller.users()
          membershipsUsers <- RedmineUnmarshaller.membershipsUsers(projectInfo.projectKey.redmine)} yield {
 
-      printlog(Messages("message.execute_project_users_convert", projectInfo.name))
+      info(Messages("message.execute_project_users_convert", projectInfo.name))
 
 
       val backlogProjectUsersWrapper: BacklogProjectUsersWrapper = ConvertService.Memberships(membershipsUsers, redmineUsers)
@@ -86,7 +86,7 @@ class ProjectsActor(r2bConf: R2BConfig) extends Actor with R2BLogging with Subta
   private def issueCategories(projectInfo: ProjectInfo) = {
     for {redmineIssueCategories <- RedmineUnmarshaller.categories(projectInfo.projectKey.redmine)} yield {
 
-      printlog(Messages("message.execute_issue_categories_convert", projectInfo.name))
+      info(Messages("message.execute_issue_categories_convert", projectInfo.name))
 
       val backlogIssueCategoriesWrapper: BacklogIssueCategoriesWrapper = ConvertService.IssueCategories(redmineIssueCategories)
       IOUtil.output(BacklogConfigBase.Backlog.getIssueCategoriesDir(projectInfo.projectKey.backlog), backlogIssueCategoriesWrapper.toJson.prettyPrint)
@@ -96,7 +96,7 @@ class ProjectsActor(r2bConf: R2BConfig) extends Actor with R2BLogging with Subta
   private def customFields(projectInfo: ProjectInfo) = {
     for {customFieldDefinitions <- RedmineUnmarshaller.customFieldDefinitions()} yield {
 
-      printlog(Messages("message.execute_custom_fields_convert", projectInfo.projectKey.redmine))
+      info(Messages("message.execute_custom_fields_convert", projectInfo.projectKey.redmine))
 
       val projectEnumerations: ProjectEnumerations = new ProjectEnumerations(projectInfo.projectKey.redmine)
 
@@ -108,7 +108,7 @@ class ProjectsActor(r2bConf: R2BConfig) extends Actor with R2BLogging with Subta
   private def issueTypes(projectInfo: ProjectInfo) = {
     for {trackers <- RedmineUnmarshaller.trackers()} yield {
 
-      printlog(Messages("message.execute_issue_types_convert", projectInfo.projectKey.redmine))
+      info(Messages("message.execute_issue_types_convert", projectInfo.projectKey.redmine))
 
       val backlogIssueTypesWrapper: BacklogIssueTypesWrapper = ConvertService.IssueTypes(trackers)
       IOUtil.output(BacklogConfigBase.Backlog.getIssueTypesDir(projectInfo.projectKey.backlog), backlogIssueTypesWrapper.toJson.prettyPrint)
@@ -118,7 +118,7 @@ class ProjectsActor(r2bConf: R2BConfig) extends Actor with R2BLogging with Subta
   private def versions(projectInfo: ProjectInfo) = {
     for {redmineVersions <- RedmineUnmarshaller.versions(projectInfo.projectKey.redmine)} yield {
 
-      printlog(Messages("message.execute_versions_convert", projectInfo.name))
+      info(Messages("message.execute_versions_convert", projectInfo.name))
 
       val backlogVersionsWrapper: BacklogVersionsWrapper = ConvertService.Versions(redmineVersions)
       IOUtil.output(BacklogConfigBase.Backlog.getVersionsDir(projectInfo.projectKey.backlog), backlogVersionsWrapper.toJson.prettyPrint)

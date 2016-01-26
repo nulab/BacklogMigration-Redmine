@@ -30,7 +30,7 @@ class WikisActor(r2bConf: R2BConfig, projectInfo: ProjectInfo) extends Actor wit
       val paths: Seq[Path] = IOUtil.directoryPaths(ConfigBase.Redmine.getWikisDir(projectInfo.projectKey.redmine))
 
       wikiSize = paths.size
-      printlog(Messages("message.execute_wikis_convert", projectInfo.name, wikiSize))
+      info(Messages("message.execute_wikis_convert", projectInfo.name, wikiSize))
       paths.foreach(convert)
       context.stop(self)
   }
@@ -46,7 +46,7 @@ class WikisActor(r2bConf: R2BConfig, projectInfo: ProjectInfo) extends Actor wit
       redmineAttachments.foreach(redmineAttachment => copy(redmineAttachment, redmineWikiPage))
 
       convertCount += 1
-      printlog(Messages("message.execute_wiki_convert", projectInfo.name, convertCount, wikiSize))
+      info(Messages("message.execute_wiki_convert", projectInfo.name, convertCount, wikiSize))
     }
   }
 

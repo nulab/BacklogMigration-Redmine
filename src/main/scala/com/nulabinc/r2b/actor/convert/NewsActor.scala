@@ -27,7 +27,7 @@ class NewsActor(r2bConf: R2BConfig, projectInfo: ProjectInfo) extends Actor with
     case NewsActor.Do =>
       for {redmineNews <- RedmineUnmarshaller.news(projectInfo.projectKey.redmine)} yield {
         newsSize = redmineNews.size
-        if (redmineNews.nonEmpty) printlog(Messages("message.execute_news_list_convert", projectInfo.name, newsSize))
+        if (redmineNews.nonEmpty) info(Messages("message.execute_news_list_convert", projectInfo.name, newsSize))
         redmineNews.foreach(convert)
       }
       context.stop(self)
@@ -47,7 +47,7 @@ class NewsActor(r2bConf: R2BConfig, projectInfo: ProjectInfo) extends Actor with
     IOUtil.output(BacklogConfigBase.Backlog.getWikiPath(projectInfo.projectKey.backlog, "news" + redmineNews.id), backlogWiki.toJson.prettyPrint)
 
     convertCount += 1
-    printlog(Messages("message.execute_news_convert", projectInfo.name, convertCount, newsSize))
+    info(Messages("message.execute_news_convert", projectInfo.name, convertCount, newsSize))
   }
 
 }

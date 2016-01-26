@@ -26,7 +26,7 @@ class ProjectsActor(r2bConf: R2BConfig) extends Actor with R2BLogging with Subta
 
   def receive: Receive = {
     case ProjectsActor.Do =>
-      printlog(Messages("message.start_redmine_projects_export"))
+      info(Messages("message.start_redmine_projects_export"))
 
       val projects: Seq[Project] = redmineService.getProjects
       IOUtil.output(ConfigBase.Redmine.PROJECTS, RedmineMarshaller.Projects(projects))
@@ -39,7 +39,7 @@ class ProjectsActor(r2bConf: R2BConfig) extends Actor with R2BLogging with Subta
   }
 
   private def doProjectActors(project: Project) = {
-    printlog(Messages("message.execute_redmine_project_export", project.getName))
+    info(Messages("message.execute_redmine_project_export", project.getName))
 
     memberships(project)
 
@@ -55,7 +55,7 @@ class ProjectsActor(r2bConf: R2BConfig) extends Actor with R2BLogging with Subta
   }
 
   private def memberships(project: Project) = {
-    printlog(Messages("message.execute_redmine_memberships_export", project.getName))
+    info(Messages("message.execute_redmine_memberships_export", project.getName))
     val either: Either[Throwable, Seq[Membership]] = redmineService.getMemberships(project.getIdentifier)
     either match {
       case Right(memberships) =>
@@ -68,7 +68,7 @@ class ProjectsActor(r2bConf: R2BConfig) extends Actor with R2BLogging with Subta
   }
 
   private def issueCategories(project: Project) = {
-    printlog(Messages("message.execute_redmine_issue_categories_export", project.getName))
+    info(Messages("message.execute_redmine_issue_categories_export", project.getName))
     val redmineService: RedmineService = new RedmineService(r2bConf)
     val either: Either[Throwable, Seq[IssueCategory]] = redmineService.getCategories(project.getId)
     either match {
@@ -79,7 +79,7 @@ class ProjectsActor(r2bConf: R2BConfig) extends Actor with R2BLogging with Subta
   }
 
   private def versions(project: Project) = {
-    printlog(Messages("message.execute_redmine_versions_export", project.getName))
+    info(Messages("message.execute_redmine_versions_export", project.getName))
     val redmineService: RedmineService = new RedmineService(r2bConf)
     val either: Either[Throwable, Seq[Version]] = redmineService.getVersions(project.getId)
     either match {

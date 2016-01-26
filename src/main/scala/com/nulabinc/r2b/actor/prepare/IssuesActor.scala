@@ -62,7 +62,7 @@ class IssuesActor(r2bConf: R2BConfig, project: Project) extends Actor with R2BLo
     })
 
     count += 1
-    printlog("-  " + Messages("message.load_redmine_issue", project.getName, count, allCount))
+    info("-  " + Messages("message.load_redmine_issue", project.getName, count, allCount))
   }
 
   private def collectUserFromValue(value: String) =

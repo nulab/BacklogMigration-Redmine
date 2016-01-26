@@ -1,23 +1,18 @@
 package com.nulabinc.r2b.cli
 
-import java.util.Locale
-
-import com.nulabinc.r2b.actor.utils.Logging
+import com.nulabinc.r2b.actor.utils.R2BLogging
 import com.nulabinc.r2b.domain.MappingJsonProtocol._
 import com.nulabinc.r2b.domain.{Mapping, MappingItem, MappingsWrapper}
 import com.nulabinc.r2b.utils.IOUtil
-import com.osinka.i18n.{Lang, Messages}
-import org.slf4j.{Logger, LoggerFactory}
+import com.osinka.i18n.Messages
 import spray.json.{JsonParser, _}
 
 import scalax.file.Path
 
 /**
- * @author uchida
- */
-trait MappingManager extends Logging {
-
-  implicit val userLang = if (Locale.getDefault.equals(Locale.JAPAN)) Lang("ja") else Lang("en")
+  * @author uchida
+  */
+trait MappingManager extends R2BLogging {
 
   val OTHER_MAPPING: Boolean = true
   val COMMAND_FINISH: Boolean = false
@@ -53,40 +48,37 @@ trait MappingManager extends Logging {
 
   private def doCreate() = {
     createFile()
-    printlog(Messages("mapping.output_mapping_file", itemName, filePath))
+    info(Messages("mapping.output_mapping_file", itemName, filePath))
   }
 
   def show() = {
-    printlog(Messages("mapping.show", itemName))
-    printlog("--------------------------------------------------")
+    title(Messages("mapping.show", itemName), TOP)
 
     val either: Either[Throwable, Seq[Mapping]] = unmarshal().right.map(_.mappings)
     val mappings: Seq[Mapping] = either.right.get
     mappings.foreach(showMapping)
 
-    printlog("--------------------------------------------------")
-    printlog()
+    separatorln()
   }
 
   def showBrokenFileMessage() =
     if (!isParsed) {
-      printlog()
-      printlog(Messages("mapping.broken_file", itemName))
-      printlog("--------------------------------------------------")
-      printlog(Messages("mapping.need_fix_file", filePath))
-      printlog("--------------------------------------------------")
+      newLine()
+      title(Messages("mapping.broken_file", itemName), TOP)
+      title(Messages("mapping.need_fix_file", filePath), BOTTOM)
     }
 
   def showInvalidErrors() =
     if (!isValid) {
-      printlog()
-      printlog(Messages("mapping.show_error", itemName))
-      printlog("--------------------------------------------------")
+
+      newLine()
+      title(Messages("mapping.show_error", itemName),TOP)
+
       val errors: Seq[String] = getErrors
-      errors.foreach(printlog(_))
-      printlog()
-      printlog(Messages("mapping.need_fix_file", filePath))
-      printlog("--------------------------------------------------")
+      errors.foreach(info(_))
+
+      newLine()
+      title(Messages("mapping.need_fix_file", filePath),BOTTOM)
     }
 
   private def unmarshal(): Either[Throwable, MappingsWrapper] = {
@@ -97,7 +89,7 @@ trait MappingManager extends Logging {
       Right(wrapper)
     } catch {
       case e: Throwable =>
-        log.error(e.getMessage,e)
+        log.error(e.getMessage, e)
         Left(e)
     }
   }
@@ -113,13 +105,13 @@ trait MappingManager extends Logging {
   }
 
   private def confirmRecreate(): Boolean = {
-    printlog()
+    newLine()
     val input: String = scala.io.StdIn.readLine(Messages("mapping.confirm_recreate", itemName, filePath))
     input == "y" || input == "Y"
   }
 
   private def showMapping(mapping: Mapping) =
-    printlog("- " + getDisplay(mapping.redmine, redmines) + " => " + getDisplay(mapping.backlog, backlogs))
+    info("- " + getDisplay(mapping.redmine, redmines) + " => " + getDisplay(mapping.backlog, backlogs))
 
   private def getDisplay(name: String, mappingItems: Seq[MappingItem]): String = {
     val option: Option[MappingItem] = mappingItems.find(_.name == name)

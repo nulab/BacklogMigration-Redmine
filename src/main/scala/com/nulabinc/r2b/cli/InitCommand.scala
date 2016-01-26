@@ -11,12 +11,15 @@ class InitCommand(r2bConf: R2BConfig) extends CommonCommand {
   val mappingService: MappingService = load(r2bConf)
 
   def execute() = {
-    printlog()
+
+    newLine()
+
     mappingService.user.createExec()
     mappingService.priority.createExec()
     mappingService.status.createExec()
-    printlog()
-    printlog(Messages("mapping.confirm_fix"))
+
+    newLine()
+    info(Messages("mapping.confirm_fix"))
   }
 
 }

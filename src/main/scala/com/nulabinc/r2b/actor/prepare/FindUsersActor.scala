@@ -22,7 +22,7 @@ class FindUsersActor(r2bConf: R2BConfig) extends Actor with R2BLogging {
 
   override val supervisorStrategy = AllForOneStrategy(maxNrOfRetries = 0) {
     case e: Exception =>
-      errorLog(e)
+      error(e)
       context.system.shutdown()
       Stop
   }

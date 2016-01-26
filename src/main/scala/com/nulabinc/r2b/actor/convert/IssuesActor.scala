@@ -37,7 +37,7 @@ class IssuesActor(r2bConf: R2BConfig, projectInfo: ProjectInfo) extends Actor wi
     case IssuesActor.Do =>
       val paths: Seq[Path] = IOUtil.directoryPaths(ConfigBase.Redmine.getIssuesDir(projectInfo.projectKey.redmine))
       issueSize = paths.size
-      if (issueSize != 0) printlog(Messages("message.execute_issues_convert", projectInfo.name, issueSize))
+      if (issueSize != 0) info(Messages("message.execute_issues_convert", projectInfo.name, issueSize))
       paths.foreach(convert)
       context.stop(self)
   }
@@ -57,7 +57,7 @@ class IssuesActor(r2bConf: R2BConfig, projectInfo: ProjectInfo) extends Actor wi
         redmineAttachments.foreach(redmineAttachment => copy(redmineAttachment, redmineIssue))
 
         convertCount += 1
-        printlog(Messages("message.execute_issue_convert", projectInfo.name, convertCount, issueSize))
+        info(Messages("message.execute_issue_convert", projectInfo.name, convertCount, issueSize))
       }
     }
   }

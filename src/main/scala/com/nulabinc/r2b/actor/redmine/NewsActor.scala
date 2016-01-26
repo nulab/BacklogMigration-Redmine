@@ -18,7 +18,7 @@ class NewsActor(r2bConf: R2BConfig, project: Project) extends Actor with R2BLogg
 
   def receive: Receive = {
     case NewsActor.Do =>
-      printlog(Messages("message.execute_redmine_news_export", project.getName))
+      info(Messages("message.execute_redmine_news_export", project.getName))
       val redmineService: RedmineService = new RedmineService(r2bConf)
       val news: Seq[News] = redmineService.getNews(project.getIdentifier)
       val users: Seq[User] = redmineService.getUsers
