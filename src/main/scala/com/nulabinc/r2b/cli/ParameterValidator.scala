@@ -1,23 +1,17 @@
 package com.nulabinc.r2b.cli
 
-import java.util.Locale
-
 import com.nulabinc.backlog.importer.core.BacklogConfig
 import com.nulabinc.backlog4j.BacklogAPIException
+import com.nulabinc.r2b.actor.utils.R2BLogging
 import com.nulabinc.r2b.conf.R2BConfig
 import com.nulabinc.r2b.service.{BacklogService, RedmineService}
-import com.osinka.i18n.{Lang, Messages}
+import com.osinka.i18n.Messages
 import com.taskadapter.redmineapi.{RedmineAuthenticationException, RedmineTransportException}
-import org.slf4j.{LoggerFactory, Logger}
 
 /**
- * @author uchida
- */
-class ParameterValidator(r2bConf: R2BConfig) {
-
-  implicit val userLang = if (Locale.getDefault.equals(Locale.JAPAN)) Lang("ja") else Lang("en")
-
-  private val log: Logger = LoggerFactory.getLogger("ParameterValidator")
+  * @author uchida
+  */
+class ParameterValidator(r2bConf: R2BConfig) extends R2BLogging {
 
   def validate(): Seq[String] = {
     val backlogErrors: Seq[String] = validateLoadBacklog()
@@ -62,13 +56,13 @@ class ParameterValidator(r2bConf: R2BConfig) {
       Seq.empty[String]
     } catch {
       case unknown: BacklogAPIException if unknown.getStatusCode == 404 =>
-        log.error(unknown.getMessage, unknown)
+        error(unknown)
         Seq("- " + Messages("message.transport_error_backlog", r2bConf.backlogUrl))
       case api: BacklogAPIException =>
-        log.error(api.getMessage, api)
+        error(api)
         Seq("- " + Messages("message.disable_access_backlog"))
       case e: Throwable =>
-        log.error(e.getMessage, e)
+        error(e)
         Seq("- " + Messages("message.disable_access_backlog"))
     }
 
