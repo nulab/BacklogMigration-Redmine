@@ -22,16 +22,13 @@ class WikisActor(r2bConf: R2BConfig, project: Project) extends Actor with R2BLog
     case WikisActor.Do =>
       val users = Set.empty[Option[User]]
       val redmineService: RedmineService = new RedmineService(r2bConf)
-      redmineService.getWikiPagesByProject(project.getIdentifier).fold(
-        e => log.error(e.getMessage, e),
-        wikiPages =>
-          wikiPages.foreach(page => {
-            val detail: WikiPageDetail = redmineService.getWikiPageDetailByProjectAndTitle(project.getIdentifier, page.getTitle)
-            users += Option(detail.getUser)
-            count += 1
-            info("-  " + Messages("message.load_redmine_wikis", project.getName, count, wikiPages.size))
-          })
-      )
+      val wikiPages = redmineService.getWikiPagesByProject(project.getIdentifier)
+      wikiPages.foreach(page => {
+        val detail: WikiPageDetail = redmineService.getWikiPageDetailByProjectAndTitle(project.getIdentifier, page.getTitle)
+        users += Option(detail.getUser)
+        count += 1
+        info("-  " + Messages("message.load_redmine_wikis", project.getName, count, wikiPages.size))
+      })
       sender ! users.flatten
   }
 

@@ -11,8 +11,8 @@ import com.osinka.i18n.Messages
 import com.taskadapter.redmineapi.bean.{Project, WikiPage}
 
 /**
- * @author uchida
- */
+  * @author uchida
+  */
 class WikisActor(r2bConf: R2BConfig, project: Project) extends Actor with R2BLogging with Subtasks {
 
   override val supervisorStrategy = OneForOneStrategy(maxNrOfRetries = 0) {
@@ -25,16 +25,12 @@ class WikisActor(r2bConf: R2BConfig, project: Project) extends Actor with R2BLog
   def receive: Receive = {
     case WikisActor.Do =>
       val redmineService: RedmineService = new RedmineService(r2bConf)
-      val either: Either[Throwable, Seq[WikiPage]] = redmineService.getWikiPagesByProject(project.getIdentifier)
-      either match {
-        case Right(wikiPages) =>
-          if (wikiPages.nonEmpty) {
-            wikiSize = wikiPages.size
-            info(Messages("message.execute_redmine_wikis_export", project.getName, wikiSize))
-            wikiPages.foreach(doWikiActor)
-          } else context.stop(self)
-        case Left(e) => context.stop(self)
-      }
+      val wikiPages = redmineService.getWikiPagesByProject(project.getIdentifier)
+      if (wikiPages.nonEmpty) {
+        wikiSize = wikiPages.size
+        info(Messages("message.execute_redmine_wikis_export", project.getName, wikiSize))
+        wikiPages.foreach(doWikiActor)
+      } else context.stop(self)
     case Terminated(ref) =>
       info(Messages("message.execute_redmine_wiki_export", project.getName, wikiSize - subtasks.size + 1, wikiSize))
       complete(ref)

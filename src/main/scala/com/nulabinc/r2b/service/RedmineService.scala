@@ -100,13 +100,13 @@ class RedmineService(r2bConf: R2BConfig) {
     }
   }
 
-  def getWikiPagesByProject(projectKey: String): Either[Throwable, Seq[WikiPage]] = {
+  def getWikiPagesByProject(projectKey: String): Seq[WikiPage] = {
     try {
-      Right(redmine.getWikiManager.getWikiPagesByProject(projectKey))
+      redmine.getWikiManager.getWikiPagesByProject(projectKey)
     } catch {
       case e: RedmineAuthenticationException =>
         log.error(e.getMessage, e)
-        Left(e)
+        Seq.empty[WikiPage]
     }
   }
 
