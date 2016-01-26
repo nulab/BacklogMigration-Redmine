@@ -70,13 +70,13 @@ class RedmineService(r2bConf: R2BConfig) {
         Left(e)
     }
 
-  def getMemberships(projectKey: String): Either[Throwable, Seq[Membership]] = {
+  def getMemberships(projectKey: String): Seq[Membership] = {
     try {
-      Right(redmine.getMembershipManager.getMemberships(projectKey))
+      redmine.getMembershipManager.getMemberships(projectKey)
     } catch {
       case e: NotFoundException =>
         log.error(e.getMessage, e)
-        Left(e)
+        Seq.empty[Membership]
     }
   }
 

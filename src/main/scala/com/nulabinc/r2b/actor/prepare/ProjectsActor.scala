@@ -18,8 +18,8 @@ import scala.concurrent.duration._
 import scala.concurrent.{Await, Future}
 
 /**
- * @author uchida
- */
+  * @author uchida
+  */
 class ProjectsActor(r2bConf: R2BConfig) extends Actor with R2BLogging {
 
   override val supervisorStrategy = OneForOneStrategy(maxNrOfRetries = 0) {
@@ -63,13 +63,11 @@ class ProjectsActor(r2bConf: R2BConfig) extends Actor with R2BLogging {
     val users: Set[User] = Set.empty[User]
     projects.foreach(project => {
       info("-  " + Messages("message.load_redmine_memberships", project.getName))
-      redmineService.getMemberships(project.getIdentifier) match {
-        case Right(memberships) => memberships.foreach(membership => {
-          if (Option(membership.getUser).isDefined) users += membership.getUser
-          if (Option(membership.getGroup).isDefined) users ++= groups(membership.getGroup)
-        })
-        case Left(e) => log.debug(e.getMessage)
-      }
+      val memberships = redmineService.getMemberships(project.getIdentifier)
+      memberships.foreach(membership => {
+        if (Option(membership.getUser).isDefined) users += membership.getUser
+        if (Option(membership.getGroup).isDefined) users ++= groups(membership.getGroup)
+      })
     })
     users
   }

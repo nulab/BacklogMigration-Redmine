@@ -58,15 +58,11 @@ class ProjectsActor(r2bConf: R2BConfig) extends Actor with R2BLogging with Subta
 
   private def memberships(project: Project) = {
     info(Messages("message.execute_redmine_memberships_export", project.getName))
-    val either: Either[Throwable, Seq[Membership]] = redmineService.getMemberships(project.getIdentifier)
-    either match {
-      case Right(memberships) =>
-        IOUtil.output(Redmine.getMembershipsPath(project.getIdentifier), RedmineMarshaller.Membership(memberships))
+    val memberships = redmineService.getMemberships(project.getIdentifier)
+    IOUtil.output(Redmine.getMembershipsPath(project.getIdentifier), RedmineMarshaller.Membership(memberships))
 
-        val groups:Seq[Group] = memberships.flatMap(membership => Option(membership.getGroup))
-        IOUtil.output(ConfigBase.Redmine.GROUP_USERS, RedmineMarshaller.Group(groups))
-      case Left(e) =>
-    }
+    val groups:Seq[Group] = memberships.flatMap(membership => Option(membership.getGroup))
+    IOUtil.output(ConfigBase.Redmine.GROUP_USERS, RedmineMarshaller.Group(groups))
   }
 
 }
