@@ -31,17 +31,22 @@ class ProjectsActor(r2bConf: R2BConfig) extends Actor with R2BLogging with Subta
       val projects: Seq[Project] = redmineService.getProjects
       IOUtil.output(ConfigBase.Redmine.PROJECTS, RedmineMarshaller.Projects(projects))
 
-      if (projects.nonEmpty) projects.foreach(doProjectActors)
+      if (projects.nonEmpty) projects.foreach(contents)
       else context.stop(self)
     case Terminated(ref) =>
       complete(ref)
       if (subtasks.isEmpty) context.stop(self)
   }
 
-  private def doProjectActors(project: Project) = {
+  private def contents(project: Project) = {
     info(Messages("message.execute_redmine_project_export", project.getName))
 
-    memberships(project)
+    info(Messages("message.execute_redmine_memberships_export", project.getName))
+    val memberships = redmineService.getMemberships(project.getIdentifier)
+    IOUtil.output(Redmine.getMembershipsPath(project.getIdentifier), RedmineMarshaller.Membership(memberships))
+
+    val groups:Seq[Group] = memberships.flatMap(membership => Option(membership.getGroup))
+    IOUtil.output(ConfigBase.Redmine.GROUP_USERS, RedmineMarshaller.Group(groups))
 
     info(Messages("message.execute_redmine_issue_categories_export", project.getName))
     IOUtil.output(Redmine.getIssueCategoriesPath(project.getIdentifier), RedmineMarshaller.IssueCategory(redmineService.getCategories(project.getId)))
@@ -54,15 +59,6 @@ class ProjectsActor(r2bConf: R2BConfig) extends Actor with R2BLogging with Subta
     start(Props(new WikisActor(r2bConf, project)), WikisActor.actorName) ! WikisActor.Do
 
     start(Props(new IssuesActor(r2bConf, project)), IssuesActor.actorName) ! IssuesActor.Do
-  }
-
-  private def memberships(project: Project) = {
-    info(Messages("message.execute_redmine_memberships_export", project.getName))
-    val memberships = redmineService.getMemberships(project.getIdentifier)
-    IOUtil.output(Redmine.getMembershipsPath(project.getIdentifier), RedmineMarshaller.Membership(memberships))
-
-    val groups:Seq[Group] = memberships.flatMap(membership => Option(membership.getGroup))
-    IOUtil.output(ConfigBase.Redmine.GROUP_USERS, RedmineMarshaller.Group(groups))
   }
 
 }
