@@ -18,19 +18,19 @@ class ConvertComments(pctx: ProjectContext) {
 
   implicit val userLang = if (Locale.getDefault.equals(Locale.JAPAN)) Lang("ja") else Lang("en")
 
-  def execute(projectIdentifier: String, issueId: Int, journals: Seq[RedmineJournal]): Seq[BacklogComment] =
-    journalsToComments(projectIdentifier, issueId)(journals)
+  def execute(issueId: Int, journals: Seq[RedmineJournal]): Seq[BacklogComment] =
+    journalsToComments(issueId)(journals)
 
-  private def journalsToComments(projectIdentifier: String, issueId: Int)(journals: Seq[RedmineJournal]) =
-    journals.map(journalToComment(projectIdentifier, issueId)(_))
+  private def journalsToComments(issueId: Int)(journals: Seq[RedmineJournal]) =
+    journals.map(journalToComment(issueId)(_))
 
-  private def journalToComment(projectIdentifier: String, issueId: Int)(journal: RedmineJournal) =
-    getBacklogComment(projectIdentifier, issueId, journal)
+  private def journalToComment(issueId: Int)(journal: RedmineJournal) =
+    getBacklogComment(issueId, journal)
 
-  private def getBacklogComment(projectIdentifier: String, issueId: Int, redmineJournal: RedmineJournal): BacklogComment =
+  private def getBacklogComment(issueId: Int, redmineJournal: RedmineJournal): BacklogComment =
     BacklogComment(
-      content = redmineJournal.notes + "\n" + getOtherProperty(projectIdentifier, issueId, redmineJournal.details),
-      details = redmineJournal.details.filter(detail => !isOtherProperty(projectIdentifier, issueId, detail)).map(getBacklogCommentDetail(_)),
+      content = redmineJournal.notes + "\n" + getOtherProperty(issueId, redmineJournal.details),
+      details = redmineJournal.details.filter(detail => !isOtherProperty(issueId, detail)).map(getBacklogCommentDetail(_)),
       createdUserId = redmineJournal.user.map(pctx.userMapping.convert),
       created = redmineJournal.createdOn)
 
@@ -41,15 +41,15 @@ class ConvertComments(pctx: ProjectContext) {
       oldValue = convertValue(redmineJournalDetail.property, redmineJournalDetail.name, redmineJournalDetail.oldValue),
       newValue = convertValue(redmineJournalDetail.property, redmineJournalDetail.name, redmineJournalDetail.newValue))
 
-  private def getOtherProperty(projectIdentifier: String, issueId: Int, details: Seq[RedmineJournalDetail]): String =
-    details.filter(isOtherProperty(projectIdentifier, issueId, _)).map(getOtherPropertyMessage(projectIdentifier, issueId, _)).mkString("\n")
+  private def getOtherProperty(issueId: Int, details: Seq[RedmineJournalDetail]): String =
+    details.filter(isOtherProperty(issueId, _)).map(getOtherPropertyMessage(issueId, _)).mkString("\n")
 
-  private def getOtherPropertyMessage(projectIdentifier: String, issueId: Int, detail: RedmineJournalDetail): String =
+  private def getOtherPropertyMessage(issueId: Int, detail: RedmineJournalDetail): String =
     if (isDoneRatioJournal(detail)) createMessage("label.done_ratio", detail)
     else if (isPrivateJournal(detail)) createMessage("label.private", detail)
     else if (isProjectId(detail)) createMessage("label.project", detail)
     else if (isRelationJournal(detail)) createMessage("label.relation", detail)
-    else if (isAttachmentNotFound(projectIdentifier, issueId, detail: RedmineJournalDetail)) {
+    else if (isAttachmentNotFound(issueId, detail: RedmineJournalDetail)) {
       if (detail.newValue.isDefined) Messages("message.add_attachment", detail.newValue.get)
       else if (detail.oldValue.isDefined) Messages("message.del_attachment", detail.oldValue.get)
       else ""
@@ -59,13 +59,13 @@ class ConvertComments(pctx: ProjectContext) {
   private def createMessage(label: String, detail: RedmineJournalDetail): String =
     Messages("label.change_comment", Messages(label), getStringMessage(detail.oldValue), getStringMessage(detail.newValue))
 
-  private def isOtherProperty(projectIdentifier: String, issueId: Int, detail: RedmineJournalDetail): Boolean =
+  private def isOtherProperty(issueId: Int, detail: RedmineJournalDetail): Boolean =
     isRelationJournal(detail) || isDoneRatioJournal(detail) || isPrivateJournal(detail) || isProjectId(detail) ||
-      isAttachmentNotFound(projectIdentifier, issueId, detail: RedmineJournalDetail)
+      isAttachmentNotFound(issueId, detail: RedmineJournalDetail)
 
-  private def isAttachmentNotFound(projectIdentifier: String, issueId: Int, detail: RedmineJournalDetail): Boolean = {
+  private def isAttachmentNotFound(issueId: Int, detail: RedmineJournalDetail): Boolean = {
     if (detail.property == ConfigBase.Property.ATTACHMENT) {
-      val path: String = ConfigBase.Redmine.getIssueAttachmentDir(projectIdentifier, issueId, detail.name.toInt)
+      val path: String = ConfigBase.Redmine.getIssueAttachmentDir(pctx.project.identifier, issueId, detail.name.toInt)
       !IOUtil.isDirectory(path)
     } else false
   }

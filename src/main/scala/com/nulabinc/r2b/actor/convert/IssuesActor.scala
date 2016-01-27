@@ -50,7 +50,7 @@ class IssuesActor(pctx: ProjectContext) extends Actor with R2BLogging {
         val redmineCustomFieldDefinitions: Seq[RedmineCustomFieldDefinition] = RedmineUnmarshaller.customFieldDefinitions().getOrElse(Seq.empty[RedmineCustomFieldDefinition])
 
         val convertIssue = new ConvertIssue(pctx)
-        val backlogIssue: BacklogIssue = convertIssue.execute(pctx.redmineProjectKey, redmineIssue, redmineCustomFieldDefinitions, pctx.conf.redmineUrl)
+        val backlogIssue: BacklogIssue = convertIssue.execute(redmineIssue, redmineCustomFieldDefinitions, pctx.conf.redmineUrl)
         IOUtil.output(BacklogConfigBase.Backlog.getIssuePath(pctx.backlogProjectKey, redmineIssue.id), backlogIssue.toJson.prettyPrint)
 
         //Copy attachments
