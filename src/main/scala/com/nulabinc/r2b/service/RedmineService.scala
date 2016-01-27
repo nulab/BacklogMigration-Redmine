@@ -11,7 +11,7 @@ import org.apache.http.impl.client.DefaultHttpClient
 import org.apache.http.util.EntityUtils
 import spray.json.JsonParser
 
-import scala.collection.JavaConversions._
+import scala.collection.JavaConverters._
 
 /**
   * @author uchida
@@ -37,7 +37,7 @@ class RedmineService(r2bConf: R2BConfig) extends R2BLogging {
   }
 
   def getIssues(params: Map[String, String]): Seq[Issue] = {
-    redmine.getIssueManager.getIssues(params)
+    redmine.getIssueManager.getIssues(params.asJava).asScala
   }
 
   def getIssueById(id: Integer, include: Include*): Issue = {
@@ -46,7 +46,7 @@ class RedmineService(r2bConf: R2BConfig) extends R2BLogging {
 
   def getCustomFieldDefinitions(): Seq[CustomFieldDefinition] = {
     try {
-      redmine.getCustomFieldManager.getCustomFieldDefinitions
+      redmine.getCustomFieldManager.getCustomFieldDefinitions.asScala
     } catch {
       case e: NotFoundException =>
         error(e)
@@ -67,7 +67,7 @@ class RedmineService(r2bConf: R2BConfig) extends R2BLogging {
 
   def getMemberships(projectKey: String): Seq[Membership] = {
     try {
-      redmine.getMembershipManager.getMemberships(projectKey)
+      redmine.getMembershipManager.getMemberships(projectKey).asScala
     } catch {
       case e: NotFoundException =>
         error(e)
@@ -77,7 +77,7 @@ class RedmineService(r2bConf: R2BConfig) extends R2BLogging {
 
   def getCategories(projectId: Int): Seq[IssueCategory] = {
     try {
-      redmine.getIssueManager.getCategories(projectId)
+      redmine.getIssueManager.getCategories(projectId).asScala
     } catch {
       case e: NotFoundException =>
         error(e)
@@ -87,7 +87,7 @@ class RedmineService(r2bConf: R2BConfig) extends R2BLogging {
 
   def getTrackers(): Seq[Tracker] = {
     try {
-      redmine.getIssueManager.getTrackers
+      redmine.getIssueManager.getTrackers.asScala
     } catch {
       case e: NotFoundException =>
         error(e)
@@ -97,7 +97,7 @@ class RedmineService(r2bConf: R2BConfig) extends R2BLogging {
 
   def getWikiPagesByProject(projectKey: String): Seq[WikiPage] = {
     try {
-      redmine.getWikiManager.getWikiPagesByProject(projectKey)
+      redmine.getWikiManager.getWikiPagesByProject(projectKey).asScala
     } catch {
       case e: RedmineAuthenticationException =>
         error(e)
@@ -110,7 +110,7 @@ class RedmineService(r2bConf: R2BConfig) extends R2BLogging {
   }
 
   def getUsers: Seq[User] = {
-    val users: Seq[User] = redmine.getUserManager.getUsers
+    val users: Seq[User] = redmine.getUserManager.getUsers.asScala
     users.map(user => getUserById(user.getId))
   }
 
@@ -119,7 +119,7 @@ class RedmineService(r2bConf: R2BConfig) extends R2BLogging {
   }
 
   def getNews(projectKey: String): Seq[News] = {
-    redmine.getProjectManager.getNews(projectKey)
+    redmine.getProjectManager.getNews(projectKey).asScala
   }
 
   def getGroupById(id: Int): Group = {
@@ -128,7 +128,7 @@ class RedmineService(r2bConf: R2BConfig) extends R2BLogging {
 
   def getStatuses(): Seq[IssueStatus] = {
     try {
-      redmine.getIssueManager.getStatuses
+      redmine.getIssueManager.getStatuses.asScala
     } catch {
       case e: NotFoundException =>
         error(e)
@@ -138,7 +138,7 @@ class RedmineService(r2bConf: R2BConfig) extends R2BLogging {
 
   def getIssuePriorities(): Seq[IssuePriority] = {
     try {
-      redmine.getIssueManager.getIssuePriorities
+      redmine.getIssueManager.getIssuePriorities.asScala
     } catch {
       case e: NotFoundException =>
         error(e)
@@ -148,7 +148,7 @@ class RedmineService(r2bConf: R2BConfig) extends R2BLogging {
 
   def getVersions(projectID: Int): Seq[Version] = {
     try {
-      redmine.getProjectManager.getVersions(projectID)
+      redmine.getProjectManager.getVersions(projectID).asScala
     } catch {
       case e: RedmineAuthenticationException =>
         error(e)
