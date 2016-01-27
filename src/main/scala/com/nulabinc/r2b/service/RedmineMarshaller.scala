@@ -11,8 +11,8 @@ import spray.json._
 import scala.collection.JavaConverters._
 
 /**
- * @author uchida
- */
+  * @author uchida
+  */
 object RedmineMarshaller {
   implicit val userLang = if (Locale.getDefault.equals(Locale.JAPAN)) Lang("ja") else Lang("en")
 
@@ -28,11 +28,12 @@ object RedmineMarshaller {
         parentIssueId = Option(issue.getParentId).map(_.toInt),
         project = getRedmineProject(project),
         subject = issue.getSubject,
-        description = issue.getDescription + getOtherInformation(issue),
+        description = issue.getDescription,
         startDate = Option(issue.getStartDate).map(date => new DateTime(date).toString(dateFormat)),
         dueDate = Option(issue.getDueDate).map(date => new DateTime(date).toString(dateFormat)),
         estimatedHours = Option(issue.getEstimatedHours).map(_.toDouble),
         spentHours = Option(issue.getSpentHours).map(_.toDouble),
+        doneRatio = issue.getDoneRatio,
         status = issue.getStatusName,
         priority = issue.getPriorityText,
         tracker = issue.getTracker.getName,
@@ -45,12 +46,6 @@ object RedmineMarshaller {
         author = getUserLogin(Option(issue.getAuthor), users),
         createdOn = Option(issue.getCreatedOn).map(date => new DateTime(date).toString(timestampFormat)),
         updatedOn = Option(issue.getUpdatedOn).map(date => new DateTime(date).toString(timestampFormat))).toJson.prettyPrint
-
-    private def getOtherInformation(issue: Issue): String = {
-      val sb = new StringBuilder
-      sb.append("\n").append(Messages("label.done_ratio")).append(":").append(issue.getDoneRatio)
-      sb.result()
-    }
 
     private def getRedmineAttachments(issue: Issue): Seq[RedmineAttachment] = {
       val attachments: Array[Attachment] = issue.getAttachments.toArray(new Array[Attachment](issue.getAttachments.size()))

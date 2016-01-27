@@ -3,8 +3,8 @@ package com.nulabinc.r2b.domain
 import spray.json.DefaultJsonProtocol
 
 /**
- * @author uchida
- */
+  * @author uchida
+  */
 case class RedmineCustomField(
                                id: Int,
                                name: String,
@@ -22,6 +22,7 @@ case class RedmineIssue(
                          dueDate: Option[String],
                          estimatedHours: Option[Double],
                          spentHours: Option[Double],
+                         doneRatio: Int,
                          status: String,
                          priority: String,
                          tracker: String,
@@ -145,7 +146,7 @@ object RedmineJsonProtocol extends DefaultJsonProtocol {
   implicit val RedmineCustomFieldFormat = jsonFormat5(RedmineCustomField)
   implicit val RedmineJournalDetailFormat = jsonFormat4(RedmineJournalDetail)
   implicit val RedmineJournalFormat = jsonFormat5(RedmineJournal)
-  implicit val RedmineIssueFormat = jsonFormat21(RedmineIssue)
+  implicit val RedmineIssueFormat = jsonFormat22(RedmineIssue)
   implicit val RedmineProjectsWrapperFormat = jsonFormat1(RedmineProjectsWrapper)
   implicit val RedmineUserFormat = jsonFormat7(RedmineUser)
   implicit val RedmineUsersWrapperFormat = jsonFormat1(RedmineUsersWrapper)

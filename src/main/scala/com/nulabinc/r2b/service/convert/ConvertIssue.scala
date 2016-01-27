@@ -7,7 +7,7 @@ import com.nulabinc.r2b.actor.convert.utils.ProjectContext
 import com.nulabinc.r2b.actor.utils.IssueTag
 import com.nulabinc.r2b.conf.ConfigBase
 import com.nulabinc.r2b.domain.{RedmineAttachment, RedmineCustomField, RedmineCustomFieldDefinition, RedmineIssue}
-import com.osinka.i18n.Lang
+import com.osinka.i18n.{Messages, Lang}
 
 /**
   * @author uchida
@@ -22,7 +22,7 @@ class ConvertIssue(pctx: ProjectContext) {
       id = redmineIssue.id,
       summary = redmineIssue.subject,
       parentIssueId = redmineIssue.parentIssueId.map(_.toLong),
-      description = redmineIssue.description + "\n" + IssueTag.getTag(redmineIssue.id, redmineUrl),
+      description = getDescription(redmineIssue),
       startDate = redmineIssue.startDate,
       dueDate = redmineIssue.dueDate,
       estimatedHours = redmineIssue.estimatedHours.map(_.toFloat),
@@ -40,6 +40,14 @@ class ConvertIssue(pctx: ProjectContext) {
       created = redmineIssue.createdOn,
       updatedUserId = redmineIssue.author.map(pctx.userMapping.convert),
       updated = redmineIssue.updatedOn)
+  }
+
+  private def getDescription(redmineIssue: RedmineIssue): String = {
+    val sb = new StringBuilder
+    sb.append(redmineIssue.description)
+    sb.append("\n").append(Messages("label.done_ratio")).append(":").append(redmineIssue.doneRatio)
+    sb.append("\n").append(IssueTag.getTag(redmineIssue.id, pctx.conf.redmineUrl))
+    sb.result()
   }
 
   private def getBacklogAttachments(attachments: Seq[RedmineAttachment]): Seq[BacklogAttachment] =
