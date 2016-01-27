@@ -32,8 +32,7 @@ class RedmineActor(conf: R2BConfig) extends Actor with R2BLogging with Subtasks 
       title(Messages("message.start_redmine_export"), TOP)
 
       info(Messages("message.execute_redmine_user_export"))
-      val users: Seq[User] = redmineService.getUsers
-      IOUtil.output(ConfigBase.Redmine.USERS, RedmineMarshaller.Users(users))
+      IOUtil.output(ConfigBase.Redmine.USERS, RedmineMarshaller.Users(redmineService.getUsers))
 
       info(Messages("message.execute_redmine_custom_fields_export"))
       IOUtil.output(Redmine.CUSTOM_FIELDS, RedmineMarshaller.CustomFieldDefinition(redmineService.getCustomFieldDefinitions))

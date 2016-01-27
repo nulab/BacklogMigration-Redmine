@@ -55,9 +55,7 @@ class ProjectsActor(conf: R2BConfig) extends Actor with R2BLogging with Subtasks
     IOUtil.output(Redmine.getVersionsPath(project.getIdentifier), RedmineMarshaller.Versions(redmineService.getVersions(project.getId)))
 
     start(Props(new NewsActor(conf, project)), NewsActor.actorName) ! NewsActor.Do
-
     start(Props(new WikisActor(conf, project)), WikisActor.actorName) ! WikisActor.Do
-
     start(Props(new IssuesActor(conf, project)), IssuesActor.actorName) ! IssuesActor.Do
   }
 
