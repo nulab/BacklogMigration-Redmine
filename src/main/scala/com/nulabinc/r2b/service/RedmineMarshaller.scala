@@ -18,8 +18,8 @@ object RedmineMarshaller {
 
   import RedmineJsonProtocol._
 
-  val dateFormat = new java.text.SimpleDateFormat("yyyy-MM-dd")
-  val timestampFormat: String = "yyyy-MM-dd'T'HH:mm:ssZ"
+  val dateFormat = "yyyy-MM-dd"
+  val timestampFormat = "yyyy-MM-dd'T'HH:mm:ssZ"
 
   object Issue {
     def apply(issue: Issue, project: Project, users: Seq[User]): String =
@@ -29,8 +29,8 @@ object RedmineMarshaller {
         project = getRedmineProject(project),
         subject = issue.getSubject,
         description = issue.getDescription + getOtherInformation(issue),
-        startDate = Option(issue.getStartDate).map(dateFormat.format),
-        dueDate = Option(issue.getDueDate).map(dateFormat.format),
+        startDate = Option(issue.getStartDate).map(date => new DateTime(date).toString(dateFormat)),
+        dueDate = Option(issue.getDueDate).map(date => new DateTime(date).toString(dateFormat)),
         estimatedHours = Option(issue.getEstimatedHours).map(_.toDouble),
         spentHours = Option(issue.getSpentHours).map(_.toDouble),
         status = issue.getStatusName,
@@ -166,7 +166,7 @@ object RedmineMarshaller {
         id = version.getId,
         name = version.getName,
         description = version.getDescription,
-        dueDate = Option(version.getDueDate).map(dateFormat.format),
+        dueDate = Option(version.getDueDate).map(date => new DateTime(date).toString(dateFormat)),
         createdOn = dateFormat.format(version.getCreatedOn))
   }
 
