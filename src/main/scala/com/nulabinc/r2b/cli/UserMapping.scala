@@ -12,18 +12,18 @@ import com.taskadapter.redmineapi.bean.{User => RedmineUser}
 /**
  * @author uchida
  */
-class UserMapping(r2bConf: R2BConfig) extends MappingManager {
+class UserMapping(conf: R2BConfig) extends MappingManager {
 
   private val backlogDatas = loadBacklog()
   private val redmineDatas = loadRedmine()
 
   private def loadRedmine(): Seq[MappingItem] = {
-    val redmineService: RedmineService = new RedmineService(r2bConf)
+    val redmineService: RedmineService = new RedmineService(conf)
 
     info("- " + Messages("mapping.load_redmine", itemName))
     info("-  " + Messages("message.collect_project_user"))
     
-    val redmineUsers: Seq[RedmineUser] = FindUsersActor(r2bConf).toSeq.map(user => {
+    val redmineUsers: Seq[RedmineUser] = FindUsersActor(conf).toSeq.map(user => {
       if (Option(user.getLogin).isDefined && Option(user.getFullName).isDefined) user
       else redmineService.getUserById(user.getId)
     })
@@ -34,7 +34,7 @@ class UserMapping(r2bConf: R2BConfig) extends MappingManager {
 
   private def loadBacklog(): Seq[MappingItem] = {
     info("- " + Messages("mapping.load_backlog", itemName))
-    val backlogService: BacklogService = new BacklogService(BacklogConfig(r2bConf.backlogUrl, r2bConf.backlogKey))
+    val backlogService: BacklogService = new BacklogService(BacklogConfig(conf.backlogUrl, conf.backlogKey))
     val backlogUsers: Seq[BacklogUser] = backlogService.getUsers
     val backlogs: Seq[MappingItem] = backlogUsers.map(backlogUser => MappingItem(backlogUser.getUserId, backlogUser.getName))
     backlogs

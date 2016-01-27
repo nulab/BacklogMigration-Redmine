@@ -1,50 +1,45 @@
-package com.nulabinc.r2b.actor.convert.utils
+package com.nulabinc.r2b.service.convert
 
 import java.util.Locale
 
 import com.nulabinc.backlog.importer.conf.{ConfigBase => BacklogConfigBase}
 import com.nulabinc.backlog.importer.domain.{BacklogComment, BacklogCommentDetail}
+import com.nulabinc.r2b.actor.convert.utils.ProjectContext
 import com.nulabinc.r2b.conf.ConfigBase
 import com.nulabinc.r2b.domain.{RedmineCustomFieldDefinition, RedmineJournal, RedmineJournalDetail}
-import com.nulabinc.r2b.service.{ConvertUserMapping, ProjectEnumerations, RedmineUnmarshaller}
+import com.nulabinc.r2b.service.RedmineUnmarshaller
 import com.nulabinc.r2b.utils.IOUtil
 import com.osinka.i18n.{Lang, Messages}
 
 /**
   * @author uchida
   */
-object ConvertComments {
+class ConvertComments(pctx: ProjectContext) {
 
   implicit val userLang = if (Locale.getDefault.equals(Locale.JAPAN)) Lang("ja") else Lang("en")
 
-  def apply(projectIdentifier: String, issueId: Int, projectEnumerations: ProjectEnumerations, userMapping: ConvertUserMapping, journals: Seq[RedmineJournal]): Seq[BacklogComment] =
-    journalsToComments(projectIdentifier, issueId, projectEnumerations, userMapping)(journals)
+  def execute(projectIdentifier: String, issueId: Int, journals: Seq[RedmineJournal]): Seq[BacklogComment] =
+    journalsToComments(projectIdentifier, issueId)(journals)
 
-  private def journalsToComments(projectIdentifier: String, issueId: Int, projectEnumerations: ProjectEnumerations, userMapping: ConvertUserMapping)(journals: Seq[RedmineJournal]) =
-    journals.map(journalToComment(projectIdentifier, issueId, projectEnumerations, userMapping)(_))
+  private def journalsToComments(projectIdentifier: String, issueId: Int)(journals: Seq[RedmineJournal]) =
+    journals.map(journalToComment(projectIdentifier, issueId)(_))
 
-  private def journalToComment(projectIdentifier: String, issueId: Int, projectEnumerations: ProjectEnumerations, userMapping: ConvertUserMapping)(journal: RedmineJournal) =
-    getBacklogComment(projectIdentifier, issueId, projectEnumerations, userMapping, journal)
+  private def journalToComment(projectIdentifier: String, issueId: Int)(journal: RedmineJournal) =
+    getBacklogComment(projectIdentifier, issueId, journal)
 
-  private def getBacklogComment(projectIdentifier: String, issueId: Int, projectEnumerations: ProjectEnumerations, userMapping: ConvertUserMapping, redmineJournal: RedmineJournal): BacklogComment =
+  private def getBacklogComment(projectIdentifier: String, issueId: Int, redmineJournal: RedmineJournal): BacklogComment =
     BacklogComment(
       content = redmineJournal.notes + "\n" + getOtherProperty(projectIdentifier, issueId, redmineJournal.details),
-      details = journalDetailsToCommentDetails(projectEnumerations, userMapping)(redmineJournal.details.filter(detail => !isOtherProperty(projectIdentifier, issueId, detail))),
-      createdUserId = redmineJournal.user.map(userMapping.convert),
+      details = redmineJournal.details.filter(detail => !isOtherProperty(projectIdentifier, issueId, detail)).map(getBacklogCommentDetail(_)),
+      createdUserId = redmineJournal.user.map(pctx.userMapping.convert),
       created = redmineJournal.createdOn)
 
-  private def journalDetailsToCommentDetails(projectEnumerations: ProjectEnumerations, userMapping: ConvertUserMapping)(details: Seq[RedmineJournalDetail]) =
-    details.map(journalDetailToCommentDetail(projectEnumerations, userMapping)(_))
-
-  private def journalDetailToCommentDetail(projectEnumerations: ProjectEnumerations, userMapping: ConvertUserMapping)(detail: RedmineJournalDetail) =
-    getBacklogCommentDetail(projectEnumerations, userMapping, detail)
-
-  private def getBacklogCommentDetail(projectEnumerations: ProjectEnumerations, userMapping: ConvertUserMapping, redmineJournalDetail: RedmineJournalDetail): BacklogCommentDetail =
+  private def getBacklogCommentDetail(redmineJournalDetail: RedmineJournalDetail): BacklogCommentDetail =
     BacklogCommentDetail(
       property = redmineJournalDetail.property,
-      name = convertName(projectEnumerations, redmineJournalDetail.property, redmineJournalDetail.name),
-      oldValue = convertValue(projectEnumerations, userMapping, redmineJournalDetail.property, redmineJournalDetail.name, redmineJournalDetail.oldValue),
-      newValue = convertValue(projectEnumerations, userMapping, redmineJournalDetail.property, redmineJournalDetail.name, redmineJournalDetail.newValue))
+      name = convertName(redmineJournalDetail),
+      oldValue = convertValue(redmineJournalDetail.property, redmineJournalDetail.name, redmineJournalDetail.oldValue),
+      newValue = convertValue(redmineJournalDetail.property, redmineJournalDetail.name, redmineJournalDetail.newValue))
 
   private def getOtherProperty(projectIdentifier: String, issueId: Int, details: Seq[RedmineJournalDetail]): String =
     details.filter(isOtherProperty(projectIdentifier, issueId, _)).map(getOtherPropertyMessage(projectIdentifier, issueId, _)).mkString("\n")
@@ -90,9 +85,9 @@ object ConvertComments {
     if (value.isEmpty) Messages("label.not_set")
     else value.get
 
-  private def convertName(projectEnumerations: ProjectEnumerations, property: String, name: String): String = property match {
-    case ConfigBase.Property.CF => projectEnumerations.CustomFieldDefinitions.convertValue(Some(name)).get
-    case _ => convertBacklogName(name)
+  private def convertName(detail: RedmineJournalDetail): String = detail.property match {
+    case ConfigBase.Property.CF => pctx.getCustomFieldDefinitionsName(detail.name)
+    case _ => convertBacklogName(detail.name)
   }
 
   private def convertBacklogName(name: String): String = name match {
@@ -110,30 +105,30 @@ object ConvertComments {
     case _ => name
   }
 
-  private def convertValue(projectEnumerations: ProjectEnumerations, userMapping: ConvertUserMapping, property: String, name: String, value: Option[String]): Option[String] = property match {
-    case ConfigBase.Property.ATTR => convertAttr(projectEnumerations, userMapping, name, value)
-    case ConfigBase.Property.CF => convertCf(projectEnumerations, name, value)
+  private def convertValue(property: String, name: String, value: Option[String]): Option[String] = property match {
+    case ConfigBase.Property.ATTR => convertAttr(name, value)
+    case ConfigBase.Property.CF => convertCf(name, value)
     case ConfigBase.Property.ATTACHMENT => value
     case "relation" => value
   }
 
-  private def convertAttr(projectEnumerations: ProjectEnumerations, userMapping: ConvertUserMapping, name: String, value: Option[String]): Option[String] = name match {
-    case ConfigBase.Property.Attr.STATUS => projectEnumerations.IssueStatus.convertValue(value)
-    case ConfigBase.Property.Attr.PRIORITY => projectEnumerations.Priority.convertValue(value)
-    case ConfigBase.Property.Attr.ASSIGNED => projectEnumerations.User.convertValue(value).map(userMapping.convert)
-    case ConfigBase.Property.Attr.VERSION => projectEnumerations.Version.convertValue(value)
-    case ConfigBase.Property.Attr.TRACKER => projectEnumerations.Tracker.convertValue(value)
-    case ConfigBase.Property.Attr.CATEGORY => projectEnumerations.Category.convertValue(value)
+  private def convertAttr(name: String, value: Option[String]): Option[String] = name match {
+    case ConfigBase.Property.Attr.STATUS => pctx.getStatusName(value)
+    case ConfigBase.Property.Attr.PRIORITY => pctx.getPriorityName(value)
+    case ConfigBase.Property.Attr.ASSIGNED => pctx.getUserLoginId(value).map(pctx.userMapping.convert)
+    case ConfigBase.Property.Attr.VERSION => pctx.getVersionName(value)
+    case ConfigBase.Property.Attr.TRACKER => pctx.getTrackerName(value)
+    case ConfigBase.Property.Attr.CATEGORY => pctx.getCategoryName(value)
     case _ => value
   }
 
-  private def convertCf(projectEnumerations: ProjectEnumerations, name: String, value: Option[String]): Option[String] =
+  private def convertCf(name: String, value: Option[String]): Option[String] =
     RedmineUnmarshaller.customFieldDefinitions() match {
       case Some(customFields) =>
         val redmineCustomFieldDefinition: RedmineCustomFieldDefinition = customFields.find(customField => name.toInt == customField.id).get
         redmineCustomFieldDefinition.fieldFormat match {
-          case "version" => projectEnumerations.Version.convertValue(value)
-          case "user" => projectEnumerations.UserId.convertValue(projectEnumerations.User.convertValue(value))
+          case "version" => pctx.getVersionName(value)
+          case "user" => pctx.getUserFullname(value)
           case _ => value
         }
       case None => None

@@ -10,14 +10,14 @@ import com.osinka.i18n.Messages
 /**
  * @author uchida
  */
-class PriorityMapping(r2bConf: R2BConfig) extends MappingManager {
+class PriorityMapping(conf: R2BConfig) extends MappingManager {
 
   private val backlogDatas = loadBacklog()
   private val redmineDatas = loadRedmine()
 
   private def loadRedmine(): Seq[MappingItem] = {
     info("- " + Messages("mapping.load_redmine", itemName))
-    val redmineService: RedmineService = new RedmineService(r2bConf)
+    val redmineService: RedmineService = new RedmineService(conf)
     val redminePriorities = redmineService.getIssuePriorities()
     val redmines: Seq[MappingItem] = redminePriorities.map(redminePriority => MappingItem(redminePriority.getName, redminePriority.getName))
     redmines
@@ -25,7 +25,7 @@ class PriorityMapping(r2bConf: R2BConfig) extends MappingManager {
 
   private def loadBacklog(): Seq[MappingItem] = {
     info("- " + Messages("mapping.load_backlog", itemName))
-    val backlogService: BacklogService = new BacklogService(BacklogConfig(r2bConf.backlogUrl, r2bConf.backlogKey))
+    val backlogService: BacklogService = new BacklogService(BacklogConfig(conf.backlogUrl, conf.backlogKey))
     val backlogPriorities: Seq[Priority] = backlogService.getPriorities
     val backlogs: Seq[MappingItem] = backlogPriorities.map(backlogPriority => MappingItem(backlogPriority.getName, backlogPriority.getName))
     backlogs

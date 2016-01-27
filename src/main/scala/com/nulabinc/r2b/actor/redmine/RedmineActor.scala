@@ -16,7 +16,7 @@ import com.taskadapter.redmineapi.bean._
 import scala.concurrent.duration._
 import scala.language.postfixOps
 
-class RedmineActor(r2bConf: R2BConfig) extends Actor with R2BLogging with Subtasks {
+class RedmineActor(conf: R2BConfig) extends Actor with R2BLogging with Subtasks {
 
   override val supervisorStrategy = OneForOneStrategy(maxNrOfRetries = 0) {
     case e: Exception =>
@@ -25,7 +25,7 @@ class RedmineActor(r2bConf: R2BConfig) extends Actor with R2BLogging with Subtas
       Stop
   }
 
-  val redmineService: RedmineService = new RedmineService(r2bConf)
+  val redmineService: RedmineService = new RedmineService(conf)
 
   def receive: Receive = {
     case RedmineActor.Do =>
@@ -46,7 +46,7 @@ class RedmineActor(r2bConf: R2BConfig) extends Actor with R2BLogging with Subtas
 
       IOUtil.output(ConfigBase.Redmine.PRIORITY, RedmineMarshaller.IssuePriority(redmineService.getIssuePriorities()))
 
-      start(Props(new ProjectsActor(r2bConf)), ProjectsActor.actorName) ! ProjectsActor.Do
+      start(Props(new ProjectsActor(conf)), ProjectsActor.actorName) ! ProjectsActor.Do
 
     case Terminated(ref) =>
       complete(ref)
@@ -67,9 +67,9 @@ object RedmineActor {
 
   def actorName = s"RedmineActor_$randomUUID"
 
-  def apply(r2bConf: R2BConfig) = {
+  def apply(conf: R2BConfig) = {
     val system = ActorSystem("redmine-exporter")
-    val actor = system.actorOf(Props(new RedmineActor(r2bConf)), RedmineActor.actorName)
+    val actor = system.actorOf(Props(new RedmineActor(conf)), RedmineActor.actorName)
     actor ! RedmineActor.Do
     system.awaitTermination(timeout.duration)
   }

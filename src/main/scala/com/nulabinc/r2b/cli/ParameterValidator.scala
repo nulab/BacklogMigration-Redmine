@@ -11,7 +11,7 @@ import com.taskadapter.redmineapi.{RedmineAuthenticationException, RedmineTransp
 /**
   * @author uchida
   */
-class ParameterValidator(r2bConf: R2BConfig) extends R2BLogging {
+class ParameterValidator(conf: R2BConfig) extends R2BLogging {
 
   def validate(): Seq[String] = {
     val backlogErrors: Seq[String] = validateLoadBacklog()
@@ -22,11 +22,11 @@ class ParameterValidator(r2bConf: R2BConfig) extends R2BLogging {
   }
 
   private def validateLoadRedmineProjects(): Seq[String] =
-    if (r2bConf.projects.isEmpty) Seq("- " + Messages("message.specify_projects"))
-    else r2bConf.projects.flatMap(validateLoadRedmineProject)
+    if (conf.projects.isEmpty) Seq("- " + Messages("message.specify_projects"))
+    else conf.projects.flatMap(validateLoadRedmineProject)
 
   private def validateLoadRedmineProject(projectKey: ParamProjectKey): Seq[String] = {
-    val redmineService: RedmineService = new RedmineService(r2bConf)
+    val redmineService: RedmineService = new RedmineService(conf)
     val option = redmineService.getProject(projectKey)
 
     if(option.isEmpty) Seq("- " + Messages("message.can_not_load_project", projectKey.redmine))
@@ -34,11 +34,11 @@ class ParameterValidator(r2bConf: R2BConfig) extends R2BLogging {
   }
 
   private def validateLoadBacklogProjects(): Seq[String] =
-    if (r2bConf.projects.isEmpty) Seq("- " + Messages("message.specify_projects"))
-    else r2bConf.projects.flatMap(validateLoadBacklogProject)
+    if (conf.projects.isEmpty) Seq("- " + Messages("message.specify_projects"))
+    else conf.projects.flatMap(validateLoadBacklogProject)
 
   private def validateLoadBacklogProject(projectKey: ParamProjectKey): Seq[String] = {
-    val backlogService: BacklogService = new BacklogService(BacklogConfig(r2bConf.backlogUrl, r2bConf.backlogKey))
+    val backlogService: BacklogService = new BacklogService(BacklogConfig(conf.backlogUrl, conf.backlogKey))
     projectKey.backlog match {
       case Some(backlog) =>
         backlogService.getProject(backlog) match {
@@ -51,13 +51,13 @@ class ParameterValidator(r2bConf: R2BConfig) extends R2BLogging {
 
   private def validateLoadBacklog(): Seq[String] =
     try {
-      val backlogService: BacklogService = new BacklogService(BacklogConfig(r2bConf.backlogUrl, r2bConf.backlogKey))
+      val backlogService: BacklogService = new BacklogService(BacklogConfig(conf.backlogUrl, conf.backlogKey))
       backlogService.getUsers
       Seq.empty[String]
     } catch {
       case unknown: BacklogAPIException if unknown.getStatusCode == 404 =>
         error(unknown)
-        Seq("- " + Messages("message.transport_error_backlog", r2bConf.backlogUrl))
+        Seq("- " + Messages("message.transport_error_backlog", conf.backlogUrl))
       case api: BacklogAPIException =>
         error(api)
         Seq("- " + Messages("message.disable_access_backlog"))
@@ -68,7 +68,7 @@ class ParameterValidator(r2bConf: R2BConfig) extends R2BLogging {
 
   private def validateLoadRedmine(): Seq[String] =
     try {
-      val redmineService: RedmineService = new RedmineService(r2bConf)
+      val redmineService: RedmineService = new RedmineService(conf)
       redmineService.getUsers
       Seq.empty[String]
     } catch {
@@ -77,7 +77,7 @@ class ParameterValidator(r2bConf: R2BConfig) extends R2BLogging {
         Seq("- " + Messages("message.auth_error_redmine"))
       case transport: RedmineTransportException =>
         error(transport)
-        Seq("- " + Messages("message.transport_error_redmine", r2bConf.redmineUrl))
+        Seq("- " + Messages("message.transport_error_redmine", conf.redmineUrl))
       case e: Throwable =>
         error(e)
         Seq("- " + Messages("message.disable_access_redmine"))

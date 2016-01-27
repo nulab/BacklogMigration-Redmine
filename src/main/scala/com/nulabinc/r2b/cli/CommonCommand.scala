@@ -8,13 +8,13 @@ import com.nulabinc.r2b.conf.R2BConfig
  */
 trait CommonCommand extends R2BLogging {
 
-  def load(r2bConf: R2BConfig): MappingService = {
+  def load(conf: R2BConfig): MappingService = {
 
     newLine()
 
-    val userMapping: UserMapping = new UserMapping(r2bConf)
-    val statusMapping: StatusMapping = new StatusMapping(r2bConf)
-    val priorityMapping: PriorityMapping = new PriorityMapping(r2bConf)
+    val userMapping: UserMapping = new UserMapping(conf)
+    val statusMapping: StatusMapping = new StatusMapping(conf)
+    val priorityMapping: PriorityMapping = new PriorityMapping(conf)
     MappingService(userMapping, statusMapping, priorityMapping)
   }
 

@@ -6,10 +6,11 @@ import akka.actor.SupervisorStrategy.Stop
 import akka.actor.{Actor, _}
 import akka.util.Timeout
 import com.nulabinc.backlog.importer.conf.{ConfigBase => BacklogConfigBase}
-import com.nulabinc.backlog.importer.domain.{BacklogGroupsWrapper, BacklogJsonProtocol, BacklogUsersWrapper}
+import com.nulabinc.backlog.importer.domain.{BacklogGroupsWrapper, BacklogJsonProtocol}
 import com.nulabinc.r2b.actor.utils.{R2BLogging, Subtasks}
 import com.nulabinc.r2b.conf.R2BConfig
-import com.nulabinc.r2b.service.{ConvertService, RedmineUnmarshaller}
+import com.nulabinc.r2b.service.RedmineUnmarshaller
+import com.nulabinc.r2b.service.convert.ConvertGroups
 import com.nulabinc.r2b.utils.IOUtil
 import com.osinka.i18n.Messages
 import spray.json._
@@ -20,7 +21,7 @@ import scala.language.postfixOps
 /**
   * @author uchida
   */
-class ConvertActor(r2bConf: R2BConfig) extends Actor with R2BLogging with Subtasks {
+class ConvertActor(conf: R2BConfig) extends Actor with R2BLogging with Subtasks {
 
   import BacklogJsonProtocol._
 
@@ -37,7 +38,7 @@ class ConvertActor(r2bConf: R2BConfig) extends Actor with R2BLogging with Subtas
 
       groups()
 
-      start(Props(new ProjectsActor(r2bConf)), ProjectsActor.actorName) ! ProjectsActor.Do
+      start(Props(new ProjectsActor(conf)), ProjectsActor.actorName) ! ProjectsActor.Do
 
     case Terminated(ref) =>
       complete(ref)
@@ -55,8 +56,10 @@ class ConvertActor(r2bConf: R2BConfig) extends Actor with R2BLogging with Subtas
 
       info(Messages("message.start_groups_convert"))
 
-      val backlogGroupsWrapper: BacklogGroupsWrapper = ConvertService.Groups(redmineGroups, redmineUsers)
-      IOUtil.output(BacklogConfigBase.Backlog.GROUPS, backlogGroupsWrapper.toJson.prettyPrint)
+      val convertGroups = new ConvertGroups()
+      IOUtil.output(
+        BacklogConfigBase.Backlog.GROUPS,
+        convertGroups.execute(redmineGroups, redmineUsers).toJson.prettyPrint)
     }
   }
 
@@ -69,9 +72,9 @@ object ConvertActor {
 
   def actorName = s"ConvertActor_$randomUUID"
 
-  def apply(r2bConf: R2BConfig) = {
+  def apply(conf: R2BConfig) = {
     val system = ActorSystem("convert")
-    val actor = system.actorOf(Props(new ConvertActor(r2bConf)), ConvertActor.actorName)
+    val actor = system.actorOf(Props(new ConvertActor(conf)), ConvertActor.actorName)
     actor ! ConvertActor.Do
     system.awaitTermination(timeout.duration)
   }

@@ -14,14 +14,14 @@ import scala.collection.mutable.Set
 /**
   * @author uchida
   */
-class WikisActor(r2bConf: R2BConfig, project: Project) extends Actor with R2BLogging {
+class WikisActor(conf: R2BConfig, project: Project) extends Actor with R2BLogging {
 
   private var count = 0
 
   def receive: Receive = {
     case WikisActor.Do =>
       val users = Set.empty[Option[User]]
-      val redmineService: RedmineService = new RedmineService(r2bConf)
+      val redmineService: RedmineService = new RedmineService(conf)
       val wikiPages = redmineService.getWikiPagesByProject(project.getIdentifier)
       wikiPages.foreach(page => {
         val detail: WikiPageDetail = redmineService.getWikiPageDetailByProjectAndTitle(project.getIdentifier, page.getTitle)

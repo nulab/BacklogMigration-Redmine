@@ -15,14 +15,14 @@ import com.taskadapter.redmineapi.bean._
 /**
  * @author uchida
  */
-class ProjectsActor(r2bConf: R2BConfig) extends Actor with R2BLogging with Subtasks {
+class ProjectsActor(conf: R2BConfig) extends Actor with R2BLogging with Subtasks {
 
   override val supervisorStrategy = OneForOneStrategy(maxNrOfRetries = 0) {
     case _: Exception =>
       Escalate
   }
 
-  val redmineService: RedmineService = new RedmineService(r2bConf)
+  val redmineService: RedmineService = new RedmineService(conf)
 
   def receive: Receive = {
     case ProjectsActor.Do =>
@@ -54,11 +54,11 @@ class ProjectsActor(r2bConf: R2BConfig) extends Actor with R2BLogging with Subta
     info(Messages("message.execute_redmine_versions_export", project.getName))
     IOUtil.output(Redmine.getVersionsPath(project.getIdentifier), RedmineMarshaller.Versions(redmineService.getVersions(project.getId)))
 
-    start(Props(new NewsActor(r2bConf, project)), NewsActor.actorName) ! NewsActor.Do
+    start(Props(new NewsActor(conf, project)), NewsActor.actorName) ! NewsActor.Do
 
-    start(Props(new WikisActor(r2bConf, project)), WikisActor.actorName) ! WikisActor.Do
+    start(Props(new WikisActor(conf, project)), WikisActor.actorName) ! WikisActor.Do
 
-    start(Props(new IssuesActor(r2bConf, project)), IssuesActor.actorName) ! IssuesActor.Do
+    start(Props(new IssuesActor(conf, project)), IssuesActor.actorName) ! IssuesActor.Do
   }
 
 }

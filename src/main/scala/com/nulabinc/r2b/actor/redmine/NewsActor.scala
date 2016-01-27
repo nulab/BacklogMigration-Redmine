@@ -14,12 +14,12 @@ import com.taskadapter.redmineapi.bean.{News, Project, User}
 /**
  * @author uchida
  */
-class NewsActor(r2bConf: R2BConfig, project: Project) extends Actor with R2BLogging {
+class NewsActor(conf: R2BConfig, project: Project) extends Actor with R2BLogging {
 
   def receive: Receive = {
     case NewsActor.Do =>
       info(Messages("message.execute_redmine_news_export", project.getName))
-      val redmineService: RedmineService = new RedmineService(r2bConf)
+      val redmineService: RedmineService = new RedmineService(conf)
       val news: Seq[News] = redmineService.getNews(project.getIdentifier)
       val users: Seq[User] = redmineService.getUsers
       IOUtil.output(Redmine.getNewsPath(project.getIdentifier), RedmineMarshaller.News(news, users))

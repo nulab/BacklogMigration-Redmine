@@ -17,10 +17,10 @@ import scala.collection.mutable.Set
 /**
  * @author uchida
  */
-class IssuesActor(r2bConf: R2BConfig, project: Project) extends Actor with R2BLogging {
+class IssuesActor(conf: R2BConfig, project: Project) extends Actor with R2BLogging {
 
   private val users = Set.empty[Option[User]]
-  private val redmineService: RedmineService = new RedmineService(r2bConf)
+  private val redmineService: RedmineService = new RedmineService(conf)
 
   private var count: Int = 0
   private var allCount: Int = 0

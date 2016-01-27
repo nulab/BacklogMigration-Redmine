@@ -13,7 +13,7 @@ import com.taskadapter.redmineapi.bean.{Project, WikiPage}
 /**
   * @author uchida
   */
-class WikisActor(r2bConf: R2BConfig, project: Project) extends Actor with R2BLogging with Subtasks {
+class WikisActor(conf: R2BConfig, project: Project) extends Actor with R2BLogging with Subtasks {
 
   override val supervisorStrategy = OneForOneStrategy(maxNrOfRetries = 0) {
     case _: Exception =>
@@ -24,7 +24,7 @@ class WikisActor(r2bConf: R2BConfig, project: Project) extends Actor with R2BLog
 
   def receive: Receive = {
     case WikisActor.Do =>
-      val redmineService: RedmineService = new RedmineService(r2bConf)
+      val redmineService: RedmineService = new RedmineService(conf)
       val wikiPages = redmineService.getWikiPagesByProject(project.getIdentifier)
       if (wikiPages.nonEmpty) {
         wikiSize = wikiPages.size
@@ -38,7 +38,7 @@ class WikisActor(r2bConf: R2BConfig, project: Project) extends Actor with R2BLog
   }
 
   private def doWikiActor(wikiPage: WikiPage) = {
-    val wikiActor = start(Props(new WikiActor(r2bConf, project, wikiPage.getTitle)), WikiActor.actorName)
+    val wikiActor = start(Props(new WikiActor(conf, project, wikiPage.getTitle)), WikiActor.actorName)
     wikiActor ! WikiActor.Do
   }
 

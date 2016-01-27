@@ -16,14 +16,14 @@ import scala.collection.JavaConverters._
 /**
   * @author uchida
   */
-class RedmineService(r2bConf: R2BConfig) extends R2BLogging {
+class RedmineService(conf: R2BConfig) extends R2BLogging {
 
   import RedmineJsonProtocol._
 
-  val redmine: RedmineManager = RedmineManagerFactory.createWithApiKey(r2bConf.redmineUrl, r2bConf.redmineKey)
+  val redmine: RedmineManager = RedmineManagerFactory.createWithApiKey(conf.redmineUrl, conf.redmineKey)
 
   def getIssuesCount(projectId: Int): Int = {
-    val url = r2bConf.redmineUrl + "/issues.json?limit=1&project_id=" + projectId + "&key=" + r2bConf.redmineKey + "&status_id=*"
+    val url = conf.redmineUrl + "/issues.json?limit=1&project_id=" + projectId + "&key=" + conf.redmineKey + "&status_id=*"
     val str: String = httpGet(url)
     val redmineIssuesWrapper: RedmineIssuesWrapper = JsonParser(str).convertTo[RedmineIssuesWrapper]
     redmineIssuesWrapper.total_count
@@ -54,7 +54,7 @@ class RedmineService(r2bConf: R2BConfig) extends R2BLogging {
     }
   }
 
-  def getProjects: Seq[Project] = r2bConf.projects.flatMap(getProject)
+  def getProjects: Seq[Project] = conf.projects.flatMap(getProject)
 
   def getProject(projectKey: ParamProjectKey): Option[Project] =
     try {
@@ -109,7 +109,7 @@ class RedmineService(r2bConf: R2BConfig) extends R2BLogging {
     redmine.getWikiManager.getWikiPageDetailByProjectAndTitle(projectKey, pageTitle)
   }
 
-  def getUsers: Seq[User] = {
+  def getUsers(): Seq[User] = {
     val users: Seq[User] = redmine.getUserManager.getUsers.asScala
     users.map(user => getUserById(user.getId))
   }

@@ -20,7 +20,7 @@ import scala.concurrent.{Await, Future}
 /**
   * @author uchida
   */
-class ProjectsActor(r2bConf: R2BConfig) extends Actor with R2BLogging {
+class ProjectsActor(conf: R2BConfig) extends Actor with R2BLogging {
 
   override val supervisorStrategy = OneForOneStrategy(maxNrOfRetries = 0) {
     case _: Exception =>
@@ -28,7 +28,7 @@ class ProjectsActor(r2bConf: R2BConfig) extends Actor with R2BLogging {
   }
 
   implicit val timeout = Timeout(60 minutes)
-  private val redmineService: RedmineService = new RedmineService(r2bConf)
+  private val redmineService: RedmineService = new RedmineService(conf)
   private val allUsers: Seq[User] = redmineService.getUsers
 
   def receive: Receive = {
@@ -50,12 +50,12 @@ class ProjectsActor(r2bConf: R2BConfig) extends Actor with R2BLogging {
   }
 
   private def searchFromIssue(project: Project, caller: ActorRef): Future[Set[User]] = {
-    val actor = context.actorOf(Props(new IssuesActor(r2bConf, project)), IssuesActor.actorName)
+    val actor = context.actorOf(Props(new IssuesActor(conf, project)), IssuesActor.actorName)
     (actor ? IssuesActor.Do).mapTo[Set[User]]
   }
 
   private def searchFromWiki(project: Project, caller: ActorRef): Future[Set[User]] = {
-    val actor = context.actorOf(Props(new WikisActor(r2bConf, project)), WikisActor.actorName)
+    val actor = context.actorOf(Props(new WikisActor(conf, project)), WikisActor.actorName)
     (actor ? WikisActor.Do).mapTo[Set[User]]
   }
 

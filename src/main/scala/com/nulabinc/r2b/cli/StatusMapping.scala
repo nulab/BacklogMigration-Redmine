@@ -10,22 +10,22 @@ import com.osinka.i18n.Messages
 /**
   * @author uchida
   */
-class StatusMapping(r2bConf: R2BConfig) extends MappingManager {
+class StatusMapping(conf: R2BConfig) extends MappingManager {
 
   private val backlogDatas = loadBacklog()
   private val redmineDatas = loadRedmine()
 
   private def loadRedmine(): Seq[MappingItem] = {
     info("- " + Messages("mapping.load_redmine", itemName))
-    val redmineService: RedmineService = new RedmineService(r2bConf)
-    val redmineStatuses = redmineService.getStatuses
+    val redmineService: RedmineService = new RedmineService(conf)
+    val redmineStatuses = redmineService.getStatuses()
     val redmines: Seq[MappingItem] = redmineStatuses.map(redmineStatus => MappingItem(redmineStatus.getName, redmineStatus.getName))
     redmines
   }
 
   private def loadBacklog(): Seq[MappingItem] = {
     info("- " + Messages("mapping.load_backlog", itemName))
-    val backlogService: BacklogService = new BacklogService(BacklogConfig(r2bConf.backlogUrl, r2bConf.backlogKey))
+    val backlogService: BacklogService = new BacklogService(BacklogConfig(conf.backlogUrl, conf.backlogKey))
     val backlogStatuses: Seq[Status] = backlogService.getStatuses
     val backlogs: Seq[MappingItem] = backlogStatuses.map(backlogStatus => MappingItem(backlogStatus.getName, backlogStatus.getName))
     backlogs
