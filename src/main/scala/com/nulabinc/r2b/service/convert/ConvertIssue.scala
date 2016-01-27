@@ -6,8 +6,8 @@ import com.nulabinc.backlog.importer.domain.{BacklogAttachment, BacklogCustomFie
 import com.nulabinc.r2b.actor.convert.utils.ProjectContext
 import com.nulabinc.r2b.actor.utils.IssueTag
 import com.nulabinc.r2b.conf.ConfigBase
-import com.nulabinc.r2b.domain.{RedmineAttachment, RedmineCustomField, RedmineCustomFieldDefinition, RedmineIssue}
-import com.osinka.i18n.{Messages, Lang}
+import com.nulabinc.r2b.domain.{RedmineAttachment, RedmineCustomField, RedmineIssue}
+import com.osinka.i18n.{Lang, Messages}
 
 /**
   * @author uchida
@@ -16,7 +16,7 @@ class ConvertIssue(pctx: ProjectContext) {
 
   implicit val userLang = if (Locale.getDefault.equals(Locale.JAPAN)) Lang("ja") else Lang("en")
 
-  def execute(redmineIssue: RedmineIssue, redmineCustomFieldDefinitions: Seq[RedmineCustomFieldDefinition], redmineUrl: String): BacklogIssue = {
+  def execute(redmineIssue: RedmineIssue): BacklogIssue = {
     val cc = new ConvertComments(pctx)
     BacklogIssue(
       id = redmineIssue.id,
@@ -35,7 +35,7 @@ class ConvertIssue(pctx: ProjectContext) {
       assigneeUserId = redmineIssue.assigneeId.map(pctx.userMapping.convert),
       attachments = getBacklogAttachments(redmineIssue.attachments),
       comments = cc.execute(redmineIssue.id, redmineIssue.journals),
-      customFields = getBacklogCustomFields(redmineIssue.customFields, redmineCustomFieldDefinitions),
+      customFields = getBacklogCustomFields(redmineIssue.customFields),
       createdUserId = redmineIssue.author.map(pctx.userMapping.convert),
       created = redmineIssue.createdOn,
       updatedUserId = redmineIssue.author.map(pctx.userMapping.convert),
@@ -56,25 +56,29 @@ class ConvertIssue(pctx: ProjectContext) {
   private def getBacklogAttachment(attachment: RedmineAttachment): BacklogAttachment =
     BacklogAttachment(attachment.id, attachment.fileName)
 
-  private def getBacklogCustomFields(redmineCustomFields: Seq[RedmineCustomField], redmineCustomFieldDefinitions: Seq[RedmineCustomFieldDefinition]): Seq[BacklogCustomField] =
-    redmineCustomFields.map(redmineCustomField => getBacklogCustomField(redmineCustomField, redmineCustomFieldDefinitions))
+  private def getBacklogCustomFields(redmineCustomFields: Seq[RedmineCustomField]): Seq[BacklogCustomField] =
+    redmineCustomFields.map(redmineCustomField => getBacklogCustomField(redmineCustomField))
 
-  private def getBacklogCustomField(redmineCustomField: RedmineCustomField, redmineCustomFieldDefinitions: Seq[RedmineCustomFieldDefinition]): BacklogCustomField =
+  private def getBacklogCustomField(redmineCustomField: RedmineCustomField): BacklogCustomField =
     BacklogCustomField(
       id = redmineCustomField.id,
       name = redmineCustomField.name,
-      value = getCustomFieldValue(redmineCustomField, redmineCustomFieldDefinitions),
+      value = getCustomFieldValue(redmineCustomField),
       multiple = redmineCustomField.multiple,
       values = redmineCustomField.values)
 
-  private def getCustomFieldValue(redmineCustomField: RedmineCustomField, redmineCustomFieldDefinitions: Seq[RedmineCustomFieldDefinition]): Option[String] = {
-    val redmineCustomFieldDefinition: RedmineCustomFieldDefinition = redmineCustomFieldDefinitions.find(_.id == redmineCustomField.id).get
-    val fieldFormat: String = redmineCustomFieldDefinition.fieldFormat
-    fieldFormat match {
+  private def getCustomFieldValue(redmineCustomField: RedmineCustomField): Option[String] = {
+    val customFieldDefinition = pctx.customFieldDefinitions.find(_.getId == redmineCustomField.id).get
+
+    val defaultValue: Option[String] =
+      if (customFieldDefinition.getDefaultValue == null || customFieldDefinition.getDefaultValue == "") None
+      else Some(customFieldDefinition.getDefaultValue)
+
+    customFieldDefinition.getFieldFormat match {
       case ConfigBase.FieldFormat.VERSION => pctx.getCategoryName(redmineCustomField.value)
       case ConfigBase.FieldFormat.USER => pctx.getMembershipUserName(redmineCustomField.value)
       case ConfigBase.FieldFormat.INT | ConfigBase.FieldFormat.FLOAT =>
-        redmineCustomField.value.orElse(redmineCustomFieldDefinition.defaultValue)
+        redmineCustomField.value.orElse(defaultValue)
       case _ => redmineCustomField.value
     }
   }
