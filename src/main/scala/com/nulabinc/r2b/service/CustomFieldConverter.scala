@@ -15,6 +15,8 @@ class CustomFieldConverter(conf: R2BConfig) {
 
   import RedmineJsonProtocol._
 
+  val redmineService: RedmineService = new RedmineService(conf)
+
   def execute(either: Either[Throwable, Seq[CustomFieldDefinition]]): Seq[RedmineCustomFieldDefinition] = {
     either.fold(
       e => e match {
@@ -46,9 +48,6 @@ class CustomFieldConverter(conf: R2BConfig) {
       trackers = cfd.getTrackers.asScala.map(getRedmineTracker),
       possibleValues = if (cfd.getPossibleValues == null) Seq.empty[String] else cfd.getPossibleValues.asScala)
 
-  private def getRedmineTracker(tracker: Tracker): RedmineTracker =
-    RedmineTracker(tracker.getId, tracker.getName)
-
   private def oldToCustomFieldDefinition(ocfd: OldCustomFieldDefinition): RedmineCustomFieldDefinition =
     RedmineCustomFieldDefinition(
       id = ocfd.id,
@@ -56,15 +55,23 @@ class CustomFieldConverter(conf: R2BConfig) {
       customizedType = ocfd.customized_type,
       fieldFormat = ocfd.field_format,
       regexp = ocfd.regexp,
-      minLength = None,
-      maxLength = None,
+      minLength = ocfd.min_length,
+      maxLength = ocfd.max_length,
       isRequired = false,
       isFilter = false,
       isSearchable = false,
       isMultiple = false,
       isVisible = ocfd.visible,
       defaultValue = ocfd.default_value,
-      trackers = Seq(ocfd.trackers.tracker),
-      possibleValues = Seq.empty[String])
+      trackers = redmineService.getTrackers.map(getRedmineTracker),
+      possibleValues = convertPossibleValues(ocfd.possible_values))
+
+  private def convertPossibleValues(possible_values: Option[Seq[OldPossibleValues]]): Seq[String] = {
+    if (possible_values.isDefined) possible_values.get.map(_.value)
+    else Seq.empty[String]
+  }
+
+  private def getRedmineTracker(tracker: Tracker): RedmineTracker =
+    RedmineTracker(tracker.getId, tracker.getName)
 
 }

@@ -140,16 +140,19 @@ case class RedmineCustomFieldDefinitionsWrapper(customFields: Seq[RedmineCustomF
 case class OldTrackers(tracker: RedmineTracker)
 
 case class OldCustomFieldDefinition(
-                                            id: Int,
-                                            name: String,
-                                            customized_type: String,
-                                            field_format: String,
-                                            regexp: Option[String],
-                                            default_value: Option[String],
-                                            visible: Boolean,
-                                            minLength: Option[Int],
-                                            maxLength: Option[Int],
-                                            trackers: OldTrackers)
+                                     id: Int,
+                                     name: String,
+                                     customized_type: String,
+                                     field_format: String,
+                                     regexp: Option[String],
+                                     min_length: Option[Int],
+                                     max_length: Option[Int],
+                                     visible: Boolean,
+                                     default_value: Option[String],
+                                     trackers: OldTrackers,
+                                     possible_values: Option[Seq[OldPossibleValues]])
+
+case class OldPossibleValues(value: String)
 
 case class OldCustomFieldDefinitionsWrapper(custom_fields: Seq[OldCustomFieldDefinition])
 
@@ -182,7 +185,8 @@ object RedmineJsonProtocol extends DefaultJsonProtocol {
   implicit val RedmineVersionFormat = jsonFormat5(RedmineVersion)
   implicit val RedmineVersionsWrapperFormat = jsonFormat1(RedmineVersionsWrapper)
   implicit val RedmineIssuesWrapperFormat = jsonFormat3(RedmineIssuesWrapper)
+  implicit val OldPossibleValuesFormat = jsonFormat1(OldPossibleValues)
   implicit val OldTrackersFormat = jsonFormat1(OldTrackers)
-  implicit val OldCustomFieldDefinitionFormat = jsonFormat10(OldCustomFieldDefinition)
+  implicit val OldCustomFieldDefinitionFormat = jsonFormat11(OldCustomFieldDefinition)
   implicit val OldCustomFieldDefinitionsWrapperFormat = jsonFormat1(OldCustomFieldDefinitionsWrapper)
 }

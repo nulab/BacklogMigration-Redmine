@@ -44,9 +44,11 @@ class ConvertCustomFieldDefinitions(pctx: ProjectContext) {
     }
 
   private def getInitialValueNumeric(redmineCustomFieldDefinition: RedmineCustomFieldDefinition): Option[Float] =
-    if (redmineCustomFieldDefinition.fieldFormat == "int" || redmineCustomFieldDefinition.fieldFormat == "float")
-      redmineCustomFieldDefinition.defaultValue.map(_.toFloat)
-    else None
+    if (redmineCustomFieldDefinition.fieldFormat == "int" || redmineCustomFieldDefinition.fieldFormat == "float") {
+      if (redmineCustomFieldDefinition.defaultValue.isDefined && redmineCustomFieldDefinition.defaultValue.get == "") {
+        None
+      } else redmineCustomFieldDefinition.defaultValue.map(_.toFloat)
+    } else None
 
   private def getMinNumeric(value: Option[Int]): Option[Float] =
     value.map(value => math.pow(10, (value - 1) * (-1)).toFloat)
