@@ -1,8 +1,9 @@
 package com.nulabinc.r2b.service
 
+import com.nulabinc.r2b.actor.utils.R2BLogging
 import com.nulabinc.r2b.conf.R2BConfig
 import com.nulabinc.r2b.domain._
-import com.taskadapter.redmineapi.RedmineFormatException
+import com.taskadapter.redmineapi.{NotFoundException, RedmineFormatException}
 import com.taskadapter.redmineapi.bean.{Tracker, CustomFieldDefinition}
 import spray.json.JsonParser
 
@@ -11,7 +12,7 @@ import scala.collection.JavaConverters._
 /**
   * @author uchida
   */
-class CustomFieldConverter(conf: R2BConfig) {
+class CustomFieldConverter(conf: R2BConfig) extends R2BLogging {
 
   import RedmineJsonProtocol._
 
@@ -25,6 +26,9 @@ class CustomFieldConverter(conf: R2BConfig) {
           val json = scala.io.Source.fromURL(url).mkString
           val wrapper = JsonParser(json).convertTo[OldCustomFieldDefinitionsWrapper]
           wrapper.custom_fields.map(oldToCustomFieldDefinition)
+        case nfe: NotFoundException =>
+          error(nfe)
+          Seq.empty[RedmineCustomFieldDefinition]
       },
       cfds => cfds.map(objToCustomFieldDefinition)
     )
