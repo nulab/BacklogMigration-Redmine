@@ -137,6 +137,22 @@ case class RedmineCustomFieldDefinition(
 
 case class RedmineCustomFieldDefinitionsWrapper(customFields: Seq[RedmineCustomFieldDefinition])
 
+case class OldTrackers(tracker: RedmineTracker)
+
+case class OldCustomFieldDefinition(
+                                            id: Int,
+                                            name: String,
+                                            customized_type: String,
+                                            field_format: String,
+                                            regexp: Option[String],
+                                            default_value: Option[String],
+                                            visible: Boolean,
+                                            minLength: Option[Int],
+                                            maxLength: Option[Int],
+                                            trackers: OldTrackers)
+
+case class OldCustomFieldDefinitionsWrapper(custom_fields: Seq[OldCustomFieldDefinition])
+
 object RedmineJsonProtocol extends DefaultJsonProtocol {
   implicit val RedmineProjectFormat = jsonFormat3(RedmineProject)
   implicit val RedmineIssueStatusFormat = jsonFormat2(RedmineIssueStatus)
@@ -166,4 +182,7 @@ object RedmineJsonProtocol extends DefaultJsonProtocol {
   implicit val RedmineVersionFormat = jsonFormat5(RedmineVersion)
   implicit val RedmineVersionsWrapperFormat = jsonFormat1(RedmineVersionsWrapper)
   implicit val RedmineIssuesWrapperFormat = jsonFormat3(RedmineIssuesWrapper)
+  implicit val OldTrackersFormat = jsonFormat1(OldTrackers)
+  implicit val OldCustomFieldDefinitionFormat = jsonFormat10(OldCustomFieldDefinition)
+  implicit val OldCustomFieldDefinitionsWrapperFormat = jsonFormat1(OldCustomFieldDefinitionsWrapper)
 }

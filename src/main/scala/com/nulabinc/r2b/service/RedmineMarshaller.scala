@@ -3,7 +3,7 @@ package com.nulabinc.r2b.service
 import java.util.Locale
 
 import com.nulabinc.r2b.domain._
-import com.osinka.i18n.{Messages, Lang}
+import com.osinka.i18n.Lang
 import com.taskadapter.redmineapi.bean._
 import org.joda.time.DateTime
 import spray.json._
@@ -64,30 +64,9 @@ object RedmineMarshaller {
   }
 
   object CustomFieldDefinition {
-    def apply(customFieldDefinitions: Seq[CustomFieldDefinition]): String = {
-      val customFields: Seq[RedmineCustomFieldDefinition] = customFieldDefinitions.map(getRedmineCustomFieldDefinition)
+    def apply(customFields: Seq[RedmineCustomFieldDefinition]): String = {
       RedmineCustomFieldDefinitionsWrapper(customFields).toJson.prettyPrint
     }
-
-    private def getRedmineCustomFieldDefinition(cfd: CustomFieldDefinition): RedmineCustomFieldDefinition = {
-      RedmineCustomFieldDefinition(
-        id = cfd.getId,
-        name = cfd.getName,
-        customizedType = cfd.getCustomizedType,
-        fieldFormat = cfd.getFieldFormat,
-        regexp = Option(cfd.getRegexp),
-        minLength = Option(cfd.getMinLength).map(_.toInt),
-        maxLength = Option(cfd.getMaxLength).map(_.toInt),
-        isRequired = cfd.isRequired,
-        isFilter = cfd.isFilter,
-        isSearchable = cfd.isSearchable,
-        isMultiple = cfd.isMultiple,
-        isVisible = cfd.isVisible,
-        defaultValue = if (cfd.getDefaultValue == null || cfd.getDefaultValue.isEmpty) None else Some(cfd.getDefaultValue),
-        trackers = cfd.getTrackers.asScala.map(getRedmineTracker),
-        possibleValues = if (cfd.getPossibleValues == null) Seq.empty[String] else cfd.getPossibleValues.asScala)
-    }
-
   }
 
   object Wiki {

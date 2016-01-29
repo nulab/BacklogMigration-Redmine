@@ -68,17 +68,13 @@ class ConvertIssue(pctx: ProjectContext) {
       values = redmineCustomField.values)
 
   private def getCustomFieldValue(redmineCustomField: RedmineCustomField): Option[String] = {
-    val customFieldDefinition = pctx.customFieldDefinitions.find(_.getId == redmineCustomField.id).get
+    val customFieldDefinition = pctx.customFieldDefinitions.find(_.id == redmineCustomField.id).get
 
-    val defaultValue: Option[String] =
-      if (customFieldDefinition.getDefaultValue == null || customFieldDefinition.getDefaultValue == "") None
-      else Some(customFieldDefinition.getDefaultValue)
-
-    customFieldDefinition.getFieldFormat match {
+    customFieldDefinition.fieldFormat match {
       case ConfigBase.FieldFormat.VERSION => pctx.getCategoryName(redmineCustomField.value)
       case ConfigBase.FieldFormat.USER => pctx.getMembershipUserName(redmineCustomField.value)
       case ConfigBase.FieldFormat.INT | ConfigBase.FieldFormat.FLOAT =>
-        redmineCustomField.value.orElse(defaultValue)
+        redmineCustomField.value.orElse(customFieldDefinition.defaultValue)
       case _ => redmineCustomField.value
     }
   }

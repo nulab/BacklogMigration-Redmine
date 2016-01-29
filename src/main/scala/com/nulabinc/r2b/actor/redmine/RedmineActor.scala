@@ -8,10 +8,9 @@ import akka.util.Timeout
 import com.nulabinc.r2b.actor.utils.{R2BLogging, Subtasks}
 import com.nulabinc.r2b.conf.ConfigBase.Redmine
 import com.nulabinc.r2b.conf.{ConfigBase, R2BConfig}
-import com.nulabinc.r2b.service.{RedmineMarshaller, RedmineService}
+import com.nulabinc.r2b.service.{CustomFieldConverter, RedmineMarshaller, RedmineService}
 import com.nulabinc.r2b.utils.IOUtil
 import com.osinka.i18n.Messages
-import com.taskadapter.redmineapi.bean._
 
 import scala.concurrent.duration._
 import scala.language.postfixOps
@@ -35,7 +34,8 @@ class RedmineActor(conf: R2BConfig) extends Actor with R2BLogging with Subtasks 
       IOUtil.output(ConfigBase.Redmine.USERS, RedmineMarshaller.Users(redmineService.getUsers))
 
       info(Messages("message.execute_redmine_custom_fields_export"))
-      IOUtil.output(Redmine.CUSTOM_FIELDS, RedmineMarshaller.CustomFieldDefinition(redmineService.getCustomFieldDefinitions))
+      val customFieldConverter = new CustomFieldConverter(conf)
+      IOUtil.output(Redmine.CUSTOM_FIELDS, RedmineMarshaller.CustomFieldDefinition(customFieldConverter.execute(redmineService.getCustomFieldDefinitions)))
 
       info(Messages("message.execute_redmine_issue_trackers_export"))
       IOUtil.output(ConfigBase.Redmine.TRACKERS, RedmineMarshaller.Tracker(redmineService.getTrackers))

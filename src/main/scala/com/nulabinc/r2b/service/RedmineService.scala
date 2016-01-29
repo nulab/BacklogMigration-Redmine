@@ -3,7 +3,7 @@ package com.nulabinc.r2b.service
 import com.nulabinc.r2b.actor.utils.R2BLogging
 import com.nulabinc.r2b.cli.ParamProjectKey
 import com.nulabinc.r2b.conf.R2BConfig
-import com.nulabinc.r2b.domain.{RedmineIssuesWrapper, RedmineJsonProtocol}
+import com.nulabinc.r2b.domain._
 import com.taskadapter.redmineapi._
 import com.taskadapter.redmineapi.bean._
 import org.apache.http.client.methods.HttpGet
@@ -44,13 +44,11 @@ class RedmineService(conf: R2BConfig) extends R2BLogging {
     redmine.getIssueManager.getIssueById(id, include: _*)
   }
 
-  def getCustomFieldDefinitions(): Seq[CustomFieldDefinition] = {
+  def getCustomFieldDefinitions(): Either[Throwable, Seq[CustomFieldDefinition]] = {
     try {
-      redmine.getCustomFieldManager.getCustomFieldDefinitions.asScala
+      Right(redmine.getCustomFieldManager.getCustomFieldDefinitions.asScala)
     } catch {
-      case e: NotFoundException =>
-        error(e)
-        Seq.empty[CustomFieldDefinition]
+      case e: Throwable => Left(e)
     }
   }
 

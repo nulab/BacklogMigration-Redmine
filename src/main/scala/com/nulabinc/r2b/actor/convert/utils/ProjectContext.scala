@@ -2,7 +2,7 @@ package com.nulabinc.r2b.actor.convert.utils
 
 import com.nulabinc.r2b.cli.ParamProjectKey
 import com.nulabinc.r2b.conf.R2BConfig
-import com.nulabinc.r2b.domain.RedmineProject
+import com.nulabinc.r2b.domain.{RedmineCustomFieldDefinition, RedmineProject}
 import com.nulabinc.r2b.service._
 
 /**
@@ -19,7 +19,8 @@ case class ProjectContext(conf: R2BConfig, project: RedmineProject) {
 
   val redmineService: RedmineService = new RedmineService(conf)
 
-  val customFieldDefinitions = redmineService.getCustomFieldDefinitions()
+  private val customFieldConverter = new CustomFieldConverter(conf)
+  val customFieldDefinitions: Seq[RedmineCustomFieldDefinition] = customFieldConverter.execute(redmineService.getCustomFieldDefinitions)
 
   val users = redmineService.getUsers()
 
@@ -37,7 +38,7 @@ case class ProjectContext(conf: R2BConfig, project: RedmineProject) {
 
   def getCustomFieldDefinitionsName(strId: String): String = {
     val id: Int = strId.toInt
-    customFieldDefinitions.find(_.getId == id).map(_.getName).get
+    customFieldDefinitions.find(_.id == id).map(_.name).get
   }
 
   def getUserLoginId(id: Option[String]): Option[String] = {
