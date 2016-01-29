@@ -233,6 +233,12 @@ MIT License
 
 * http://www.opensource.org/licenses/mit-license.php
 
+## Inquiry
+
+Please contact us if you encounter any problems during the Redmine to Backlog migration.
+
+https://www.backlog.jp/contact/
+
 # Backlog Migration for Redmine
 Redmineのプロジェクトを[Backlog]に移行するためのツールです。
 
@@ -463,6 +469,12 @@ Backlog側にRedmineに対応するプロジェクトキーがある場合同一
 MIT License
 
 * http://www.opensource.org/licenses/mit-license.php
+
+## お問い合わせ
+
+お問い合わせは下記サイトからご連絡ください。
+
+https://www.backlog.jp/contact/
 
 [Backlog]: http://www.backlog.jp/
 
