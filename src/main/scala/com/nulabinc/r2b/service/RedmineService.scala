@@ -97,9 +97,13 @@ class RedmineService(conf: R2BConfig) extends R2BLogging {
     try {
       redmine.getWikiManager.getWikiPagesByProject(projectKey).asScala
     } catch {
-      case e: RedmineAuthenticationException =>
-        error(e)
+      case rae: RedmineAuthenticationException =>
+        error(rae)
         Seq.empty[WikiPage]
+      case nfe: NotFoundException =>
+        error(nfe)
+        Seq.empty[WikiPage]
+
     }
   }
 
