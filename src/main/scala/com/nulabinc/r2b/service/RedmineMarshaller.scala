@@ -3,7 +3,7 @@ package com.nulabinc.r2b.service
 import java.util.Locale
 
 import com.nulabinc.r2b.domain._
-import com.osinka.i18n.{Messages, Lang}
+import com.osinka.i18n.Lang
 import com.taskadapter.redmineapi.bean._
 import org.joda.time.DateTime
 import spray.json._
@@ -11,15 +11,15 @@ import spray.json._
 import scala.collection.JavaConverters._
 
 /**
- * @author uchida
- */
+  * @author uchida
+  */
 object RedmineMarshaller {
   implicit val userLang = if (Locale.getDefault.equals(Locale.JAPAN)) Lang("ja") else Lang("en")
 
   import RedmineJsonProtocol._
 
-  val dateFormat = new java.text.SimpleDateFormat("yyyy-MM-dd")
-  val timestampFormat: String = "yyyy-MM-dd'T'HH:mm:ssZ"
+  val dateFormat = "yyyy-MM-dd"
+  val timestampFormat = "yyyy-MM-dd'T'HH:mm:ssZ"
 
   object Issue {
     def apply(issue: Issue, project: Project, users: Seq[User]): String =
@@ -28,11 +28,12 @@ object RedmineMarshaller {
         parentIssueId = Option(issue.getParentId).map(_.toInt),
         project = getRedmineProject(project),
         subject = issue.getSubject,
-        description = issue.getDescription + getOtherInformation(issue),
-        startDate = Option(issue.getStartDate).map(dateFormat.format),
-        dueDate = Option(issue.getDueDate).map(dateFormat.format),
+        description = issue.getDescription,
+        startDate = Option(issue.getStartDate).map(date => new DateTime(date).toString(dateFormat)),
+        dueDate = Option(issue.getDueDate).map(date => new DateTime(date).toString(dateFormat)),
         estimatedHours = Option(issue.getEstimatedHours).map(_.toDouble),
         spentHours = Option(issue.getSpentHours).map(_.toDouble),
+        doneRatio = issue.getDoneRatio,
         status = issue.getStatusName,
         priority = issue.getPriorityText,
         tracker = issue.getTracker.getName,
@@ -45,12 +46,6 @@ object RedmineMarshaller {
         author = getUserLogin(Option(issue.getAuthor), users),
         createdOn = Option(issue.getCreatedOn).map(date => new DateTime(date).toString(timestampFormat)),
         updatedOn = Option(issue.getUpdatedOn).map(date => new DateTime(date).toString(timestampFormat))).toJson.prettyPrint
-
-    private def getOtherInformation(issue: Issue): String = {
-      val sb = new StringBuilder
-      sb.append("\n").append(Messages("label.done_ratio")).append(":").append(issue.getDoneRatio)
-      sb.result()
-    }
 
     private def getRedmineAttachments(issue: Issue): Seq[RedmineAttachment] = {
       val attachments: Array[Attachment] = issue.getAttachments.toArray(new Array[Attachment](issue.getAttachments.size()))
@@ -69,30 +64,9 @@ object RedmineMarshaller {
   }
 
   object CustomFieldDefinition {
-    def apply(customFieldDefinitions: Seq[CustomFieldDefinition]): String = {
-      val customFields: Seq[RedmineCustomFieldDefinition] = customFieldDefinitions.map(getRedmineCustomFieldDefinition)
+    def apply(customFields: Seq[RedmineCustomFieldDefinition]): String = {
       RedmineCustomFieldDefinitionsWrapper(customFields).toJson.prettyPrint
     }
-
-    private def getRedmineCustomFieldDefinition(cfd: CustomFieldDefinition): RedmineCustomFieldDefinition = {
-      RedmineCustomFieldDefinition(
-        id = cfd.getId,
-        name = cfd.getName,
-        customizedType = cfd.getCustomizedType,
-        fieldFormat = cfd.getFieldFormat,
-        regexp = Option(cfd.getRegexp),
-        minLength = Option(cfd.getMinLength).map(_.toInt),
-        maxLength = Option(cfd.getMaxLength).map(_.toInt),
-        isRequired = cfd.isRequired,
-        isFilter = cfd.isFilter,
-        isSearchable = cfd.isSearchable,
-        isMultiple = cfd.isMultiple,
-        isVisible = cfd.isVisible,
-        defaultValue = if (cfd.getDefaultValue == null || cfd.getDefaultValue.isEmpty) None else Some(cfd.getDefaultValue),
-        trackers = cfd.getTrackers.asScala.map(getRedmineTracker),
-        possibleValues = if (cfd.getPossibleValues == null) Seq.empty[String] else cfd.getPossibleValues.asScala)
-    }
-
   }
 
   object Wiki {
@@ -166,7 +140,7 @@ object RedmineMarshaller {
         id = version.getId,
         name = version.getName,
         description = version.getDescription,
-        dueDate = Option(version.getDueDate).map(dateFormat.format),
+        dueDate = Option(version.getDueDate).map(date => new DateTime(date).toString(dateFormat)),
         createdOn = dateFormat.format(version.getCreatedOn))
   }
 

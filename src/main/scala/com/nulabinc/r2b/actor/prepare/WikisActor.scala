@@ -14,24 +14,21 @@ import scala.collection.mutable.Set
 /**
   * @author uchida
   */
-class WikisActor(r2bConf: R2BConfig, project: Project) extends Actor with R2BLogging {
+class WikisActor(conf: R2BConfig, project: Project) extends Actor with R2BLogging {
 
   private var count = 0
 
   def receive: Receive = {
     case WikisActor.Do =>
       val users = Set.empty[Option[User]]
-      val redmineService: RedmineService = new RedmineService(r2bConf)
-      redmineService.getWikiPagesByProject(project.getIdentifier).fold(
-        e => log.error(e.getMessage, e),
-        wikiPages =>
-          wikiPages.foreach(page => {
-            val detail: WikiPageDetail = redmineService.getWikiPageDetailByProjectAndTitle(project.getIdentifier, page.getTitle)
-            users += Option(detail.getUser)
-            count += 1
-            printlog("-  " + Messages("message.load_redmine_wikis", project.getName, count, wikiPages.size))
-          })
-      )
+      val redmineService: RedmineService = new RedmineService(conf)
+      val wikiPages = redmineService.getWikiPagesByProject(project.getIdentifier)
+      wikiPages.foreach(page => {
+        val detail: WikiPageDetail = redmineService.getWikiPageDetailByProjectAndTitle(project.getIdentifier, page.getTitle)
+        users += Option(detail.getUser)
+        count += 1
+        info("-  " + Messages("message.load_redmine_wikis", project.getName, count, wikiPages.size))
+      })
       sender ! users.flatten
   }
 

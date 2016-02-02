@@ -1,23 +1,17 @@
 package com.nulabinc.r2b.cli
 
-import java.util.Locale
-
 import com.nulabinc.backlog.importer.core.BacklogConfig
 import com.nulabinc.backlog4j.BacklogAPIException
+import com.nulabinc.r2b.actor.utils.R2BLogging
 import com.nulabinc.r2b.conf.R2BConfig
 import com.nulabinc.r2b.service.{BacklogService, RedmineService}
-import com.osinka.i18n.{Lang, Messages}
+import com.osinka.i18n.Messages
 import com.taskadapter.redmineapi.{RedmineAuthenticationException, RedmineTransportException}
-import org.slf4j.{LoggerFactory, Logger}
 
 /**
- * @author uchida
- */
-class ParameterValidator(r2bConf: R2BConfig) {
-
-  implicit val userLang = if (Locale.getDefault.equals(Locale.JAPAN)) Lang("ja") else Lang("en")
-
-  private val log: Logger = LoggerFactory.getLogger("ParameterValidator")
+  * @author uchida
+  */
+class ParameterValidator(conf: R2BConfig) extends R2BLogging {
 
   def validate(): Seq[String] = {
     val backlogErrors: Seq[String] = validateLoadBacklog()
@@ -28,23 +22,23 @@ class ParameterValidator(r2bConf: R2BConfig) {
   }
 
   private def validateLoadRedmineProjects(): Seq[String] =
-    if (r2bConf.projects.isEmpty) Seq("- " + Messages("message.specify_projects"))
-    else r2bConf.projects.flatMap(validateLoadRedmineProject)
+    if (conf.projects.isEmpty) Seq("- " + Messages("message.specify_projects"))
+    else conf.projects.flatMap(validateLoadRedmineProject)
 
   private def validateLoadRedmineProject(projectKey: ParamProjectKey): Seq[String] = {
-    val redmineService: RedmineService = new RedmineService(r2bConf)
-    redmineService.getProject(projectKey) match {
-      case Right(_) => Seq.empty[String]
-      case Left(_) => Seq("- " + Messages("message.can_not_load_project", projectKey.redmine))
-    }
+    val redmineService: RedmineService = new RedmineService(conf)
+    val option = redmineService.getProject(projectKey)
+
+    if(option.isEmpty) Seq("- " + Messages("message.can_not_load_project", projectKey.redmine))
+    else Seq.empty[String]
   }
 
   private def validateLoadBacklogProjects(): Seq[String] =
-    if (r2bConf.projects.isEmpty) Seq("- " + Messages("message.specify_projects"))
-    else r2bConf.projects.flatMap(validateLoadBacklogProject)
+    if (conf.projects.isEmpty) Seq("- " + Messages("message.specify_projects"))
+    else conf.projects.flatMap(validateLoadBacklogProject)
 
   private def validateLoadBacklogProject(projectKey: ParamProjectKey): Seq[String] = {
-    val backlogService: BacklogService = new BacklogService(BacklogConfig(r2bConf.backlogUrl, r2bConf.backlogKey))
+    val backlogService: BacklogService = new BacklogService(BacklogConfig(conf.backlogUrl, conf.backlogKey))
     projectKey.backlog match {
       case Some(backlog) =>
         backlogService.getProject(backlog) match {
@@ -57,35 +51,35 @@ class ParameterValidator(r2bConf: R2BConfig) {
 
   private def validateLoadBacklog(): Seq[String] =
     try {
-      val backlogService: BacklogService = new BacklogService(BacklogConfig(r2bConf.backlogUrl, r2bConf.backlogKey))
+      val backlogService: BacklogService = new BacklogService(BacklogConfig(conf.backlogUrl, conf.backlogKey))
       backlogService.getUsers
       Seq.empty[String]
     } catch {
       case unknown: BacklogAPIException if unknown.getStatusCode == 404 =>
-        log.error(unknown.getMessage, unknown)
-        Seq("- " + Messages("message.transport_error_backlog", r2bConf.backlogUrl))
+        error(unknown)
+        Seq("- " + Messages("message.transport_error_backlog", conf.backlogUrl))
       case api: BacklogAPIException =>
-        log.error(api.getMessage, api)
+        error(api)
         Seq("- " + Messages("message.disable_access_backlog"))
       case e: Throwable =>
-        log.error(e.getMessage, e)
+        error(e)
         Seq("- " + Messages("message.disable_access_backlog"))
     }
 
   private def validateLoadRedmine(): Seq[String] =
     try {
-      val redmineService: RedmineService = new RedmineService(r2bConf)
+      val redmineService: RedmineService = new RedmineService(conf)
       redmineService.getUsers
       Seq.empty[String]
     } catch {
       case auth: RedmineAuthenticationException =>
-        log.error(auth.getMessage, auth)
+        error(auth)
         Seq("- " + Messages("message.auth_error_redmine"))
       case transport: RedmineTransportException =>
-        log.error(transport.getMessage, transport)
-        Seq("- " + Messages("message.transport_error_redmine", r2bConf.redmineUrl))
+        error(transport)
+        Seq("- " + Messages("message.transport_error_redmine", conf.redmineUrl))
       case e: Throwable =>
-        log.error(e.getMessage, e)
+        error(e)
         Seq("- " + Messages("message.disable_access_redmine"))
     }
 

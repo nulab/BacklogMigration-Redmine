@@ -1,35 +1,29 @@
 package com.nulabinc.r2b.service
 
-import java.io.{File, FileOutputStream}
-import java.net.URL
-import java.nio.channels.{Channels, ReadableByteChannel}
-
+import com.nulabinc.r2b.actor.utils.R2BLogging
 import com.nulabinc.r2b.cli.ParamProjectKey
 import com.nulabinc.r2b.conf.R2BConfig
-import com.nulabinc.r2b.domain.{RedmineIssuesWrapper, RedmineJsonProtocol}
+import com.nulabinc.r2b.domain._
 import com.taskadapter.redmineapi._
 import com.taskadapter.redmineapi.bean._
 import org.apache.http.client.methods.HttpGet
 import org.apache.http.impl.client.DefaultHttpClient
 import org.apache.http.util.EntityUtils
-import org.slf4j.{Logger, LoggerFactory}
 import spray.json.JsonParser
 
-import scala.collection.JavaConversions._
+import scala.collection.JavaConverters._
 
 /**
- * @author uchida
- */
-class RedmineService(r2bConf: R2BConfig) {
+  * @author uchida
+  */
+class RedmineService(conf: R2BConfig) extends R2BLogging {
 
   import RedmineJsonProtocol._
 
-  private val log: Logger = LoggerFactory.getLogger("RedmineService")
-
-  val redmine: RedmineManager = RedmineManagerFactory.createWithApiKey(r2bConf.redmineUrl, r2bConf.redmineKey)
+  val redmine: RedmineManager = RedmineManagerFactory.createWithApiKey(conf.redmineUrl, conf.redmineKey)
 
   def getIssuesCount(projectId: Int): Int = {
-    val url = r2bConf.redmineUrl + "/issues.json?limit=1&project_id=" + projectId + "&key=" + r2bConf.redmineKey + "&status_id=*"
+    val url = conf.redmineUrl + "/issues.json?limit=1&project_id=" + projectId + "&key=" + conf.redmineKey + "&status_id=*"
     val str: String = httpGet(url)
     val redmineIssuesWrapper: RedmineIssuesWrapper = JsonParser(str).convertTo[RedmineIssuesWrapper]
     redmineIssuesWrapper.total_count
@@ -43,74 +37,73 @@ class RedmineService(r2bConf: R2BConfig) {
   }
 
   def getIssues(params: Map[String, String]): Seq[Issue] = {
-    redmine.getIssueManager.getIssues(params)
+    redmine.getIssueManager.getIssues(params.asJava).asScala
   }
 
   def getIssueById(id: Integer, include: Include*): Issue = {
     redmine.getIssueManager.getIssueById(id, include: _*)
   }
 
-  def getCustomFieldDefinitions: Either[Throwable, Seq[CustomFieldDefinition]] = {
+  def getCustomFieldDefinitions(): Either[Throwable, Seq[CustomFieldDefinition]] = {
     try {
-      Right(redmine.getCustomFieldManager.getCustomFieldDefinitions)
+      Right(redmine.getCustomFieldManager.getCustomFieldDefinitions.asScala)
     } catch {
-      case e: NotFoundException =>
-        log.error(e.getMessage, e)
-        Left(e)
+      case e: Throwable => Left(e)
     }
   }
 
-  def getProjects: Seq[Project] = {
-    val projects: Seq[Either[Throwable, Project]] = r2bConf.projects.map(getProject)
-    projects.filter(_.isRight).map(_.right.get)
-  }
+  def getProjects(): Seq[Project] = conf.projects.flatMap(getProject)
 
-  def getProject(projectKey: ParamProjectKey): Either[Throwable, Project] =
+  def getProject(projectKey: ParamProjectKey): Option[Project] =
     try {
-      Right(redmine.getProjectManager.getProjectByKey(projectKey.redmine))
+      Some(redmine.getProjectManager.getProjectByKey(projectKey.redmine))
     } catch {
       case e: NotFoundException =>
-        log.error(e.getMessage, e)
-        Left(e)
+        error(e)
+        None
     }
 
-  def getMemberships(projectKey: String): Either[Throwable, Seq[Membership]] = {
+  def getMemberships(projectKey: String): Seq[Membership] = {
     try {
-      Right(redmine.getMembershipManager.getMemberships(projectKey))
+      redmine.getMembershipManager.getMemberships(projectKey).asScala
     } catch {
       case e: NotFoundException =>
-        log.error(e.getMessage, e)
-        Left(e)
+        error(e)
+        Seq.empty[Membership]
     }
   }
 
-  def getCategories(projectId: Int): Either[Throwable, Seq[IssueCategory]] = {
+  def getCategories(projectId: Int): Seq[IssueCategory] = {
     try {
-      Right(redmine.getIssueManager.getCategories(projectId))
+      redmine.getIssueManager.getCategories(projectId).asScala
     } catch {
       case e: NotFoundException =>
-        log.error(e.getMessage, e)
-        Left(e)
+        error(e)
+        Seq.empty[IssueCategory]
     }
   }
 
-  def getTrackers: Either[Throwable, Seq[Tracker]] = {
+  def getTrackers(): Seq[Tracker] = {
     try {
-      Right(redmine.getIssueManager.getTrackers)
+      redmine.getIssueManager.getTrackers.asScala
     } catch {
       case e: NotFoundException =>
-        log.error(e.getMessage, e)
-        Left(e)
+        error(e)
+        Seq.empty[Tracker]
     }
   }
 
-  def getWikiPagesByProject(projectKey: String): Either[Throwable, Seq[WikiPage]] = {
+  def getWikiPagesByProject(projectKey: String): Seq[WikiPage] = {
     try {
-      Right(redmine.getWikiManager.getWikiPagesByProject(projectKey))
+      redmine.getWikiManager.getWikiPagesByProject(projectKey).asScala
     } catch {
-      case e: RedmineAuthenticationException =>
-        log.error(e.getMessage, e)
-        Left(e)
+      case rae: RedmineAuthenticationException =>
+        error(rae)
+        Seq.empty[WikiPage]
+      case nfe: NotFoundException =>
+        error(nfe)
+        Seq.empty[WikiPage]
+
     }
   }
 
@@ -118,70 +111,59 @@ class RedmineService(r2bConf: R2BConfig) {
     redmine.getWikiManager.getWikiPageDetailByProjectAndTitle(projectKey, pageTitle)
   }
 
-  def getUsers: Seq[User] = {
-    val users: Seq[User] = redmine.getUserManager.getUsers
-    users.map(user => getUserById(user.getId))
+  def getUsers(): Seq[User] = {
+    val users: Seq[User] = redmine.getUserManager.getUsers.asScala
+    users.flatMap(user => getUserById(user.getId))
   }
 
-  def getUserById(id: Int): User = {
-    redmine.getUserManager.getUserById(id)
+  def getUserById(id: Int): Option[User] = {
+    try {
+      Some(redmine.getUserManager.getUserById(id))
+    } catch {
+      case e: NotFoundException =>
+        error(e)
+        None
+    }
   }
 
   def getNews(projectKey: String): Seq[News] = {
-    redmine.getProjectManager.getNews(projectKey)
-  }
-
-  def getGroups: Either[Throwable, Seq[Group]] = {
-    try {
-      Right(redmine.getUserManager.getGroups)
-    } catch {
-      case e: RedmineAuthenticationException =>
-        log.error(e.getMessage, e)
-        Left(e)
-    }
+    redmine.getProjectManager.getNews(projectKey).asScala
   }
 
   def getGroupById(id: Int): Group = {
     redmine.getUserManager.getGroupById(id)
   }
 
-  def getStatuses: Either[Throwable, Seq[IssueStatus]] = {
+  def getStatuses(): Seq[IssueStatus] = {
     try {
-      Right(redmine.getIssueManager.getStatuses)
+      redmine.getIssueManager.getStatuses.asScala
     } catch {
       case e: NotFoundException =>
-        log.error(e.getMessage, e)
-        Left(e)
+        error(e)
+        Seq.empty[IssueStatus]
     }
   }
 
-  def getIssuePriorities: Either[Throwable, Seq[IssuePriority]] = {
+  def getIssuePriorities(): Seq[IssuePriority] = {
     try {
-      Right(redmine.getIssueManager.getIssuePriorities)
+      redmine.getIssueManager.getIssuePriorities.asScala
     } catch {
       case e: NotFoundException =>
-        log.error(e.getMessage, e)
-        Left(e)
+        error(e)
+        Seq.empty[IssuePriority]
     }
   }
 
-  def getVersions(projectID: Int): Either[Throwable, Seq[Version]] = {
+  def getVersions(projectID: Int): Seq[Version] = {
     try {
-      Right(redmine.getProjectManager.getVersions(projectID))
+      redmine.getProjectManager.getVersions(projectID).asScala
     } catch {
-      case e: RedmineAuthenticationException =>
-        log.error(e.getMessage, e)
-        Left(e)
-    }
-  }
-
-  def getMemberships(projectID: Int): Either[Throwable, Seq[Membership]] = {
-    try {
-      Right(redmine.getMembershipManager.getMemberships(projectID))
-    } catch {
-      case e: NotFoundException =>
-        log.error(e.getMessage, e)
-        Left(e)
+      case rae: RedmineAuthenticationException =>
+        error(rae)
+        Seq.empty[Version]
+      case nfe: NotFoundException =>
+        error(nfe)
+        Seq.empty[Version]
     }
   }
 

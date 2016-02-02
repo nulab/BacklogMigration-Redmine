@@ -17,10 +17,10 @@ import scala.collection.mutable.Set
 /**
  * @author uchida
  */
-class IssuesActor(r2bConf: R2BConfig, project: Project) extends Actor with R2BLogging {
+class IssuesActor(conf: R2BConfig, project: Project) extends Actor with R2BLogging {
 
   private val users = Set.empty[Option[User]]
-  private val redmineService: RedmineService = new RedmineService(r2bConf)
+  private val redmineService: RedmineService = new RedmineService(conf)
 
   private var count: Int = 0
   private var allCount: Int = 0
@@ -62,12 +62,12 @@ class IssuesActor(r2bConf: R2BConfig, project: Project) extends Actor with R2BLo
     })
 
     count += 1
-    printlog("-  " + Messages("message.load_redmine_issue", project.getName, count, allCount))
+    info("-  " + Messages("message.load_redmine_issue", project.getName, count, allCount))
   }
 
   private def collectUserFromValue(value: String) =
-    if (Option(value).isDefined && !users.flatten.exists(user => user.getId == value.toInt))
-      users += Option(redmineService.getUserById(value.toInt))
+    if (Option(value).isDefined && !users.flatten.exists(_.getId == value.toInt))
+      users += redmineService.getUserById(value.toInt)
 
 }
 

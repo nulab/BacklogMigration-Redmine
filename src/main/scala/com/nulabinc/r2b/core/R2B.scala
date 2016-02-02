@@ -6,7 +6,7 @@ import com.nulabinc.backlog.importer.actor.backlog.BacklogActor
 import com.nulabinc.backlog.importer.core.BacklogConfig
 import com.nulabinc.r2b.actor.convert.ConvertActor
 import com.nulabinc.r2b.actor.redmine.RedmineActor
-import com.nulabinc.r2b.actor.utils.Logging
+import com.nulabinc.r2b.actor.utils.R2BLogging
 import com.nulabinc.r2b.cli.{ExecuteCommand, InitCommand, ParamProjectKey, ParameterValidator}
 import com.nulabinc.r2b.conf.{ConfigBase, R2BConfig}
 import com.nulabinc.r2b.utils.ClassVersion
@@ -48,9 +48,7 @@ class CommandLineInterface(arguments: Seq[String]) extends ScallopConf(arguments
   }
 }
 
-object R2B extends Logging {
-
-  implicit val userLang = if (Locale.getDefault.equals(Locale.JAPAN)) Lang("ja") else Lang("en")
+object R2B extends R2BLogging {
 
   def main(args: Array[String]) {
     if (ClassVersion.isValid()) {
@@ -61,11 +59,11 @@ object R2B extends Logging {
       } catch {
         case e: Throwable ⇒
           e.printStackTrace()
-          log.error(e.getMessage, e)
+          error(e)
           System.exit(1)
       }
     } else {
-      printlog(Messages("requirements_java8", System.getProperty("java.specification.version")))
+      info(Messages("requirements_java8", System.getProperty("java.specification.version")))
       System.exit(1)
     }
   }
@@ -116,55 +114,49 @@ object R2B extends Logging {
         }
 
       case _ =>
-        printlog()
-        printlog(ConfigBase.NAME + " " + ConfigBase.VERSION + " (c) nulab.inc")
-        printlog("--------------------------------------------------")
-        println(Messages("help.sample_command"))
-        println(Messages("help"))
+        newLine()
+        title(ConfigBase.NAME + " " + ConfigBase.VERSION + " (c) nulab.inc", TOP)
+        info(Messages("help.sample_command"))
+        info(Messages("help"))
     }
   }
 
   private def showTitle() = {
-    printlog()
-    printlog(ConfigBase.NAME + " " + ConfigBase.VERSION + " (c) nulab.inc")
-    printlog("--------------------------------------------------")
+    newLine()
+    title(ConfigBase.NAME + " " + ConfigBase.VERSION + " (c) nulab.inc", TOP)
   }
 
   private def showImportStart() = {
-    printlog()
-    printlog("--------------------------------------------------")
-    printlog(Messages("start"))
-    printlog("--------------------------------------------------")
-    printlog()
+    newLine()
+    title(Messages("start"), TOP)
+    separatorln()
   }
 
   private def showImportFinish() = {
-    printlog()
-    printlog("--------------------------------------------------")
-    printlog(Messages("finish"))
+    newLine()
+    title(Messages("finish"), BOTTOM)
   }
 
   private def showImportCancel() = {
-    printlog()
-    printlog("--------------------------------------------------")
-    printlog(Messages("cancel"))
+    newLine()
+    separator()
+    info(Messages("cancel"))
   }
 
   private def showImportUncompleted() = {
-    printlog()
-    printlog("--------------------------------------------------")
-    printlog(Messages("import_uncompleted"))
+    newLine()
+    title(Messages("import_uncompleted"), BOTTOM)
   }
 
   private def isParameterValid(r2bConf: R2BConfig): Boolean = {
     val validator: ParameterValidator = new ParameterValidator(r2bConf)
     val errors: Seq[String] = validator.validate()
     if (errors.nonEmpty) {
-      printlog()
-      printlog(Messages("mapping.show_parameter_error"))
-      printlog("--------------------------------------------------")
-      errors.foreach(printlog(_))
-      printlog("--------------------------------------------------")
+      newLine()
+      info(Messages("mapping.show_parameter_error"))
+      separator()
+      errors.foreach(info(_))
+      separator()
       false
     } else true
   }

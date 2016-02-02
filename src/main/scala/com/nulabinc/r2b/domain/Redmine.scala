@@ -3,8 +3,8 @@ package com.nulabinc.r2b.domain
 import spray.json.DefaultJsonProtocol
 
 /**
- * @author uchida
- */
+  * @author uchida
+  */
 case class RedmineCustomField(
                                id: Int,
                                name: String,
@@ -22,6 +22,7 @@ case class RedmineIssue(
                          dueDate: Option[String],
                          estimatedHours: Option[Double],
                          spentHours: Option[Double],
+                         doneRatio: Int,
                          status: String,
                          priority: String,
                          tracker: String,
@@ -136,6 +137,25 @@ case class RedmineCustomFieldDefinition(
 
 case class RedmineCustomFieldDefinitionsWrapper(customFields: Seq[RedmineCustomFieldDefinition])
 
+case class OldTrackers(tracker: RedmineTracker)
+
+case class OldCustomFieldDefinition(
+                                     id: Int,
+                                     name: String,
+                                     customized_type: String,
+                                     field_format: String,
+                                     regexp: Option[String],
+                                     min_length: Option[Int],
+                                     max_length: Option[Int],
+                                     visible: Boolean,
+                                     default_value: Option[String],
+                                     trackers: OldTrackers,
+                                     possible_values: Option[Seq[OldPossibleValues]])
+
+case class OldPossibleValues(value: String)
+
+case class OldCustomFieldDefinitionsWrapper(custom_fields: Seq[OldCustomFieldDefinition])
+
 object RedmineJsonProtocol extends DefaultJsonProtocol {
   implicit val RedmineProjectFormat = jsonFormat3(RedmineProject)
   implicit val RedmineIssueStatusFormat = jsonFormat2(RedmineIssueStatus)
@@ -145,7 +165,7 @@ object RedmineJsonProtocol extends DefaultJsonProtocol {
   implicit val RedmineCustomFieldFormat = jsonFormat5(RedmineCustomField)
   implicit val RedmineJournalDetailFormat = jsonFormat4(RedmineJournalDetail)
   implicit val RedmineJournalFormat = jsonFormat5(RedmineJournal)
-  implicit val RedmineIssueFormat = jsonFormat21(RedmineIssue)
+  implicit val RedmineIssueFormat = jsonFormat22(RedmineIssue)
   implicit val RedmineProjectsWrapperFormat = jsonFormat1(RedmineProjectsWrapper)
   implicit val RedmineUserFormat = jsonFormat7(RedmineUser)
   implicit val RedmineUsersWrapperFormat = jsonFormat1(RedmineUsersWrapper)
@@ -165,4 +185,8 @@ object RedmineJsonProtocol extends DefaultJsonProtocol {
   implicit val RedmineVersionFormat = jsonFormat5(RedmineVersion)
   implicit val RedmineVersionsWrapperFormat = jsonFormat1(RedmineVersionsWrapper)
   implicit val RedmineIssuesWrapperFormat = jsonFormat3(RedmineIssuesWrapper)
+  implicit val OldPossibleValuesFormat = jsonFormat1(OldPossibleValues)
+  implicit val OldTrackersFormat = jsonFormat1(OldTrackers)
+  implicit val OldCustomFieldDefinitionFormat = jsonFormat11(OldCustomFieldDefinition)
+  implicit val OldCustomFieldDefinitionsWrapperFormat = jsonFormat1(OldCustomFieldDefinitionsWrapper)
 }

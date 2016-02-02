@@ -18,23 +18,23 @@ import scala.concurrent.duration._
 import scala.concurrent.{Await, Future}
 
 /**
- * @author uchida
- */
-class ProjectsActor(r2bConf: R2BConfig) extends Actor with R2BLogging {
+  * @author uchida
+  */
+class ProjectsActor(conf: R2BConfig) extends Actor with R2BLogging {
 
-  override val supervisorStrategy = AllForOneStrategy(maxNrOfRetries = 0) {
+  override val supervisorStrategy = OneForOneStrategy(maxNrOfRetries = 0) {
     case _: Exception =>
       Escalate
   }
 
   implicit val timeout = Timeout(60 minutes)
-  private val redmineService: RedmineService = new RedmineService(r2bConf)
+  private val redmineService: RedmineService = new RedmineService(conf)
   private val allUsers: Seq[User] = redmineService.getUsers
 
   def receive: Receive = {
     case ProjectsActor.Do =>
       val caller = sender
-      printlog("-  " + Messages("message.load_redmine_projects"))
+      info("-  " + Messages("message.load_redmine_projects"))
       val projects: Seq[Project] = redmineService.getProjects
 
       val futures: Seq[Future[Set[User]]] = projects.foldLeft(Seq.empty[Future[Set[User]]])((fs: Seq[Future[Set[User]]], project: Project) => {
@@ -50,26 +50,24 @@ class ProjectsActor(r2bConf: R2BConfig) extends Actor with R2BLogging {
   }
 
   private def searchFromIssue(project: Project, caller: ActorRef): Future[Set[User]] = {
-    val actor = context.actorOf(Props(new IssuesActor(r2bConf, project)), IssuesActor.actorName)
+    val actor = context.actorOf(Props(new IssuesActor(conf, project)), IssuesActor.actorName)
     (actor ? IssuesActor.Do).mapTo[Set[User]]
   }
 
   private def searchFromWiki(project: Project, caller: ActorRef): Future[Set[User]] = {
-    val actor = context.actorOf(Props(new WikisActor(r2bConf, project)), WikisActor.actorName)
+    val actor = context.actorOf(Props(new WikisActor(conf, project)), WikisActor.actorName)
     (actor ? WikisActor.Do).mapTo[Set[User]]
   }
 
   private def memberships(projects: Seq[Project]): Set[User] = {
     val users: Set[User] = Set.empty[User]
     projects.foreach(project => {
-      printlog("-  " + Messages("message.load_redmine_memberships", project.getName))
-      redmineService.getMemberships(project.getIdentifier) match {
-        case Right(memberships) => memberships.foreach(membership => {
-          if (Option(membership.getUser).isDefined) users += membership.getUser
-          if (Option(membership.getGroup).isDefined) users ++= groups(membership.getGroup)
-        })
-        case Left(e) => log.debug(e.getMessage)
-      }
+      info("-  " + Messages("message.load_redmine_memberships", project.getName))
+      val memberships = redmineService.getMemberships(project.getIdentifier)
+      memberships.foreach(membership => {
+        if (Option(membership.getUser).isDefined) users += membership.getUser
+        if (Option(membership.getGroup).isDefined) users ++= groups(membership.getGroup)
+      })
     })
     users
   }

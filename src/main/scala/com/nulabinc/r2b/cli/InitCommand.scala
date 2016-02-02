@@ -6,17 +6,20 @@ import com.osinka.i18n.Messages
 /**
  * @author uchida
  */
-class InitCommand(r2bConf: R2BConfig) extends CommonCommand {
+class InitCommand(conf: R2BConfig) extends CommonCommand {
 
-  val mappingService: MappingService = load(r2bConf)
+  val mappingService: MappingService = load(conf)
 
   def execute() = {
-    printlog()
+
+    newLine()
+
     mappingService.user.createExec()
     mappingService.priority.createExec()
     mappingService.status.createExec()
-    printlog()
-    printlog(Messages("mapping.confirm_fix"))
+
+    newLine()
+    info(Messages("mapping.confirm_fix"))
   }
 
 }

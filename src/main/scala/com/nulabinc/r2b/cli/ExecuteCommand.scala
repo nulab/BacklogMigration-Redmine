@@ -8,9 +8,9 @@ import com.osinka.i18n.Messages
 /**
  * @author uchida
  */
-class ExecuteCommand(r2bConf: R2BConfig) extends CommonCommand {
+class ExecuteCommand(conf: R2BConfig) extends CommonCommand {
 
-  val mappingService: MappingService = load(r2bConf)
+  val mappingService: MappingService = load(conf)
 
   def check(): Boolean =
     if (isAllExists) {
@@ -18,28 +18,33 @@ class ExecuteCommand(r2bConf: R2BConfig) extends CommonCommand {
         isAllValid
       } else false
     } else {
-      printlog()
-      printlog(Messages("invalid_setup"))
+      invalidMessage()
       false
     }
 
   def confirm(useProjects: Seq[ParamProjectKey]): Boolean = {
-    printlog()
+    
+    newLine()
+    
     showProjectsMapping(useProjects)
     mappingService.user.show()
     mappingService.status.show()
     mappingService.priority.show()
-    printlog()
+    
+    newLine()
+    
     val input: String = scala.io.StdIn.readLine(Messages("mapping.confirm"))
     input == "y" || input == "Y"
   }
 
-  def useProjectsConfirm(): Seq[ParamProjectKey] = r2bConf.projects.flatMap(confirmUseProject)
+  def useProjectsConfirm(): Seq[ParamProjectKey] = conf.projects.flatMap(confirmUseProject)
 
   private def confirmUseProject(projectKey: ParamProjectKey): Option[ParamProjectKey] = {
-    val backlogService: BacklogService = new BacklogService(BacklogConfig(r2bConf.backlogUrl, r2bConf.backlogKey))
+    val backlogService: BacklogService = new BacklogService(BacklogConfig(conf.backlogUrl, conf.backlogKey))
     if (backlogService.getProject(projectKey.getBacklogKey()).isRight) {
-      printlog()
+
+      newLine()
+
       val input: String = scala.io.StdIn.readLine(Messages("message.backlog_project_already_exist", projectKey.getBacklogKey()))
       if (input == "y" || input == "Y") Some(projectKey)
       else None
@@ -67,21 +72,23 @@ class ExecuteCommand(r2bConf: R2BConfig) extends CommonCommand {
 
 
   private def showProjectsMapping(useProjects: Seq[ParamProjectKey]) = {
-    printlog(Messages("mapping.show", Messages("projects")))
-    printlog("--------------------------------------------------")
+    title(Messages("mapping.show", Messages("projects")),TOP)
 
     useProjects.foreach(showMapping)
 
-    printlog("--------------------------------------------------")
-    printlog()
+    separatorln()
   }
 
   private def showMapping(paramProjectKey: ParamProjectKey) = {
     val backlogDisplay: String =
       if (paramProjectKey.backlog.isDefined) paramProjectKey.backlog.get
       else paramProjectKey.redmine.toUpperCase.replaceAll("-", "_")
-    printlog("- " + paramProjectKey.redmine + " => " + backlogDisplay)
+    info("- " + paramProjectKey.redmine + " => " + backlogDisplay)
   }
 
+  private def invalidMessage() = {
+    newLine()
+    info(Messages("invalid_setup"))
+  }
 
 }

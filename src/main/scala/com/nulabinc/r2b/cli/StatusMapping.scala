@@ -6,31 +6,26 @@ import com.nulabinc.r2b.conf.{ConfigBase, R2BConfig}
 import com.nulabinc.r2b.domain.MappingItem
 import com.nulabinc.r2b.service.{BacklogService, RedmineService}
 import com.osinka.i18n.Messages
-import com.taskadapter.redmineapi.bean.IssueStatus
 
 /**
- * @author uchida
- */
-class StatusMapping(r2bConf: R2BConfig) extends MappingManager {
+  * @author uchida
+  */
+class StatusMapping(conf: R2BConfig) extends MappingManager {
 
   private val backlogDatas = loadBacklog()
   private val redmineDatas = loadRedmine()
 
   private def loadRedmine(): Seq[MappingItem] = {
-    printlog("- " + Messages("mapping.load_redmine", itemName))
-    val redmineService: RedmineService = new RedmineService(r2bConf)
-    val either: Either[Throwable, Seq[IssueStatus]] = redmineService.getStatuses
-    val redmineStatuses: Seq[IssueStatus] = either match {
-      case Right(statuses) => statuses
-      case Left(e) => Seq.empty[IssueStatus]
-    }
+    info("- " + Messages("mapping.load_redmine", itemName))
+    val redmineService: RedmineService = new RedmineService(conf)
+    val redmineStatuses = redmineService.getStatuses()
     val redmines: Seq[MappingItem] = redmineStatuses.map(redmineStatus => MappingItem(redmineStatus.getName, redmineStatus.getName))
     redmines
   }
 
   private def loadBacklog(): Seq[MappingItem] = {
-    printlog("- " + Messages("mapping.load_backlog", itemName))
-    val backlogService: BacklogService = new BacklogService(BacklogConfig(r2bConf.backlogUrl, r2bConf.backlogKey))
+    info("- " + Messages("mapping.load_backlog", itemName))
+    val backlogService: BacklogService = new BacklogService(BacklogConfig(conf.backlogUrl, conf.backlogKey))
     val backlogStatuses: Seq[Status] = backlogService.getStatuses
     val backlogs: Seq[MappingItem] = backlogStatuses.map(backlogStatus => MappingItem(backlogStatus.getName, backlogStatus.getName))
     backlogs
