@@ -2,7 +2,7 @@ name := "backlog-migration-redmine"
 
 organization := "com.nulabinc"
 
-version := "0.9.0b16"
+version := "0.9.0b17"
 
 scalaVersion := "2.11.6"
 
@@ -60,6 +60,8 @@ ideaExcludeFolders += ".idea"
 ideaExcludeFolders += ".idea_modules"
 
 jarName in assembly := { s"${name.value}-${version.value}.jar" }
+
+test in assembly := {}
 
 import de.johoop.cpd4sbt.CopyPasteDetector._
 import de.johoop.findbugs4sbt.FindBugs._
