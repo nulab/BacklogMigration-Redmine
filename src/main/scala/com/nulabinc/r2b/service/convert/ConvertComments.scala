@@ -22,7 +22,7 @@ class ConvertComments(pctx: ProjectContext) {
     journalsToComments(issueId)(journals)
 
   private def journalsToComments(issueId: Int)(journals: Seq[RedmineJournal]) =
-    journals.map(journalToComment(issueId)(_))
+    journals.map(journalToComment(issueId))
 
   private def journalToComment(issueId: Int)(journal: RedmineJournal) =
     getBacklogComment(issueId, journal)
@@ -30,7 +30,7 @@ class ConvertComments(pctx: ProjectContext) {
   private def getBacklogComment(issueId: Int, redmineJournal: RedmineJournal): BacklogComment =
     BacklogComment(
       content = redmineJournal.notes + "\n" + getOtherProperty(issueId, redmineJournal.details),
-      details = redmineJournal.details.filter(detail => !isOtherProperty(issueId, detail)).map(getBacklogCommentDetail(_)),
+      details = redmineJournal.details.filter(detail => !isOtherProperty(issueId, detail)).map(getBacklogCommentDetail),
       createdUserId = redmineJournal.user.map(pctx.userMapping.convert),
       created = redmineJournal.createdOn)
 
@@ -47,7 +47,7 @@ class ConvertComments(pctx: ProjectContext) {
   private def getOtherPropertyMessage(issueId: Int, detail: RedmineJournalDetail): String =
     if (isDoneRatioJournal(detail)) createMessage("label.done_ratio", detail)
     else if (isPrivateJournal(detail)) createMessage("label.private", detail)
-    else if (isProjectId(detail)) createMessage("label.project", detail)
+    else if (isProjectId(detail)) createChangeProjectIdMessage("label.project", detail)
     else if (isRelationJournal(detail)) createMessage("label.relation", detail)
     else if (isAttachmentNotFound(issueId, detail: RedmineJournalDetail)) {
       if (detail.newValue.isDefined) Messages("message.add_attachment", detail.newValue.get)
@@ -58,6 +58,14 @@ class ConvertComments(pctx: ProjectContext) {
 
   private def createMessage(label: String, detail: RedmineJournalDetail): String =
     Messages("label.change_comment", Messages(label), getStringMessage(detail.oldValue), getStringMessage(detail.newValue))
+
+  private def createChangeProjectIdMessage(label: String, detail: RedmineJournalDetail): String =
+    Messages("label.change_comment", Messages(label), getProjectName(detail.oldValue), getProjectName(detail.newValue))
+
+  private def getProjectName(value: Option[String]): String =
+    if (value.isDefined && value.get != "") {
+      pctx.getProjectName(value.get.toInt).getOrElse(Messages("label.not_set"))
+    } else Messages("label.not_set")
 
   private def isOtherProperty(issueId: Int, detail: RedmineJournalDetail): Boolean =
     isRelationJournal(detail) || isDoneRatioJournal(detail) || isPrivateJournal(detail) || isProjectId(detail) ||
