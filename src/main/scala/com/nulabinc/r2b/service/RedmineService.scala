@@ -52,7 +52,7 @@ class RedmineService(conf: R2BConfig) extends R2BLogging {
     }
   }
 
-  def getProjects: Seq[Project] = conf.projects.flatMap(getProject)
+  def getProjects(): Seq[Project] = conf.projects.flatMap(getProject)
 
   def getProject(projectKey: ParamProjectKey): Option[Project] =
     try {

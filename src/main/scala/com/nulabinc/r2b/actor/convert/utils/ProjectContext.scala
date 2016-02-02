@@ -28,13 +28,15 @@ case class ProjectContext(conf: R2BConfig, project: RedmineProject) {
 
   val priorities = redmineService.getIssuePriorities()
 
-  val trackers = redmineService.getTrackers
+  val trackers = redmineService.getTrackers()
 
   val categories = redmineService.getCategories(project.id)
 
   val versions = redmineService.getVersions(project.id)
 
   val memberships = redmineService.getMemberships(project.identifier)
+
+  val projects = redmineService.getProjects()
 
   def getCustomFieldDefinitionsName(strId: String): String = {
     val id: Int = strId.toInt
@@ -118,5 +120,7 @@ case class ProjectContext(conf: R2BConfig, project: RedmineProject) {
       case None => redmineIdentifier.toUpperCase.replaceAll("-", "_")
     }
   }
+
+  def getProjectName(id: Int): Option[String] = projects.find(_.getId == id).map(_.getName)
 
 }
