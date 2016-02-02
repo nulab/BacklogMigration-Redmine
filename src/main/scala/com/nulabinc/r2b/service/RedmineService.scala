@@ -113,11 +113,17 @@ class RedmineService(conf: R2BConfig) extends R2BLogging {
 
   def getUsers(): Seq[User] = {
     val users: Seq[User] = redmine.getUserManager.getUsers.asScala
-    users.map(user => getUserById(user.getId))
+    users.flatMap(user => getUserById(user.getId))
   }
 
-  def getUserById(id: Int): User = {
-    redmine.getUserManager.getUserById(id)
+  def getUserById(id: Int): Option[User] = {
+    try {
+      Some(redmine.getUserManager.getUserById(id))
+    } catch {
+      case e: NotFoundException =>
+        error(e)
+        None
+    }
   }
 
   def getNews(projectKey: String): Seq[News] = {
@@ -152,8 +158,11 @@ class RedmineService(conf: R2BConfig) extends R2BLogging {
     try {
       redmine.getProjectManager.getVersions(projectID).asScala
     } catch {
-      case e: RedmineAuthenticationException =>
-        error(e)
+      case rae: RedmineAuthenticationException =>
+        error(rae)
+        Seq.empty[Version]
+      case nfe: NotFoundException =>
+        error(nfe)
         Seq.empty[Version]
     }
   }

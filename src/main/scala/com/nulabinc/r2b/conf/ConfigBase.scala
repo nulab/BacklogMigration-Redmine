@@ -35,8 +35,9 @@ object ConfigBase {
 
   object Property {
     val ATTACHMENT: String = "attachment"
-    val CF: String = "cf"
+    val CUSTOM_FIELD: String = "cf"
     val ATTR: String = "attr"
+    val RELATION: String = "relation"
 
     object Attr {
       val SUBJECT: String = "subject"

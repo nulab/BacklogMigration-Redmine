@@ -7,7 +7,6 @@ import com.nulabinc.backlog.importer.domain.{BacklogComment, BacklogCommentDetai
 import com.nulabinc.r2b.actor.convert.utils.ProjectContext
 import com.nulabinc.r2b.conf.ConfigBase
 import com.nulabinc.r2b.domain.{RedmineCustomFieldDefinition, RedmineJournal, RedmineJournalDetail}
-import com.nulabinc.r2b.service.RedmineUnmarshaller
 import com.nulabinc.r2b.utils.IOUtil
 import com.osinka.i18n.{Lang, Messages}
 
@@ -27,28 +26,32 @@ class ConvertComments(pctx: ProjectContext) {
   private def journalToComment(issueId: Int)(journal: RedmineJournal) =
     getBacklogComment(issueId, journal)
 
-  private def getBacklogComment(issueId: Int, redmineJournal: RedmineJournal): BacklogComment =
+  private def getBacklogComment(issueId: Int, journal: RedmineJournal): BacklogComment = {
+    val details = journal.details.filter(detail => !isNote(issueId, detail))
+    val notes = journal.details.filter(isNote(issueId, _))
     BacklogComment(
-      content = redmineJournal.notes + "\n" + getOtherProperty(issueId, redmineJournal.details),
-      details = redmineJournal.details.filter(detail => !isOtherProperty(issueId, detail)).map(getBacklogCommentDetail),
-      createdUserId = redmineJournal.user.map(pctx.userMapping.convert),
-      created = redmineJournal.createdOn)
+      content = journal.notes + "\n" + getComment(issueId, notes),
+      details = details.map(getBacklogCommentDetail),
+      createdUserId = journal.user.map(pctx.userMapping.convert),
+      created = journal.createdOn)
+  }
 
-  private def getBacklogCommentDetail(redmineJournalDetail: RedmineJournalDetail): BacklogCommentDetail =
+  private def getBacklogCommentDetail(detail: RedmineJournalDetail): BacklogCommentDetail =
     BacklogCommentDetail(
-      property = redmineJournalDetail.property,
-      name = convertName(redmineJournalDetail),
-      oldValue = convertValue(redmineJournalDetail.property, redmineJournalDetail.name, redmineJournalDetail.oldValue),
-      newValue = convertValue(redmineJournalDetail.property, redmineJournalDetail.name, redmineJournalDetail.newValue))
+      property = detail.property,
+      name = convertName(detail),
+      oldValue = convertValue(detail, detail.oldValue),
+      newValue = convertValue(detail, detail.newValue))
 
-  private def getOtherProperty(issueId: Int, details: Seq[RedmineJournalDetail]): String =
-    details.filter(isOtherProperty(issueId, _)).map(getOtherPropertyMessage(issueId, _)).mkString("\n")
+  private def getComment(issueId: Int, notes: Seq[RedmineJournalDetail]): String =
+    notes.map(getNote(issueId, _)).mkString("\n")
 
-  private def getOtherPropertyMessage(issueId: Int, detail: RedmineJournalDetail): String =
-    if (isDoneRatioJournal(detail)) createMessage("label.done_ratio", detail)
-    else if (isPrivateJournal(detail)) createMessage("label.private", detail)
-    else if (isProjectId(detail)) createChangeProjectIdMessage("label.project", detail)
-    else if (isRelationJournal(detail)) createMessage("label.relation", detail)
+  private def getNote(issueId: Int, detail: RedmineJournalDetail): String =
+    if (isDoneRatioJournal(detail)) getNote("label.done_ratio", detail)
+    else if (isPrivateJournal(detail)) getNote("label.private", detail)
+    else if (isRelationJournal(detail)) getNote("label.relation", detail)
+    else if (isProjectId(detail)) getNoteForProject("label.project", detail)
+    else if (isAnonymousUser(detail)) getNoteForUser("label.user", detail)
     else if (isAttachmentNotFound(issueId, detail: RedmineJournalDetail)) {
       if (detail.newValue.isDefined) Messages("message.add_attachment", detail.newValue.get)
       else if (detail.oldValue.isDefined) Messages("message.del_attachment", detail.oldValue.get)
@@ -56,10 +59,16 @@ class ConvertComments(pctx: ProjectContext) {
     }
     else ""
 
-  private def createMessage(label: String, detail: RedmineJournalDetail): String =
-    Messages("label.change_comment", Messages(label), getStringMessage(detail.oldValue), getStringMessage(detail.newValue))
+  private def getNote(label: String, detail: RedmineJournalDetail): String =
+    Messages("label.change_comment", Messages(label), getValue(detail.oldValue), getValue(detail.newValue))
 
-  private def createChangeProjectIdMessage(label: String, detail: RedmineJournalDetail): String =
+  private def getNoteForUser(label: String, detail: RedmineJournalDetail): String = {
+    val oldValue = pctx.getUserFullname(detail.oldValue).orElse(detail.oldValue)
+    val newValue = pctx.getUserFullname(detail.newValue).orElse(detail.newValue)
+    Messages("label.change_comment", Messages(label), getValue(oldValue), getValue(newValue))
+  }
+
+  private def getNoteForProject(label: String, detail: RedmineJournalDetail): String =
     Messages("label.change_comment", Messages(label), getProjectName(detail.oldValue), getProjectName(detail.newValue))
 
   private def getProjectName(value: Option[String]): String =
@@ -67,8 +76,10 @@ class ConvertComments(pctx: ProjectContext) {
       pctx.getProjectName(value.get.toInt).getOrElse(Messages("label.not_set"))
     } else Messages("label.not_set")
 
-  private def isOtherProperty(issueId: Int, detail: RedmineJournalDetail): Boolean =
-    isRelationJournal(detail) || isDoneRatioJournal(detail) || isPrivateJournal(detail) || isProjectId(detail) ||
+  private def isNote(issueId: Int, detail: RedmineJournalDetail): Boolean =
+    isRelationJournal(detail) || isDoneRatioJournal(detail) ||
+      isPrivateJournal(detail) || isProjectId(detail) ||
+      isAnonymousUser(detail) ||
       isAttachmentNotFound(issueId, detail: RedmineJournalDetail)
 
   private def isAttachmentNotFound(issueId: Int, detail: RedmineJournalDetail): Boolean = {
@@ -78,7 +89,18 @@ class ConvertComments(pctx: ProjectContext) {
     } else false
   }
 
-  private def isRelationJournal(detail: RedmineJournalDetail) = detail.property == "relation"
+  private def isAnonymousUser(detail: RedmineJournalDetail) = {
+    if (detail.property == ConfigBase.Property.CUSTOM_FIELD) {
+      val define: RedmineCustomFieldDefinition = pctx.customFieldDefinitions.find(customField => detail.name.toInt == customField.id).get
+      if (define.fieldFormat == "user") {
+        if (!(pctx.getUserFullname(detail.oldValue).isDefined && pctx.getUserFullname(detail.newValue).isDefined)) true
+        else false
+      } else false
+    } else false
+  }
+
+  private def isRelationJournal(detail: RedmineJournalDetail) =
+    detail.property == ConfigBase.Property.RELATION
 
   private def isDoneRatioJournal(detail: RedmineJournalDetail) =
     detail.property == ConfigBase.Property.ATTR && detail.name == "done_ratio"
@@ -89,12 +111,10 @@ class ConvertComments(pctx: ProjectContext) {
   private def isProjectId(detail: RedmineJournalDetail) =
     detail.property == ConfigBase.Property.ATTR && detail.name == "project_id"
 
-  private def getStringMessage(value: Option[String]): String =
-    if (value.isEmpty) Messages("label.not_set")
-    else value.get
+  private def getValue(value: Option[String]): String = value.getOrElse(Messages("label.not_set"))
 
   private def convertName(detail: RedmineJournalDetail): String = detail.property match {
-    case ConfigBase.Property.CF => pctx.getCustomFieldDefinitionsName(detail.name)
+    case ConfigBase.Property.CUSTOM_FIELD => pctx.getCustomFieldDefinitionsName(detail.name)
     case _ => convertBacklogName(detail.name)
   }
 
@@ -113,11 +133,11 @@ class ConvertComments(pctx: ProjectContext) {
     case _ => name
   }
 
-  private def convertValue(property: String, name: String, value: Option[String]): Option[String] = property match {
-    case ConfigBase.Property.ATTR => convertAttr(name, value)
-    case ConfigBase.Property.CF => convertCf(name, value)
+  private def convertValue(detail: RedmineJournalDetail, value: Option[String]): Option[String] = detail.property match {
+    case ConfigBase.Property.ATTR => convertAttr(detail.name, value)
+    case ConfigBase.Property.CUSTOM_FIELD => convertCf(detail.name, value)
     case ConfigBase.Property.ATTACHMENT => value
-    case "relation" => value
+    case ConfigBase.Property.RELATION => value
   }
 
   private def convertAttr(name: String, value: Option[String]): Option[String] = name match {
@@ -130,16 +150,13 @@ class ConvertComments(pctx: ProjectContext) {
     case _ => value
   }
 
-  private def convertCf(name: String, value: Option[String]): Option[String] =
-    RedmineUnmarshaller.customFieldDefinitions() match {
-      case Some(customFields) =>
-        val redmineCustomFieldDefinition: RedmineCustomFieldDefinition = customFields.find(customField => name.toInt == customField.id).get
-        redmineCustomFieldDefinition.fieldFormat match {
-          case "version" => pctx.getVersionName(value)
-          case "user" => pctx.getUserFullname(value)
-          case _ => value
-        }
-      case None => None
+  private def convertCf(name: String, value: Option[String]): Option[String] = {
+    val define: RedmineCustomFieldDefinition = pctx.customFieldDefinitions.find(customField => name.toInt == customField.id).get
+    define.fieldFormat match {
+      case "version" => pctx.getVersionName(value)
+      case "user" => pctx.getUserFullname(value)
+      case _ => value
     }
+  }
 
 }

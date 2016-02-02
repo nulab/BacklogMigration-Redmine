@@ -66,8 +66,8 @@ class IssuesActor(conf: R2BConfig, project: Project) extends Actor with R2BLoggi
   }
 
   private def collectUserFromValue(value: String) =
-    if (Option(value).isDefined && !users.flatten.exists(user => user.getId == value.toInt))
-      users += Option(redmineService.getUserById(value.toInt))
+    if (Option(value).isDefined && !users.flatten.exists(_.getId == value.toInt))
+      users += redmineService.getUserById(value.toInt)
 
 }
 

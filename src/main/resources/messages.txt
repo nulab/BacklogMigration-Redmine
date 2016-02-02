@@ -54,6 +54,7 @@ label.project=Project
 label.done_ratio=% done
 label.private=Private
 label.not_set=New
+label.user=User
 label.yes=Yes
 label.no=No
 label.change_comment={0}: {1} -> {2}

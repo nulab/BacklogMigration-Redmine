@@ -54,6 +54,7 @@ label.project=プロジェクト
 label.done_ratio=進捗率
 label.private=プライベート
 label.not_set=新規
+label.user=ユーザー
 label.yes=はい
 label.no=いいえ
 label.change_comment={0}: {1} -> {2}

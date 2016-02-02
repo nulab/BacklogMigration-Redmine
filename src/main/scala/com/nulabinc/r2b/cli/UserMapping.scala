@@ -10,8 +10,8 @@ import com.osinka.i18n.Messages
 import com.taskadapter.redmineapi.bean.{User => RedmineUser}
 
 /**
- * @author uchida
- */
+  * @author uchida
+  */
 class UserMapping(conf: R2BConfig) extends MappingManager {
 
   private val backlogDatas = loadBacklog()
@@ -22,11 +22,11 @@ class UserMapping(conf: R2BConfig) extends MappingManager {
 
     info("- " + Messages("mapping.load_redmine", itemName))
     info("-  " + Messages("message.collect_project_user"))
-    
-    val redmineUsers: Seq[RedmineUser] = FindUsersActor(conf).toSeq.map(user => {
-      if (Option(user.getLogin).isDefined && Option(user.getFullName).isDefined) user
+
+    val redmineUsers: Seq[RedmineUser] = FindUsersActor(conf).toSeq.flatMap(user => {
+      if (Option(user.getLogin).isDefined && Option(user.getFullName).isDefined) Some(user)
       else redmineService.getUserById(user.getId)
-    })
+    }).filter(user => user.getLogin != "")
 
     val redmines: Seq[MappingItem] = redmineUsers.map(redmineUser => MappingItem(redmineUser.getLogin, redmineUser.getFullName))
     redmines
