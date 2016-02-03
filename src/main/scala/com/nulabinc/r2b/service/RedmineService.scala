@@ -148,8 +148,11 @@ class RedmineService(conf: R2BConfig) extends R2BLogging {
     try {
       redmine.getIssueManager.getIssuePriorities.asScala
     } catch {
-      case e: NotFoundException =>
-        error(e)
+      case nfe: NotFoundException =>
+        error(nfe)
+        Seq.empty[IssuePriority]
+      case rfe: RedmineFormatException =>
+        error(rfe)
         Seq.empty[IssuePriority]
     }
   }
