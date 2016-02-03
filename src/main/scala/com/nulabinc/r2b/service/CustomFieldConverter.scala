@@ -26,7 +26,7 @@ class CustomFieldConverter(conf: R2BConfig) extends R2BLogging {
           val json = scala.io.Source.fromURL(url).mkString
           val wrapper = JsonParser(json).convertTo[OldCustomFieldDefinitionsWrapper]
           wrapper.custom_fields.map(oldToCustomFieldDefinition)
-        case nfe: NotFoundException =>
+        case nfe: Exception =>
           error(nfe)
           Seq.empty[RedmineCustomFieldDefinition]
       },
