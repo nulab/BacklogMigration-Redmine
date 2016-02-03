@@ -16,6 +16,7 @@ Migrate your projects from Redmine to [Backlog].
 * The Backlog Space's administrator roles. 
 
 ## Update
+* 2016/02/03 0.9.0b18 released
 * 2016/02/02 0.9.0b17 released
 * 2015/12/21 0.9.0b16 released
 * 2015/11/25 0.9.0b15 released
@@ -254,6 +255,7 @@ Redmineのプロジェクトを[Backlog]に移行するためのツールです�
 * Backlogの管理者権限
 
 ## 更新履歴
+* 2016/02/03 0.9.0b18 リリース
 * 2016/02/02 0.9.0b17 リリース
 * 2015/12/21 0.9.0b16 リリース
 * 2015/11/25 0.9.0b15 リリース
@@ -480,4 +482,4 @@ https://www.backlog.jp/contact/
 
 [Backlog]: http://www.backlog.jp/
 
-[Jar]: https://github.com/nulab/BacklogMigration-Redmine/releases/download/v0.9.0b17/backlog-migration-redmine-0.9.0b17.jar
+[Jar]: https://github.com/nulab/BacklogMigration-Redmine/releases/download/v0.9.0b18/backlog-migration-redmine-0.9.0b18.jar
