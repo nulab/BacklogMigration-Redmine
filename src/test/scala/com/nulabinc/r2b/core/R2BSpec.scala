@@ -163,6 +163,9 @@ class R2BSpec extends FlatSpec with ShouldMatchers with BeforeAndAfterAll with S
       redmineDescription.result() should equal(backlogIssue.getDescription)
       spentHours should equal(actualHours)
       redmineIssue.getTracker.getName should equal(backlogIssue.getIssueType.getName)
+      if(redmineIssue.getCategory.getName != null && backlogIssue.getCategory.size() > 0){
+        redmineIssue.getCategory.getName should equal(backlogIssue.getCategory.get(0).getName)
+      }
       dateToString(redmineIssue.getStartDate) should equal(dateToString(backlogIssue.getStartDate))
       statusMapping.convert(redmineIssue.getStatusName) should equal(backlogIssue.getStatus.getName)
       priorityMapping.convert(redmineIssue.getPriorityText) should equal(backlogIssue.getPriority.getName)
