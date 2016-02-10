@@ -2,7 +2,7 @@ name := "backlog-migration-redmine"
 
 organization := "com.nulabinc"
 
-version := "0.9.0b19"
+version := "0.9.0b20"
 
 scalaVersion := "2.11.6"
 
@@ -18,14 +18,12 @@ libraryDependencies ++= Seq(
   "io.spray" %% "spray-json" % "1.3.2",
   "com.github.scala-incubator.io" %% "scala-io-core" % "0.4.3",
   "com.github.scala-incubator.io" %% "scala-io-file" % "0.4.3",
-  "com.typesafe.slick" %% "slick" % "2.1.0",
   "com.h2database" % "h2" % "1.4.185",
   "com.osinka.i18n" %% "scala-i18n" % "1.0.0",
   "com.taskadapter" % "redmine-java-api" % "2.4.0",
   "joda-time" % "joda-time" % "2.3",
   "org.joda" % "joda-convert" % "1.6",
   "com.nulabinc" %% "backlog-importer" % "0.0.1"
-  //"com.nulab-inc" % "backlog4j" % "2.1.3"
 )
 
 assemblyMergeStrategy in assembly := {
