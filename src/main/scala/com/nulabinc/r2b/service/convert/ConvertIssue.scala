@@ -17,7 +17,7 @@ class ConvertIssue(pctx: ProjectContext) {
   implicit val userLang = if (Locale.getDefault.equals(Locale.JAPAN)) Lang("ja") else Lang("en")
 
   def execute(redmineIssue: RedmineIssue): BacklogIssue = {
-    val cc = new ConvertComments(pctx)
+    val cc = new ConvertComments(pctx, redmineIssue.id)
     BacklogIssue(
       id = redmineIssue.id,
       summary = redmineIssue.subject,
@@ -34,7 +34,7 @@ class ConvertIssue(pctx: ProjectContext) {
       priorityName = pctx.priorityMapping.convert(redmineIssue.priority),
       assigneeUserId = redmineIssue.assigneeId.map(pctx.userMapping.convert),
       attachments = getBacklogAttachments(redmineIssue.attachments),
-      comments = cc.execute(redmineIssue.id, redmineIssue.journals),
+      comments = cc.execute(redmineIssue.journals),
       customFields = getBacklogCustomFields(redmineIssue.customFields),
       createdUserId = redmineIssue.author.map(pctx.userMapping.convert),
       created = redmineIssue.createdOn,

@@ -41,6 +41,7 @@ object ConfigBase {
 
     object Attr {
       val SUBJECT: String = "subject"
+      val DESCRIPTION: String = "description"
       val TRACKER: String = "tracker_id"
       val STATUS: String = "status_id"
       val PRIORITY: String = "priority_id"
