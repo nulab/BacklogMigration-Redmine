@@ -120,7 +120,7 @@ class ConvertComments(pctx: ProjectContext, issueId: Int) {
     case ConfigBase.Property.Attr.STATUS => BacklogConfigBase.Property.Attr.STATUS
     case ConfigBase.Property.Attr.PRIORITY => BacklogConfigBase.Property.Attr.PRIORITY
     case ConfigBase.Property.Attr.ASSIGNED => BacklogConfigBase.Property.Attr.ASSIGNED
-    case ConfigBase.Property.Attr.VERSION => BacklogConfigBase.Property.Attr.VERSION
+    case ConfigBase.Property.Attr.VERSION => BacklogConfigBase.Property.Attr.MILESTONE
     case ConfigBase.Property.Attr.PARENT => BacklogConfigBase.Property.Attr.PARENT
     case ConfigBase.Property.Attr.START_DATE => BacklogConfigBase.Property.Attr.START_DATE
     case ConfigBase.Property.Attr.DUE_DATE => BacklogConfigBase.Property.Attr.DUE_DATE
