@@ -8,7 +8,7 @@ import java.io.File
 object ConfigBase {
   val LOG_APPLICATION_LABEL = "[R2B]"
   val NAME: String = "Backlog Migration for Redmine"
-  val VERSION: String = "0.9.0b20"
+  val VERSION: String = "0.9.0b21"
 
   val root = new File(".").getAbsoluteFile.getParent
   val R2B_ROOT = root + "/backlog-migration-redmine"
@@ -41,6 +41,7 @@ object ConfigBase {
 
     object Attr {
       val SUBJECT: String = "subject"
+      val DESCRIPTION: String = "description"
       val TRACKER: String = "tracker_id"
       val STATUS: String = "status_id"
       val PRIORITY: String = "priority_id"

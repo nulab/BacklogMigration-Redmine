@@ -5,32 +5,27 @@ import java.util.Locale
 import com.nulabinc.backlog.importer.conf.{ConfigBase => BacklogConfigBase}
 import com.nulabinc.backlog.importer.domain.{BacklogComment, BacklogCommentDetail}
 import com.nulabinc.r2b.actor.convert.utils.ProjectContext
+import com.nulabinc.r2b.actor.utils.IssueTag
 import com.nulabinc.r2b.conf.ConfigBase
-import com.nulabinc.r2b.domain.{RedmineCustomFieldDefinition, RedmineJournal, RedmineJournalDetail}
+import com.nulabinc.r2b.domain.{RedmineIssue, RedmineCustomFieldDefinition, RedmineJournal, RedmineJournalDetail}
 import com.nulabinc.r2b.utils.IOUtil
 import com.osinka.i18n.{Lang, Messages}
 
 /**
   * @author uchida
   */
-class ConvertComments(pctx: ProjectContext) {
+class ConvertComments(pctx: ProjectContext, issueId: Int) {
 
   implicit val userLang = if (Locale.getDefault.equals(Locale.JAPAN)) Lang("ja") else Lang("en")
 
-  def execute(issueId: Int, journals: Seq[RedmineJournal]): Seq[BacklogComment] =
-    journalsToComments(issueId)(journals)
+  def execute(journals: Seq[RedmineJournal]): Seq[BacklogComment] =
+    journals.map(getBacklogComment)
 
-  private def journalsToComments(issueId: Int)(journals: Seq[RedmineJournal]) =
-    journals.map(journalToComment(issueId))
-
-  private def journalToComment(issueId: Int)(journal: RedmineJournal) =
-    getBacklogComment(issueId, journal)
-
-  private def getBacklogComment(issueId: Int, journal: RedmineJournal): BacklogComment = {
-    val details = journal.details.filter(detail => !isNote(issueId, detail))
-    val notes = journal.details.filter(isNote(issueId, _))
+  private def getBacklogComment(journal: RedmineJournal): BacklogComment = {
+    val details = journal.details.filterNot(isNote)
+    val notes = journal.details.filter(isNote)
     BacklogComment(
-      content = journal.notes + "\n" + getComment(issueId, notes),
+      content = journal.notes + "\n" + getComment(notes),
       details = details.map(getBacklogCommentDetail),
       createdUserId = journal.user.map(pctx.userMapping.convert),
       created = journal.createdOn)
@@ -43,16 +38,16 @@ class ConvertComments(pctx: ProjectContext) {
       oldValue = convertValue(detail, detail.oldValue),
       newValue = convertValue(detail, detail.newValue))
 
-  private def getComment(issueId: Int, notes: Seq[RedmineJournalDetail]): String =
-    notes.map(getNote(issueId, _)).mkString("\n")
+  private def getComment(notes: Seq[RedmineJournalDetail]): String =
+    notes.map(getNote).mkString("\n")
 
-  private def getNote(issueId: Int, detail: RedmineJournalDetail): String =
+  private def getNote(detail: RedmineJournalDetail): String =
     if (isDoneRatioJournal(detail)) getNote("label.done_ratio", detail)
     else if (isPrivateJournal(detail)) getNote("label.private", detail)
     else if (isRelationJournal(detail)) getNote("label.relation", detail)
     else if (isProjectId(detail)) getNoteForProject("label.project", detail)
     else if (isAnonymousUser(detail)) getNoteForUser("label.user", detail)
-    else if (isAttachmentNotFound(issueId, detail: RedmineJournalDetail)) {
+    else if (isAttachmentNotFound(detail: RedmineJournalDetail)) {
       if (detail.newValue.isDefined) Messages("message.add_attachment", detail.newValue.get)
       else if (detail.oldValue.isDefined) Messages("message.del_attachment", detail.oldValue.get)
       else ""
@@ -76,13 +71,13 @@ class ConvertComments(pctx: ProjectContext) {
       pctx.getProjectName(value.get.toInt).getOrElse(Messages("label.not_set"))
     } else Messages("label.not_set")
 
-  private def isNote(issueId: Int, detail: RedmineJournalDetail): Boolean =
+  private def isNote(detail: RedmineJournalDetail): Boolean =
     isRelationJournal(detail) || isDoneRatioJournal(detail) ||
       isPrivateJournal(detail) || isProjectId(detail) ||
       isAnonymousUser(detail) ||
-      isAttachmentNotFound(issueId, detail: RedmineJournalDetail)
+      isAttachmentNotFound(detail: RedmineJournalDetail)
 
-  private def isAttachmentNotFound(issueId: Int, detail: RedmineJournalDetail): Boolean = {
+  private def isAttachmentNotFound(detail: RedmineJournalDetail): Boolean = {
     if (detail.property == ConfigBase.Property.ATTACHMENT) {
       val path: String = ConfigBase.Redmine.getIssueAttachmentDir(pctx.project.identifier, issueId, detail.name.toInt)
       !IOUtil.isDirectory(path)
@@ -120,6 +115,7 @@ class ConvertComments(pctx: ProjectContext) {
 
   private def convertBacklogName(name: String): String = name match {
     case ConfigBase.Property.Attr.SUBJECT => BacklogConfigBase.Property.Attr.SUMMARY
+    case ConfigBase.Property.Attr.DESCRIPTION => BacklogConfigBase.Property.Attr.DESCRIPTION
     case ConfigBase.Property.Attr.TRACKER => BacklogConfigBase.Property.Attr.ISSUE_TYPE
     case ConfigBase.Property.Attr.STATUS => BacklogConfigBase.Property.Attr.STATUS
     case ConfigBase.Property.Attr.PRIORITY => BacklogConfigBase.Property.Attr.PRIORITY
@@ -142,6 +138,7 @@ class ConvertComments(pctx: ProjectContext) {
 
   private def convertAttr(name: String, value: Option[String]): Option[String] = name match {
     case ConfigBase.Property.Attr.STATUS => pctx.getStatusName(value)
+    case ConfigBase.Property.Attr.DESCRIPTION => getDescription(value)
     case ConfigBase.Property.Attr.PRIORITY => pctx.getPriorityName(value)
     case ConfigBase.Property.Attr.ASSIGNED => pctx.getUserLoginId(value).map(pctx.userMapping.convert)
     case ConfigBase.Property.Attr.VERSION => pctx.getVersionName(value)
@@ -149,6 +146,14 @@ class ConvertComments(pctx: ProjectContext) {
     case ConfigBase.Property.Attr.CATEGORY => pctx.getCategoryName(value)
     case _ => value
   }
+
+  private def getDescription(description: Option[String]): Option[String] =
+    description.map(value => {
+      val sb = new StringBuilder
+      sb.append(value)
+      sb.append("\n").append(IssueTag.getTag(issueId, pctx.conf.redmineUrl))
+      sb.result()
+    })
 
   private def convertCf(name: String, value: Option[String]): Option[String] = {
     val define: RedmineCustomFieldDefinition = pctx.customFieldDefinitions.find(customField => name.toInt == customField.id).get
