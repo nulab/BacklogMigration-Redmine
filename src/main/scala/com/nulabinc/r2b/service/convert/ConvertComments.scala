@@ -87,10 +87,8 @@ class ConvertComments(pctx: ProjectContext, issueId: Int) {
   private def isAnonymousUser(detail: RedmineJournalDetail) = {
     if (detail.property == ConfigBase.Property.CUSTOM_FIELD) {
       val define: RedmineCustomFieldDefinition = pctx.customFieldDefinitions.find(customField => detail.name.toInt == customField.id).get
-      if (define.fieldFormat == "user") {
-        if (!(pctx.getUserFullname(detail.oldValue).isDefined && pctx.getUserFullname(detail.newValue).isDefined)) true
-        else false
-      } else false
+      if (define.fieldFormat == "user") !(pctx.getUserFullname(detail.oldValue).isDefined && pctx.getUserFullname(detail.newValue).isDefined)
+      else false
     } else false
   }
 
