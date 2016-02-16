@@ -86,9 +86,12 @@ class ConvertComments(pctx: ProjectContext, issueId: Int) {
 
   private def isAnonymousUser(detail: RedmineJournalDetail) = {
     if (detail.property == ConfigBase.Property.CUSTOM_FIELD) {
-      val define: RedmineCustomFieldDefinition = pctx.customFieldDefinitions.find(customField => detail.name.toInt == customField.id).get
-      if (define.fieldFormat == "user") !(pctx.getUserFullname(detail.oldValue).isDefined && pctx.getUserFullname(detail.newValue).isDefined)
-      else false
+      val option = pctx.customFieldDefinitions.find(customField => detail.name.toInt == customField.id)
+      if (option.isDefined) {
+        val define: RedmineCustomFieldDefinition = option.get
+        if (define.fieldFormat == "user") !(pctx.getUserFullname(detail.oldValue).isDefined && pctx.getUserFullname(detail.newValue).isDefined)
+        else false
+      } else false
     } else false
   }
 
@@ -154,12 +157,16 @@ class ConvertComments(pctx: ProjectContext, issueId: Int) {
     })
 
   private def convertCf(name: String, value: Option[String]): Option[String] = {
-    val define: RedmineCustomFieldDefinition = pctx.customFieldDefinitions.find(customField => name.toInt == customField.id).get
-    define.fieldFormat match {
-      case "version" => pctx.getVersionName(value)
-      case "user" => pctx.getUserFullname(value)
-      case _ => value
-    }
+    val option = pctx.customFieldDefinitions.find(customField => name.toInt == customField.id)
+    if (option.isDefined) {
+
+      val define: RedmineCustomFieldDefinition = pctx.customFieldDefinitions.find(customField => name.toInt == customField.id).get
+      define.fieldFormat match {
+        case "version" => pctx.getVersionName(value)
+        case "user" => pctx.getUserFullname(value)
+        case _ => value
+      }
+    } else value
   }
 
 }

@@ -40,7 +40,7 @@ case class ProjectContext(conf: R2BConfig, project: RedmineProject) {
 
   def getCustomFieldDefinitionsName(strId: String): String = {
     val id: Int = strId.toInt
-    customFieldDefinitions.find(_.id == id).map(_.name).get
+    customFieldDefinitions.find(_.id == id).map(_.name).getOrElse("")
   }
 
   def getUserLoginId(id: Option[String]): Option[String] = {
