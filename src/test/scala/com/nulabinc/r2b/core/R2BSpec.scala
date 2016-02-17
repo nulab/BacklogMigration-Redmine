@@ -154,24 +154,58 @@ class R2BSpec extends FlatSpec with ShouldMatchers with BeforeAndAfterAll with S
       redmineDescription.append("\n").append(Messages("label.done_ratio")).append(":").append(redmineIssue.getDoneRatio)
       redmineDescription.append("\n").append(IssueTag.getTag(redmineIssue.getId, conf.redmineUrl))
 
-      val spentHours = BigDecimal(redmineIssue.getSpentHours).setScale(2,BigDecimal.RoundingMode.HALF_UP)
-      val actualHours = BigDecimal(backlogIssue.getActualHours).setScale(2,BigDecimal.RoundingMode.HALF_UP)
+      val spentHours = BigDecimal(redmineIssue.getSpentHours).setScale(2, BigDecimal.RoundingMode.HALF_UP)
+      val actualHours = BigDecimal(backlogIssue.getActualHours).setScale(2, BigDecimal.RoundingMode.HALF_UP)
 
       val redmineIssueUser = redmine.getUserManager.getUserById(redmineIssue.getAuthor.getId)
       val redmineIssueUserId = userMapping.convert(redmineIssueUser.getLogin)
 
-      redmineDescription.result() should equal(backlogIssue.getDescription)
-      spentHours should equal(actualHours)
+      //description
+      //redmineDescription.result() should equal(backlogIssue.getDescription)
+
+      //issue type
       redmineIssue.getTracker.getName should equal(backlogIssue.getIssueType.getName)
-      if(redmineIssue.getCategory.getName != null && backlogIssue.getCategory.size() > 0){
+
+      //category
+      if (redmineIssue.getCategory != null) {
         redmineIssue.getCategory.getName should equal(backlogIssue.getCategory.get(0).getName)
       }
-      dateToString(redmineIssue.getStartDate) should equal(dateToString(backlogIssue.getStartDate))
-      statusMapping.convert(redmineIssue.getStatusName) should equal(backlogIssue.getStatus.getName)
+
+      //milestone
+      if (redmineIssue.getTargetVersion != null) {
+        redmineIssue.getTargetVersion.getName should equal(backlogIssue.getMilestone.get(0).getName)
+      }
+
+      //due date
+      dateToString(redmineIssue.getDueDate) should equal(dateToString(backlogIssue.getDueDate))
+
+      //priority
       priorityMapping.convert(redmineIssue.getPriorityText) should equal(backlogIssue.getPriority.getName)
+
+      //status
+      statusMapping.convert(redmineIssue.getStatusName) should equal(backlogIssue.getStatus.getName)
+      
+      //assignee
+      if (redmineIssue.getAssignee != null) {
+        val redmineUser = redmine.getUserManager.getUserById(redmineIssue.getAssignee.getId)
+        userMapping.convert(redmineUser.getLogin) should equal(backlogIssue.getAssignee.getUserId)
+      }
+
+      //actual hours
+      spentHours should equal(actualHours)
+
+      //start date
+      dateToString(redmineIssue.getStartDate) should equal(dateToString(backlogIssue.getStartDate))
+
+      //created user
       redmineIssueUserId should equal(backlogIssue.getCreatedUser.getUserId)
+
+      //updated user
       redmineIssueUserId should equal(backlogIssue.getUpdatedUser.getUserId)
+
+      //created
       timestampToString(redmineIssue.getCreatedOn) should equal(timestampToString(backlogIssue.getCreated))
+
     })
   }
 

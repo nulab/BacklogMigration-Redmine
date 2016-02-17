@@ -30,7 +30,8 @@ class ConvertIssue(pctx: ProjectContext) {
       issueTypeName = redmineIssue.tracker,
       statusName = pctx.statusMapping.convert(redmineIssue.status),
       categoryName = redmineIssue.category,
-      versionName = redmineIssue.version,
+      versionName = None,
+      milestoneName = redmineIssue.version,
       priorityName = pctx.priorityMapping.convert(redmineIssue.priority),
       assigneeUserId = redmineIssue.assigneeId.map(pctx.userMapping.convert),
       attachments = getBacklogAttachments(redmineIssue.attachments),
@@ -68,15 +69,17 @@ class ConvertIssue(pctx: ProjectContext) {
       values = redmineCustomField.values)
 
   private def getCustomFieldValue(redmineCustomField: RedmineCustomField): Option[String] = {
-    val customFieldDefinition = pctx.customFieldDefinitions.find(_.id == redmineCustomField.id).get
-
-    customFieldDefinition.fieldFormat match {
-      case ConfigBase.FieldFormat.VERSION => pctx.getCategoryName(redmineCustomField.value)
-      case ConfigBase.FieldFormat.USER => pctx.getMembershipUserName(redmineCustomField.value)
-      case ConfigBase.FieldFormat.INT | ConfigBase.FieldFormat.FLOAT =>
-        redmineCustomField.value.orElse(customFieldDefinition.defaultValue)
-      case _ => redmineCustomField.value
-    }
+    val option = pctx.customFieldDefinitions.find(_.id == redmineCustomField.id)
+    if (option.isDefined) {
+      val customFieldDefinition = option.get
+      customFieldDefinition.fieldFormat match {
+        case ConfigBase.FieldFormat.VERSION => pctx.getCategoryName(redmineCustomField.value)
+        case ConfigBase.FieldFormat.USER => pctx.getMembershipUserName(redmineCustomField.value)
+        case ConfigBase.FieldFormat.INT | ConfigBase.FieldFormat.FLOAT =>
+          redmineCustomField.value.orElse(customFieldDefinition.defaultValue)
+        case _ => redmineCustomField.value
+      }
+    } else None
   }
 
 }

@@ -137,7 +137,7 @@ case class RedmineCustomFieldDefinition(
 
 case class RedmineCustomFieldDefinitionsWrapper(customFields: Seq[RedmineCustomFieldDefinition])
 
-case class OldTrackers(tracker: RedmineTracker)
+case class OldTrackers(tracker: Option[RedmineTracker])
 
 case class OldCustomFieldDefinition(
                                      id: Int,

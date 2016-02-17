@@ -86,9 +86,10 @@ class ConvertComments(pctx: ProjectContext, issueId: Int) {
 
   private def isAnonymousUser(detail: RedmineJournalDetail) = {
     if (detail.property == ConfigBase.Property.CUSTOM_FIELD) {
-      val define: RedmineCustomFieldDefinition = pctx.customFieldDefinitions.find(customField => detail.name.toInt == customField.id).get
-      if (define.fieldFormat == "user") {
-        if (!(pctx.getUserFullname(detail.oldValue).isDefined && pctx.getUserFullname(detail.newValue).isDefined)) true
+      val option = pctx.customFieldDefinitions.find(customField => detail.name.toInt == customField.id)
+      if (option.isDefined) {
+        val define: RedmineCustomFieldDefinition = option.get
+        if (define.fieldFormat == "user") !(pctx.getUserFullname(detail.oldValue).isDefined && pctx.getUserFullname(detail.newValue).isDefined)
         else false
       } else false
     } else false
@@ -120,7 +121,7 @@ class ConvertComments(pctx: ProjectContext, issueId: Int) {
     case ConfigBase.Property.Attr.STATUS => BacklogConfigBase.Property.Attr.STATUS
     case ConfigBase.Property.Attr.PRIORITY => BacklogConfigBase.Property.Attr.PRIORITY
     case ConfigBase.Property.Attr.ASSIGNED => BacklogConfigBase.Property.Attr.ASSIGNED
-    case ConfigBase.Property.Attr.VERSION => BacklogConfigBase.Property.Attr.VERSION
+    case ConfigBase.Property.Attr.VERSION => BacklogConfigBase.Property.Attr.MILESTONE
     case ConfigBase.Property.Attr.PARENT => BacklogConfigBase.Property.Attr.PARENT
     case ConfigBase.Property.Attr.START_DATE => BacklogConfigBase.Property.Attr.START_DATE
     case ConfigBase.Property.Attr.DUE_DATE => BacklogConfigBase.Property.Attr.DUE_DATE
@@ -156,12 +157,16 @@ class ConvertComments(pctx: ProjectContext, issueId: Int) {
     })
 
   private def convertCf(name: String, value: Option[String]): Option[String] = {
-    val define: RedmineCustomFieldDefinition = pctx.customFieldDefinitions.find(customField => name.toInt == customField.id).get
-    define.fieldFormat match {
-      case "version" => pctx.getVersionName(value)
-      case "user" => pctx.getUserFullname(value)
-      case _ => value
-    }
+    val option = pctx.customFieldDefinitions.find(customField => name.toInt == customField.id)
+    if (option.isDefined) {
+
+      val define: RedmineCustomFieldDefinition = pctx.customFieldDefinitions.find(customField => name.toInt == customField.id).get
+      define.fieldFormat match {
+        case "version" => pctx.getVersionName(value)
+        case "user" => pctx.getUserFullname(value)
+        case _ => value
+      }
+    } else value
   }
 
 }

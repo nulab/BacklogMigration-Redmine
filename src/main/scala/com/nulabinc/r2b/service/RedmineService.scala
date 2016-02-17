@@ -123,7 +123,13 @@ class RedmineService(conf: R2BConfig) extends R2BLogging {
   }
 
   def getNews(projectKey: String): Seq[News] = {
-    redmine.getProjectManager.getNews(projectKey).asScala
+    try {
+      redmine.getProjectManager.getNews(projectKey).asScala
+    } catch {
+      case e: NotAuthorizedException =>
+        error(e)
+        Seq.empty[News]
+    }
   }
 
   def getGroupById(id: Int): Group = {
