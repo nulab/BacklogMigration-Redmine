@@ -25,7 +25,7 @@ class ConvertComments(pctx: ProjectContext, issueId: Int) {
     val details = journal.details.filterNot(isNote)
     val notes = journal.details.filter(isNote)
     BacklogComment(
-      content = journal.notes + "\n" + getComment(notes),
+      content = journal.notes.getOrElse("") + "\n" + getComment(notes),
       details = details.map(getBacklogCommentDetail),
       createdUserId = journal.user.map(pctx.userMapping.convert),
       created = journal.createdOn)
