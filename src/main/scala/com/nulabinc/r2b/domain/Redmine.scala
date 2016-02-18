@@ -40,7 +40,7 @@ case class RedmineIssuesWrapper(total_count: Int, offset: Int, limit: Int)
 
 case class RedmineJournal(
                            id: Int,
-                           notes: String,
+                           notes: Option[String],
                            details: Seq[RedmineJournalDetail],
                            user: Option[String],
                            createdOn: Option[String])

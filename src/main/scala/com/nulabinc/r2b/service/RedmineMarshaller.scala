@@ -206,7 +206,7 @@ object RedmineMarshaller {
   private def getRedmineJournal(journal: Journal, users: Seq[User]): RedmineJournal =
     RedmineJournal(
       id = journal.getId,
-      notes = journal.getNotes,
+      notes = Option(journal.getNotes),
       details = journal.getDetails.asScala.map(getRedmineJournalDetail),
       user = getUserLogin(Option(journal.getUser), users),
       createdOn = Option(journal.getCreatedOn).map(date => new DateTime(date).toString(timestampFormat)))
