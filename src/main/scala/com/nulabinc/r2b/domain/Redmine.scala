@@ -127,10 +127,7 @@ case class RedmineCustomFieldDefinition(
                                          minLength: Option[Int],
                                          maxLength: Option[Int],
                                          isRequired: Boolean,
-                                         isFilter: Boolean,
-                                         isSearchable: Boolean,
                                          isMultiple: Boolean,
-                                         isVisible: Boolean,
                                          defaultValue: Option[String],
                                          trackers: Seq[RedmineTracker],
                                          possibleValues: Seq[String])
@@ -147,7 +144,6 @@ case class OldCustomFieldDefinition(
                                      regexp: Option[String],
                                      min_length: Option[Int],
                                      max_length: Option[Int],
-                                     visible: Boolean,
                                      default_value: Option[String],
                                      trackers: OldTrackers,
                                      possible_values: Option[Seq[OldPossibleValues]])
@@ -178,7 +174,7 @@ object RedmineJsonProtocol extends DefaultJsonProtocol {
   implicit val RedminePrioritiesWrapperFormat = jsonFormat1(RedminePrioritiesWrapper)
   implicit val RedmineIssueCategoryFormat = jsonFormat2(RedmineIssueCategory)
   implicit val RedmineIssueCategoriesWrapperFormat = jsonFormat1(RedmineIssueCategoriesWrapper)
-  implicit val RedmineCustomFieldDefinitionFormat = jsonFormat15(RedmineCustomFieldDefinition)
+  implicit val RedmineCustomFieldDefinitionFormat = jsonFormat12(RedmineCustomFieldDefinition)
   implicit val RedmineCustomFieldDefinitionsWrapperFormat = jsonFormat1(RedmineCustomFieldDefinitionsWrapper)
   implicit val RedmineNewsFormat = jsonFormat6(RedmineNews)
   implicit val RedmineNewsWrapperFormat = jsonFormat1(RedmineNewsWrapper)
@@ -187,6 +183,6 @@ object RedmineJsonProtocol extends DefaultJsonProtocol {
   implicit val RedmineIssuesWrapperFormat = jsonFormat3(RedmineIssuesWrapper)
   implicit val OldPossibleValuesFormat = jsonFormat1(OldPossibleValues)
   implicit val OldTrackersFormat = jsonFormat1(OldTrackers)
-  implicit val OldCustomFieldDefinitionFormat = jsonFormat11(OldCustomFieldDefinition)
+  implicit val OldCustomFieldDefinitionFormat = jsonFormat10(OldCustomFieldDefinition)
   implicit val OldCustomFieldDefinitionsWrapperFormat = jsonFormat1(OldCustomFieldDefinitionsWrapper)
 }
