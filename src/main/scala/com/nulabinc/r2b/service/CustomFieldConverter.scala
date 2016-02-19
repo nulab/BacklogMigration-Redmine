@@ -44,10 +44,7 @@ class CustomFieldConverter(conf: R2BConfig) extends R2BLogging {
       minLength = Option(cfd.getMinLength).map(_.toInt),
       maxLength = Option(cfd.getMaxLength).map(_.toInt),
       isRequired = cfd.isRequired,
-      isFilter = cfd.isFilter,
-      isSearchable = cfd.isSearchable,
       isMultiple = cfd.isMultiple,
-      isVisible = cfd.isVisible,
       defaultValue = if (cfd.getDefaultValue == null || cfd.getDefaultValue.isEmpty) None else Some(cfd.getDefaultValue),
       trackers = cfd.getTrackers.asScala.map(getRedmineTracker),
       possibleValues = if (cfd.getPossibleValues == null) Seq.empty[String] else cfd.getPossibleValues.asScala)
@@ -62,10 +59,7 @@ class CustomFieldConverter(conf: R2BConfig) extends R2BLogging {
       minLength = ocfd.min_length,
       maxLength = ocfd.max_length,
       isRequired = false,
-      isFilter = false,
-      isSearchable = false,
       isMultiple = false,
-      isVisible = ocfd.visible,
       defaultValue = ocfd.default_value,
       trackers = redmineService.getTrackers.map(getRedmineTracker),
       possibleValues = convertPossibleValues(ocfd.possible_values))
