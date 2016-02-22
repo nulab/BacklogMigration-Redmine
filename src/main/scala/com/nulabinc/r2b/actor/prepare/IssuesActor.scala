@@ -15,8 +15,8 @@ import scala.collection.JavaConverters._
 import scala.collection.mutable.Set
 
 /**
- * @author uchida
- */
+  * @author uchida
+  */
 class IssuesActor(conf: R2BConfig, project: Project) extends Actor with R2BLogging {
 
   private val users = Set.empty[Option[User]]
@@ -40,7 +40,7 @@ class IssuesActor(conf: R2BConfig, project: Project) extends Actor with R2BLoggi
   }
 
   private def searchIssues(offset: Int) = {
-    val params: Map[String, String] = Map("offset" -> offset.toString, "limit" -> Redmine.ISSUE_GET_LIMIT.toString, "project_id" -> project.getId.toString, "status_id" -> "*")
+    val params: Map[String, String] = Map("offset" -> offset.toString, "limit" -> Redmine.ISSUE_GET_LIMIT.toString, "project_id" -> project.getId.toString, "status_id" -> "*", "subproject_id" -> "!*")
     val issues: Seq[Issue] = redmineService.getIssues(params)
     issues.foreach(collectUsers)
   }

@@ -23,7 +23,7 @@ class RedmineService(conf: R2BConfig) extends R2BLogging {
   val redmine: RedmineManager = RedmineManagerFactory.createWithApiKey(conf.redmineUrl, conf.redmineKey)
 
   def getIssuesCount(projectId: Int): Int = {
-    val url = conf.redmineUrl + "/issues.json?limit=1&project_id=" + projectId + "&key=" + conf.redmineKey + "&status_id=*"
+    val url = conf.redmineUrl + "/issues.json?limit=1&subproject_id=!*&project_id=" + projectId + "&key=" + conf.redmineKey + "&status_id=*"
     val str: String = httpGet(url)
     val redmineIssuesWrapper: RedmineIssuesWrapper = JsonParser(str).convertTo[RedmineIssuesWrapper]
     redmineIssuesWrapper.total_count
