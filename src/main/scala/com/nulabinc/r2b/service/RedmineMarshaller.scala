@@ -187,13 +187,7 @@ object RedmineMarshaller {
   private def getRedmineAttachment(attachment: Attachment): RedmineAttachment =
     RedmineAttachment(
       id = attachment.getId,
-      fileSize = attachment.getFileSize,
-      fileName = attachment.getFileName,
-      contentType = attachment.getContentType,
-      description = attachment.getDescription,
-      contentURL = attachment.getContentURL,
-      author = attachment.getAuthor.getId,
-      createdOn = new DateTime(attachment.getCreatedOn).toString(timestampFormat))
+      fileName = attachment.getFileName)
 
   private def getRedmineCustomField(customField: CustomField): RedmineCustomField =
     RedmineCustomField(

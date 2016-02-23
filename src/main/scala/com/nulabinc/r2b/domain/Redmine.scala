@@ -49,13 +49,7 @@ case class RedmineJournalDetail(property: String, name: String, oldValue: Option
 
 case class RedmineAttachment(
                               id: Int,
-                              fileSize: Long,
-                              fileName: String,
-                              contentType: String,
-                              description: String,
-                              contentURL: String,
-                              author: Int,
-                              createdOn: String)
+                              fileName: String)
 
 case class RedmineWikiPage(
                             title: String,
@@ -156,7 +150,7 @@ object RedmineJsonProtocol extends DefaultJsonProtocol {
   implicit val RedmineProjectFormat = jsonFormat3(RedmineProject)
   implicit val RedmineIssueStatusFormat = jsonFormat2(RedmineIssueStatus)
   implicit val RedmineIssueStatusesWrapperFormat = jsonFormat1(RedmineIssueStatusesWrapper)
-  implicit val RedmineAttachmentFormat = jsonFormat8(RedmineAttachment)
+  implicit val RedmineAttachmentFormat = jsonFormat2(RedmineAttachment)
   implicit val RedmineWikiPageFormat = jsonFormat8(RedmineWikiPage)
   implicit val RedmineCustomFieldFormat = jsonFormat5(RedmineCustomField)
   implicit val RedmineJournalDetailFormat = jsonFormat4(RedmineJournalDetail)
