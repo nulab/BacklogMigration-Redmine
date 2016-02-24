@@ -39,7 +39,7 @@ class IssuesActor(conf: R2BConfig, project: Project) extends Actor with R2BLoggi
     }
 
   private def search(offset: Int) = {
-    val params: Map[String, String] = Map("offset" -> offset.toString, "limit" -> Redmine.ISSUE_GET_LIMIT.toString, "project_id" -> project.getId.toString, "status_id" -> "*")
+    val params: Map[String, String] = Map("offset" -> offset.toString, "limit" -> Redmine.ISSUE_GET_LIMIT.toString, "project_id" -> project.getId.toString, "status_id" -> "*", "subproject_id" -> "!*")
     val issues: Seq[Issue] = redmineService.getIssues(params)
     issues.foreach(output)
   }
@@ -49,7 +49,7 @@ class IssuesActor(conf: R2BConfig, project: Project) extends Actor with R2BLoggi
     val users: Seq[User] = redmineService.getUsers
 
     IOUtil.output(ConfigBase.Redmine.getIssuePath(project.getIdentifier, searchIssue.getId), RedmineMarshaller.Issue(issue, project, users))
-    AttachmentDownloader.issue(conf.redmineKey, project.getIdentifier,issue)
+    AttachmentDownloader.issue(conf.redmineKey, project.getIdentifier, issue)
 
     count += 1
     info(Messages("message.execute_redmine_issue_export", project.getName, count, allCount))
