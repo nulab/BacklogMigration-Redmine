@@ -7,7 +7,7 @@ import com.nulabinc.backlog.importer.domain.{BacklogComment, BacklogCommentDetai
 import com.nulabinc.r2b.actor.convert.utils.ProjectContext
 import com.nulabinc.r2b.actor.utils.IssueTag
 import com.nulabinc.r2b.conf.ConfigBase
-import com.nulabinc.r2b.domain.{RedmineIssue, RedmineCustomFieldDefinition, RedmineJournal, RedmineJournalDetail}
+import com.nulabinc.r2b.domain.{RedmineCustomFieldDefinition, RedmineJournal, RedmineJournalDetail}
 import com.nulabinc.r2b.utils.IOUtil
 import com.osinka.i18n.{Lang, Messages}
 
@@ -18,96 +18,45 @@ class ConvertComments(pctx: ProjectContext, issueId: Int) {
 
   implicit val userLang = if (Locale.getDefault.equals(Locale.JAPAN)) Lang("ja") else Lang("en")
 
-  def execute(journals: Seq[RedmineJournal]): Seq[BacklogComment] =
-    journals.map(getBacklogComment)
+  private val note: Note = new Note(pctx, issueId)
+  private var isSetStatus = false
+
+  def execute(journals: Seq[RedmineJournal]): Seq[BacklogComment] = journals.map(getBacklogComment)
 
   private def getBacklogComment(journal: RedmineJournal): BacklogComment = {
-    val details = journal.details.filterNot(isNote)
-    val notes = journal.details.filter(isNote)
+    val details = journal.details.filterNot(note.is)
+    val notes = journal.details.filter(note.is)
     BacklogComment(
-      content = journal.notes.getOrElse("") + "\n" + getComment(notes),
+      content = journal.notes.getOrElse("") + "\n" + getNoteText(notes),
       details = details.map(getBacklogCommentDetail),
       createdUserId = journal.user.map(pctx.userMapping.convert),
       created = journal.createdOn)
   }
 
-  private def getBacklogCommentDetail(detail: RedmineJournalDetail): BacklogCommentDetail =
+  private def getBacklogCommentDetail(detail: RedmineJournalDetail): BacklogCommentDetail = {
+    val convertOld = convertOldValue(detail, detail.oldValue)
+    val convertNew = convertValue(detail, detail.newValue)
+
     BacklogCommentDetail(
       property = detail.property,
       name = convertName(detail),
-      oldValue = convertValue(detail, detail.oldValue),
-      newValue = convertValue(detail, detail.newValue))
-
-  private def getComment(notes: Seq[RedmineJournalDetail]): String =
-    notes.map(getNote).mkString("\n")
-
-  private def getNote(detail: RedmineJournalDetail): String =
-    if (isDoneRatioJournal(detail)) getNote("label.done_ratio", detail)
-    else if (isPrivateJournal(detail)) getNote("label.private", detail)
-    else if (isRelationJournal(detail)) getNote("label.relation", detail)
-    else if (isProjectId(detail)) getNoteForProject("label.project", detail)
-    else if (isAnonymousUser(detail)) getNoteForUser("label.user", detail)
-    else if (isAttachmentNotFound(detail: RedmineJournalDetail)) {
-      if (detail.newValue.isDefined) Messages("message.add_attachment", detail.newValue.get)
-      else if (detail.oldValue.isDefined) Messages("message.del_attachment", detail.oldValue.get)
-      else ""
-    }
-    else ""
-
-  private def getNote(label: String, detail: RedmineJournalDetail): String =
-    Messages("label.change_comment", Messages(label), getValue(detail.oldValue), getValue(detail.newValue))
-
-  private def getNoteForUser(label: String, detail: RedmineJournalDetail): String = {
-    val oldValue = pctx.getUserFullname(detail.oldValue).orElse(detail.oldValue)
-    val newValue = pctx.getUserFullname(detail.newValue).orElse(detail.newValue)
-    Messages("label.change_comment", Messages(label), getValue(oldValue), getValue(newValue))
+      oldValue = convertOld,
+      newValue = convertNew)
   }
 
-  private def getNoteForProject(label: String, detail: RedmineJournalDetail): String =
-    Messages("label.change_comment", Messages(label), getProjectName(detail.oldValue), getProjectName(detail.newValue))
-
-  private def getProjectName(value: Option[String]): String =
-    if (value.isDefined && value.get != "") {
-      pctx.getProjectName(value.get.toInt).getOrElse(Messages("label.not_set"))
-    } else Messages("label.not_set")
-
-  private def isNote(detail: RedmineJournalDetail): Boolean =
-    isRelationJournal(detail) || isDoneRatioJournal(detail) ||
-      isPrivateJournal(detail) || isProjectId(detail) ||
-      isAnonymousUser(detail) ||
-      isAttachmentNotFound(detail: RedmineJournalDetail)
-
-  private def isAttachmentNotFound(detail: RedmineJournalDetail): Boolean = {
-    if (detail.property == ConfigBase.Property.ATTACHMENT) {
-      val path: String = ConfigBase.Redmine.getIssueAttachmentDir(pctx.project.identifier, issueId, detail.name.toInt)
-      !IOUtil.isDirectory(path)
-    } else false
+  private def convertOldValue(detail: RedmineJournalDetail, value: Option[String]) = {
+    val convertOld = convertValue(detail, detail.oldValue)
+    if (detail.property == ConfigBase.Property.ATTR && detail.name == ConfigBase.Property.Attr.STATUS) {
+      if (isSetStatus) convertOld
+      else {
+        isSetStatus = true
+        pctx.getDefaultStatusName()
+      }
+    } else convertOld
   }
 
-  private def isAnonymousUser(detail: RedmineJournalDetail) = {
-    if (detail.property == ConfigBase.Property.CUSTOM_FIELD) {
-      val option = pctx.customFieldDefinitions.find(customField => detail.name.toInt == customField.id)
-      if (option.isDefined) {
-        val define: RedmineCustomFieldDefinition = option.get
-        if (define.fieldFormat == "user") !(pctx.getUserFullname(detail.oldValue).isDefined && pctx.getUserFullname(detail.newValue).isDefined)
-        else false
-      } else false
-    } else false
-  }
-
-  private def isRelationJournal(detail: RedmineJournalDetail) =
-    detail.property == ConfigBase.Property.RELATION
-
-  private def isDoneRatioJournal(detail: RedmineJournalDetail) =
-    detail.property == ConfigBase.Property.ATTR && detail.name == "done_ratio"
-
-  private def isPrivateJournal(detail: RedmineJournalDetail) =
-    detail.property == ConfigBase.Property.ATTR && detail.name == "is_private"
-
-  private def isProjectId(detail: RedmineJournalDetail) =
-    detail.property == ConfigBase.Property.ATTR && detail.name == "project_id"
-
-  private def getValue(value: Option[String]): String = value.getOrElse(Messages("label.not_set"))
+  private def getNoteText(notes: Seq[RedmineJournalDetail]): String =
+    notes.map(note.getValue).mkString("\n")
 
   private def convertName(detail: RedmineJournalDetail): String = detail.property match {
     case ConfigBase.Property.CUSTOM_FIELD => pctx.getCustomFieldDefinitionsName(detail.name)
@@ -159,7 +108,6 @@ class ConvertComments(pctx: ProjectContext, issueId: Int) {
   private def convertCf(name: String, value: Option[String]): Option[String] = {
     val option = pctx.customFieldDefinitions.find(customField => name.toInt == customField.id)
     if (option.isDefined) {
-
       val define: RedmineCustomFieldDefinition = pctx.customFieldDefinitions.find(customField => name.toInt == customField.id).get
       define.fieldFormat match {
         case "version" => pctx.getVersionName(value)
@@ -167,6 +115,115 @@ class ConvertComments(pctx: ProjectContext, issueId: Int) {
         case _ => value
       }
     } else value
+  }
+
+}
+
+class Note(pctx: ProjectContext, issueId: Int) {
+
+  implicit val userLang = if (Locale.getDefault.equals(Locale.JAPAN)) Lang("ja") else Lang("en")
+
+  def is(detail: RedmineJournalDetail): Boolean =
+    RelationNote.is(detail) ||
+      DoneRatioNote.is(detail) ||
+      PrivateIssueNote.is(detail) ||
+      ProjectIdNote.is(detail) ||
+      AnonymousUserNote.is(detail) ||
+      AttachmentNotFoundNote.is(detail)
+
+  def getValue(detail: RedmineJournalDetail): String =
+    if (DoneRatioNote.is(detail)) DoneRatioNote.value(detail)
+    else if (PrivateIssueNote.is(detail)) PrivateIssueNote.value(detail)
+    else if (RelationNote.is(detail)) RelationNote.value(detail)
+    else if (ProjectIdNote.is(detail)) ProjectIdNote.value(detail)
+    else if (AnonymousUserNote.is(detail)) AnonymousUserNote.value(detail)
+    else if (AttachmentNotFoundNote.is(detail)) AttachmentNotFoundNote.value(detail)
+    else ""
+
+  trait Note {
+
+    def is(detail: RedmineJournalDetail): Boolean
+
+    def value(detail: RedmineJournalDetail): String
+
+    def getNote(label: String, detail: RedmineJournalDetail): String =
+      Messages(label, getValue(detail.oldValue), getValue(detail.newValue))
+
+    def getMessage(label: String, oldValue: String, newValue: String): String =
+      Messages("label.change_comment", Messages(label), oldValue, newValue)
+
+    def getValue(value: Option[String]): String = value.getOrElse(Messages("label.not_set"))
+
+  }
+
+  object RelationNote extends Note {
+    override def is(detail: RedmineJournalDetail): Boolean = detail.property == ConfigBase.Property.RELATION
+
+    override def value(detail: RedmineJournalDetail): String = getNote("label.relation", detail)
+  }
+
+  object DoneRatioNote extends Note {
+    override def is(detail: RedmineJournalDetail): Boolean =
+      detail.property == ConfigBase.Property.ATTR && detail.name == "done_ratio"
+
+    override def value(detail: RedmineJournalDetail): String = getNote("label.done_ratio", detail)
+  }
+
+  object PrivateIssueNote extends Note {
+    override def is(detail: RedmineJournalDetail): Boolean =
+      detail.property == ConfigBase.Property.ATTR && detail.name == "is_private"
+
+    override def value(detail: RedmineJournalDetail): String = getNote("label.private", detail)
+  }
+
+  object ProjectIdNote extends Note {
+    override def is(detail: RedmineJournalDetail): Boolean =
+      detail.property == ConfigBase.Property.ATTR && detail.name == "project_id"
+
+    override def value(detail: RedmineJournalDetail): String = {
+      val oldName = getProjectName(detail.oldValue)
+      val newName = getProjectName(detail.newValue)
+      getMessage("label.project", oldName, newName)
+    }
+
+    private def getProjectName(value: Option[String]): String =
+      if (value.isDefined && value.get != "") {
+        pctx.getProjectName(value.get.toInt).getOrElse(Messages("label.not_set"))
+      } else Messages("label.not_set")
+  }
+
+  object AnonymousUserNote extends Note {
+    override def is(detail: RedmineJournalDetail): Boolean = {
+      if (detail.property == ConfigBase.Property.CUSTOM_FIELD) {
+        val option = pctx.customFieldDefinitions.find(customField => detail.name.toInt == customField.id)
+        if (option.isDefined) {
+          val define: RedmineCustomFieldDefinition = option.get
+          if (define.fieldFormat == "user") !(pctx.getUserFullname(detail.oldValue).isDefined && pctx.getUserFullname(detail.newValue).isDefined)
+          else false
+        } else false
+      } else false
+    }
+
+    override def value(detail: RedmineJournalDetail): String = {
+      val oldValue = pctx.getUserFullname(detail.oldValue).orElse(detail.oldValue)
+      val newValue = pctx.getUserFullname(detail.newValue).orElse(detail.newValue)
+      getMessage("label.user", getValue(oldValue), getValue(newValue))
+    }
+  }
+
+  object AttachmentNotFoundNote extends Note {
+    override def is(detail: RedmineJournalDetail): Boolean = {
+      if (detail.property == ConfigBase.Property.ATTACHMENT) {
+        val path: String = ConfigBase.Redmine.getIssueAttachmentDir(pctx.project.identifier, issueId, detail.name.toInt)
+        !IOUtil.isDirectory(path)
+      } else false
+    }
+
+    override def value(detail: RedmineJournalDetail): String = {
+      if (detail.newValue.isDefined) Messages("message.add_attachment", detail.newValue.get)
+      else if (detail.oldValue.isDefined) Messages("message.del_attachment", detail.oldValue.get)
+      else ""
+    }
   }
 
 }

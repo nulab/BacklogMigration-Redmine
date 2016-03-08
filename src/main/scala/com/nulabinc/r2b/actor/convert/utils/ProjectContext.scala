@@ -4,6 +4,7 @@ import com.nulabinc.r2b.cli.ParamProjectKey
 import com.nulabinc.r2b.conf.R2BConfig
 import com.nulabinc.r2b.domain.{RedmineCustomFieldDefinition, RedmineProject}
 import com.nulabinc.r2b.service._
+import com.taskadapter.redmineapi.bean.IssueStatus
 
 /**
   * @author uchida
@@ -67,6 +68,10 @@ case class ProjectContext(conf: R2BConfig, project: RedmineProject) {
       statuses.find(_.getId == id).map(_.getName)
     }
     result.flatten.map(statusMapping.convert)
+  }
+
+  def getDefaultStatusName(): Option[String] = {
+    statuses.find(_.isDefaultStatus).map(_.getName).map(statusMapping.convert)
   }
 
   def getPriorityName(id: Option[String]): Option[String] = {

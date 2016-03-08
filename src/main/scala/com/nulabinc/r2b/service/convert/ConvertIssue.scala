@@ -73,7 +73,7 @@ class ConvertIssue(pctx: ProjectContext) {
     if (option.isDefined) {
       val customFieldDefinition = option.get
       customFieldDefinition.fieldFormat match {
-        case ConfigBase.FieldFormat.VERSION => pctx.getCategoryName(redmineCustomField.value)
+        case ConfigBase.FieldFormat.VERSION => pctx.getVersionName(redmineCustomField.value)
         case ConfigBase.FieldFormat.USER => pctx.getMembershipUserName(redmineCustomField.value)
         case ConfigBase.FieldFormat.INT | ConfigBase.FieldFormat.FLOAT =>
           redmineCustomField.value.orElse(customFieldDefinition.defaultValue)
