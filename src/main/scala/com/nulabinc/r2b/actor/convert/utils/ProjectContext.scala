@@ -1,9 +1,13 @@
 package com.nulabinc.r2b.actor.convert.utils
 
+import com.nulabinc.backlog.importer.core.BacklogConfig
+import com.nulabinc.backlog4j.Issue.StatusType
+import com.nulabinc.backlog4j.Status
 import com.nulabinc.r2b.cli.ParamProjectKey
 import com.nulabinc.r2b.conf.R2BConfig
 import com.nulabinc.r2b.domain.{RedmineCustomFieldDefinition, RedmineProject}
 import com.nulabinc.r2b.service._
+import com.taskadapter.redmineapi.bean.IssueStatus
 
 /**
   * @author uchida
@@ -18,6 +22,8 @@ case class ProjectContext(conf: R2BConfig, project: RedmineProject) {
   val priorityMapping: ConvertPriorityMapping = new ConvertPriorityMapping()
 
   val redmineService: RedmineService = new RedmineService(conf)
+  val backlogService: BacklogService = new BacklogService(BacklogConfig(conf.backlogUrl, conf.backlogKey))
+  val backlogStatuses: Seq[Status] = backlogService.getStatuses
 
   private val customFieldConverter = new CustomFieldConverter(conf)
   val customFieldDefinitions: Seq[RedmineCustomFieldDefinition] = customFieldConverter.execute(redmineService.getCustomFieldDefinitions)
@@ -67,6 +73,10 @@ case class ProjectContext(conf: R2BConfig, project: RedmineProject) {
       statuses.find(_.getId == id).map(_.getName)
     }
     result.flatten.map(statusMapping.convert)
+  }
+
+  def getDefaultStatusName(): Option[String] = {
+    backlogStatuses.find(_.getStatus == StatusType.Open).map(_.getName)
   }
 
   def getPriorityName(id: Option[String]): Option[String] = {
