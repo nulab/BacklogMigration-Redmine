@@ -19,9 +19,9 @@ class ConvertComments(pctx: ProjectContext, issueId: Int) {
   implicit val userLang = if (Locale.getDefault.equals(Locale.JAPAN)) Lang("ja") else Lang("en")
 
   private val note: Note = new Note(pctx, issueId)
+  private var isSetStatus = false
 
-  def execute(journals: Seq[RedmineJournal]): Seq[BacklogComment] =
-    journals.map(getBacklogComment)
+  def execute(journals: Seq[RedmineJournal]): Seq[BacklogComment] = journals.map(getBacklogComment)
 
   private def getBacklogComment(journal: RedmineJournal): BacklogComment = {
     val details = journal.details.filterNot(note.is)
@@ -33,12 +33,27 @@ class ConvertComments(pctx: ProjectContext, issueId: Int) {
       created = journal.createdOn)
   }
 
-  private def getBacklogCommentDetail(detail: RedmineJournalDetail): BacklogCommentDetail =
+  private def getBacklogCommentDetail(detail: RedmineJournalDetail): BacklogCommentDetail = {
+    val convertOld = convertOldValue(detail, detail.oldValue)
+    val convertNew = convertValue(detail, detail.newValue)
+
     BacklogCommentDetail(
       property = detail.property,
       name = convertName(detail),
-      oldValue = convertValue(detail, detail.oldValue),
-      newValue = convertValue(detail, detail.newValue))
+      oldValue = convertOld,
+      newValue = convertNew)
+  }
+
+  private def convertOldValue(detail: RedmineJournalDetail, value: Option[String]) = {
+    val convertOld = convertValue(detail, detail.oldValue)
+    if (detail.property == ConfigBase.Property.ATTR && detail.name == ConfigBase.Property.Attr.STATUS) {
+      if (isSetStatus) convertOld
+      else {
+        isSetStatus = true
+        pctx.getDefaultStatusName()
+      }
+    } else convertOld
+  }
 
   private def getNoteText(notes: Seq[RedmineJournalDetail]): String =
     notes.map(note.getValue).mkString("\n")
@@ -106,6 +121,8 @@ class ConvertComments(pctx: ProjectContext, issueId: Int) {
 
 class Note(pctx: ProjectContext, issueId: Int) {
 
+  implicit val userLang = if (Locale.getDefault.equals(Locale.JAPAN)) Lang("ja") else Lang("en")
+
   def is(detail: RedmineJournalDetail): Boolean =
     RelationNote.is(detail) ||
       DoneRatioNote.is(detail) ||
@@ -125,9 +142,9 @@ class Note(pctx: ProjectContext, issueId: Int) {
 
   trait Note {
 
-    val is = ???
+    def is(detail: RedmineJournalDetail): Boolean
 
-    val value = ???
+    def value(detail: RedmineJournalDetail): String
 
     def getNote(label: String, detail: RedmineJournalDetail): String =
       Messages(label, getValue(detail.oldValue), getValue(detail.newValue))
@@ -140,30 +157,34 @@ class Note(pctx: ProjectContext, issueId: Int) {
   }
 
   object RelationNote extends Note {
-    override val is = (detail: RedmineJournalDetail) => detail.property == ConfigBase.Property.RELATION
-    override val value = (detail: RedmineJournalDetail) => getNote("label.relation", detail): String
+    override def is(detail: RedmineJournalDetail): Boolean = detail.property == ConfigBase.Property.RELATION
+
+    override def value(detail: RedmineJournalDetail): String = getNote("label.relation", detail)
   }
 
   object DoneRatioNote extends Note {
-    override val is = (detail: RedmineJournalDetail) =>
+    override def is(detail: RedmineJournalDetail): Boolean =
       detail.property == ConfigBase.Property.ATTR && detail.name == "done_ratio"
-    override val value = (detail: RedmineJournalDetail) => getNote("label.done_ratio", detail): String
+
+    override def value(detail: RedmineJournalDetail): String = getNote("label.done_ratio", detail)
   }
 
   object PrivateIssueNote extends Note {
-    override val is = (detail: RedmineJournalDetail) =>
+    override def is(detail: RedmineJournalDetail): Boolean =
       detail.property == ConfigBase.Property.ATTR && detail.name == "is_private"
-    override val value = (detail: RedmineJournalDetail) => getNote("label.private", detail): String
+
+    override def value(detail: RedmineJournalDetail): String = getNote("label.private", detail)
   }
 
   object ProjectIdNote extends Note {
-    override val is = (detail: RedmineJournalDetail) =>
+    override def is(detail: RedmineJournalDetail): Boolean =
       detail.property == ConfigBase.Property.ATTR && detail.name == "project_id"
-    override val value = (detail: RedmineJournalDetail) => {
+
+    override def value(detail: RedmineJournalDetail): String = {
       val oldName = getProjectName(detail.oldValue)
       val newName = getProjectName(detail.newValue)
       getMessage("label.project", oldName, newName)
-    }: String
+    }
 
     private def getProjectName(value: Option[String]): String =
       if (value.isDefined && value.get != "") {
@@ -172,7 +193,7 @@ class Note(pctx: ProjectContext, issueId: Int) {
   }
 
   object AnonymousUserNote extends Note {
-    override val is = (detail: RedmineJournalDetail) => {
+    override def is(detail: RedmineJournalDetail): Boolean = {
       if (detail.property == ConfigBase.Property.CUSTOM_FIELD) {
         val option = pctx.customFieldDefinitions.find(customField => detail.name.toInt == customField.id)
         if (option.isDefined) {
@@ -182,25 +203,27 @@ class Note(pctx: ProjectContext, issueId: Int) {
         } else false
       } else false
     }
-    override val value = (detail: RedmineJournalDetail) => {
+
+    override def value(detail: RedmineJournalDetail): String = {
       val oldValue = pctx.getUserFullname(detail.oldValue).orElse(detail.oldValue)
       val newValue = pctx.getUserFullname(detail.newValue).orElse(detail.newValue)
       getMessage("label.user", getValue(oldValue), getValue(newValue))
-    }: String
+    }
   }
 
   object AttachmentNotFoundNote extends Note {
-    override val is = (detail: RedmineJournalDetail) => {
+    override def is(detail: RedmineJournalDetail): Boolean = {
       if (detail.property == ConfigBase.Property.ATTACHMENT) {
         val path: String = ConfigBase.Redmine.getIssueAttachmentDir(pctx.project.identifier, issueId, detail.name.toInt)
         !IOUtil.isDirectory(path)
       } else false
     }
-    override val value = (detail: RedmineJournalDetail) => {
+
+    override def value(detail: RedmineJournalDetail): String = {
       if (detail.newValue.isDefined) Messages("message.add_attachment", detail.newValue.get)
       else if (detail.oldValue.isDefined) Messages("message.del_attachment", detail.oldValue.get)
       else ""
-    }: String
+    }
   }
 
 }
