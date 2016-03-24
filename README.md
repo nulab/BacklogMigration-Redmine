@@ -174,7 +174,7 @@ Only applied to max or platina plan.
 * Attachment files will not be migrated.
 
 ### About Project
-* Text formatting rules: backlog
+* Text formatting rules: markdown
 * Some changes will be applied to the Redmine's project identifier to meet the project key format in Backlog.
 
 Hyphen → underscore
@@ -423,7 +423,7 @@ Backlogでマックスプラン以上のプランを契約している必要が�
 * 添付ファイルは移行できません。
 
 ### プロジェクトについて
-* テキスト整形のルール：backlog
+* テキスト整形のルール：markdown
 * Redmineのプロジェクト識別子は以下のように変換されBacklogのプロジェクトキーとして登録されます。
 
 ハイフン→アンダースコア
