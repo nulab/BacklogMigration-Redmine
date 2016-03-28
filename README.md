@@ -4,6 +4,7 @@ Migrate your projects from Redmine to [Backlog].
 (英語の下に日本文が記載されています)
 
 **Backlog Migration for Redmine is in beta.  To avoid problems, create a new project and import data before importing data to the existing project in Backlog.**
+**Since a part of library isn't published, you may not be able to build. Now we are preparing.**
 
 ![Backlog icon](https://raw.githubusercontent.com/nulab/BacklogMigration-Redmine/master/icon.png)
 
@@ -253,6 +254,7 @@ https://www.backlog.jp/contact/
 Redmineのプロジェクトを[Backlog]に移行するためのツールです。
 
 **Backlog Migration for Redmineはベータバージョンです。Backlog上の既存プロジェクトにインポートする場合は、先に新しく別プロジェクトを作成し、こちらにインポートし内容を確認後。正式なプロジェクトにインポートしてください**
+**現在一部のライブラリを公開していないためビルドできません。現在準備中です。**
 
 * Backlog 
     * [http://backlog.jp](http://backlog.jp)
