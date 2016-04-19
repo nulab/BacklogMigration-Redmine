@@ -1,14 +1,15 @@
 package com.nulabinc.r2b.actor.prepare
 
 import java.util.UUID._
+import java.util.concurrent.TimeUnit
 
-import akka.actor.SupervisorStrategy.Stop
 import akka.actor._
 import akka.pattern.ask
 import akka.util.Timeout
 import com.nulabinc.r2b.actor.utils.R2BLogging
 import com.nulabinc.r2b.conf.R2BConfig
 import com.taskadapter.redmineapi.bean.User
+import com.typesafe.config.ConfigFactory
 
 import scala.collection.mutable.Set
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -20,7 +21,7 @@ import scala.concurrent.{Await, Future}
  */
 class FindUsersActor(conf: R2BConfig) extends Actor with R2BLogging {
 
-  implicit val timeout = Timeout(60 minutes)
+  implicit val timeout = Timeout(ConfigFactory.load().getDuration("r2b.prepare", TimeUnit.MINUTES), TimeUnit.MINUTES)
 
   private val allUsers = Set.empty[User]
 
@@ -43,7 +44,8 @@ class FindUsersActor(conf: R2BConfig) extends Actor with R2BLogging {
 }
 
 object FindUsersActor {
-  implicit val timeout = Timeout(60 minutes)
+
+  implicit val timeout: Timeout = Timeout(ConfigFactory.load().getDuration("r2b.prepare", TimeUnit.MINUTES), TimeUnit.MINUTES)
 
   case class Do()
 

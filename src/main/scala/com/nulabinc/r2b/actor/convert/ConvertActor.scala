@@ -1,18 +1,19 @@
 package com.nulabinc.r2b.actor.convert
 
 import java.util.UUID._
+import java.util.concurrent.TimeUnit
 
 import akka.actor.SupervisorStrategy.Stop
 import akka.actor.{Actor, _}
-import akka.util.Timeout
 import com.nulabinc.backlog.importer.conf.{ConfigBase => BacklogConfigBase}
-import com.nulabinc.backlog.importer.domain.{BacklogGroupsWrapper, BacklogJsonProtocol}
+import com.nulabinc.backlog.importer.domain.BacklogJsonProtocol
 import com.nulabinc.r2b.actor.utils.{R2BLogging, Subtasks}
 import com.nulabinc.r2b.conf.R2BConfig
 import com.nulabinc.r2b.service.RedmineUnmarshaller
 import com.nulabinc.r2b.service.convert.ConvertGroups
 import com.nulabinc.r2b.utils.IOUtil
 import com.osinka.i18n.Messages
+import com.typesafe.config.ConfigFactory
 import spray.json._
 
 import scala.concurrent.duration._
@@ -66,7 +67,8 @@ class ConvertActor(conf: R2BConfig) extends Actor with R2BLogging with Subtasks 
 }
 
 object ConvertActor {
-  implicit val timeout = Timeout(60 minutes)
+
+  val timeout: Duration = Duration(ConfigFactory.load().getDuration("r2b.convert", TimeUnit.MINUTES), TimeUnit.MINUTES)
 
   case class Do()
 
@@ -76,7 +78,7 @@ object ConvertActor {
     val system = ActorSystem("convert")
     val actor = system.actorOf(Props(new ConvertActor(conf)), ConvertActor.actorName)
     actor ! ConvertActor.Do
-    system.awaitTermination(timeout.duration)
+    system.awaitTermination(timeout)
   }
 
 }

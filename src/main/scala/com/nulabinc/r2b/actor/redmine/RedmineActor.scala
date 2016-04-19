@@ -1,16 +1,17 @@
 package com.nulabinc.r2b.actor.redmine
 
 import java.util.UUID._
+import java.util.concurrent.TimeUnit
 
 import akka.actor.SupervisorStrategy.Stop
 import akka.actor._
-import akka.util.Timeout
 import com.nulabinc.r2b.actor.utils.{R2BLogging, Subtasks}
 import com.nulabinc.r2b.conf.ConfigBase.Redmine
 import com.nulabinc.r2b.conf.{ConfigBase, R2BConfig}
 import com.nulabinc.r2b.service.{CustomFieldConverter, RedmineMarshaller, RedmineService}
 import com.nulabinc.r2b.utils.IOUtil
 import com.osinka.i18n.Messages
+import com.typesafe.config.ConfigFactory
 
 import scala.concurrent.duration._
 import scala.language.postfixOps
@@ -60,7 +61,8 @@ class RedmineActor(conf: R2BConfig) extends Actor with R2BLogging with Subtasks 
 }
 
 object RedmineActor {
-  implicit val timeout = Timeout(60 minutes)
+
+  val timeout: Duration = Duration(ConfigFactory.load().getDuration("r2b.export", TimeUnit.MINUTES), TimeUnit.MINUTES)
 
   case class Do()
 
@@ -70,7 +72,7 @@ object RedmineActor {
     val system = ActorSystem("redmine-exporter")
     val actor = system.actorOf(Props(new RedmineActor(conf)), RedmineActor.actorName)
     actor ! RedmineActor.Do
-    system.awaitTermination(timeout.duration)
+    system.awaitTermination(timeout)
   }
 
 }
