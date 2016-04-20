@@ -1,6 +1,7 @@
 package com.nulabinc.r2b.actor.prepare
 
 import java.util.UUID._
+import java.util.concurrent.TimeUnit
 
 import akka.actor.SupervisorStrategy.Escalate
 import akka.actor._
@@ -11,6 +12,7 @@ import com.nulabinc.r2b.conf.R2BConfig
 import com.nulabinc.r2b.service.RedmineService
 import com.osinka.i18n.Messages
 import com.taskadapter.redmineapi.bean.{Group, Project, User}
+import com.typesafe.config.ConfigFactory
 
 import scala.collection.mutable.Set
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -27,7 +29,8 @@ class ProjectsActor(conf: R2BConfig) extends Actor with R2BLogging {
       Escalate
   }
 
-  implicit val timeout = Timeout(60 minutes)
+  implicit val timeout: Timeout = Timeout(ConfigFactory.load().getDuration("r2b.prepare", TimeUnit.MINUTES), TimeUnit.MINUTES)
+
   private val redmineService: RedmineService = new RedmineService(conf)
   private val allUsers: Seq[User] = redmineService.getUsers
 

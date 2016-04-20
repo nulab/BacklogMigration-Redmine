@@ -2,7 +2,7 @@ name := "backlog-migration-redmine"
 
 organization := "com.nulabinc"
 
-version := "0.9.0b26"
+version := "0.9.0b27"
 
 scalaVersion := "2.11.6"
 
@@ -23,6 +23,7 @@ libraryDependencies ++= Seq(
   "com.taskadapter" % "redmine-java-api" % "2.4.0",
   "joda-time" % "joda-time" % "2.3",
   "org.joda" % "joda-convert" % "1.6",
+  "com.typesafe" % "config" % "1.3.0",
   "com.nulabinc" %% "backlog-importer" % "0.0.1"
 )
 
