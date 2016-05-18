@@ -12,9 +12,9 @@ import com.taskadapter.redmineapi.bean.User
 import com.typesafe.config.ConfigFactory
 
 import scala.collection.mutable.Set
+import scala.concurrent.Await
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration._
-import scala.concurrent.{Await, Future}
 
 /**
   * @author uchida
@@ -23,17 +23,15 @@ class FindUsersActor(conf: R2BConfig) extends Actor with R2BLogging {
 
   implicit val timeout = Timeout(ConfigFactory.load().getDuration("r2b.prepare", TimeUnit.MINUTES), TimeUnit.MINUTES)
 
+  private val actor = context.actorOf(Props(new ProjectsActor(conf)), ProjectsActor.actorName)
+
   def receive: Receive = {
     case FindUsersActor.Do =>
-
-      val caller = sender()
-
-      val actor = context.actorOf(Props(new ProjectsActor(conf)), ProjectsActor.actorName)
+      val s = sender
       val f = (actor ? ProjectsActor.Do).mapTo[Set[User]]
 
       for {users <- f} yield {
-        caller ! users
-        context.stop(self)
+        s ! users
       }
   }
 
@@ -48,8 +46,7 @@ object FindUsersActor {
   def actorName = s"FindUsersActor_$randomUUID"
 
   def apply(conf: R2BConfig): Set[User] = {
-    val system = ActorSystem("find-users")
-    val actor = system.actorOf(Props(new FindUsersActor(conf)), FindUsersActor.actorName)
+    val actor = ActorSystem("find-users").actorOf(Props(new FindUsersActor(conf)), FindUsersActor.actorName)
     val f = (actor ? FindUsersActor.Do).mapTo[Set[User]]
     Await.result(f, Duration.Inf)
   }
