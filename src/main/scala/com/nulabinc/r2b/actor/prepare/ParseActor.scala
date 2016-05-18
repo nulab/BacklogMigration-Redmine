@@ -19,14 +19,14 @@ import scala.concurrent.duration._
 /**
   * @author uchida
   */
-class FindUsersActor(conf: R2BConfig) extends Actor with R2BLogging {
+class ParseActor(conf: R2BConfig) extends Actor with R2BLogging {
 
   implicit val timeout = Timeout(ConfigFactory.load().getDuration("r2b.prepare", TimeUnit.MINUTES), TimeUnit.MINUTES)
 
   private val actor = context.actorOf(Props(new ProjectsActor(conf)), ProjectsActor.actorName)
 
   def receive: Receive = {
-    case FindUsersActor.Do =>
+    case ParseActor.Do =>
       val s = sender
       val f = (actor ? ProjectsActor.Do).mapTo[Set[User]]
 
@@ -37,7 +37,7 @@ class FindUsersActor(conf: R2BConfig) extends Actor with R2BLogging {
 
 }
 
-object FindUsersActor {
+object ParseActor {
 
   implicit val timeout: Timeout = Timeout(ConfigFactory.load().getDuration("r2b.prepare", TimeUnit.MINUTES), TimeUnit.MINUTES)
 
@@ -46,8 +46,8 @@ object FindUsersActor {
   def actorName = s"FindUsersActor_$randomUUID"
 
   def apply(conf: R2BConfig): Set[User] = {
-    val actor = ActorSystem("find-users").actorOf(Props(new FindUsersActor(conf)), FindUsersActor.actorName)
-    val f = (actor ? FindUsersActor.Do).mapTo[Set[User]]
+    val actor = ActorSystem("find-users").actorOf(Props(new ParseActor(conf)), ParseActor.actorName)
+    val f = (actor ? ParseActor.Do).mapTo[Set[User]]
     Await.result(f, Duration.Inf)
   }
 
