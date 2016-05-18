@@ -17,13 +17,11 @@ import scala.concurrent.duration._
 import scala.concurrent.{Await, Future}
 
 /**
- * @author uchida
- */
+  * @author uchida
+  */
 class FindUsersActor(conf: R2BConfig) extends Actor with R2BLogging {
 
   implicit val timeout = Timeout(ConfigFactory.load().getDuration("r2b.prepare", TimeUnit.MINUTES), TimeUnit.MINUTES)
-
-  private val allUsers = Set.empty[User]
 
   def receive: Receive = {
     case FindUsersActor.Do =>
@@ -31,12 +29,10 @@ class FindUsersActor(conf: R2BConfig) extends Actor with R2BLogging {
       val caller = sender()
 
       val actor = context.actorOf(Props(new ProjectsActor(conf)), ProjectsActor.actorName)
-
-      val f: Future[Set[User]] = (actor ? ProjectsActor.Do).mapTo[Set[User]]
+      val f = (actor ? ProjectsActor.Do).mapTo[Set[User]]
 
       for {users <- f} yield {
-        allUsers ++= users
-        caller ! allUsers
+        caller ! users
         context.stop(self)
       }
   }
@@ -54,10 +50,8 @@ object FindUsersActor {
   def apply(conf: R2BConfig): Set[User] = {
     val system = ActorSystem("find-users")
     val actor = system.actorOf(Props(new FindUsersActor(conf)), FindUsersActor.actorName)
-
-    val f: Future[Set[User]] = (actor ? FindUsersActor.Do).mapTo[Set[User]]
-    val users: Set[User] = Await.result(f, Duration.Inf)
-    users
+    val f = (actor ? FindUsersActor.Do).mapTo[Set[User]]
+    Await.result(f, Duration.Inf)
   }
 
 }
