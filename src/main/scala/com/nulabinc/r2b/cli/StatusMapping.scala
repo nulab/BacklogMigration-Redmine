@@ -2,6 +2,7 @@ package com.nulabinc.r2b.cli
 
 import com.nulabinc.backlog.importer.core.BacklogConfig
 import com.nulabinc.backlog4j.Status
+import com.nulabinc.r2b.actor.prepare.PrepareData
 import com.nulabinc.r2b.conf.{ConfigBase, R2BConfig}
 import com.nulabinc.r2b.domain.MappingItem
 import com.nulabinc.r2b.service.{BacklogService, RedmineService}
@@ -10,7 +11,7 @@ import com.osinka.i18n.Messages
 /**
   * @author uchida
   */
-class StatusMapping(conf: R2BConfig) extends MappingManager {
+class StatusMapping(conf: R2BConfig, prepareData: PrepareData) extends MappingManager {
 
   private val backlogDatas = loadBacklog()
   private val redmineDatas = loadRedmine()
