@@ -14,7 +14,7 @@ import scala.collection.mutable.Set
 /**
   * @author uchida
   */
-class WikisActor(conf: R2BConfig, project: Project) extends Actor with R2BLogging {
+class WikisActor(conf: R2BConfig, project: Project, prepareData: PrepareData) extends Actor with R2BLogging {
 
   private val users = Set.empty[Option[User]]
   private val redmineService: RedmineService = new RedmineService(conf)
@@ -25,7 +25,8 @@ class WikisActor(conf: R2BConfig, project: Project) extends Actor with R2BLoggin
   def receive: Receive = {
     case WikisActor.Do =>
       wikiPages.foreach(parseWikiPage)
-      sender ! users.flatten
+      prepareData.users ++= users.flatten
+      context.stop(self)
   }
 
   private def parseWikiPage(page: WikiPage) = {

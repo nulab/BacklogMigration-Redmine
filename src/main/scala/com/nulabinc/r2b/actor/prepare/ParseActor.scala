@@ -4,7 +4,6 @@ import java.util.UUID._
 import java.util.concurrent.TimeUnit
 
 import akka.actor._
-import akka.pattern.ask
 import akka.util.Timeout
 import com.nulabinc.r2b.actor.utils.R2BLogging
 import com.nulabinc.r2b.conf.R2BConfig
@@ -12,43 +11,45 @@ import com.taskadapter.redmineapi.bean.User
 import com.typesafe.config.ConfigFactory
 
 import scala.collection.mutable.Set
-import scala.concurrent.Await
-import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration._
 
 /**
   * @author uchida
   */
-class ParseActor(conf: R2BConfig) extends Actor with R2BLogging {
+class ParseActor(conf: R2BConfig, prepareData: PrepareData) extends Actor with R2BLogging {
 
   implicit val timeout = Timeout(ConfigFactory.load().getDuration("r2b.prepare", TimeUnit.MINUTES), TimeUnit.MINUTES)
 
-  private val actor = context.actorOf(Props(new ProjectsActor(conf)), ProjectsActor.actorName)
+  private val actor = context.watch(context.actorOf(Props(new ProjectsActor(conf, prepareData)), ProjectsActor.actorName))
 
   def receive: Receive = {
     case ParseActor.Do =>
-      val s = sender
-      val f = (actor ? ProjectsActor.Do).mapTo[Set[User]]
-
-      for {users <- f} yield {
-        s ! users
-      }
+      actor ! ProjectsActor.Do
+    case Terminated(ref) =>
+      context.system.shutdown()
   }
 
 }
 
 object ParseActor {
 
-  implicit val timeout: Timeout = Timeout(ConfigFactory.load().getDuration("r2b.prepare", TimeUnit.MINUTES), TimeUnit.MINUTES)
+  private val timeout: Duration = Duration(ConfigFactory.load().getDuration("r2b.prepare", TimeUnit.MINUTES), TimeUnit.MINUTES)
 
   case class Do()
 
-  def actorName = s"FindUsersActor_$randomUUID"
+  def actorName = s"ParseActor_$randomUUID"
 
-  def apply(conf: R2BConfig): Set[User] = {
-    val actor = ActorSystem("find-users").actorOf(Props(new ParseActor(conf)), ParseActor.actorName)
-    val f = (actor ? ParseActor.Do).mapTo[Set[User]]
-    Await.result(f, Duration.Inf)
+  def apply(conf: R2BConfig): PrepareData = {
+
+    val prepareData = PrepareData(Set.empty[User], Set.empty[String])
+
+    val system = ActorSystem("parse")
+    val actor = system.actorOf(Props(new ParseActor(conf, prepareData)), ParseActor.actorName)
+    actor ! ParseActor.Do
+    system.awaitTermination(timeout)
+    prepareData
   }
 
 }
+
+case class PrepareData(users: Set[User], statuses: Set[String])

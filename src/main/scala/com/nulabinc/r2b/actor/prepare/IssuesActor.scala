@@ -17,9 +17,10 @@ import scala.collection.mutable.Set
 /**
   * @author uchida
   */
-class IssuesActor(conf: R2BConfig, project: Project) extends Actor with R2BLogging {
+class IssuesActor(conf: R2BConfig, project: Project, prepareData: PrepareData) extends Actor with R2BLogging {
 
   private val users = Set.empty[Option[User]]
+  private val statuses = Set.empty[Option[String]]
   private val redmineService: RedmineService = new RedmineService(conf)
   private val allCount = redmineService.getIssuesCount(project.getId)
 
@@ -36,7 +37,9 @@ class IssuesActor(conf: R2BConfig, project: Project) extends Actor with R2BLoggi
       }
 
       loop(0)
-      sender ! users.flatten
+      prepareData.statuses ++= statuses.flatten
+      prepareData.users ++= users.flatten
+      context.stop(self)
   }
 
   private def parseIssues(offset: Int) = {
@@ -67,11 +70,17 @@ class IssuesActor(conf: R2BConfig, project: Project) extends Actor with R2BLoggi
       addUser(detail.getOldValue)
       addUser(detail.getNewValue)
     }
+    if (detail.getName == ConfigBase.Property.Attr.STATUS) {
+      addStatus(detail.getOldValue)
+      addStatus(detail.getNewValue)
+    }
   }
 
   private def addUser(value: String) =
     if (Option(value).isDefined && !users.flatten.exists(_.getId == value.toInt))
       users += redmineService.getUserById(value.toInt)
+
+  private def addStatus(value: String) = statuses += Option(value)
 
 }
 

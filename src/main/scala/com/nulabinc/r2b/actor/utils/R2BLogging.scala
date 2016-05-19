@@ -6,10 +6,8 @@ package com.nulabinc.r2b.actor.utils
 
 import java.util.Locale
 
-import akka.actor.{Actor, ActorLogging}
 import com.nulabinc.backlog4j.BacklogAPIException
-import com.nulabinc.r2b.conf.ConfigBase
-import com.osinka.i18n.{Messages, Lang}
+import com.osinka.i18n.{Lang, Messages}
 import com.taskadapter.redmineapi.RedmineTransportException
 
 trait R2BLogging extends Logging {
