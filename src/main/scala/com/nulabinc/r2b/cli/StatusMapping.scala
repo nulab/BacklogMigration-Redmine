@@ -18,10 +18,22 @@ class StatusMapping(conf: R2BConfig, prepareData: PrepareData) extends MappingMa
 
   private def loadRedmine(): Seq[MappingItem] = {
     info("- " + Messages("mapping.load_redmine", itemName))
+
     val redmineService: RedmineService = new RedmineService(conf)
     val redmineStatuses = redmineService.getStatuses()
     val redmines: Seq[MappingItem] = redmineStatuses.map(redmineStatus => MappingItem(redmineStatus.getName, redmineStatus.getName))
-    redmines
+
+    val deleteItems = prepareData.statuses.foldLeft(Seq.empty[MappingItem]) {
+      (acc: Seq[MappingItem], x: String) => {
+        val exists = redmineStatuses.exists(redmineStatuse => redmineStatuse.getId == x.toInt)
+        if (exists) acc
+        else {
+          val name = Messages("mapping.delete_status", x)
+          acc :+ MappingItem(name, name)
+        }
+      }
+    }
+    redmines union deleteItems
   }
 
   private def loadBacklog(): Seq[MappingItem] = {
