@@ -2,6 +2,7 @@ package com.nulabinc.r2b.cli
 
 import com.nulabinc.backlog.importer.core.BacklogConfig
 import com.nulabinc.backlog4j.Status
+import com.nulabinc.r2b.actor.prepare.PrepareData
 import com.nulabinc.r2b.conf.{ConfigBase, R2BConfig}
 import com.nulabinc.r2b.domain.MappingItem
 import com.nulabinc.r2b.service.{BacklogService, RedmineService}
@@ -10,17 +11,29 @@ import com.osinka.i18n.Messages
 /**
   * @author uchida
   */
-class StatusMapping(conf: R2BConfig) extends MappingManager {
+class StatusMapping(conf: R2BConfig, prepareData: PrepareData) extends MappingManager {
 
   private val backlogDatas = loadBacklog()
   private val redmineDatas = loadRedmine()
 
   private def loadRedmine(): Seq[MappingItem] = {
     info("- " + Messages("mapping.load_redmine", itemName))
+
     val redmineService: RedmineService = new RedmineService(conf)
     val redmineStatuses = redmineService.getStatuses()
     val redmines: Seq[MappingItem] = redmineStatuses.map(redmineStatus => MappingItem(redmineStatus.getName, redmineStatus.getName))
-    redmines
+
+    val deleteItems = prepareData.statuses.foldLeft(Seq.empty[MappingItem]) {
+      (acc: Seq[MappingItem], x: String) => {
+        val exists = redmineStatuses.exists(redmineStatuse => redmineStatuse.getId == x.toInt)
+        if (exists) acc
+        else {
+          val name = Messages("mapping.delete_status", x)
+          acc :+ MappingItem(name, name)
+        }
+      }
+    }
+    redmines union deleteItems
   }
 
   private def loadBacklog(): Seq[MappingItem] = {

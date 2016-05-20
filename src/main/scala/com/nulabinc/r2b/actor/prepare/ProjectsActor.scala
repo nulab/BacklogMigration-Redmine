@@ -1,89 +1,55 @@
 package com.nulabinc.r2b.actor.prepare
 
 import java.util.UUID._
-import java.util.concurrent.TimeUnit
 
 import akka.actor.SupervisorStrategy.Escalate
 import akka.actor._
-import akka.pattern.ask
-import akka.util.Timeout
-import com.nulabinc.r2b.actor.utils.R2BLogging
+import com.nulabinc.r2b.actor.utils.{R2BLogging, Subtasks}
 import com.nulabinc.r2b.conf.R2BConfig
 import com.nulabinc.r2b.service.RedmineService
 import com.osinka.i18n.Messages
-import com.taskadapter.redmineapi.bean.{Group, Project, User}
-import com.typesafe.config.ConfigFactory
-
-import scala.collection.mutable.Set
-import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.duration._
-import scala.concurrent.{Await, Future}
+import com.taskadapter.redmineapi.bean.{Group, Membership, Project, User}
 
 /**
   * @author uchida
   */
-class ProjectsActor(conf: R2BConfig) extends Actor with R2BLogging {
+class ProjectsActor(conf: R2BConfig, prepareData: PrepareData) extends Actor with R2BLogging with Subtasks {
 
   override val supervisorStrategy = OneForOneStrategy(maxNrOfRetries = 0) {
     case _: Exception =>
       Escalate
   }
 
-  implicit val timeout: Timeout = Timeout(ConfigFactory.load().getDuration("r2b.prepare", TimeUnit.MINUTES), TimeUnit.MINUTES)
-
   private val redmineService: RedmineService = new RedmineService(conf)
-  private val allUsers: Seq[User] = redmineService.getUsers
 
   def receive: Receive = {
     case ProjectsActor.Do =>
-      val caller = sender
       info("-  " + Messages("message.load_redmine_projects"))
-      val projects: Seq[Project] = redmineService.getProjects
-
-      val futures: Seq[Future[Set[User]]] = projects.foldLeft(Seq.empty[Future[Set[User]]])((fs: Seq[Future[Set[User]]], project: Project) => {
-        fs :+ searchFromIssue(project, caller) :+ searchFromWiki(project, caller)
-      })
-
-      val f: Future[Set[User]] = Future.fold(futures)(Set.empty[User])((total: Set[User], users: Set[User]) => total ++= users)
-
-      val users: Set[User] = Await.result(f, Duration.Inf)
-      users ++= memberships(projects)
-      caller ! users
-      context.stop(self)
+      redmineService.getProjects.foreach(parseProject)
+    case Terminated(ref) =>
+      complete(ref)
+      if (subtasks.isEmpty) context.stop(self)
   }
 
-  private def searchFromIssue(project: Project, caller: ActorRef): Future[Set[User]] = {
-    val actor = context.actorOf(Props(new IssuesActor(conf, project)), IssuesActor.actorName)
-    (actor ? IssuesActor.Do).mapTo[Set[User]]
+  private def parseProject(project: Project) = {
+
+    start(Props(new IssuesActor(conf, project, prepareData)), IssuesActor.actorName) ! IssuesActor.Do
+
+    start(Props(new WikisActor(conf, project, prepareData)), WikisActor.actorName) ! WikisActor.Do
+
+    info("-  " + Messages("message.load_redmine_memberships", project.getName))
+    val memberships = redmineService.getMemberships(project.getIdentifier)
+    memberships.foreach(parseMembership)
   }
 
-  private def searchFromWiki(project: Project, caller: ActorRef): Future[Set[User]] = {
-    val actor = context.actorOf(Props(new WikisActor(conf, project)), WikisActor.actorName)
-    (actor ? WikisActor.Do).mapTo[Set[User]]
+  private def parseMembership(membership: Membership) = {
+    if (Option(membership.getUser).isDefined) prepareData.users += membership.getUser
+    if (Option(membership.getGroup).isDefined) redmineService.getUsers.foreach(parseUserGroups(membership.getGroup))
   }
 
-  private def memberships(projects: Seq[Project]): Set[User] = {
-    val users: Set[User] = Set.empty[User]
-    projects.foreach(project => {
-      info("-  " + Messages("message.load_redmine_memberships", project.getName))
-      val memberships = redmineService.getMemberships(project.getIdentifier)
-      memberships.foreach(membership => {
-        if (Option(membership.getUser).isDefined) users += membership.getUser
-        if (Option(membership.getGroup).isDefined) users ++= groups(membership.getGroup)
-      })
-    })
-    users
-  }
-
-  private def groups(group: Group): Set[User] = {
-    val users: Set[User] = Set.empty[User]
-    allUsers.foreach(user => {
-      val userGroups: Array[Group] = user.getGroups.toArray(new Array[Group](user.getGroups.size()))
-      userGroups.foreach(userGroup => {
-        if (group.getId == userGroup.getId) users += user
-      })
-    })
-    users
+  private def parseUserGroups(group: Group)(user: User) = {
+    val userGroups = user.getGroups.toArray(new Array[Group](user.getGroups.size()))
+    userGroups.foreach(userGroup => if (group.getId == userGroup.getId) prepareData.users += user)
   }
 
 }

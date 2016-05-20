@@ -2,7 +2,7 @@ package com.nulabinc.r2b.cli
 
 import com.nulabinc.backlog.importer.core.BacklogConfig
 import com.nulabinc.backlog4j.{User => BacklogUser}
-import com.nulabinc.r2b.actor.prepare.FindUsersActor
+import com.nulabinc.r2b.actor.prepare.PrepareData
 import com.nulabinc.r2b.conf.{ConfigBase, R2BConfig}
 import com.nulabinc.r2b.domain._
 import com.nulabinc.r2b.service.{BacklogService, RedmineService}
@@ -12,7 +12,7 @@ import com.taskadapter.redmineapi.bean.{User => RedmineUser}
 /**
   * @author uchida
   */
-class UserMapping(conf: R2BConfig) extends MappingManager {
+class UserMapping(conf: R2BConfig, prepareData: PrepareData) extends MappingManager {
 
   private val backlogDatas = loadBacklog()
   private val redmineDatas = loadRedmine()
@@ -23,7 +23,7 @@ class UserMapping(conf: R2BConfig) extends MappingManager {
     info("- " + Messages("mapping.load_redmine", itemName))
     info("-  " + Messages("message.collect_project_user"))
 
-    val redmineUsers: Seq[RedmineUser] = FindUsersActor(conf).toSeq.flatMap(user => {
+    val redmineUsers: Seq[RedmineUser] = prepareData.users.toSeq.flatMap(user => {
       if (Option(user.getLogin).isDefined && Option(user.getFullName).isDefined) Some(user)
       else redmineService.getUserById(user.getId)
     }).filter(user => user.getLogin != "")
