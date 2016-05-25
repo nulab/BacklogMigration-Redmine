@@ -1,14 +1,11 @@
 package com.nulabinc.r2b.actor.prepare
 
 import java.util.UUID._
-import java.util.concurrent.TimeUnit
 
 import akka.actor._
-import akka.util.Timeout
 import com.nulabinc.r2b.actor.utils.R2BLogging
 import com.nulabinc.r2b.conf.R2BConfig
 import com.taskadapter.redmineapi.bean.User
-import com.typesafe.config.ConfigFactory
 
 import scala.collection.mutable.Set
 import scala.concurrent.duration._
@@ -17,8 +14,6 @@ import scala.concurrent.duration._
   * @author uchida
   */
 class ParseActor(conf: R2BConfig, prepareData: PrepareData) extends Actor with R2BLogging {
-
-  implicit val timeout = Timeout(ConfigFactory.load().getDuration("r2b.prepare", TimeUnit.MINUTES), TimeUnit.MINUTES)
 
   private val actor = context.watch(context.actorOf(Props(new ProjectsActor(conf, prepareData)), ProjectsActor.actorName))
 
