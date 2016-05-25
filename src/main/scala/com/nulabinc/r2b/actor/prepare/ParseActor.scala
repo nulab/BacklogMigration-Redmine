@@ -33,8 +33,6 @@ class ParseActor(conf: R2BConfig, prepareData: PrepareData) extends Actor with R
 
 object ParseActor {
 
-  private val timeout: Duration = Duration(ConfigFactory.load().getDuration("r2b.prepare", TimeUnit.MINUTES), TimeUnit.MINUTES)
-
   case class Do()
 
   def actorName = s"ParseActor_$randomUUID"
@@ -46,7 +44,7 @@ object ParseActor {
     val system = ActorSystem("parse")
     val actor = system.actorOf(Props(new ParseActor(conf, prepareData)), ParseActor.actorName)
     actor ! ParseActor.Do
-    system.awaitTermination(timeout)
+    system.awaitTermination(Duration.Inf)
     prepareData
   }
 
