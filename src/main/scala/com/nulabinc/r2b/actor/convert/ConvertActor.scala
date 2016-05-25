@@ -1,7 +1,6 @@
 package com.nulabinc.r2b.actor.convert
 
 import java.util.UUID._
-import java.util.concurrent.TimeUnit
 
 import akka.actor.SupervisorStrategy.Stop
 import akka.actor.{Actor, _}
@@ -13,7 +12,6 @@ import com.nulabinc.r2b.service.RedmineUnmarshaller
 import com.nulabinc.r2b.service.convert.ConvertGroups
 import com.nulabinc.r2b.utils.IOUtil
 import com.osinka.i18n.Messages
-import com.typesafe.config.ConfigFactory
 import spray.json._
 
 import scala.concurrent.duration._
@@ -68,8 +66,6 @@ class ConvertActor(conf: R2BConfig) extends Actor with R2BLogging with Subtasks 
 
 object ConvertActor {
 
-  val timeout: Duration = Duration(ConfigFactory.load().getDuration("r2b.convert", TimeUnit.MINUTES), TimeUnit.MINUTES)
-
   case class Do()
 
   def actorName = s"ConvertActor_$randomUUID"
@@ -78,7 +74,7 @@ object ConvertActor {
     val system = ActorSystem("convert")
     val actor = system.actorOf(Props(new ConvertActor(conf)), ConvertActor.actorName)
     actor ! ConvertActor.Do
-    system.awaitTermination(timeout)
+    system.awaitTermination(Duration.Inf)
   }
 
 }
