@@ -66,7 +66,7 @@ Run the "init" command to prepare the mapping file.
     --backlog.url <URL of Backlog> \
     --redmine.key <Redmine API key> \
     --redmine.url <Redmine of URL>
-    --projects <project identifier 1> <project identifier 2> <Redmine project identifier>: <Backlog project key>
+    --projects <project identifier 1> <project identifier 2> <Redmine project identifier>:<Backlog project key>
     
 Sample commands:
 
@@ -75,7 +75,7 @@ Sample commands:
     --backlog.url https://nulab.backlog.jp \
     --redmine.key XXXXXXXXXXXXX \
     --redmine.url https: //my.redmine \
-    --projects estimation_system order_system: ORDER_SYSTEM
+    --projects estimation_system order_system:ORDER_SYSTEM
         
 The mapping file is created as follows.
 
@@ -95,7 +95,7 @@ The mapping file is created as follows.
 
 Specify the destination project for --projects option by colon (:).  i.e. "--projects atest:BTEST" migrates atest Redmine project in BTEST Backlog project.
 
-    --projects <Redmine project identifier>: <Backlog project key>
+    --projects <Redmine project identifier>:<Backlog project key>
 
 ### Fix the mapping file
 
@@ -123,7 +123,7 @@ Run the "execute" command to import data.
     --backlog.url <URL of Backlog> \
     --redmine.key <Redmine API key> \
     --redmine.url <Redmine of URL>
-    --projects <project identifier 1> <project identifier 2> <Redmine project identifier>: <Backlog project key>
+    --projects <project identifier 1> <project identifier 2> <Redmine project identifier>:<Backlog project key>
     
 Sample commands:
 
@@ -132,7 +132,7 @@ Sample commands:
     --backlog.url https://nulab.backlog.jp \
     --redmine.key XXXXXXXXXXXXX \
     --redmine.url https: //my.redmine \
-    --projects estimation_system order_system: ORDER_SYSTEM
+    --projects estimation_system order_system:ORDER_SYSTEM
     
 When import has been completed, the R2b directory will be created and data file that has been used for importing will be produced.
 
