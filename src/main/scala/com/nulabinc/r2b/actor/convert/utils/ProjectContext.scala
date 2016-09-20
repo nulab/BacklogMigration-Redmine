@@ -76,7 +76,7 @@ case class ProjectContext(conf: R2BConfig, project: RedmineProject) {
   }
 
   def getDefaultStatusName(): Option[String] = {
-    backlogStatuses.find(_.getStatus == StatusType.Open).map(_.getName)
+    backlogStatuses.find(_.getStatusType == StatusType.Open).map(_.getName)
   }
 
   def getPriorityName(id: Option[String]): Option[String] = {
