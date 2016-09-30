@@ -13,6 +13,7 @@ help.backlog.url=Your Backlog url (required) Example:--backlog.url <your backlog
 help.redmine.key=Your Redmine api access key (required) Example:--redmine.key <your redmine API access key>
 help.redmine.url=Your Redmine URL (required) Example:--redmine.url <your redmine url>
 help.projects=Your Redmine project identifier (required) To migrate multiple projects, separate Redmine project identifiers by spaces.Example:--projects <your project identifier1> <your project identifier2>
+help.importOnly=If you set this property, only import will be run by the program.
 mapping.delete_status=Deleted status[{0}]
 mapping.confirm_fix=Check the mapping file and fix it if necessary.
 mapping.not_exists_redmine_item={0} "{1}" does not exist in the Redmine''s mapping file. Recreating will automatically add it.  To recreate, delete "{1}" and run the sub-command "init".

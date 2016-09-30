@@ -13,6 +13,7 @@ help.backlog.url=BacklogのURLを指定します。(必須オプション)例：
 help.redmine.key=RedmineのAPIアクセスキーを指定します。(必須オプション)例：--redmine.key <RedmineのAPIアクセスキー>
 help.redmine.url=RedmineのURLを指定します。(必須オプション)例：--redmine.url <RedmineのURL>
 help.projects=移行したいRedmineプロジェクトのプロジェクト識別子を指定します。複数プロジェクト移行する場合はスペース区切りで指定します。(必須オプション)例：--projects <プロジェクト識別子A> <プロジェクト識別子B>
+help.importOnly=このプロパティを設定した場合、インポートのみを行います。
 mapping.delete_status=削除されたステータス[{0}]
 mapping.confirm_fix=マッピングファイルを確認し、必要に応じて修正してください。
 mapping.not_exists_redmine_item={0}「{1}」がRedmineのマッピングファイルにありません。再作成することで自動的に追加することができます。再作成する場合は、「{2}」を削除し、サブコマンド「init」を実行してください。
