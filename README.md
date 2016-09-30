@@ -420,6 +420,7 @@ descriptionにある項目を使い、空白を埋める必要が有ります。
 #### インポートのみ実行
 
 「--importOnly」オプションを利用すると前回出力したファイルからインポートのみ実行します。
+
     java -jar backlog-migration-redmine-<latest version>.jar execute \
     --backlog.key <BacklogのAPIキー> \
     --backlog.url <BacklogのURL> \
