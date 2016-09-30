@@ -36,6 +36,7 @@ class CommandLineInterface(arguments: Seq[String]) extends ScallopConf(arguments
     val redmineUrl = opt[String]("redmine.url", descr = Messages("help.redmine.url"), required = true, noshort = true)
 
     val projects = opt[List[String]]("projects", descr = Messages("help.projects"), required = true)
+    val importOnly = opt[Boolean]("importOnly", descr = Messages("help.importOnly"), required = true)
   }
 
   val init = new Subcommand("init") {
@@ -76,28 +77,35 @@ object R2B extends R2BLogging {
           cli.execute.redmineUrl(), cli.execute.redmineKey(),
           cli.execute.projects().map(new ParamProjectKey(_)))
 
-        val r2bRoot: Path = Path.fromString(ConfigBase.R2B_ROOT)
-        r2bRoot.deleteRecursively(force = true, continueOnFailure = true)
-
         showTitle()
 
         if (isParameterValid(r2bConf)) {
-          val executeCommand: ExecuteCommand = new ExecuteCommand(r2bConf)
-          if (executeCommand.check()) {
-            val useProjects: Seq[ParamProjectKey] = executeCommand.useProjectsConfirm()
-            val conf: R2BConfig = r2bConf.copy(projects = useProjects)
-            if (executeCommand.confirm(useProjects)) {
+          if(cli.execute.importOnly()) {
+            showImportStart()
+            BacklogActor(BacklogConfig(r2bConf.backlogUrl, r2bConf.backlogKey))
+            showImportFinish()
+          } else {
 
-              showImportStart()
+            val r2bRoot: Path = Path.fromString(ConfigBase.R2B_ROOT)
+            r2bRoot.deleteRecursively(force = true, continueOnFailure = true)
 
-              RedmineActor(conf)
-              ConvertActor(conf)
-              BacklogActor(BacklogConfig(conf.backlogUrl, conf.backlogKey))
+            val executeCommand: ExecuteCommand = new ExecuteCommand(r2bConf)
+            if (executeCommand.check()) {
+              val useProjects: Seq[ParamProjectKey] = executeCommand.useProjectsConfirm()
+              val conf: R2BConfig = r2bConf.copy(projects = useProjects)
+              if (executeCommand.confirm(useProjects)) {
 
-              showImportFinish()
+                showImportStart()
 
-            } else showImportCancel()
-          } else showImportUncompleted()
+                RedmineActor(conf)
+                ConvertActor(conf)
+                BacklogActor(BacklogConfig(conf.backlogUrl, conf.backlogKey))
+
+                showImportFinish()
+
+              } else showImportCancel()
+            } else showImportUncompleted()
+          }
         } else showImportUncompleted()
       case Some(cli.init) =>
 

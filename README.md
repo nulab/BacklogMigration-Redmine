@@ -18,6 +18,7 @@ Migrate your projects from Redmine to [Backlog].
 * The Backlog Space's administrator roles. 
 
 ## Update
+* 2016/09/30 0.9.0b32 released
 * 2016/09/30 0.9.0b31 released
 * 2016/09/21 0.9.0b30 released
 * 2016/09/20 0.9.0b29 released
@@ -146,6 +147,17 @@ When import has been completed, the R2b directory will be created and data file 
     │ └── users.json
     ├── backlog-migration-redmine
     └── backlog-migration-redmine-debug.log
+
+#### Import-Only Mode
+「--importOnly」If you set this property, only import will be run by the program.
+
+    java -jar backlog-migration-redmine-<latest version>.jar execute \
+    --backlog.key <Backlog of API key> \
+    --backlog.url <URL of Backlog> \
+    --redmine.key <Redmine API key> \
+    --redmine.url <Redmine of URL>
+    --projects <project identifier 1> <project identifier 2> <Redmine project identifier>: <Backlog project key>
+    --importOnly
         
 ## Limitation
 
@@ -273,6 +285,7 @@ Redmineのプロジェクトを[Backlog]に移行するためのツールです�
 * Backlogの管理者権限
 
 ## 更新履歴
+* 2016/09/30 0.9.0b32 リリース
 * 2016/09/30 0.9.0b31 リリース
 * 2016/09/21 0.9.0b30 リリース
 * 2016/09/20 0.9.0b29 リリース
@@ -403,6 +416,17 @@ descriptionにある項目を使い、空白を埋める必要が有ります。
     │   └── users.json
     ├── backlog-migration-redmine
     └── backlog-migration-redmine-debug.log
+
+#### インポートのみ実行
+
+「--importOnly」オプションを利用すると前回出力したファイルからインポートのみ実行します。
+    java -jar backlog-migration-redmine-<latest version>.jar execute \
+    --backlog.key <BacklogのAPIキー> \
+    --backlog.url <BacklogのURL> \
+    --redmine.key <RedmineのAPIキー> \
+    --redmine.url <RedmineのURL>
+    --projects <プロジェクト識別子1> <プロジェクト識別子2> <Redmineプロジェクト識別子>:<Backlogプロジェクトキー>
+    --importOnly
         
 ## 制限事項
 
@@ -514,4 +538,4 @@ https://www.backlog.jp/contact/
 
 [Backlog]: http://www.backlog.jp/
 
-[Jar]: https://github.com/nulab/BacklogMigration-Redmine/releases/download/v0.9.0b31/backlog-migration-redmine-0.9.0b31.jar
+[Jar]: https://github.com/nulab/BacklogMigration-Redmine/releases/download/v0.9.0b32/backlog-migration-redmine-0.9.0b32.jar
