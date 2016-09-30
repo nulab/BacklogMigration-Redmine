@@ -24,7 +24,7 @@ libraryDependencies ++= Seq(
   "joda-time" % "joda-time" % "2.3",
   "org.joda" % "joda-convert" % "1.6",
   "com.typesafe" % "config" % "1.3.0",
-  "com.nulabinc" %% "backlog-importer" % "0.0.1"
+  "com.nulabinc" %% "backlog-importer" % "0.9.0b1"
 )
 
 assemblyMergeStrategy in assembly := {
