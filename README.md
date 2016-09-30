@@ -146,6 +146,17 @@ When import has been completed, the R2b directory will be created and data file 
     │ └── users.json
     ├── backlog-migration-redmine
     └── backlog-migration-redmine-debug.log
+
+#### Import-Only Mode
+「--importOnly」If you set this property, only import will be run by the program.
+
+    java -jar backlog-migration-redmine-<latest version>.jar execute \
+    --backlog.key <Backlog of API key> \
+    --backlog.url <URL of Backlog> \
+    --redmine.key <Redmine API key> \
+    --redmine.url <Redmine of URL>
+    --projects <project identifier 1> <project identifier 2> <Redmine project identifier>: <Backlog project key>
+    --importOnly
         
 ## Limitation
 
@@ -403,6 +414,17 @@ descriptionにある項目を使い、空白を埋める必要が有ります。
     │   └── users.json
     ├── backlog-migration-redmine
     └── backlog-migration-redmine-debug.log
+
+#### インポートのみ実行
+
+「--importOnly」オプションを利用すると前回出力したファイルからインポートのみ実行します。
+    java -jar backlog-migration-redmine-<latest version>.jar execute \
+    --backlog.key <BacklogのAPIキー> \
+    --backlog.url <BacklogのURL> \
+    --redmine.key <RedmineのAPIキー> \
+    --redmine.url <RedmineのURL>
+    --projects <プロジェクト識別子1> <プロジェクト識別子2> <Redmineプロジェクト識別子>:<Backlogプロジェクトキー>
+    --importOnly
         
 ## 制限事項
 
