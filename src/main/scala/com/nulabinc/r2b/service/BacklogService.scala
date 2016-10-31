@@ -9,8 +9,8 @@ import com.nulabinc.r2b.actor.utils.R2BLogging
 import scala.collection.JavaConverters._
 
 /**
- * @author uchida
- */
+  * @author uchida
+  */
 class BacklogService(conf: BacklogConfig) extends R2BLogging {
 
   val backlog: BacklogClient = getBacklogClient
@@ -22,20 +22,20 @@ class BacklogService(conf: BacklogConfig) extends R2BLogging {
   def getPriorities: Seq[Priority] = backlog.getPriorities.asScala
 
   def getIssues(projectKey: String): Seq[Issue] = {
-    val result: Either[Throwable, Project] = getProject(projectKey)
-    if (result.isLeft) return Seq.empty[Issue]
-
-    val params: GetIssuesParams = new GetIssuesParams(List(result.right.get.getId.asInstanceOf[java.lang.Long]).asJava)
-    backlog.getIssues(params).asScala
+    val optProject: Option[Project] = getProject(projectKey)
+    if (optProject.isDefined) {
+      val params: GetIssuesParams = new GetIssuesParams(List(optProject.get.getId.asInstanceOf[java.lang.Long]).asJava)
+      backlog.getIssues(params).asScala
+    } else Seq.empty[Issue]
   }
 
 
-  def getProject(projectKey: String): Either[Throwable, Project] = try {
-    Right(backlog.getProject(projectKey))
+  def getProject(projectKey: String): Option[Project] = try {
+    Some(backlog.getProject(projectKey))
   } catch {
     case e: BacklogAPIException =>
-      if(!e.getMessage.contains("No project")) error(e)
-      Left(e)
+      if (!(e.getMessage.contains("No project") || e.getMessage.contains("No such project"))) error(e)
+      None
   }
 
   private def getBacklogClient: BacklogClient = {
