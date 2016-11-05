@@ -126,7 +126,7 @@ class R2BSpec extends FlatSpec with ShouldMatchers with BeforeAndAfterAll with S
       val redmineWikiUserId = userMapping.convert(redmineWikiUser.getLogin)
 
       redmineWikiPageDetail.getTitle should equal(backlogWiki.getName)
-      redmineContent.replaceAll("\r\n", "\n") should equal(backlogWiki.getContent)
+      redmineContent should equal(backlogWiki.getContent)
       redmineWikiUserId should equal(backlogWiki.getCreatedUser.getUserId)
       redmineWikiUserId should equal(backlogWiki.getUpdatedUser.getUserId)
       timestampToString(redmineWikiPageDetail.getCreatedOn) should equal(timestampToString(backlogWiki.getCreated))

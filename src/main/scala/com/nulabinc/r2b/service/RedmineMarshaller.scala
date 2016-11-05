@@ -6,6 +6,7 @@ import com.nulabinc.r2b.domain._
 import com.osinka.i18n.Lang
 import com.taskadapter.redmineapi.bean._
 import org.joda.time.DateTime
+import org.joda.time.format.ISODateTimeFormat
 import spray.json._
 
 import scala.collection.JavaConverters._
@@ -19,7 +20,7 @@ object RedmineMarshaller {
   import RedmineJsonProtocol._
 
   val dateFormat = "yyyy-MM-dd"
-  val timestampFormat = "yyyy-MM-dd'T'HH:mm:ssZ"
+  val parserISO = ISODateTimeFormat.dateTimeNoMillis()
 
   object Issue {
     def apply(issue: Issue, project: Project, users: Seq[User]): String =
@@ -44,8 +45,8 @@ object RedmineMarshaller {
         journals = getRedmineJournals(issue, users),
         customFields = getRedmineCustomFields(issue),
         author = getUserLogin(Option(issue.getAuthor), users),
-        createdOn = Option(issue.getCreatedOn).map(date => new DateTime(date).toString(timestampFormat)),
-        updatedOn = Option(issue.getUpdatedOn).map(date => new DateTime(date).toString(timestampFormat))).toJson.prettyPrint
+        createdOn = Option(issue.getCreatedOn).map(date => parserISO.print(new DateTime(date))),
+        updatedOn = Option(issue.getUpdatedOn).map(date => parserISO.print(new DateTime(date)))).toJson.prettyPrint
 
     private def getRedmineAttachments(issue: Issue): Seq[RedmineAttachment] = {
       val attachments: Array[Attachment] = issue.getAttachments.toArray(new Array[Attachment](issue.getAttachments.size()))
@@ -77,8 +78,8 @@ object RedmineMarshaller {
         user = getUserLogin(Option(wikiPageDetail.getUser), users),
         comments = Option(wikiPageDetail.getComments),
         parentTitle = Option(wikiPageDetail.getParent).map(_.getTitle),
-        createdOn = Option(wikiPageDetail.getCreatedOn).map(date => new DateTime(date).toString(timestampFormat)),
-        updatedOn = Option(wikiPageDetail.getUpdatedOn).map(date => new DateTime(date).toString(timestampFormat)),
+        createdOn = Option(wikiPageDetail.getCreatedOn).map(date => parserISO.print(new DateTime(date))),
+        updatedOn = Option(wikiPageDetail.getUpdatedOn).map(date => parserISO.print(new DateTime(date))),
         attachments = getRedmineAttachments(wikiPageDetail)).toJson.prettyPrint
     }
 
@@ -109,7 +110,7 @@ object RedmineMarshaller {
         description = news.getDescription,
         link = Option(news.getLink),
         user = getUserLogin(Option(news.getUser), users),
-        createdOn = Option(news.getCreatedOn).map(date => new DateTime(date).toString(timestampFormat)))
+        createdOn = Option(news.getCreatedOn).map(date => parserISO.print(new DateTime(date))))
   }
 
   object Membership {
@@ -203,7 +204,7 @@ object RedmineMarshaller {
       notes = Option(journal.getNotes),
       details = journal.getDetails.asScala.map(getRedmineJournalDetail),
       user = getUserLogin(Option(journal.getUser), users),
-      createdOn = Option(journal.getCreatedOn).map(date => new DateTime(date).toString(timestampFormat)))
+      createdOn = Option(journal.getCreatedOn).map(date => parserISO.print(new DateTime(date))))
 
   private def getRedmineJournalDetail(journalDetail: JournalDetail): RedmineJournalDetail =
     RedmineJournalDetail(

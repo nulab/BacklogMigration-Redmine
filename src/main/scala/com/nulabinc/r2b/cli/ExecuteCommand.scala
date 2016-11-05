@@ -41,7 +41,7 @@ class ExecuteCommand(conf: R2BConfig) extends CommonCommand {
 
   private def confirmUseProject(projectKey: ParamProjectKey): Option[ParamProjectKey] = {
     val backlogService: BacklogService = new BacklogService(BacklogConfig(conf.backlogUrl, conf.backlogKey))
-    if (backlogService.getProject(projectKey.getBacklogKey()).isRight) {
+    if (backlogService.getProject(projectKey.getBacklogKey()).isDefined) {
 
       newLine()
 

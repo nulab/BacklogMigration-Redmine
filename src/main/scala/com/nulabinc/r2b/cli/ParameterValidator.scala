@@ -42,8 +42,8 @@ class ParameterValidator(conf: R2BConfig) extends R2BLogging {
     projectKey.backlog match {
       case Some(backlog) =>
         backlogService.getProject(backlog) match {
-          case Right(_) => Seq.empty[String]
-          case Left(_) => Seq("- " + Messages("message.project_not_exist", projectKey.backlog.get))
+          case Some(_) => Seq.empty[String]
+          case None => Seq("- " + Messages("message.project_not_exist", projectKey.backlog.get))
         }
       case None => Seq.empty[String]
     }
