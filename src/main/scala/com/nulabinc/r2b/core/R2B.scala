@@ -9,7 +9,7 @@ import com.nulabinc.r2b.actor.redmine.RedmineActor
 import com.nulabinc.r2b.actor.utils.R2BLogging
 import com.nulabinc.r2b.cli.{ExecuteCommand, InitCommand, ParamProjectKey, ParameterValidator}
 import com.nulabinc.r2b.conf.{ConfigBase, R2BConfig}
-import com.nulabinc.r2b.utils.ClassVersion
+import com.nulabinc.r2b.utils.{ClassVersion, DisableSSLCertificateCheckUtil}
 import com.osinka.i18n.{Lang, Messages}
 import org.rogach.scallop._
 
@@ -70,6 +70,7 @@ object R2B extends R2BLogging {
   }
 
   private def execute(cli: CommandLineInterface) = {
+    DisableSSLCertificateCheckUtil.disableChecks()
     cli.subcommand match {
       case Some(cli.execute) =>
         val r2bConf: R2BConfig = new R2BConfig(
