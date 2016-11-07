@@ -52,25 +52,6 @@ object AttachmentDownloader {
   }
 
   private def download(downloadInfo: DownloadInfo) = {
-    val tm: Array[TrustManager] = Array(
-      new X509TrustManager() {
-        override def getAcceptedIssuers: Array[X509Certificate] = null
-
-        override def checkClientTrusted(x509Certificates: Array[X509Certificate], s: String): Unit = {}
-
-        override def checkServerTrusted(x509Certificates: Array[X509Certificate], s: String): Unit = {}
-      }
-    )
-
-    try {
-      val sc:SSLContext = SSLContext.getInstance("SSL")
-      sc.init(null, tm, new SecureRandom())
-      HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory())
-    } catch {
-      case e:GeneralSecurityException =>
-        throw new ExceptionInInitializerError(e)
-    }
-
     val rbc: ReadableByteChannel = Channels.newChannel(downloadInfo.url.openStream())
     val fos: FileOutputStream = new FileOutputStream(downloadInfo.path)
     fos.getChannel.transferFrom(rbc, 0, java.lang.Long.MAX_VALUE)
