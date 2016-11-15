@@ -2,7 +2,7 @@ name := "backlog-migration-redmine"
 
 organization := "com.nulabinc"
 
-version := "0.9.0b34"
+version := "0.9.0b35"
 
 scalaVersion := "2.11.6"
 
@@ -65,3 +65,5 @@ import de.johoop.findbugs4sbt.FindBugs._
 
 cpdSettings
 findbugsSettings
+
+test in assembly := {}

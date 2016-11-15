@@ -80,8 +80,8 @@ object R2B extends R2BLogging {
 
         showTitle()
 
-        if (isParameterValid(r2bConf)) {
-          if(cli.execute.importOnly()) {
+        if (isParameterValid(r2bConf, cli.execute.importOnly())) {
+          if (cli.execute.importOnly()) {
             showImportStart()
             BacklogActor(BacklogConfig(r2bConf.backlogUrl, r2bConf.backlogKey))
             showImportFinish()
@@ -117,7 +117,7 @@ object R2B extends R2BLogging {
 
         showTitle()
 
-        if (isParameterValid(r2bConf)) {
+        if (isParameterValid(r2bConf, true)) {
           val initCommand: InitCommand = new InitCommand(r2bConf)
           initCommand.execute()
         }
@@ -157,9 +157,9 @@ object R2B extends R2BLogging {
     title(Messages("import_uncompleted"), BOTTOM)
   }
 
-  private def isParameterValid(r2bConf: R2BConfig): Boolean = {
+  private def isParameterValid(r2bConf: R2BConfig, isImportOnly: Boolean): Boolean = {
     val validator: ParameterValidator = new ParameterValidator(r2bConf)
-    val errors: Seq[String] = validator.validate()
+    val errors: Seq[String] = validator.validate(isImportOnly)
     if (errors.nonEmpty) {
       newLine()
       info(Messages("mapping.show_parameter_error"))

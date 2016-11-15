@@ -13,12 +13,15 @@ import com.taskadapter.redmineapi.{RedmineAuthenticationException, RedmineTransp
   */
 class ParameterValidator(conf: R2BConfig) extends R2BLogging {
 
-  def validate(): Seq[String] = {
+  def validate(isImportOnly: Boolean): Seq[String] = {
     val backlogErrors: Seq[String] = validateLoadBacklog()
-    val redmineErrors: Seq[String] = validateLoadRedmine()
-    val redmineProjectsErrors: Seq[String] = if (redmineErrors.isEmpty) validateLoadRedmineProjects() else Seq.empty[String]
-    val backlogProjectsErrors: Seq[String] = if (redmineErrors.isEmpty) validateLoadBacklogProjects() else Seq.empty[String]
-    backlogErrors union redmineErrors union backlogProjectsErrors union redmineProjectsErrors
+    if (isImportOnly) backlogErrors
+    else {
+      val redmineErrors: Seq[String] = validateLoadRedmine()
+      val redmineProjectsErrors: Seq[String] = if (redmineErrors.isEmpty) validateLoadRedmineProjects() else Seq.empty[String]
+      val backlogProjectsErrors: Seq[String] = if (redmineErrors.isEmpty) validateLoadBacklogProjects() else Seq.empty[String]
+      backlogErrors union redmineErrors union backlogProjectsErrors union redmineProjectsErrors
+    }
   }
 
   private def validateLoadRedmineProjects(): Seq[String] =
@@ -29,7 +32,7 @@ class ParameterValidator(conf: R2BConfig) extends R2BLogging {
     val redmineService: RedmineService = new RedmineService(conf)
     val option = redmineService.getProject(projectKey)
 
-    if(option.isEmpty) Seq("- " + Messages("message.can_not_load_project", projectKey.redmine))
+    if (option.isEmpty) Seq("- " + Messages("message.can_not_load_project", projectKey.redmine))
     else Seq.empty[String]
   }
 
