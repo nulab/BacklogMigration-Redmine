@@ -1,15 +1,15 @@
 package com.nulabinc.r2b.service
 
-import com.nulabinc.r2b.conf.ConfigBase
-import com.nulabinc.r2b.domain.MappingJsonProtocol._
-import com.nulabinc.r2b.domain.{Mapping, MappingsWrapper}
+import com.nulabinc.r2b.conf.RedmineDirectory
+import com.nulabinc.r2b.mapping.MappingJsonProtocol._
+import com.nulabinc.r2b.mapping.{Mapping, MappingsWrapper}
 import spray.json.JsonParser
 
 import scalax.file.Path
 
 /**
- * @author uchida
- */
+  * @author uchida
+  */
 trait ConvertMapping {
 
   def filePath: String
@@ -34,13 +34,13 @@ trait ConvertMapping {
 }
 
 class ConvertUserMapping extends ConvertMapping {
-  override def filePath: String = ConfigBase.USER_MAPPING_FILE
+  override def filePath: String = RedmineDirectory.USER_MAPPING_FILE
 }
 
 class ConvertStatusMapping extends ConvertMapping {
-  override def filePath: String = ConfigBase.STATUS_MAPPING_FILE
+  override def filePath: String = RedmineDirectory.STATUS_MAPPING_FILE
 }
 
 class ConvertPriorityMapping extends ConvertMapping {
-  override def filePath: String = ConfigBase.PRIORITY_MAPPING_FILE
+  override def filePath: String = RedmineDirectory.PRIORITY_MAPPING_FILE
 }

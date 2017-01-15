@@ -1,58 +1,58 @@
 package com.nulabinc.r2b.actor.redmine
 
-import java.util.UUID._
+import java.util.concurrent.CountDownLatch
+import javax.inject.{Inject, Named}
 
 import akka.actor.SupervisorStrategy.Escalate
-import akka.actor._
-import com.nulabinc.r2b.actor.utils.{R2BLogging, Subtasks}
-import com.nulabinc.r2b.conf.R2BConfig
-import com.nulabinc.r2b.service.RedmineService
-import com.osinka.i18n.Messages
-import com.taskadapter.redmineapi.bean.{Project, WikiPage}
+import akka.actor.{Actor, AllForOneStrategy, Props, SupervisorStrategy}
+import akka.routing.SmallestMailboxPool
+import com.nulabinc.backlog.migration.conf.CommonConfigBase
+import com.nulabinc.backlog.migration.di.akkaguice.NamedActor
+import com.nulabinc.backlog.migration.utils.Logging
+import com.nulabinc.r2b.conf.RedmineDirectory
+import com.nulabinc.r2b.service.{AttachmentDownloadService, UserService, WikiService}
+import com.taskadapter.redmineapi.bean.{User, WikiPage}
 
 /**
   * @author uchida
   */
-class WikisActor(conf: R2BConfig, project: Project) extends Actor with R2BLogging with Subtasks {
+class WikisActor @Inject()(
+                            redmineDirectory: RedmineDirectory,
+                            @Named("key") key: String,
+                            @Named("projectKey") projectKey: String,
+                            attachmentDownloadService: AttachmentDownloadService,
+                            userService: UserService,
+                            wikiService: WikiService) extends Actor with Logging {
 
-  override val supervisorStrategy = OneForOneStrategy(maxNrOfRetries = 0) {
-    case _: Exception =>
-      Escalate
+  override val supervisorStrategy: SupervisorStrategy = {
+    val decider: SupervisorStrategy.Decider = {
+      case _ =>
+        Escalate
+    }
+    AllForOneStrategy()(decider orElse super.supervisorStrategy.decider)
   }
 
-  var wikiSize: Int = 0
+  private val wikis: Seq[WikiPage] = wikiService.allWikis()
+  private val completion = new CountDownLatch(wikis.size)
 
   def receive: Receive = {
-    case WikisActor.Do =>
+    case WikisActor.Do() =>
+      val users: Seq[User] = userService.allUsers()
+      val wikiActor = context.actorOf(SmallestMailboxPool(CommonConfigBase.ACTOR_POOL_SIZE).
+        props(Props(new WikiActor(redmineDirectory, key, projectKey, attachmentDownloadService, wikiService, users))))
 
-      val redmineService: RedmineService = new RedmineService(conf)
-      val wikiPages = redmineService.getWikiPagesByProject(project.getIdentifier)
+      wikis.foreach(wiki => wikiActor ! WikiActor.Do(wiki, completion, wikis.size))
 
-      if (wikiPages.nonEmpty) {
-
-        wikiSize = wikiPages.size
-        info(Messages("message.execute_redmine_wikis_export", project.getName, wikiSize))
-        wikiPages.foreach(contents)
-
-      } else context.stop(self)
-
-    case Terminated(ref) =>
-      info(Messages("message.execute_redmine_wiki_export", project.getName, wikiSize - subtasks.size + 1, wikiSize))
-      complete(ref)
-      if (subtasks.isEmpty) context.stop(self)
-  }
-
-  private def contents(wikiPage: WikiPage) = {
-    val wikiActor = start(Props(new WikiActor(conf, project, wikiPage.getTitle)), WikiActor.actorName)
-    wikiActor ! WikiActor.Do
+      completion.await
+      context.stop(self)
   }
 
 }
 
-object WikisActor {
+object WikisActor extends NamedActor {
 
   case class Do()
 
-  def actorName = s"WikisActor_$randomUUID"
+  override final val name = "WikisActor"
 
 }

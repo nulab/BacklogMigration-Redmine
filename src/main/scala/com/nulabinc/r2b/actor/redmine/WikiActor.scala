@@ -1,38 +1,40 @@
 package com.nulabinc.r2b.actor.redmine
 
-import java.util.UUID._
+import java.util.concurrent.CountDownLatch
 
-import akka.actor._
-import com.nulabinc.r2b.actor.utils.R2BLogging
-import com.nulabinc.r2b.conf.{ConfigBase, R2BConfig}
-import com.nulabinc.r2b.service.{AttachmentDownloader, RedmineMarshaller, RedmineService}
-import com.nulabinc.r2b.utils.IOUtil
-import com.taskadapter.redmineapi.bean.{Project, User, WikiPageDetail}
+import akka.actor.Actor
+import com.nulabinc.backlog.migration.utils.{IOUtil, Logging}
+import com.nulabinc.r2b.conf.RedmineDirectory
+import com.nulabinc.r2b.service.{AttachmentDownloadService, RedmineMarshaller, WikiService}
+import com.osinka.i18n.Messages
+import com.taskadapter.redmineapi.bean.{User, WikiPage, WikiPageDetail}
 
 /**
- * @author uchida
- */
-class WikiActor(conf: R2BConfig, project: Project, pageTitle: String) extends Actor with R2BLogging {
-
-  val redmineService: RedmineService = new RedmineService(conf)
+  * @author uchida
+  */
+class WikiActor(
+                 redmineDirectory: RedmineDirectory,
+                 apiKey: String,
+                 projectKey: String,
+                 attachmentDownloadService: AttachmentDownloadService,
+                 wikiService: WikiService,
+                 users: Seq[User]) extends Actor with Logging {
 
   def receive: Receive = {
-    case WikiActor.Do =>
-      val wiki: WikiPageDetail = redmineService.getWikiPageDetailByProjectAndTitle(project.getIdentifier, pageTitle)
-      val users: Seq[User] = redmineService.getUsers()
+    case WikiActor.Do(wiki: WikiPage, completion: CountDownLatch, allCount: Int) =>
+      val wikiDetail: WikiPageDetail = wikiService.wikiDetail(wiki.getTitle)
 
-      IOUtil.output(ConfigBase.Redmine.getWikiPath(project.getIdentifier, pageTitle), RedmineMarshaller.Wiki(wiki, users))
-      AttachmentDownloader.wiki(conf.redmineKey, project.getIdentifier,wiki)
+      IOUtil.output(redmineDirectory.getWikiPath(wiki.getTitle), RedmineMarshaller.Wiki(wikiDetail, users))
+      attachmentDownloadService.wiki(apiKey, projectKey, wikiDetail)
 
-      context.stop(self)
+      completion.countDown()
+      log.info(showMessage(LOG_List, Messages("cli.load_redmine_wikis", allCount - completion.getCount, allCount)))
   }
 
 }
 
 object WikiActor {
 
-  case class Do()
-
-  def actorName = s"WikiActor_$randomUUID"
+  case class Do(wiki: WikiPage, completion: CountDownLatch, allCount: Int)
 
 }

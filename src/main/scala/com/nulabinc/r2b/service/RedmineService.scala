@@ -1,8 +1,7 @@
 package com.nulabinc.r2b.service
 
-import com.nulabinc.r2b.actor.utils.R2BLogging
-import com.nulabinc.r2b.cli.ParamProjectKey
-import com.nulabinc.r2b.conf.R2BConfig
+import com.nulabinc.backlog.migration.utils.Logging
+import com.nulabinc.r2b.conf.RedmineConfig
 import com.nulabinc.r2b.domain._
 import com.taskadapter.redmineapi._
 import com.taskadapter.redmineapi.bean._
@@ -16,14 +15,14 @@ import scala.collection.JavaConverters._
 /**
   * @author uchida
   */
-class RedmineService(conf: R2BConfig) extends R2BLogging {
+class RedmineService(redmineConfig: RedmineConfig) extends Logging {
 
   import RedmineJsonProtocol._
 
-  val redmine: RedmineManager = RedmineManagerFactory.createWithApiKey(conf.redmineUrl, conf.redmineKey)
+  val redmine: RedmineManager = RedmineManagerFactory.createWithApiKey(redmineConfig.url, redmineConfig.key)
 
   def getIssuesCount(projectId: Int): Int = {
-    val url = conf.redmineUrl + "/issues.json?limit=1&subproject_id=!*&project_id=" + projectId + "&key=" + conf.redmineKey + "&status_id=*"
+    val url = redmineConfig.url + "/issues.json?limit=1&subproject_id=!*&project_id=" + projectId + "&key=" + redmineConfig.key + "&status_id=*"
     val str: String = httpGet(url)
     val redmineIssuesWrapper: RedmineIssuesWrapper = JsonParser(str).convertTo[RedmineIssuesWrapper]
     redmineIssuesWrapper.total_count
@@ -52,14 +51,12 @@ class RedmineService(conf: R2BConfig) extends R2BLogging {
     }
   }
 
-  def getProjects(): Seq[Project] = conf.projects.flatMap(getProject)
-
-  def getProject(projectKey: ParamProjectKey): Option[Project] =
+  def optProject(projectKey: String): Option[Project] =
     try {
-      Some(redmine.getProjectManager.getProjectByKey(projectKey.redmine))
+      Some(redmine.getProjectManager.getProjectByKey(projectKey))
     } catch {
       case e: NotFoundException =>
-        error(e)
+        log.error(e)
         None
     }
 
@@ -68,7 +65,7 @@ class RedmineService(conf: R2BConfig) extends R2BLogging {
       redmine.getMembershipManager.getMemberships(projectKey).asScala
     } catch {
       case e: NotFoundException =>
-        error(e)
+        log.error(e)
         Seq.empty[Membership]
     }
   }
@@ -78,7 +75,7 @@ class RedmineService(conf: R2BConfig) extends R2BLogging {
       redmine.getIssueManager.getCategories(projectId).asScala
     } catch {
       case e: NotFoundException =>
-        error(e)
+        log.error(e)
         Seq.empty[IssueCategory]
     }
   }
@@ -88,7 +85,7 @@ class RedmineService(conf: R2BConfig) extends R2BLogging {
       redmine.getIssueManager.getTrackers.asScala
     } catch {
       case e: NotFoundException =>
-        error(e)
+        log.error(e)
         Seq.empty[Tracker]
     }
   }
@@ -98,7 +95,7 @@ class RedmineService(conf: R2BConfig) extends R2BLogging {
       redmine.getWikiManager.getWikiPagesByProject(projectKey).asScala
     } catch {
       case e: Exception =>
-        error(e)
+        log.error(e)
         Seq.empty[WikiPage]
     }
   }
@@ -117,7 +114,7 @@ class RedmineService(conf: R2BConfig) extends R2BLogging {
       Some(redmine.getUserManager.getUserById(id))
     } catch {
       case e: NotFoundException =>
-        error(e)
+        log.error(e)
         None
     }
   }
@@ -127,7 +124,7 @@ class RedmineService(conf: R2BConfig) extends R2BLogging {
       redmine.getProjectManager.getNews(projectKey).asScala
     } catch {
       case e: NotAuthorizedException =>
-        error(e)
+        log.error(e)
         Seq.empty[News]
     }
   }
@@ -141,7 +138,7 @@ class RedmineService(conf: R2BConfig) extends R2BLogging {
       redmine.getIssueManager.getStatuses.asScala
     } catch {
       case e: NotFoundException =>
-        error(e)
+        log.error(e)
         Seq.empty[IssueStatus]
     }
   }
@@ -151,10 +148,10 @@ class RedmineService(conf: R2BConfig) extends R2BLogging {
       redmine.getIssueManager.getIssuePriorities.asScala
     } catch {
       case nfe: NotFoundException =>
-        error(nfe)
+        log.error(nfe)
         Seq.empty[IssuePriority]
       case rfe: RedmineFormatException =>
-        error(rfe)
+        log.error(rfe)
         Seq.empty[IssuePriority]
     }
   }
@@ -164,10 +161,10 @@ class RedmineService(conf: R2BConfig) extends R2BLogging {
       redmine.getProjectManager.getVersions(projectID).asScala
     } catch {
       case rae: RedmineAuthenticationException =>
-        error(rae)
+        log.error(rae)
         Seq.empty[Version]
       case nfe: NotFoundException =>
-        error(nfe)
+        log.error(nfe)
         Seq.empty[Version]
     }
   }

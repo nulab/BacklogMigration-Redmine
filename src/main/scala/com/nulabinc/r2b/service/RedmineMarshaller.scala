@@ -94,9 +94,9 @@ object RedmineMarshaller {
       RedmineUsersWrapper(users.map(getRedmineUser)).toJson.prettyPrint
   }
 
-  object Projects {
-    def apply(projects: Seq[Project]): String =
-      RedmineProjectsWrapper(projects.map(getRedmineProject)).toJson.prettyPrint
+  object Project {
+    def apply(project: Project): String =
+      RedmineProjectsWrapper(getRedmineProject(project)).toJson.prettyPrint
   }
 
   object News {
