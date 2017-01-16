@@ -7,12 +7,8 @@ import java.io.File
   */
 class RedmineDirectory(projectKey: String) {
 
-  val workingDirectory = new File(".").getAbsoluteFile.getParent
-
-  val ROOT = workingDirectory + "/redmine"
-
-
-  val DEFAULT_PASSWORD: String = "password"
+  private[this] val WORKING_DIRECTORY = new File(".").getAbsoluteFile.getParent
+  val ROOT = WORKING_DIRECTORY + "/redmine"
 
   val PROJECTS = ROOT + "/projects.json"
   val CUSTOM_FIELDS = ROOT + "/custom_fields.json"
@@ -59,12 +55,7 @@ class RedmineDirectory(projectKey: String) {
 
 object RedmineDirectory {
 
-  val workingDirectory = new File(".").getAbsoluteFile.getParent
-
-  val ROOT = workingDirectory + "/redmine"
-
-  val USER_MAPPING_FILE = workingDirectory + "/mapping/users.json"
-  val STATUS_MAPPING_FILE = workingDirectory + "/mapping/statuses.json"
-  val PRIORITY_MAPPING_FILE = workingDirectory + "/mapping/priorities.json"
+  private[this] val WORKING_DIRECTORY = new File(".").getAbsoluteFile.getParent
+  val ROOT = WORKING_DIRECTORY + "/redmine"
 
 }

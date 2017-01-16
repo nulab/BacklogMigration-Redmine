@@ -1,7 +1,7 @@
 package com.nulabinc.r2b.mapping
 
 import com.nulabinc.backlog4j.Priority
-import com.nulabinc.r2b.conf.{AppConfiguration, RedmineDirectory}
+import com.nulabinc.r2b.conf.AppConfiguration
 import com.nulabinc.r2b.service.{BacklogService, RedmineService}
 import com.osinka.i18n.Messages
 
@@ -74,7 +74,7 @@ class PriorityMappingFile(config: AppConfiguration) extends MappingFile {
 
   override def redmines: Seq[MappingItem] = redmineDatas
 
-  override def filePath: String = RedmineDirectory.PRIORITY_MAPPING_FILE
+  override def filePath: String = MappingDirectory.PRIORITY_MAPPING_FILE
 
   override def itemName: String = Messages("common.priorities")
 
