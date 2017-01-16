@@ -85,6 +85,8 @@ import.attachment_upload_failed_too_large=Attachment file upload failed. The siz
 import.attachment_upload_failed=Attachment file upload failed. :{0}
 import.wiki_attachment_attach_failed=Wiki attachment file attach failed. :{0}
 [CONVERT]
+convert.start_convert=Start convert.
+convert.completed_convert=Convert completed.
 convert.add_attachment=File {0} added
 convert.del_attachment=File deleted ({0})
 convert.start_groups_convert=Start converting groups.

@@ -85,6 +85,8 @@ import.attachment_upload_failed_too_large=添付ファイルを{0}をアップ�
 import.attachment_upload_failed=添付ファイルを{0}をアップロードできませんでした。:{1}
 import.wiki_attachment_attach_failed=添付ファイルをWikiに添付できませんでした。:{0}
 [CONVERT]
+convert.start_convert=コンバートを開始します。
+convert.completed_convert=コンバートを完了しました。
 convert.add_attachment=ファイル {0} を追加
 convert.del_attachment=ファイル を削除 ({0})
 convert.start_groups_convert=グループのコンバートを実行します。

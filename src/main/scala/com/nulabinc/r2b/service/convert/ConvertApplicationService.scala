@@ -65,7 +65,7 @@ class ConvertApplicationService @Inject()(
       def getUserIdsByGroupId(groupName: String, redmineUsers: Seq[RedmineUser]): Seq[String] =
         redmineUsers.filter(redmineUser => redmineUser.groups.contains(groupName)).map(_.login)
 
-      log.info(Messages("convert.start_groups_convert"))
+      log.info(showMessage(LOG_Header2, Messages("convert.start_groups_convert")))
       val backlogGroups: Seq[BacklogGroup] =
         redmineGroups.map(redmineGroup =>
           BacklogGroup(redmineGroup.name, getUserIdsByGroupId(redmineGroup.name, redmineUsers).map(userMapping.convert)))
@@ -78,7 +78,7 @@ class ConvertApplicationService @Inject()(
   private[this] def projectUsers() =
     for {membershipsUsers <- RedmineUnmarshaller.membershipsUsers(redmineDirectory)} yield {
 
-      log.info(Messages("convert.execute_project_users_convert"))
+      log.info(showMessage(LOG_Header2, Messages("convert.execute_project_users_convert")))
 
       val userIds: Seq[String] = membershipsUsers.flatMap(membershipsUser => propertyService.optUser(membershipsUser.id))
       IOUtil.output(
@@ -90,7 +90,7 @@ class ConvertApplicationService @Inject()(
   private[this] def issueCategories() = {
     for {redmineIssueCategories <- RedmineUnmarshaller.categories(redmineDirectory)} yield {
 
-      log.info(Messages("convert.execute_issue_categories_convert"))
+      log.info(showMessage(LOG_Header2, Messages("convert.execute_issue_categories_convert")))
 
       IOUtil.output(
         backlogDirectory.getIssueCategoriesDir(),
@@ -101,7 +101,7 @@ class ConvertApplicationService @Inject()(
   private[this] def customFields() = {
     for {customFieldDefinitions <- RedmineUnmarshaller.customFieldDefinitions(redmineDirectory)} yield {
 
-      log.info(Messages("convert.execute_custom_fields_convert"))
+      log.info(showMessage(LOG_Header2, Messages("convert.execute_custom_fields_convert")))
 
       val backlogCustomFieldDefinitions: Seq[BacklogCustomFieldDefinition] =
         customFieldDefinitions.map(customFieldDefinition => convertCustomFieldDefinitionService.convert(customFieldDefinition))
@@ -114,7 +114,7 @@ class ConvertApplicationService @Inject()(
   private[this] def issueTypes() = {
     for {trackers <- RedmineUnmarshaller.trackers(redmineDirectory)} yield {
 
-      log.info(Messages("convert.execute_issue_types_convert"))
+      log.info(showMessage(LOG_Header2, Messages("convert.execute_issue_types_convert")))
 
       val backlogIssueTypes: Seq[BacklogIssueType] =
         trackers.map(tracker => BacklogIssueType(name = tracker.name, color = BacklogProperty.ISSUE_TYPE_COLOR.getStrValue, deleted = false))
@@ -128,7 +128,7 @@ class ConvertApplicationService @Inject()(
   private[this] def versions() = {
     for {redmineVersions <- RedmineUnmarshaller.versions(redmineDirectory)} yield {
 
-      log.info(Messages("convert.execute_versions_convert"))
+      log.info(showMessage(LOG_Header2, Messages("convert.execute_versions_convert")))
 
       val backlogVersions: Seq[BacklogVersion] =
         redmineVersions.map(version => BacklogVersion(
@@ -158,7 +158,7 @@ class ConvertApplicationService @Inject()(
       val redmineAttachments: Seq[RedmineAttachment] = redmineIssue.attachments
       redmineAttachments.foreach(redmineAttachment => copy(redmineAttachment, redmineIssue))
 
-      log.info(Messages("convert.execute_issue_convert", count + 1, size))
+      log.info(showMessage(LOG_List, Messages("convert.execute_issue_convert", count + 1, size)))
     }
   }
 
@@ -185,7 +185,7 @@ class ConvertApplicationService @Inject()(
       val redmineAttachments: Seq[RedmineAttachment] = redmineWikiPage.attachments
       redmineAttachments.foreach(redmineAttachment => copy(redmineAttachment, redmineWikiPage))
 
-      log.info(Messages("convert.execute_wiki_convert", count + 1, size))
+      log.info(showMessage(LOG_List, Messages("convert.execute_wiki_convert", count + 1, size)))
     }
   }
 

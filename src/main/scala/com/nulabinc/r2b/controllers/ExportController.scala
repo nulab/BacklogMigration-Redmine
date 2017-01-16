@@ -36,7 +36,8 @@ object ExportController extends Logging {
 
     log.info(
       s"""--------------------------------------------------
-         |${showMessage(logKInd, Messages("export.completed_redmine_export"))}""".stripMargin)
+         |${showMessage(logKInd, Messages("export.completed_redmine_export"))}
+         |""".stripMargin)
 
   }
 
