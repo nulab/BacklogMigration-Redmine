@@ -189,7 +189,7 @@ class ConvertApplicationService @Inject()(
     }
   }
 
-  private def copy(redmineAttachment: RedmineAttachment, redmineWikiPage: RedmineWikiPage) = {
+  private[this] def copy(redmineAttachment: RedmineAttachment, redmineWikiPage: RedmineWikiPage) = {
     val dir: String = redmineDirectory.getWikiAttachmentDir(redmineWikiPage.title, redmineAttachment.id)
     val redmineFilePath: String = dir + "/" + redmineAttachment.fileName
     val convertFilePath: String = backlogDirectory.getWikiAttachmentPath(redmineWikiPage.title, redmineAttachment.id, redmineAttachment.fileName)

@@ -32,8 +32,8 @@ class WikisActor @Inject()(
     AllForOneStrategy()(decider orElse super.supervisorStrategy.decider)
   }
 
-  private val wikis: Seq[WikiPage] = wikiService.allWikis()
-  private val completion = new CountDownLatch(wikis.size)
+  private[this] val wikis: Seq[WikiPage] = wikiService.allWikis()
+  private[this] val completion = new CountDownLatch(wikis.size)
 
   def receive: Receive = {
     case WikisActor.Do() =>

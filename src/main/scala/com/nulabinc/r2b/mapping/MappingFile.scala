@@ -68,6 +68,6 @@ trait MappingFile extends Logging {
     } else name
   }
 
-  private def convert(redmine: MappingItem): Mapping = Mapping(redmine.name, matchWithBacklog(redmine))
+  private[this] def convert(redmine: MappingItem): Mapping = Mapping(redmine.name, matchWithBacklog(redmine))
 
 }

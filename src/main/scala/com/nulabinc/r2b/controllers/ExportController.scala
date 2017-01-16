@@ -15,7 +15,7 @@ import com.taskadapter.redmineapi.bean.User
   */
 object ExportController extends Logging {
 
-  private val logKInd = LOG_Header1
+  private[this] val logKInd = LOG_Header1
 
   def execute(config: AppConfiguration, needUsers: Seq[User]) = {
 

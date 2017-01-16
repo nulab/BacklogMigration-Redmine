@@ -31,7 +31,7 @@ class ProjectApplicationService @Inject()(
                                            newsService: NewsService,
                                            redmineDirectory: RedmineDirectory) extends Logging {
 
-  private val logKInd = LOG_Header2
+  private[this] val logKInd = LOG_Header2
 
   def execute(injector: Injector) = {
     val system = injector.instance[ActorSystem]

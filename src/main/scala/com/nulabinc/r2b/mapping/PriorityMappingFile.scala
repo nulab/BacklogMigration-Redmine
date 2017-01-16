@@ -10,17 +10,17 @@ import com.osinka.i18n.Messages
   */
 class PriorityMappingFile(config: AppConfiguration) extends MappingFile {
 
-  private val backlogDatas = loadBacklog()
-  private val redmineDatas = loadRedmine()
+  private[this] val backlogDatas = loadBacklog()
+  private[this] val redmineDatas = loadRedmine()
 
-  private def loadRedmine(): Seq[MappingItem] = {
+  private[this] def loadRedmine(): Seq[MappingItem] = {
     val redmineService: RedmineService = new RedmineService(config.redmineConfig)
     val redminePriorities = redmineService.getIssuePriorities()
     val redmines: Seq[MappingItem] = redminePriorities.map(redminePriority => MappingItem(redminePriority.getName, redminePriority.getName))
     redmines
   }
 
-  private def loadBacklog(): Seq[MappingItem] = {
+  private[this] def loadBacklog(): Seq[MappingItem] = {
     val backlogService: BacklogService = new BacklogService(config.backlogConfig)
     val backlogPriorities: Seq[Priority] = backlogService.getPriorities
     val backlogs: Seq[MappingItem] = backlogPriorities.map(backlogPriority => MappingItem(backlogPriority.getName, backlogPriority.getName))

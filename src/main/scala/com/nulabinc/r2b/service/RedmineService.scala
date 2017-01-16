@@ -28,7 +28,7 @@ class RedmineService(redmineConfig: RedmineConfig) extends Logging {
     redmineIssuesWrapper.total_count
   }
 
-  private def httpGet(url: String): String = {
+  private[this] def httpGet(url: String): String = {
     val httpGet: HttpGet = new HttpGet(url)
     val client = new DefaultHttpClient
     val response = client.execute(httpGet)

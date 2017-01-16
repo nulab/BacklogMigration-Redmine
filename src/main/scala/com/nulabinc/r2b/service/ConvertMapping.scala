@@ -23,9 +23,9 @@ trait ConvertMapping {
     }
   }
 
-  private val wrapper: MappingsWrapper = unmarshal(filePath)
+  private[this] val wrapper: MappingsWrapper = unmarshal(filePath)
 
-  private def unmarshal(strPath: String): MappingsWrapper = {
+  private[this] def unmarshal(strPath: String): MappingsWrapper = {
     val path: Path = Path.fromString(strPath)
     val json = path.lines().mkString
     JsonParser(json).convertTo[MappingsWrapper]

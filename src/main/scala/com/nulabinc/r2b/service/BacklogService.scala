@@ -28,7 +28,7 @@ class BacklogService(conf: BacklogConfig) extends Logging {
       None
   }
 
-  private def getBacklogClient: BacklogClient = {
+  private[this] def getBacklogClient: BacklogClient = {
     val url = conf.url
     val backlogPackageConfigure: BacklogPackageConfigure = new BacklogPackageConfigure(url)
     val configure: BacklogConfigure = backlogPackageConfigure.apiKey(conf.key)

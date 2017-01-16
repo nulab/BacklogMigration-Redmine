@@ -16,7 +16,7 @@ import scala.collection.mutable
   */
 class WikiActor(wikiService: WikiService, mappingData: MappingData) extends Actor with Logging {
 
-  private val users = mutable.Set.empty[Option[User]]
+  private[this] val users = mutable.Set.empty[Option[User]]
 
   def receive: Receive = {
     case WikiActor.Do(projectKey: String, wiki: WikiPage, completion: CountDownLatch, allCount: Int) =>
