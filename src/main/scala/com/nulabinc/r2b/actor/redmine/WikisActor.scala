@@ -6,12 +6,12 @@ import javax.inject.{Inject, Named}
 import akka.actor.SupervisorStrategy.Escalate
 import akka.actor.{Actor, AllForOneStrategy, Props, SupervisorStrategy}
 import akka.routing.SmallestMailboxPool
-import com.nulabinc.backlog.migration.conf.CommonConfigBase
 import com.nulabinc.backlog.migration.di.akkaguice.NamedActor
 import com.nulabinc.backlog.migration.utils.Logging
 import com.nulabinc.r2b.conf.RedmineDirectory
 import com.nulabinc.r2b.service.{AttachmentDownloadService, UserService, WikiService}
 import com.taskadapter.redmineapi.bean.{User, WikiPage}
+import com.typesafe.config.ConfigFactory
 
 /**
   * @author uchida
@@ -38,7 +38,7 @@ class WikisActor @Inject()(
   def receive: Receive = {
     case WikisActor.Do() =>
       val users: Seq[User] = userService.allUsers()
-      val wikiActor = context.actorOf(SmallestMailboxPool(CommonConfigBase.ACTOR_POOL_SIZE).
+      val wikiActor = context.actorOf(SmallestMailboxPool(ConfigFactory.load().getInt("akka.mailbox-pool")).
         props(Props(new WikiActor(redmineDirectory, key, projectKey, attachmentDownloadService, wikiService, users))))
 
       wikis.foreach(wiki => wikiActor ! WikiActor.Do(wiki, completion, wikis.size))
