@@ -14,11 +14,9 @@ object DisableSSLCertificateCheckUtil extends Logging {
   private[this] class NullX509TrustManager extends X509TrustManager {
 
     def checkClientTrusted(chain: Array[X509Certificate], authType: String) {
-      println()
     }
 
     def checkServerTrusted(chain: Array[X509Certificate], authType: String) {
-      println()
     }
 
     def getAcceptedIssuers: Array[X509Certificate] = Array.ofDim[X509Certificate](0)
