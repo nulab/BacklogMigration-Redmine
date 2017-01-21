@@ -10,6 +10,7 @@ import org.joda.time.format.ISODateTimeFormat
 import spray.json._
 
 import scala.collection.JavaConverters._
+import scala.collection.mutable
 
 /**
   * @author uchida
@@ -25,8 +26,8 @@ object RedmineMarshaller {
   object Issue {
     def apply(issue: Issue, project: Project, users: Seq[User]): String =
       RedmineIssue(
-        id = issue.getId.toInt,
-        parentIssueId = Option(issue.getParentId).map(_.toInt),
+        id = issue.getId,
+        parentIssueId = Option(issue.getParentId).map(_.intValue()),
         project = getRedmineProject(project),
         subject = issue.getSubject,
         description = issue.getDescription,
@@ -114,10 +115,14 @@ object RedmineMarshaller {
   }
 
   object Membership {
-    def apply(memberships: Seq[Membership]): String = {
-      val redmineUsers: Seq[RedmineUser] = memberships.filter(_.getUser != null).map(membership => getRedmineUser(membership.getUser))
-      RedmineMembershipsWrapper(redmineUsers).toJson.prettyPrint
+    def apply(memberships: Seq[Membership], needUsers: Seq[User]): String = {
+      val redmineUsers: mutable.Set[RedmineUser] = mutable.Set.empty[RedmineUser]
+      memberships.filter(userCondition).map(_.getUser).map(getRedmineUser).foreach(redmineUser => redmineUsers += redmineUser)
+      needUsers.map(getRedmineUser).foreach(redmineUser => redmineUsers += redmineUser)
+      RedmineMembershipsWrapper(redmineUsers.toSeq).toJson.prettyPrint
     }
+
+    private[this] def userCondition(membership: Membership) = Option(membership.getUser).isDefined
   }
 
   object IssueCategory {

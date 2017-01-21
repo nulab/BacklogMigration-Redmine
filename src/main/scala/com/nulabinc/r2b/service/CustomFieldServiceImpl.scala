@@ -32,35 +32,35 @@ class CustomFieldServiceImpl @Inject()(
         Seq.empty[RedmineCustomFieldDefinition]
     }
 
-  private[this] def objToCustomFieldDefinition(cfd: CustomFieldDefinition): RedmineCustomFieldDefinition =
+  private[this] def objToCustomFieldDefinition(customFieldDefinition: CustomFieldDefinition): RedmineCustomFieldDefinition =
     RedmineCustomFieldDefinition(
-      id = cfd.getId,
-      name = cfd.getName,
-      customizedType = cfd.getCustomizedType,
-      fieldFormat = cfd.getFieldFormat,
-      regexp = Option(cfd.getRegexp),
-      minLength = Option(cfd.getMinLength).map(_.toInt),
-      maxLength = Option(cfd.getMaxLength).map(_.toInt),
-      isRequired = cfd.isRequired,
-      isMultiple = cfd.isMultiple,
-      defaultValue = if (Option(cfd.getDefaultValue).getOrElse("").isEmpty) None else Some(cfd.getDefaultValue),
-      trackers = cfd.getTrackers.asScala.map(getRedmineTracker),
-      possibleValues = Option(cfd.getPossibleValues.asScala).getOrElse(Seq.empty[String]))
+      id = customFieldDefinition.getId,
+      name = customFieldDefinition.getName,
+      customizedType = customFieldDefinition.getCustomizedType,
+      fieldFormat = customFieldDefinition.getFieldFormat,
+      regexp = Option(customFieldDefinition.getRegexp),
+      minLength = Option(customFieldDefinition.getMinLength).map(_.intValue()),
+      maxLength = Option(customFieldDefinition.getMaxLength).map(_.intValue()),
+      isRequired = customFieldDefinition.isRequired,
+      isMultiple = customFieldDefinition.isMultiple,
+      defaultValue = if (Option(customFieldDefinition.getDefaultValue).getOrElse("").isEmpty) None else Some(customFieldDefinition.getDefaultValue),
+      trackers = customFieldDefinition.getTrackers.asScala.map(getRedmineTracker),
+      possibleValues = Option(customFieldDefinition.getPossibleValues.asScala).getOrElse(Seq.empty[String]))
 
-  private[this] def oldToCustomFieldDefinition(ocfd: OldCustomFieldDefinition): RedmineCustomFieldDefinition =
+  private[this] def oldToCustomFieldDefinition(oldCustomFieldDefinition: OldCustomFieldDefinition): RedmineCustomFieldDefinition =
     RedmineCustomFieldDefinition(
-      id = ocfd.id,
-      name = ocfd.name,
-      customizedType = ocfd.customized_type,
-      fieldFormat = ocfd.field_format,
-      regexp = ocfd.regexp,
-      minLength = ocfd.min_length,
-      maxLength = ocfd.max_length,
+      id = oldCustomFieldDefinition.id,
+      name = oldCustomFieldDefinition.name,
+      customizedType = oldCustomFieldDefinition.customized_type,
+      fieldFormat = oldCustomFieldDefinition.field_format,
+      regexp = oldCustomFieldDefinition.regexp,
+      minLength = oldCustomFieldDefinition.min_length,
+      maxLength = oldCustomFieldDefinition.max_length,
       isRequired = false,
       isMultiple = false,
-      defaultValue = ocfd.default_value,
+      defaultValue = oldCustomFieldDefinition.default_value,
       trackers = redmine.getIssueManager.getTrackers.asScala.map(getRedmineTracker),
-      possibleValues = ocfd.possible_values.getOrElse(Seq.empty[OldPossibleValues]).map(_.value))
+      possibleValues = oldCustomFieldDefinition.possible_values.getOrElse(Seq.empty[OldPossibleValues]).map(_.value))
 
   private[this] def getRedmineTracker(tracker: Tracker): RedmineTracker =
     RedmineTracker(tracker.getId, tracker.getName)

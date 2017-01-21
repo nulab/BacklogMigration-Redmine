@@ -47,15 +47,15 @@ class PropertyServiceImpl(
   }
 
   override def optUser(id: Int): Option[String] =
-    users.find(_.getId == id).map(_.getLogin)
+    users.find(_.getId.intValue() == id).map(_.getLogin)
 
   override def optUser(optId: Option[String]): Option[String] =
     (for {id <- optId} yield
-      users.find(_.getId == id.toInt).map(_.getLogin)).flatten
+      users.find(_.getId.intValue() == id.toInt).map(_.getLogin)).flatten
 
   override def optUserName(optId: Option[String]): Option[String] =
     (for {id <- optId} yield {
-      users.find(_.getId == id.toInt).map(_.getFullName)
+      users.find(_.getId.intValue() == id.toInt).map(_.getFullName)
     }).flatten
 
   override def allVersionNames(): Seq[String] = {
@@ -71,7 +71,7 @@ class PropertyServiceImpl(
     (for {
       versions <- optVersions
       id <- optId
-    } yield versions.find(_.getId == id.toInt).map(_.getName)).flatten
+    } yield versions.find(_.getId.intValue() == id.toInt).map(_.getName)).flatten
   }
 
   override def allMembershipNames(): Seq[String] = {
@@ -87,19 +87,19 @@ class PropertyServiceImpl(
     (for {
       memberships <- optMemberships
       id <- optId
-    } yield memberships.filter(_.getUser != null).find(_.getUser.getId == id.toInt).map(_.getUser.getFullName)).flatten
+    } yield memberships.filter(membership => Option(membership.getUser).nonEmpty).find(_.getUser.getId.intValue() == id.toInt).map(_.getUser.getFullName)).flatten
   }
 
   override def optStatusName(optId: Option[String]): Option[String] =
     (for {
       id <- optId
     } yield {
-      statuses.find(_.getId == id.toInt).map(_.getName)
+      statuses.find(_.getId.intValue() == id.toInt).map(_.getName)
     }).flatten.map(statusMapping.convert)
 
   override def optTrackerName(optId: Option[String]): Option[String] =
     (for {id <- optId} yield
-      trackers.find(_.getId == id.toInt).map(_.getName)).flatten
+      trackers.find(_.getId.intValue() == id.toInt).map(_.getName)).flatten
 
   override def optCategoryName(optId: Option[String]): Option[String] = {
     if (optCategories.isEmpty) optCategories = optAllCategories()
@@ -107,7 +107,7 @@ class PropertyServiceImpl(
       categories <- optCategories
       id <- optId
     } yield
-      categories.find(_.getId == id.toInt).map(_.getName)).flatten
+      categories.find(_.getId.intValue() == id.toInt).map(_.getName)).flatten
   }
 
   override def optDefaultStatusName(): Option[String] = {
@@ -116,10 +116,10 @@ class PropertyServiceImpl(
 
   override def optPriorityName(optId: Option[String]): Option[String] =
     (for {id <- optId} yield {
-      priorities.find(_.getId == id.toInt).map(_.getName)
+      priorities.find(_.getId.intValue() == id.toInt).map(_.getName)
     }).flatten.map(priorityMapping.convert)
 
-  override def optProjectName(id: Int): Option[String] = projects.find(_.getId == id).map(_.getName)
+  override def optProjectName(id: Int): Option[String] = projects.find(_.getId.intValue() == id).map(_.getName)
 
   private[this] def optAllCategories(): Option[Seq[IssueCategory]] =
     try {

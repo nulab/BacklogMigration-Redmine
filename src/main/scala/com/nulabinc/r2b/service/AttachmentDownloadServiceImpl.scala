@@ -16,28 +16,28 @@ class AttachmentDownloadServiceImpl @Inject()(redmineDirectory: RedmineDirectory
 
   private[this] case class DownloadInfo(url: URL, path: String)
 
-  override def issue(apiKey: String, projectIdentifier: String, issue: Issue) = {
+  override def issue(apiKey: String, issue: Issue) = {
     val attachments: Array[Attachment] = issue.getAttachments.toArray(new Array[Attachment](issue.getAttachments.size()))
-    getDownloadInfos(apiKey, projectIdentifier, issue)(attachments).foreach(download)
+    getDownloadInfos(apiKey, issue)(attachments).foreach(download)
   }
 
-  override def wiki(apiKey: String, projectIdentifier: String, wikiPageDetail: WikiPageDetail) = {
+  override def wiki(apiKey: String, wikiPageDetail: WikiPageDetail) = {
     val attachments: Array[Attachment] = wikiPageDetail.getAttachments.toArray(new Array[Attachment](wikiPageDetail.getAttachments.size()))
-    getDownloadInfos(apiKey, projectIdentifier, wikiPageDetail)(attachments).foreach(download)
+    getDownloadInfos(apiKey, wikiPageDetail)(attachments).foreach(download)
   }
 
-  private[this] def getDownloadInfos(apiKey: String, projectIdentifier: String, issue: Issue)(attachments: Array[Attachment]) =
-    attachments.map(attachment => getDownloadInfo(apiKey, projectIdentifier, issue, attachment))
+  private[this] def getDownloadInfos(apiKey: String, issue: Issue)(attachments: Array[Attachment]) =
+    attachments.map(attachment => getDownloadInfo(apiKey, issue, attachment))
 
-  private[this] def getDownloadInfos(apiKey: String, projectIdentifier: String, wikiPageDetail: WikiPageDetail)(attachments: Array[Attachment]) =
-    attachments.map(attachment => getDownloadInfo(apiKey, projectIdentifier, wikiPageDetail, attachment))
+  private[this] def getDownloadInfos(apiKey: String, wikiPageDetail: WikiPageDetail)(attachments: Array[Attachment]) =
+    attachments.map(attachment => getDownloadInfo(apiKey, wikiPageDetail, attachment))
 
-  private[this] def getDownloadInfo(apiKey: String, projectIdentifier: String, issue: Issue, attachment: Attachment): DownloadInfo = {
+  private[this] def getDownloadInfo(apiKey: String, issue: Issue, attachment: Attachment): DownloadInfo = {
     val directoryPath: String = redmineDirectory.getIssueAttachmentDir(issue.getId, attachment.getId)
     getDownloadInfo(apiKey, attachment, directoryPath)
   }
 
-  private[this] def getDownloadInfo(apiKey: String, projectIdentifier: String, wikiPageDetail: WikiPageDetail, attachment: Attachment): DownloadInfo = {
+  private[this] def getDownloadInfo(apiKey: String, wikiPageDetail: WikiPageDetail, attachment: Attachment): DownloadInfo = {
     val directoryPath: String = redmineDirectory.getWikiAttachmentDir(wikiPageDetail.getTitle, attachment.getId)
     getDownloadInfo(apiKey, attachment, directoryPath)
   }

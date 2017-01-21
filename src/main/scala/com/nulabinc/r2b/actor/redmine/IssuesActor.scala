@@ -3,16 +3,17 @@ package com.nulabinc.r2b.actor.redmine
 import java.util.concurrent.CountDownLatch
 import javax.inject.{Inject, Named}
 
-import akka.actor.SupervisorStrategy.Escalate
-import akka.actor.{Actor, ActorRef, OneForOneStrategy, Props, SupervisorStrategy}
+import akka.actor.SupervisorStrategy.Restart
+import akka.actor.{Actor, ActorRef, OneForOneStrategy, Props}
 import akka.routing.SmallestMailboxPool
 import com.nulabinc.backlog.migration.di.akkaguice.NamedActor
 import com.nulabinc.backlog.migration.utils.Logging
-import com.nulabinc.r2b.conf.{AppConfiguration, RedmineDirectory}
+import com.nulabinc.r2b.conf.RedmineDirectory
 import com.nulabinc.r2b.service.{AttachmentDownloadService, IssueService, UserService}
 import com.taskadapter.redmineapi.bean.{Issue, Project, User}
 import com.typesafe.config.ConfigFactory
 
+import scala.concurrent.duration._
 
 /**
   * @author uchida
@@ -20,20 +21,14 @@ import com.typesafe.config.ConfigFactory
 class IssuesActor @Inject()(
                              redmineDirectory: RedmineDirectory,
                              @Named("key") key: String,
-                             @Named("projectKey") projectKey: String,
                              @Named("projectId") projectId: Int,
                              project: Project,
-                             config: AppConfiguration,
                              attachmentDownloadService: AttachmentDownloadService,
                              userService: UserService,
                              issueService: IssueService) extends Actor with Logging {
 
-  override val supervisorStrategy: SupervisorStrategy = {
-    val decider: SupervisorStrategy.Decider = {
-      case _ =>
-        Escalate
-    }
-    OneForOneStrategy()(decider orElse super.supervisorStrategy.decider)
+  private[this] val strategy = OneForOneStrategy(maxNrOfRetries = 10, withinTimeRange = 1 minute) {
+    case _ => Restart
   }
 
   private[this] val limit = ConfigFactory.load().getInt("application.export.issue-get-limit")
@@ -41,10 +36,11 @@ class IssuesActor @Inject()(
   private[this] val completion = new CountDownLatch(allCount)
 
   def receive: Receive = {
-    case IssuesActor.Do() =>
+    case IssuesActor.Do =>
       val users: Seq[User] = userService.allUsers()
-      val issueActor = context.actorOf(SmallestMailboxPool(ConfigFactory.load().getInt("akka.mailbox-pool")).
-        props(Props(new IssueActor(redmineDirectory, key, projectKey, project, attachmentDownloadService, issueService, users))))
+
+      val router = SmallestMailboxPool(ConfigFactory.load().getInt("akka.mailbox-pool"), supervisorStrategy = strategy)
+      val issueActor = context.actorOf(router.props(Props(new IssueActor(redmineDirectory, key, project, attachmentDownloadService, issueService, users))))
 
       def loop(offset: Long): Unit = {
         if (offset < allCount) {
@@ -69,7 +65,7 @@ class IssuesActor @Inject()(
 
 object IssuesActor extends NamedActor {
 
-  case class Do()
+  case object Do
 
   override final val name = "IssuesActor"
 

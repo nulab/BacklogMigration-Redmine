@@ -1,31 +1,24 @@
 package com.nulabinc.r2b.actor.mapping.service
 
-import javax.inject.{Inject, Named}
+import javax.inject.Inject
 
 import akka.actor.ActorSystem
 import com.google.inject.Injector
 import com.nulabinc.backlog.migration.di.akkaguice.GuiceAkkaExtension
 import com.nulabinc.backlog.migration.utils.Logging
 import com.nulabinc.r2b.actor.mapping.ContentActor
-import com.nulabinc.r2b.conf.AppConfiguration
 import com.nulabinc.r2b.mapping.MappingData
-import com.nulabinc.r2b.service.{MembershipService, ProjectService, UserService}
+import com.nulabinc.r2b.service.{MembershipService, UserService}
 import com.taskadapter.redmineapi.bean.{Group, Membership, User}
 import net.codingwell.scalaguice.InjectorExtensions._
 
 import scala.collection.JavaConverters._
 import scala.concurrent.duration.Duration
 
-
 /**
   * @author uchida
   */
-class ProjectApplicationService @Inject()(
-                                           config: AppConfiguration,
-                                           @Named("projectKey") projectKey: String,
-                                           projectService: ProjectService,
-                                           membershipService: MembershipService,
-                                           userService: UserService) extends Logging {
+class ProjectApplicationService @Inject()(membershipService: MembershipService, userService: UserService) extends Logging {
 
   def execute(injector: Injector, mappingData: MappingData) = {
     val system = injector.instance[ActorSystem]

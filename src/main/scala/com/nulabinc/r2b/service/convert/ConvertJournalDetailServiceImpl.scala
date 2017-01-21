@@ -1,6 +1,6 @@
 package com.nulabinc.r2b.service.convert
 
-import javax.inject.{Inject, Named}
+import javax.inject.Inject
 
 import com.nulabinc.backlog.migration.utils.{IOUtil, Logging}
 import com.nulabinc.r2b.conf.{RedmineDirectory, RedmineProperty}
@@ -13,12 +13,8 @@ import com.osinka.i18n.Messages
   */
 class ConvertJournalDetailServiceImpl @Inject()(
                                                  redmineDirectory: RedmineDirectory,
-                                                 @Named("projectKey") projectKey: String,
                                                  propertyService: PropertyService,
-                                                 customFieldService: CustomFieldService,
-                                                 statusMapping: ConvertStatusMapping,
-                                                 priorityMapping: ConvertPriorityMapping,
-                                                 userMapping: ConvertUserMapping) extends ConvertJournalDetailService with Logging {
+                                                 customFieldService: CustomFieldService) extends ConvertJournalDetailService with Logging {
 
   private[this] val customFieldDefinitions = customFieldService.allCustomFieldDefinitions()
 
@@ -85,10 +81,12 @@ class ConvertJournalDetailServiceImpl @Inject()(
       getMessage("common.project", oldName, newName)
     }
 
-    private[this] def getProjectName(value: Option[String]): String =
-      if (value.getOrElse("").nonEmpty)
-        propertyService.optProjectName(value.get.toInt).getOrElse(Messages("common.not_set"))
-      else Messages("common.not_set")
+    private[this] def getProjectName(optProjectId: Option[String]): String =
+      optProjectId match {
+        case Some(projectId) if (projectId.nonEmpty) =>
+          propertyService.optProjectName(projectId.toInt).getOrElse(Messages("common.not_set"))
+        case _ => Messages("common.not_set")
+      }
   }
 
   object AnonymousUserNote extends Note {
@@ -119,11 +117,12 @@ class ConvertJournalDetailServiceImpl @Inject()(
       } else false
     }
 
-    override def value(detail: RedmineJournalDetail): String = {
-      if (detail.newValue.isDefined) Messages("convert.add_attachment", detail.newValue.get)
-      else if (detail.oldValue.isDefined) Messages("message.del_attachment", detail.oldValue.get)
-      else ""
-    }
+    override def value(detail: RedmineJournalDetail): String =
+      (detail.newValue, detail.oldValue) match {
+        case (Some(newValue), _) => Messages("convert.add_attachment", newValue)
+        case (_, Some(oldValue)) => Messages("message.del_attachment", oldValue)
+        case _ => ""
+      }
   }
 
   private[this] def optCustomFieldDefinition(id: Int): Option[RedmineCustomFieldDefinition] =

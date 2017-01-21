@@ -19,7 +19,6 @@ import scalax.file.Path
   * @author uchida
   */
 class ConvertApplicationService @Inject()(
-                                           @Named("projectKey") projectKey: String,
                                            config: AppConfiguration,
                                            project: Project,
                                            propertyService: PropertyService,

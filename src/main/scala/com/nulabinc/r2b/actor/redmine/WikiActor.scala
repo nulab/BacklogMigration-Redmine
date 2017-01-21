@@ -15,7 +15,6 @@ import com.taskadapter.redmineapi.bean.{User, WikiPage, WikiPageDetail}
 class WikiActor(
                  redmineDirectory: RedmineDirectory,
                  apiKey: String,
-                 projectKey: String,
                  attachmentDownloadService: AttachmentDownloadService,
                  wikiService: WikiService,
                  users: Seq[User]) extends Actor with Logging {
@@ -25,7 +24,7 @@ class WikiActor(
       val wikiDetail: WikiPageDetail = wikiService.wikiDetail(wiki.getTitle)
 
       IOUtil.output(redmineDirectory.getWikiPath(wiki.getTitle), RedmineMarshaller.Wiki(wikiDetail, users))
-      attachmentDownloadService.wiki(apiKey, projectKey, wikiDetail)
+      attachmentDownloadService.wiki(apiKey, wikiDetail)
 
       completion.countDown()
       log.info(showMessage(LOG_List, Messages("cli.load_redmine_wikis", allCount - completion.getCount, allCount)))

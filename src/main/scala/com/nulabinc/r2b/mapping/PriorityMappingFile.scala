@@ -55,9 +55,8 @@ class PriorityMappingFile(config: AppConfiguration) extends MappingFile {
     val IMMEDIATE_EN: String = "Immediate"
   }
 
-  override def matchWithBacklog(redmine: MappingItem): String = {
-    val option: Option[String] = backlogs.map(_.name).find(_ == redmine)
-    option match {
+  override def matchWithBacklog(redmine: MappingItem): String =
+    backlogs.map(_.name).find(_ == redmine.name) match {
       case Some(backlog) => backlog
       case None => redmine.name match {
         case Redmine.LOW_JA | Redmine.LOW_EN => Backlog.low()
@@ -68,7 +67,6 @@ class PriorityMappingFile(config: AppConfiguration) extends MappingFile {
         case _ => ""
       }
     }
-  }
 
   override def backlogs: Seq[MappingItem] = backlogDatas
 

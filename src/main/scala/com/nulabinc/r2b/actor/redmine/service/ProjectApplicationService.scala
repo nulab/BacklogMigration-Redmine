@@ -6,7 +6,7 @@ import akka.actor.ActorSystem
 import com.google.inject.Injector
 import com.nulabinc.backlog.migration.di.akkaguice.GuiceAkkaExtension
 import com.nulabinc.backlog.migration.utils.{IOUtil, Logging}
-import com.nulabinc.r2b.actor.redmine.ContentActor
+import com.nulabinc.r2b.actor.redmine.{ContentActor, ExportInfo}
 import com.nulabinc.r2b.conf.RedmineDirectory
 import com.nulabinc.r2b.service._
 import com.osinka.i18n.Messages
@@ -19,6 +19,7 @@ import scala.concurrent.duration.Duration
   * @author uchida
   */
 class ProjectApplicationService @Inject()(
+                                           exportInfo: ExportInfo,
                                            project: Project,
                                            userService: UserService,
                                            customFieldService: CustomFieldService,
@@ -36,7 +37,7 @@ class ProjectApplicationService @Inject()(
   def execute(injector: Injector) = {
     val system = injector.instance[ActorSystem]
     val contentActor = system.actorOf(GuiceAkkaExtension(system).props(ContentActor.name))
-    contentActor ! ContentActor.Do()
+    contentActor ! ContentActor.Do
     system.awaitTermination(Duration.Inf)
     property()
   }
@@ -61,7 +62,7 @@ class ProjectApplicationService @Inject()(
 
     log.info(showMessage(logKInd, Messages("export.execute_redmine_memberships_export")))
     val memberships: Seq[Membership] = membershipService.allMemberships()
-    IOUtil.output(redmineDirectory.getMembershipsPath(), RedmineMarshaller.Membership(memberships))
+    IOUtil.output(redmineDirectory.getMembershipsPath(), RedmineMarshaller.Membership(memberships, exportInfo.needUsers))
 
     val groups: Seq[Group] = memberships.flatMap(membership => Option(membership.getGroup))
     IOUtil.output(redmineDirectory.GROUP_USERS, RedmineMarshaller.Group(groups))

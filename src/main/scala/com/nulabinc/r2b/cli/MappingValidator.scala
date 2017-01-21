@@ -2,7 +2,7 @@ package com.nulabinc.r2b.cli
 
 import java.util.Locale
 
-import com.nulabinc.r2b.mapping.{Mapping, MappingItem, MappingsWrapper}
+import com.nulabinc.r2b.mapping.{Mapping, MappingItem}
 import com.osinka.i18n.{Lang, Messages}
 
 /**
@@ -12,13 +12,14 @@ class MappingValidator(redmineMappings: Seq[MappingItem], backlogMappings: Seq[M
 
   implicit val userLang = if (Locale.getDefault.equals(Locale.JAPAN)) Lang("ja") else Lang("en")
 
-  def validate(either: Either[Throwable, MappingsWrapper]): Seq[String] = {
-    val mappings: Seq[Mapping] = either.right.get.mappings
-    val errors: Seq[String] = itemsExists(mappings)
-    errors union
-      itemsRequired(mappings) union
-      redmineItemsExists(mappings)
-  }
+  def validate(optMappings: Option[Seq[Mapping]]): Seq[String] =
+    optMappings match {
+      case Some(mappings) =>
+        itemsExists(mappings) union
+          itemsRequired(mappings) union
+          redmineItemsExists(mappings)
+      case _ => throw new RuntimeException
+    }
 
   private[this] def redmineItemsExists(mappings: Seq[Mapping]): Seq[String] =
     redmineMappings.foldLeft(Seq.empty[String])((errors: Seq[String], mappingItem: MappingItem) =>

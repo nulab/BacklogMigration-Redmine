@@ -19,7 +19,7 @@ class ConvertCustomFieldDefinitionServiceImpl @Inject()(propertyService: Propert
 
   override def convert(redmineCustomFieldDefinition: RedmineCustomFieldDefinition): BacklogCustomFieldDefinition =
     BacklogCustomFieldDefinition(
-      id = redmineCustomFieldDefinition.id,
+      id = redmineCustomFieldDefinition.id.toLong,
       name = redmineCustomFieldDefinition.name,
       description = "",
       typeId = getTypeId(redmineCustomFieldDefinition),
@@ -69,17 +69,16 @@ class ConvertCustomFieldDefinitionServiceImpl @Inject()(propertyService: Propert
     }
 
   private[this] def getInitialValueNumeric(redmineCustomFieldDefinition: RedmineCustomFieldDefinition): Option[Float] =
-    if (redmineCustomFieldDefinition.fieldFormat == "int" || redmineCustomFieldDefinition.fieldFormat == "float") {
-      if (redmineCustomFieldDefinition.defaultValue.isDefined && redmineCustomFieldDefinition.defaultValue.get == "") {
-        None
-      } else redmineCustomFieldDefinition.defaultValue.map(_.toFloat)
-    } else None
+    (redmineCustomFieldDefinition.fieldFormat, redmineCustomFieldDefinition.defaultValue) match {
+      case ("int" | "float", Some(defaultValue)) if (defaultValue.nonEmpty) => Some(defaultValue.toFloat)
+      case _ => None
+    }
 
   private[this] def getMinNumeric(value: Option[Int]): Option[Float] =
-    value.map(value => math.pow(10, (value - 1) * (-1)).toFloat)
+    value.map(value => math.pow(10, ((value - 1) * (-1)).toDouble).toFloat)
 
   private[this] def getMaxNumeric(value: Option[Int]): Option[Float] =
-    value.map(value => math.pow(10, value).toFloat)
+    value.map(value => math.pow(10, value.toDouble).toFloat)
 
   private[this] def getInitialValueDate(redmineCustomFieldDefinition: RedmineCustomFieldDefinition): Option[BacklogCustomFieldInitialDate] =
     if (redmineCustomFieldDefinition.fieldFormat == RedmineProperty.FieldFormat.DATE)

@@ -5,6 +5,7 @@ import com.google.inject.name.Names
 import com.nulabinc.backlog.migration.conf.BacklogDirectory
 import com.nulabinc.backlog4j.{BacklogClient, BacklogClientFactory}
 import com.nulabinc.backlog4j.conf.{BacklogConfigure, BacklogPackageConfigure}
+import com.nulabinc.r2b.actor.redmine.ExportInfo
 import com.nulabinc.r2b.conf.{AppConfiguration, RedmineDirectory}
 import com.nulabinc.r2b.service._
 import com.nulabinc.r2b.service.convert._
@@ -25,6 +26,7 @@ class RedmineModule(config: AppConfiguration, needUsers: Seq[User]) extends Abst
     bind(classOf[AppConfiguration]).toInstance(config)
     bind(classOf[RedmineManager]).toInstance(redmine)
     bind(classOf[Project]).toInstance(project)
+    bind(classOf[ExportInfo]).toInstance(ExportInfo(needUsers))
     bind(classOf[String])
       .annotatedWith(Names.named("projectKey"))
       .toInstance(config.projectKeyMap.redmine)

@@ -32,7 +32,7 @@ class ConvertIssueServiceImpl @Inject()(
     }
 
     BacklogIssue(
-      id = redmineIssue.id,
+      id = redmineIssue.id.toLong,
       summary = redmineIssue.subject,
       parentIssueId = redmineIssue.parentIssueId.map(_.toLong),
       description = getDescription(redmineIssue),

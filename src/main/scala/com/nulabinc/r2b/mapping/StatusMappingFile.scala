@@ -18,11 +18,11 @@ class StatusMappingFile(config: AppConfiguration, mappingData: MappingData) exte
     val redmineStatuses = redmineService.getStatuses()
     val redmines: Seq[MappingItem] = redmineStatuses.map(redmineStatus => MappingItem(redmineStatus.getName, redmineStatus.getName))
     val deleteItems = mappingData.statuses.foldLeft(Seq.empty[MappingItem]) {
-      (acc: Seq[MappingItem], x: String) => {
-        val exists = redmineStatuses.exists(redmineStatuse => redmineStatuse.getId == x.toInt)
+      (acc: Seq[MappingItem], status: String) => {
+        val exists = redmineStatuses.exists(redmineStatuse => redmineStatuse.getId.intValue() == status.toInt)
         if (exists) acc
         else {
-          val name = Messages("mapping.delete_status", x)
+          val name = Messages("mapping.delete_status", status)
           acc :+ MappingItem(name, name)
         }
       }
@@ -71,9 +71,8 @@ class StatusMappingFile(config: AppConfiguration, mappingData: MappingData) exte
     val REJECTED_EN: String = "Rejected"
   }
 
-  override def matchWithBacklog(redmine: MappingItem): String = {
-    val option: Option[String] = backlogs.map(_.name).find(_ == redmine)
-    option match {
+  override def matchWithBacklog(redmine: MappingItem): String =
+    backlogs.map(_.name).find(_ == redmine.name) match {
       case Some(backlog) => backlog
       case None => redmine.name match {
         case Redmine.NEW_JA | Redmine.NEW_EN => Backlog.open()
@@ -85,7 +84,6 @@ class StatusMappingFile(config: AppConfiguration, mappingData: MappingData) exte
         case _ => ""
       }
     }
-  }
 
   override def backlogs: Seq[MappingItem] = backlogDatas
 

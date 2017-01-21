@@ -7,8 +7,8 @@ import com.taskadapter.redmineapi.bean.{Issue, WikiPageDetail}
   */
 trait AttachmentDownloadService {
 
-  def issue(apiKey: String, projectIdentifier: String, issue: Issue)
+  def issue(apiKey: String, issue: Issue)
 
-  def wiki(apiKey: String, projectIdentifier: String, wikiPageDetail: WikiPageDetail)
+  def wiki(apiKey: String, wikiPageDetail: WikiPageDetail)
 
 }

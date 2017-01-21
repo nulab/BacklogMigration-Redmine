@@ -31,9 +31,9 @@ object R2BCli extends Logging {
       if (config.importOnly) ImportController.execute(getImportConfig(config))
       else {
         val propertyMappingFiles = createMapping(config)
-        if (validateMapping(config, propertyMappingFiles.user) &&
-          validateMapping(config, propertyMappingFiles.status) &&
-          validateMapping(config, propertyMappingFiles.priority)) {
+        if (validateMapping(propertyMappingFiles.user) &&
+          validateMapping(propertyMappingFiles.status) &&
+          validateMapping(propertyMappingFiles.priority)) {
           if (confirmImport(config, propertyMappingFiles)) {
             ExportController.execute(config, propertyMappingFiles.user.getNeedUsers())
             ConvertController.execute(config, propertyMappingFiles.user.getNeedUsers())
@@ -76,7 +76,7 @@ object R2BCli extends Logging {
     }
   }
 
-  private[this] def validateMapping(config: AppConfiguration, mappingFile: MappingFile): Boolean = {
+  private[this] def validateMapping(mappingFile: MappingFile): Boolean = {
     Path.fromString(RedmineDirectory.ROOT).deleteRecursively(force = true, continueOnFailure = true)
     Path.fromString(BacklogDirectory.ROOT).deleteRecursively(force = true, continueOnFailure = true)
     if (!mappingFile.isExists) {
@@ -142,13 +142,14 @@ object R2BCli extends Logging {
     }
   }
 
-  private[this] def mappingString(mappingFile: MappingFile): String = {
-    val either: Either[Throwable, Seq[Mapping]] = mappingFile.unmarshal().right.map(_.mappings)
-    val mappings: Seq[Mapping] = either.right.get
-    mappings.map(mapping =>
-      s"- ${mappingFile.display(mapping.redmine, mappingFile.redmines)} => ${mappingFile.display(mapping.backlog, mappingFile.backlogs)}"
-    ).mkString("\n")
-  }
+  private[this] def mappingString(mappingFile: MappingFile): String =
+    mappingFile.unmarshal() match {
+      case Some(mappings) =>
+        mappings.map(mapping =>
+          s"- ${mappingFile.display(mapping.redmine, mappingFile.redmines)} => ${mappingFile.display(mapping.backlog, mappingFile.backlogs)}"
+        ).mkString("\n")
+      case _ => throw new RuntimeException
+    }
 
   private[this] def confirmProject(backlogService: BacklogService, projectKeyMap: ProjectKeyMap): Option[ProjectKeyMap] =
     backlogService.optProject(projectKeyMap.getBacklogKey()) match {

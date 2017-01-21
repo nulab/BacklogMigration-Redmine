@@ -16,7 +16,6 @@ import com.taskadapter.redmineapi.bean._
 class IssueActor(
                   redmineDirectory: RedmineDirectory,
                   apiKey: String,
-                  projectKey: String,
                   project: Project,
                   attachmentDownloadService: AttachmentDownloadService,
                   issueService: IssueService,
@@ -28,7 +27,7 @@ class IssueActor(
         e => throw e,
         issue => {
           IOUtil.output(redmineDirectory.getIssuePath(issueId), RedmineMarshaller.Issue(issue, project, users))
-          attachmentDownloadService.issue(apiKey, projectKey, issue)
+          attachmentDownloadService.issue(apiKey, issue)
         }
       )
       completion.countDown()

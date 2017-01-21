@@ -7,6 +7,8 @@ lazy val commonSettings = Seq(
   version := "0.10.0b1-SNAPSHOT",
   scalaVersion := "2.11.6",
   scalacOptions ++= Seq(
+    "-language:reflectiveCalls",
+    "-language:postfixOps",
     "-deprecation",
     "-feature",
     "-unchecked",
@@ -42,12 +44,20 @@ lazy val common = (project in file("common")).
   settings(commonSettings: _*).
   settings(
     name := "backlog-migration-common",
-    unmanagedBase := baseDirectory.value / "libs"
+    unmanagedBase := baseDirectory.value / "libs",
+    cpdSettings,
+    findbugsSettings,
+    scapegoatVersion := "1.1.0",
+    scapegoatDisabledInspections := Seq("NullParameter", "CatchThrowable", "NoOpOverride")
   )
 lazy val importer = (project in file("importer")).
   settings(commonSettings: _*).
   settings(
-    name := "backlog-importer"
+    name := "backlog-importer",
+    cpdSettings,
+    findbugsSettings,
+    scapegoatVersion := "1.1.0",
+    scapegoatDisabledInspections := Seq("NullParameter", "CatchThrowable", "NoOpOverride")
   ).dependsOn(common).aggregate(common)
 lazy val root = (project in file(".")).
   settings(commonSettings: _*).
@@ -62,5 +72,7 @@ lazy val root = (project in file(".")).
       s"${name.value}-${version.value}.jar"
     },
     cpdSettings,
-    findbugsSettings
+    findbugsSettings,
+    scapegoatVersion := "1.1.0",
+    scapegoatDisabledInspections := Seq("NullParameter", "CatchThrowable", "NoOpOverride")
   ).dependsOn(common, importer).aggregate(common, importer)

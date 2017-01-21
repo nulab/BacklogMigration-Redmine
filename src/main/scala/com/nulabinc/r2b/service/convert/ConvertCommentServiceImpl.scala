@@ -16,8 +16,6 @@ import com.osinka.i18n.Messages
 class ConvertCommentServiceImpl @Inject()(
                                            propertyService: PropertyService,
                                            customFieldService: CustomFieldService,
-                                           statusMapping: ConvertStatusMapping,
-                                           priorityMapping: ConvertPriorityMapping,
                                            userMapping: ConvertUserMapping,
                                            convertJournalDetailService: ConvertJournalDetailService) extends ConvertCommentService with Logging {
 

@@ -36,21 +36,21 @@ trait MappingFile extends Logging {
     path.isFile
   }
 
-  def isParsed: Boolean = unmarshal().isRight
+  def isParsed: Boolean = unmarshal().isDefined
 
   def create() =
     IOUtil.output(filePath, MappingsWrapper(description, redmines.map(convert)).toJson.prettyPrint)
 
-  def unmarshal(): Either[Throwable, MappingsWrapper] = {
+  def unmarshal(): Option[Seq[Mapping]] = {
     val path: Path = Path.fromString(filePath)
     val json = path.lines().mkString
     try {
       val wrapper: MappingsWrapper = JsonParser(json).convertTo[MappingsWrapper]
-      Right(wrapper)
+      Some(wrapper.mappings)
     } catch {
       case e: Throwable =>
         log.error(e.getMessage, e)
-        Left(e)
+        None
     }
   }
 
@@ -59,14 +59,13 @@ trait MappingFile extends Logging {
     validator.validate(unmarshal())
   }
 
-  def display(name: String, mappingItems: Seq[MappingItem]): String = {
-    val option: Option[MappingItem] = mappingItems.find(_.name == name)
-    if (option.isDefined) {
-      val mappingItem: MappingItem = option.get
-      if (isDisplayDetail) s"${mappingItem.display}(${mappingItem.name})"
-      else name
-    } else name
-  }
+  def display(name: String, mappingItems: Seq[MappingItem]): String =
+    mappingItems.find(_.name == name) match {
+      case Some(mappingItem) =>
+        if (isDisplayDetail) s"${mappingItem.display}(${mappingItem.name})"
+        else name
+      case _ => name
+    }
 
   private[this] def convert(redmine: MappingItem): Mapping = Mapping(redmine.name, matchWithBacklog(redmine))
 

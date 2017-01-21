@@ -8,11 +8,11 @@ import com.nulabinc.r2b.conf.RedmineProperty
 import com.nulabinc.r2b.mapping.MappingData
 import com.nulabinc.r2b.service.IssueService
 import com.osinka.i18n.Messages
+import com.taskadapter.redmineapi.Include
 import com.taskadapter.redmineapi.bean.{Issue, Journal, JournalDetail, User}
 
 import scala.collection.JavaConverters._
 import scala.collection.mutable
-
 
 /**
   * @author uchida
@@ -24,7 +24,7 @@ class IssueActor(issueService: IssueService, mappingData: MappingData, allUsers:
 
   def receive: Receive = {
     case IssueActor.Do(issueId: Int, completion: CountDownLatch, allCount: Int) =>
-      issueService.issueOfId(issueId).fold(
+      issueService.issueOfId(issueId, Include.journals).fold(
         e => throw e,
         issue => {
           parse(issue)
@@ -59,10 +59,8 @@ class IssueActor(issueService: IssueService, mappingData: MappingData, allUsers:
   }
 
   private[this] def addUser(value: String) =
-    for {userId <- Option(value)} yield {
-      //TODO
-      users += allUsers.find(user => user.getId == userId.toInt)
-    }
+    for {userId <- Option(value)} yield
+      users += allUsers.find(user => user.getId.intValue() == userId.toInt)
 
   private[this] def addStatus(value: String) = statuses += Option(value)
 
