@@ -7,3 +7,7 @@ addSbtPlugin("com.typesafe.sbt" % "sbt-osgi" % "0.7.0")
 addSbtPlugin("de.johoop" % "cpd4sbt" % "1.1.5")
 
 addSbtPlugin("de.johoop" % "findbugs4sbt" % "1.4.0")
+
+addSbtPlugin("com.sksamuel.scapegoat" %% "sbt-scapegoat" % "1.0.4")
+
+addSbtPlugin("com.geirsson" % "sbt-scalafmt" % "0.5.1")

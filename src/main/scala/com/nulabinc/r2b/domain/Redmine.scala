@@ -63,7 +63,7 @@ case class RedmineWikiPage(
 
 case class RedmineProject(id: Int, name: String, identifier: String)
 
-case class RedmineProjectsWrapper(projects: Seq[RedmineProject])
+case class RedmineProjectsWrapper(project: RedmineProject)
 
 case class RedmineUser(
                         id: Int,

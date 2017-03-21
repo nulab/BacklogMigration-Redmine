@@ -10,6 +10,7 @@ import org.joda.time.format.ISODateTimeFormat
 import spray.json._
 
 import scala.collection.JavaConverters._
+import scala.collection.mutable
 
 /**
   * @author uchida
@@ -25,8 +26,8 @@ object RedmineMarshaller {
   object Issue {
     def apply(issue: Issue, project: Project, users: Seq[User]): String =
       RedmineIssue(
-        id = issue.getId.toInt,
-        parentIssueId = Option(issue.getParentId).map(_.toInt),
+        id = issue.getId,
+        parentIssueId = Option(issue.getParentId).map(_.intValue()),
         project = getRedmineProject(project),
         subject = issue.getSubject,
         description = issue.getDescription,
@@ -48,17 +49,17 @@ object RedmineMarshaller {
         createdOn = Option(issue.getCreatedOn).map(date => parserISO.print(new DateTime(date))),
         updatedOn = Option(issue.getUpdatedOn).map(date => parserISO.print(new DateTime(date)))).toJson.prettyPrint
 
-    private def getRedmineAttachments(issue: Issue): Seq[RedmineAttachment] = {
+    private[this] def getRedmineAttachments(issue: Issue): Seq[RedmineAttachment] = {
       val attachments: Array[Attachment] = issue.getAttachments.toArray(new Array[Attachment](issue.getAttachments.size()))
       attachments.map(getRedmineAttachment)
     }
 
-    private def getRedmineJournals(issue: Issue, users: Seq[User]): Seq[RedmineJournal] = {
+    private[this] def getRedmineJournals(issue: Issue, users: Seq[User]): Seq[RedmineJournal] = {
       val journals: Array[Journal] = issue.getJournals.toArray(new Array[Journal](issue.getJournals.size()))
       journals.map(journal => getRedmineJournal(journal, users))
     }
 
-    private def getRedmineCustomFields(issue: Issue): Seq[RedmineCustomField] = {
+    private[this] def getRedmineCustomFields(issue: Issue): Seq[RedmineCustomField] = {
       val customFields: Array[CustomField] = issue.getCustomFields.toArray(new Array[CustomField](issue.getCustomFields.size()))
       customFields.map(getRedmineCustomField)
     }
@@ -83,7 +84,7 @@ object RedmineMarshaller {
         attachments = getRedmineAttachments(wikiPageDetail)).toJson.prettyPrint
     }
 
-    private def getRedmineAttachments(wikiPageDetail: WikiPageDetail): Seq[RedmineAttachment] = {
+    private[this] def getRedmineAttachments(wikiPageDetail: WikiPageDetail): Seq[RedmineAttachment] = {
       val attachments: Array[Attachment] = wikiPageDetail.getAttachments.toArray(new Array[Attachment](wikiPageDetail.getAttachments.size()))
       attachments.map(getRedmineAttachment)
     }
@@ -94,16 +95,16 @@ object RedmineMarshaller {
       RedmineUsersWrapper(users.map(getRedmineUser)).toJson.prettyPrint
   }
 
-  object Projects {
-    def apply(projects: Seq[Project]): String =
-      RedmineProjectsWrapper(projects.map(getRedmineProject)).toJson.prettyPrint
+  object Project {
+    def apply(project: Project): String =
+      RedmineProjectsWrapper(getRedmineProject(project)).toJson.prettyPrint
   }
 
   object News {
     def apply(news: Seq[News], users: Seq[User]): String =
       RedmineNewsWrapper(news.map(news => getRedmineNews(news, users))).toJson.prettyPrint
 
-    private def getRedmineNews(news: News, users: Seq[User]): RedmineNews =
+    private[this] def getRedmineNews(news: News, users: Seq[User]): RedmineNews =
       RedmineNews(
         id = news.getId,
         title = news.getTitle,
@@ -114,10 +115,14 @@ object RedmineMarshaller {
   }
 
   object Membership {
-    def apply(memberships: Seq[Membership]): String = {
-      val redmineUsers: Seq[RedmineUser] = memberships.filter(_.getUser != null).map(membership => getRedmineUser(membership.getUser))
-      RedmineMembershipsWrapper(redmineUsers).toJson.prettyPrint
+    def apply(memberships: Seq[Membership], needUsers: Seq[User]): String = {
+      val redmineUsers: mutable.Set[RedmineUser] = mutable.Set.empty[RedmineUser]
+      memberships.filter(userCondition).map(_.getUser).map(getRedmineUser).foreach(redmineUser => redmineUsers += redmineUser)
+      needUsers.map(getRedmineUser).foreach(redmineUser => redmineUsers += redmineUser)
+      RedmineMembershipsWrapper(redmineUsers.toSeq).toJson.prettyPrint
     }
+
+    private[this] def userCondition(membership: Membership) = Option(membership.getUser).isDefined
   }
 
   object IssueCategory {
@@ -176,21 +181,21 @@ object RedmineMarshaller {
       RedmineGroupsWrapper(redmineGroups).toJson.prettyPrint
     }
 
-    private def getRedmineGroup(group: Group): RedmineGroup = RedmineGroup(group.getId, group.getName)
+    private[this] def getRedmineGroup(group: Group): RedmineGroup = RedmineGroup(group.getId, group.getName)
   }
 
-  private def getRedmineProject(project: Project): RedmineProject =
+  private[this] def getRedmineProject(project: Project): RedmineProject =
     RedmineProject(
       id = project.getId,
       name = project.getName,
       identifier = project.getIdentifier)
 
-  private def getRedmineAttachment(attachment: Attachment): RedmineAttachment =
+  private[this] def getRedmineAttachment(attachment: Attachment): RedmineAttachment =
     RedmineAttachment(
       id = attachment.getId,
       fileName = attachment.getFileName)
 
-  private def getRedmineCustomField(customField: CustomField): RedmineCustomField =
+  private[this] def getRedmineCustomField(customField: CustomField): RedmineCustomField =
     RedmineCustomField(
       id = customField.getId,
       name = customField.getName,
@@ -198,7 +203,7 @@ object RedmineMarshaller {
       multiple = customField.isMultiple,
       values = if (customField.getValues == null) Seq.empty[String] else customField.getValues.asScala)
 
-  private def getRedmineJournal(journal: Journal, users: Seq[User]): RedmineJournal =
+  private[this] def getRedmineJournal(journal: Journal, users: Seq[User]): RedmineJournal =
     RedmineJournal(
       id = journal.getId,
       notes = Option(journal.getNotes),
@@ -206,14 +211,14 @@ object RedmineMarshaller {
       user = getUserLogin(Option(journal.getUser), users),
       createdOn = Option(journal.getCreatedOn).map(date => parserISO.print(new DateTime(date))))
 
-  private def getRedmineJournalDetail(journalDetail: JournalDetail): RedmineJournalDetail =
+  private[this] def getRedmineJournalDetail(journalDetail: JournalDetail): RedmineJournalDetail =
     RedmineJournalDetail(
       property = journalDetail.getProperty,
       name = journalDetail.getName,
       oldValue = if (journalDetail.getOldValue == null || journalDetail.getOldValue.isEmpty) None else Some(journalDetail.getOldValue),
       newValue = if (journalDetail.getNewValue == null || journalDetail.getNewValue.isEmpty) None else Some(journalDetail.getNewValue))
 
-  private def getRedmineUser(user: User): RedmineUser =
+  private[this] def getRedmineUser(user: User): RedmineUser =
     RedmineUser(
       id = user.getId,
       firstname = user.getFirstName,
@@ -223,13 +228,13 @@ object RedmineMarshaller {
       mail = Option(user.getMail),
       groups = user.getGroups.asScala.map(_.getName).toSeq)
 
-  private def getUserLogin(optUser: Option[User], users: Seq[User]): Option[String] = optUser match {
+  private[this] def getUserLogin(optUser: Option[User], users: Seq[User]): Option[String] = optUser match {
     case Some(targetUser) =>
       users.find(user => user.getId == targetUser.getId).map(_.getLogin)
     case None => None
   }
 
-  private def getRedmineTracker(tracker: Tracker): RedmineTracker =
+  private[this] def getRedmineTracker(tracker: Tracker): RedmineTracker =
     RedmineTracker(tracker.getId, tracker.getName)
 
 }

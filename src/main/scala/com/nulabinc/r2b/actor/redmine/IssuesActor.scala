@@ -1,66 +1,72 @@
 package com.nulabinc.r2b.actor.redmine
 
-import java.util.UUID._
+import java.util.concurrent.CountDownLatch
+import javax.inject.{Inject, Named}
 
-import akka.actor._
-import com.nulabinc.r2b.actor.utils.R2BLogging
-import com.nulabinc.r2b.conf.ConfigBase.Redmine
-import com.nulabinc.r2b.conf.{ConfigBase, R2BConfig}
-import com.nulabinc.r2b.service.{AttachmentDownloader, RedmineMarshaller, RedmineService}
-import com.nulabinc.r2b.utils.IOUtil
-import com.osinka.i18n.Messages
-import com.taskadapter.redmineapi.Include
+import akka.actor.SupervisorStrategy.Restart
+import akka.actor.{Actor, ActorRef, OneForOneStrategy, Props}
+import akka.routing.SmallestMailboxPool
+import com.nulabinc.backlog.migration.di.akkaguice.NamedActor
+import com.nulabinc.backlog.migration.utils.Logging
+import com.nulabinc.r2b.conf.RedmineDirectory
+import com.nulabinc.r2b.service.{AttachmentDownloadService, IssueService, UserService}
 import com.taskadapter.redmineapi.bean.{Issue, Project, User}
+import com.typesafe.config.ConfigFactory
+
+import scala.concurrent.duration._
 
 /**
   * @author uchida
   */
-class IssuesActor(conf: R2BConfig, project: Project) extends Actor with R2BLogging {
+class IssuesActor @Inject()(
+                             redmineDirectory: RedmineDirectory,
+                             @Named("key") key: String,
+                             @Named("projectId") projectId: Int,
+                             project: Project,
+                             attachmentDownloadService: AttachmentDownloadService,
+                             userService: UserService,
+                             issueService: IssueService) extends Actor with Logging {
 
-  private val redmineService: RedmineService = new RedmineService(conf)
+  private[this] val strategy = OneForOneStrategy(maxNrOfRetries = 10, withinTimeRange = 1 minute) {
+    case _ => Restart
+  }
 
-  private var allCount: Int = 0
-  private var count: Int = 0
+  private[this] val limit = ConfigFactory.load().getInt("application.export.issue-get-limit")
+  private[this] val allCount = issueService.countIssues()
+  private[this] val completion = new CountDownLatch(allCount)
 
   def receive: Receive = {
     case IssuesActor.Do =>
-      allCount = redmineService.getIssuesCount(project.getId)
+      val users: Seq[User] = userService.allUsers()
 
-      if (allCount != 0) info(Messages("message.execute_redmine_issues_export", project.getName, allCount))
+      val router = SmallestMailboxPool(ConfigFactory.load().getInt("akka.mailbox-pool"), supervisorStrategy = strategy)
+      val issueActor = context.actorOf(router.props(Props(new IssueActor(redmineDirectory, key, project, attachmentDownloadService, issueService, users))))
+
+      def loop(offset: Long): Unit = {
+        if (offset < allCount) {
+          issues(issueActor, offset)
+          loop(offset + limit)
+        }
+      }
 
       loop(0)
+
+      completion.await
       context.stop(self)
   }
 
-  private def loop(offset: Int): Unit =
-    if (offset < allCount) {
-      search(offset)
-      loop(offset + Redmine.ISSUE_GET_LIMIT)
-    }
-
-  private def search(offset: Int) = {
-    val params: Map[String, String] = Map("offset" -> offset.toString, "limit" -> Redmine.ISSUE_GET_LIMIT.toString, "project_id" -> project.getId.toString, "status_id" -> "*", "subproject_id" -> "!*")
-    val issues: Seq[Issue] = redmineService.getIssues(params)
-    issues.foreach(output)
-  }
-
-  private def output(searchIssue: Issue) = {
-    val issue: Issue = redmineService.getIssueById(searchIssue.getId, Include.attachments, Include.journals)
-    val users: Seq[User] = redmineService.getUsers
-
-    IOUtil.output(ConfigBase.Redmine.getIssuePath(project.getIdentifier, searchIssue.getId), RedmineMarshaller.Issue(issue, project, users))
-    AttachmentDownloader.issue(conf.redmineKey, project.getIdentifier, issue)
-
-    count += 1
-    info(Messages("message.execute_redmine_issue_export", project.getName, count, allCount))
+  private[this] def issues(issueActor: ActorRef, offset: Long) = {
+    val params = Map("offset" -> offset.toString, "limit" -> limit.toString, "project_id" -> projectId.toString, "status_id" -> "*", "subproject_id" -> "!*")
+    val issues: Seq[Issue] = issueService.allIssues(params)
+    issues.foreach(issue => issueActor ! IssueActor.Do(issue.getId, completion, allCount))
   }
 
 }
 
-object IssuesActor {
+object IssuesActor extends NamedActor {
 
-  case class Do()
+  case object Do
 
-  def actorName = s"TopIssueActor_$randomUUID"
+  override final val name = "IssuesActor"
 
 }
