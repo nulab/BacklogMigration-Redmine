@@ -1,20 +1,23 @@
 package com.nulabinc.r2b.cli
 
+import com.google.inject.Injector
 import com.nulabinc.backlog.importer.controllers.ImportController
-import com.nulabinc.backlog.migration.conf.BacklogPaths
+import com.nulabinc.backlog.migration.conf.{BacklogConfiguration, BacklogPaths}
 import com.nulabinc.backlog.migration.modules.ServiceInjector
-import com.nulabinc.backlog.migration.service.ProjectService
-import com.nulabinc.backlog.migration.utils.{ConsoleOut, Logging}
+import com.nulabinc.backlog.migration.service.{ProjectService, SpaceService, UserService}
+import com.nulabinc.backlog.migration.utils.{ConsoleOut, Logging, MixpanelUtil, TrackingData}
 import com.nulabinc.r2b.conf.AppConfiguration
 import com.nulabinc.r2b.controllers.MappingController
 import com.nulabinc.r2b.exporter.controllers.ExportController
 import com.nulabinc.r2b.mapping.core._
 import com.osinka.i18n.Messages
 
+import scala.util.Try
+
 /**
   * @author uchida
   */
-object R2BCli extends Logging {
+object R2BCli extends BacklogConfiguration with Logging {
 
   def init(config: AppConfiguration): Unit =
     if (validateParam(config)) {
@@ -40,6 +43,7 @@ object R2BCli extends Logging {
 
             ExportController.execute(config.redmineConfig, config.backlogConfig.projectKey)
             ImportController.execute(config.backlogConfig, false)
+            tracking(config, backlogInjector)
           }
         }
       }
@@ -48,7 +52,28 @@ object R2BCli extends Logging {
   def doImport(config: AppConfiguration): Unit =
     if (validateParam(config)) {
       ImportController.execute(config.backlogConfig, false)
+      val backlogInjector = ServiceInjector.createInjector(config.backlogConfig)
+      tracking(config, backlogInjector)
     }
+
+  private[this] def tracking(config: AppConfiguration, backlogInjector: Injector) = {
+    Try {
+      val space       = backlogInjector.getInstance(classOf[SpaceService]).space()
+      val myself      = backlogInjector.getInstance(classOf[UserService]).myself()
+      val environment = backlogInjector.getInstance(classOf[SpaceService]).environment()
+      val data = TrackingData(product = mixpanelProduct,
+                              envname = environment.name,
+                              spaceId = environment.spaceId,
+                              userId = myself.id,
+                              srcUrl = config.redmineConfig.url,
+                              dstUrl = config.backlogConfig.url,
+                              srcProjectKey = config.redmineConfig.projectKey,
+                              dstProjectKey = config.backlogConfig.projectKey,
+                              srcSpaceCreated = "",
+                              dstSpaceCreated = space.created)
+      MixpanelUtil.track(token = mixpanelToken, data = data)
+    }
+  }
 
   private[this] def confirmRecreate(mappingFile: MappingFile): Boolean = {
     val input: String = scala.io.StdIn.readLine(Messages("cli.confirm_recreate", mappingFile.itemName, mappingFile.filePath))
@@ -63,7 +88,7 @@ object R2BCli extends Logging {
       val message =
         s"""
            |
-          |${Messages("mapping.show_parameter_error")}
+          |${Messages("cli.param.error")}
            |--------------------------------------------------
            |${errors.mkString("\n")}
            |
@@ -83,19 +108,19 @@ object R2BCli extends Logging {
       val error =
         s"""
            |--------------------------------------------------
-           |${Messages("mapping.broken_file", mappingFile.itemName)}
+           |${Messages("cli.mapping.error.broken_file", mappingFile.itemName)}
            |--------------------------------------------------
         """.stripMargin
       ConsoleOut.error(error)
       val message =
         s"""|--------------------------------------------------
-            |${Messages("mapping.need_fix_file", mappingFile.filePath)}""".stripMargin
+            |${Messages("cli.mapping.fix_file", mappingFile.filePath)}""".stripMargin
       ConsoleOut.println(message)
       false
     } else if (!mappingFile.isValid) {
       val error =
         s"""
-           |${Messages("mapping.show_error", mappingFile.itemName)}
+           |${Messages("cli.mapping.error", mappingFile.itemName)}
            |--------------------------------------------------
            |${mappingFile.errors.mkString("\n")}
            |--------------------------------------------------""".stripMargin
@@ -103,7 +128,7 @@ object R2BCli extends Logging {
       val message =
         s"""
            |--------------------------------------------------
-           |${Messages("mapping.need_fix_file", mappingFile.filePath)}
+           |${Messages("cli.mapping.fix_file", mappingFile.filePath)}
         """.stripMargin
       ConsoleOut.println(message)
       false
@@ -115,27 +140,27 @@ object R2BCli extends Logging {
       case Some(projectKeys) =>
         val (redmine, backlog): (String, String) = projectKeys
         ConsoleOut.println(s"""
-                              |${Messages("mapping.show", Messages("common.projects"))}
+                              |${Messages("cli.mapping.show", Messages("common.projects"))}
                               |--------------------------------------------------
                               |- ${redmine} => ${backlog}
                               |--------------------------------------------------
                               |
-         |${Messages("mapping.show", propertyMappingFiles.user.itemName)}
+         |${Messages("cli.mapping.show", propertyMappingFiles.user.itemName)}
                               |--------------------------------------------------
                               |${mappingString(propertyMappingFiles.user)}
                               |--------------------------------------------------
                               |
-         |${Messages("mapping.show", propertyMappingFiles.priority.itemName)}
+         |${Messages("cli.mapping.show", propertyMappingFiles.priority.itemName)}
                               |--------------------------------------------------
                               |${mappingString(propertyMappingFiles.priority)}
                               |--------------------------------------------------
                               |
-         |${Messages("mapping.show", propertyMappingFiles.status.itemName)}
+         |${Messages("cli.mapping.show", propertyMappingFiles.status.itemName)}
                               |--------------------------------------------------
                               |${mappingString(propertyMappingFiles.status)}
                               |--------------------------------------------------
                               |""".stripMargin)
-        val input: String = scala.io.StdIn.readLine(Messages("mapping.confirm"))
+        val input: String = scala.io.StdIn.readLine(Messages("cli.confirm"))
         if (input == "y" || input == "Y") true
         else {
           ConsoleOut.println(s"""
@@ -188,18 +213,18 @@ object R2BCli extends Logging {
       if (confirmRecreate(mappingFile)) {
         mappingFile.create()
         val message =
-          s"""${Messages("cli.output_mapping_file", mappingFile.itemName, mappingFile.filePath)}
+          s"""${Messages("cli.mapping.output_file", mappingFile.itemName, mappingFile.filePath)}
             |
-            |${Messages("cli.confirm_fix")}
+            |${Messages("cli.confirm.fix")}
           """.stripMargin
         ConsoleOut.info(message)
       }
     } else {
       mappingFile.create()
       val message =
-        s"""${Messages("cli.output_mapping_file", mappingFile.itemName, mappingFile.filePath)}
+        s"""${Messages("cli.mapping.output_file", mappingFile.itemName, mappingFile.filePath)}
           |
-          |${Messages("cli.confirm_fix")}
+          |${Messages("cli.confirm.fix")}
         """.stripMargin
       ConsoleOut.info(message)
     }

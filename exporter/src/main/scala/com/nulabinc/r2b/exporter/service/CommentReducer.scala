@@ -6,7 +6,7 @@ import java.nio.channels.Channels
 
 import com.nulabinc.backlog.migration.conf.{BacklogConstantValue, BacklogPaths}
 import com.nulabinc.backlog.migration.domain.{BacklogAttachmentInfo, BacklogChangeLog, BacklogComment, BacklogIssue}
-import com.nulabinc.backlog.migration.utils.{IOUtil, Logging}
+import com.nulabinc.backlog.migration.utils.{FileUtil, IOUtil, Logging}
 import com.nulabinc.r2b.redmine.conf.RedmineConfig
 import com.nulabinc.r2b.redmine.service.IssueService
 import com.taskadapter.redmineapi.bean.Attachment
@@ -40,14 +40,15 @@ class CommentReducer(apiConfig: RedmineConfig,
     comment.copy(optIssueId = Some(issue.id), optContent = optNewContent, isCreateIssue = false, changeLogs = newChangeLogs)
   }
 
-  private[this] def parse(comment: BacklogComment, changeLog: BacklogChangeLog): Option[BacklogChangeLog] =
+  private[this] def parse(comment: BacklogComment, changeLog: BacklogChangeLog): Option[BacklogChangeLog] = {
     changeLog.field match {
       case BacklogConstantValue.ChangeLog.ATTACHMENT => attachment(changeLog)
       case _ =>
         Some(changeLog.copy(optNewValue = issuePropertyNewValue(comment, changeLog)))
     }
+  }
 
-  private[this] def attachment(changeLog: BacklogChangeLog): Option[BacklogChangeLog] =
+  private[this] def attachment(changeLog: BacklogChangeLog): Option[BacklogChangeLog] = {
     changeLog.optAttachmentInfo match {
       case Some(attachmentInfo) =>
         val optAttachment = attachments.find(attachment => attachment.getFileName == attachmentInfo.name)
@@ -56,14 +57,14 @@ class CommentReducer(apiConfig: RedmineConfig,
             val url: URL = new URL(s"${attachment.getContentURL}?key=${apiConfig.key}")
             download(attachmentInfo, attachmentInfo.name, url.openStream())
             Some(changeLog)
-          case _ =>
-            None
+          case _ => None
         }
       case _ => Some(changeLog)
     }
+  }
 
   private[this] def download(attachmentInfo: BacklogAttachmentInfo, name: String, content: InputStream) = {
-    val dir  = backlogPaths.issueAttachmentDirectoryPath(issueDirPath, attachmentInfo.id.toInt)
+    val dir  = backlogPaths.issueAttachmentDirectoryPath(issueDirPath)
     val path = backlogPaths.issueAttachmentPath(dir, name)
     IOUtil.createDirectory(dir)
     val rbc = Channels.newChannel(content)

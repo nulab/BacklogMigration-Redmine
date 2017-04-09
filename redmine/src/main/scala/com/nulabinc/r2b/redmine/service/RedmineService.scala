@@ -55,7 +55,7 @@ class RedmineService(redmineConfig: RedmineConfig) extends Logging {
     try {
       Some(redmine.getProjectManager.getProjectByKey(projectKey))
     } catch {
-      case e: NotFoundException =>
+      case e: Throwable =>
         logger.error(e.getMessage, e)
         None
     }

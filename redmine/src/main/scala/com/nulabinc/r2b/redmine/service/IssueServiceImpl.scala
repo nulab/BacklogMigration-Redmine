@@ -5,6 +5,7 @@ import javax.inject.{Inject, Named}
 import com.nulabinc.backlog.migration.utils.Logging
 import com.nulabinc.r2b.domain.RedmineIssuesWrapper
 import com.nulabinc.r2b.domain.RedmineJsonProtocol._
+import com.nulabinc.r2b.redmine.conf.RedmineConfig
 import com.taskadapter.redmineapi.bean.Issue
 import com.taskadapter.redmineapi.{Include, RedmineManager}
 import org.apache.http.client.methods.HttpGet
@@ -17,14 +18,14 @@ import scala.collection.JavaConverters._
 /**
   * @author uchida
   */
-class IssueServiceImpl @Inject()(@Named("url") url: String, @Named("key") key: String, @Named("projectId") projectId: Int, redmine: RedmineManager)
+class IssueServiceImpl @Inject()(apiConfig: RedmineConfig, @Named("projectId") projectId: Int, redmine: RedmineManager)
     extends IssueService
     with Logging {
 
   override def countIssues(): Int = {
-    val countIssueUrl                              = s"${url}/issues.json?limit=1&subproject_id=!*&project_id=${projectId}&key=${key}&status_id=*"
-    val str: String                                = httpGet(countIssueUrl)
-    val redmineIssuesWrapper: RedmineIssuesWrapper = JsonParser(str).convertTo[RedmineIssuesWrapper]
+    val countIssueUrl        = s"${apiConfig.url}/issues.json?limit=1&subproject_id=!*&project_id=${projectId}&key=${apiConfig.key}&status_id=*"
+    val str: String          = httpGet(countIssueUrl)
+    val redmineIssuesWrapper = JsonParser(str).convertTo[RedmineIssuesWrapper]
     redmineIssuesWrapper.total_count
   }
 

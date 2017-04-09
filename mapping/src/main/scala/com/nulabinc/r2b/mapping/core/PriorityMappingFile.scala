@@ -83,7 +83,7 @@ class PriorityMappingFile(redmineApiConfig: RedmineConfig, backlogApiConfig: Bac
   override def itemName: String = Messages("common.priorities")
 
   override def description: String =
-    Messages("mapping.possible_values", itemName, backlogs.map(_.name).mkString(","))
+    Messages("cli.mapping.configurable", itemName, backlogs.map(_.name).mkString(","))
 
   override def isDisplayDetail: Boolean = false
 

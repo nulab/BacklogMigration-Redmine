@@ -27,7 +27,7 @@ class WikiActor(wikiService: WikiService, mappingData: MappingData) extends Acto
   private[this] val users = mutable.Set.empty[Option[User]]
 
   def receive: Receive = {
-    case WikiActor.Do(projectKey: String, wiki: WikiPage, completion: CountDownLatch, allCount: Int, console: ((Int, Int) => Unit)) =>
+    case WikiActor.Do(wiki: WikiPage, completion: CountDownLatch, allCount: Int, console: ((Int, Int) => Unit)) =>
       val wikiDetail: WikiPageDetail = wikiService.wikiDetail(wiki.getTitle)
       parse(wikiDetail)
       mappingData.users ++= users.flatten
@@ -43,6 +43,6 @@ class WikiActor(wikiService: WikiService, mappingData: MappingData) extends Acto
 
 object WikiActor {
 
-  case class Do(projectKey: String, wiki: WikiPage, completion: CountDownLatch, allCount: Int, console: ((Int, Int) => Unit))
+  case class Do(wiki: WikiPage, completion: CountDownLatch, allCount: Int, console: ((Int, Int) => Unit))
 
 }

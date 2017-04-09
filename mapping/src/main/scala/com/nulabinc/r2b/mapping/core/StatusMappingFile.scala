@@ -26,7 +26,7 @@ class StatusMappingFile(redmineApiConfig: RedmineConfig, backlogApiConfig: Backl
         val exists = redmineStatuses.exists(redmineStatuse => redmineStatuse.getId.intValue() == status.toInt)
         if (exists) acc
         else {
-          val name = Messages("mapping.delete_status", status)
+          val name = Messages("cli.mapping.delete_status", status)
           acc :+ MappingItem(name, name)
         }
       }
@@ -100,7 +100,7 @@ class StatusMappingFile(redmineApiConfig: RedmineConfig, backlogApiConfig: Backl
   override def itemName: String = Messages("common.statuses")
 
   override def description: String =
-    Messages("mapping.possible_values", itemName, backlogs.map(_.name).mkString(","))
+    Messages("cli.mapping.configurable", itemName, backlogs.map(_.name).mkString(","))
 
   override def isDisplayDetail: Boolean = false
 

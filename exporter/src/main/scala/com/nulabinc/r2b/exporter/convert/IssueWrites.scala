@@ -34,11 +34,11 @@ class IssueWrites @Inject()(implicit val attachmentWrites: AttachmentWrites,
       optDueDate = Option(issue.getDueDate).map(DateUtil.dateFormat),
       optEstimatedHours = Option(issue.getEstimatedHours).map(_.floatValue()),
       optActualHours = Option(issue.getSpentHours).map(_.floatValue()),
-      optIssueTypeName = Some(issue.getTracker.getName),
+      optIssueTypeName = Option(issue.getTracker).map(_.getName),
       statusName = statusMapping.convert(issue.getStatusName),
-      categoryNames = Seq(issue.getCategory.getName),
+      categoryNames = Option(issue.getCategory).map(_.getName).toSeq,
       versionNames = Seq.empty[String],
-      milestoneNames = Seq(issue.getTargetVersion.getName),
+      milestoneNames = Option(issue.getTargetVersion).map(_.getName).toSeq,
       priorityName = priorityMapping.convert(issue.getPriorityText),
       optAssignee = Option(issue.getAssignee).map(Convert.toBacklog(_)),
       sharedFiles = Seq.empty[BacklogSharedFile],
@@ -49,7 +49,7 @@ class IssueWrites @Inject()(implicit val attachmentWrites: AttachmentWrites,
   }
 
   private[this] def parentIssueId(issue: Issue): Option[Long] = {
-    Option(issue.getParentId.intValue()) match {
+    Option(issue.getParentId).map(_.intValue()) match {
       case Some(id) if id == 0 => None
       case Some(id)            => Some(id)
       case _                   => None

@@ -55,7 +55,7 @@ class UserMappingFile(redmineApiConfig: RedmineConfig, backlogApiConfig: Backlog
 
   override def description: String = {
     val description: String =
-      Messages("mapping.possible_values", itemName, backlogs.map(_.name).mkString(","))
+      Messages("cli.mapping.configurable", itemName, backlogs.map(_.name).mkString(","))
     description
   }
 

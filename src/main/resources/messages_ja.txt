@@ -8,12 +8,8 @@ common.priorities=優先度
 common.yes=はい
 common.no=いいえ
 common.user=ユーザー
-common.relation=関連している課題:
 common.project=プロジェクト
 common.done_ratio=進捗率
-common.private=プライベート
-common.not_set=新規
-common.change_comment={0}: {1} -> {2}
 common.comment=コメント
 common.parent_page=親ページ
 common.parent_issue=親課題
@@ -25,13 +21,16 @@ common.category=カテゴリー
 common.news=ニュース
 common.issues=課題
 common.issues_info=課題情報
+common.version=バージョン
+common.groups=グループ
+common.issue_type=課題種別
+common.result_success=成功
+common.result_failed=失敗:{0,number,#}
 
 
 # Message
 message.exporting=エクスポートしています...
 message.exported=エクスポートしました。
-message.converting=コンバートしています...
-message.converted=コンバートしました。
 message.importing=インポートしています...
 message.imported=インポートしました。
 message.execute={0}の{1}(全{2,number,#}件)
@@ -45,96 +44,74 @@ message.collected=収集しました。
 
 
 # CLI
-cli.require_java8=現在のJavaのバージョンは「{0}」です。Java8以上が必須になります。
-cli.help.projectKey=移行したいRedmineプロジェクトのプロジェクト識別子を指定します。(必須オプション)例：--projectKey <Redmineプロジェクト識別子>:<Backlogプロジェクトキー>
-cli.collect_project_info.start=プロジェクトに関連する情報を収集します。
-cli.collect_project_info.finish=プロジェクトに関連する情報の収集が完了しました。
-cli.load_redmine_issue=課題を解析しています。({0,number,#}/{1,number,#})
-cli.load_redmine_wikis=Wikiを解析しています。({0,number,#}/{1,number,#})
-cli.confirm_recreate={0}マッピングファイルが既にあります。上書きしますか？ [y/N]:
-cli.output_mapping_file={0}のマッピングファイルを「{1}」に作成しました。
-cli.confirm_fix=マッピングファイルを確認し、必要に応じて修正してください。
-cli.backlog_project_already_exist=プロジェクト「{0}」はBacklog内に既に存在します。\nプロジェクト「{0}」に課題とWikiをインポートしますか？（追加インポートの仕様については、詳細READMEを参照ください) [y/N]:
-cli.help=オプションのヘルプを見るには`java -jar backlog-migration-redmine-<latest version>.jar --help`を実行してください。
-cli.help.sample_command=\nサンプルコマンド:\n\n初期化:先に「init」コマンドを実行し、マッピングファイルを準備する必要があります。\n\njava -jar backlog-migration-redmine-<latest version>.jar init \\\n--backlog.key <BacklogのAPIキー> \\\n--backlog.url <BacklogのURL> \\\n--redmine.key <RedmineのAPIキー> \\\n--redmine.url <RedmineのURL> \\\n--projects <プロジェクト識別子1> <プロジェクト識別子2>\n\nインポートの実行:「execute」コマンドを実行することでインポートできます。\n\njava -jar backlog-migration-redmine-<latest version>.jar execute \\\n--backlog.key <BacklogのAPIキー> \\\n--backlog.url <BacklogのURL> \\\n--redmine.key <RedmineのAPIキー> \\\n--redmine.url <RedmineのURL> \\\n--projects <プロジェクト識別子1> <プロジェクト識別子2>\n
+cli.confirm=移行を実行しますか？ (y/n [n]):
+cli.require_java8=現在のJavaのバージョンは[{0}]です。Java8以上が必須になります。
+cli.help.projectKey=移行したいRedmineプロジェクトのプロジェクト識別子を指定します。(必須オプション)例：--projectKey [Redmineプロジェクト識別子]:[Backlogプロジェクトキー]
+cli.confirm_recreate={0}マッピングファイルが既にあります。上書きしますか？ (y/n [n]):
+cli.backlog_project_already_exist=プロジェクト[{0}]はBacklog内に既に存在します。\nプロジェクト[{0}]に課題とWikiをインポートしますか？（追加インポートの仕様については、詳細READMEを参照ください) (y/n [n]):
+cli.error.unknown=予期しないエラーが発生しました。
+cli.cancel=インポートを中止しました。
+cli.invalid_setup=セットアップが不十分です。サブコマンド[init]を使用しセットアップしてください。[init]コマンドについて知るには、[--help]オプションをつけて実行してください。
+
+
+# CLI Help
+cli.help=オプションのヘルプを見るには`java -jar backlog-migration-redmine-[latest version].jar --help`を実行してください。
+cli.help.sample_command=\nサンプルコマンド:\n\n初期化:[init]コマンドを実行することでマッピングファイルを作成します。\n\njava -jar backlog-migration-redmine-[latest version].jar init \\\n--redmine.key [RedmineのAPIキー] \\\n--redmine.url [RedmineのURL] \\\n--backlog.key [BacklogのAPIキー] \\\n--backlog.url [BacklogのURL] \\\n--projectKey [プロジェクト識別子]\n\nインポートの実行:[execute]コマンドを実行することでインポートできます。\n\njava -jar backlog-migration-redmine-[latest version].jar execute \\\n--redmine.key [RedmineのAPIキー] \\\n--redmine.url [RedmineのURL] \\\n--backlog.key [BacklogのAPIキー] \\\n--backlog.url [BacklogのURL] \\\n--projectKey [プロジェクト識別子]\n
 cli.help.show_help=ヘルプを表示
 cli.help.show_version=バージョンを表示
-cli.help.backlog.key=Backlogのアクセスキーを指定します。(必須オプション)例：--backlog.key <Backlogのアクセスキー>
-cli.help.backlog.url=BacklogのURLを指定します。(必須オプション)例：--backlog.url <BacklogのURL>
-cli.help.redmine.key=RedmineのAPIアクセスキーを指定します。(必須オプション)例：--redmine.key <RedmineのAPIアクセスキー>
-cli.help.redmine.url=RedmineのURLを指定します。(必須オプション)例：--redmine.url <RedmineのURL>
+cli.help.backlog.key=Backlogのアクセスキーを指定します。(必須オプション)例：--backlog.key [Backlogのアクセスキー]
+cli.help.backlog.url=BacklogのURLを指定します。(必須オプション)例：--backlog.url [BacklogのURL]
+cli.help.redmine.key=RedmineのAPIアクセスキーを指定します。(必須オプション)例：--redmine.key [RedmineのAPIアクセスキー]
+cli.help.redmine.url=RedmineのURLを指定します。(必須オプション)例：--redmine.url [RedmineのURL]
 cli.help.importOnly=このプロパティを設定した場合、インポートのみを行います。
-cli.error.unknown=予期しないエラーが発生しました。
-cli.disable_access_backlog=Backlogにアクセスできませんでした。URLまたはAPIアクセスキーを確認してください。
-cli.disable_access_redmine=Redmineにアクセスできませんでした。URLまたはAPIアクセスキーを確認してください。
-cli.cancel=インポートを中止しました。
-cli.invalid_setup=セットアップが不十分です。サブコマンド「init」を使用しセットアップしてください。「init」コマンドについて知るには、「--help」オプションをつけて実行してください。
 
 
 # CLI Validate Param
+cli.param.error=パラメーターに以下の誤りがあります。
+cli.param.check.access={0}にアクセス可能かチェックしています...
+cli.param.get.project={0}のプロジェクトを取得しています...
+cli.param.error.auth={0}にアクセスできませんでした。認証エラーが発生しました。\n有効なAPIアクセスキーになっていることと、REST APIサービスがサーバー上で有効になっていることを確認してください。
 cli.param.error.disable.project=プロジェクト[{0}]を読み込むことができませんでした。
 cli.param.error.disable.access={0}にアクセスできませんでした。URLまたはAPIアクセスキーを確認してください。
 cli.param.error.disable.host={0}にアクセスできませんでした。[{1}]は不明なホストです。
-cli.param.check.access={0}にアクセス可能かチェックしています...
-cli.param.get.project={0}のプロジェクトを取得しています...
-cli.param.error.auth={0}にアクセスできませんでした。認証エラーが発生しました。有効なAPIアクセスキーになっていることと、REST APIサービスがサーバー上で有効になっていることを確認してください。
+cli.param.error.project_key=プロジェクトキー[{0}]が正しくありません。(半角英大文字と半角数字とアンダースコアが使用できます。)
 
 
-# MAPPING
-mapping.delete_status=削除されたステータス[{0}]
-mapping.not_exists_redmine_item={0}「{1}」がRedmineのマッピングファイルにありません。再作成することで自動的に追加することができます。再作成する場合は、「{2}」を削除し、サブコマンド「init」を実行してください。
-mapping.broken_file={0}のマッピングファイルが壊れています。
-mapping.need_fix_file=「{0}」を修正する必要があります。\n再作成する場合は、「{0}」を削除し、サブコマンド「init」を実行してください。
-mapping.show={0}のマッピングは以下のようになります。
-mapping.show_parameter_error=パラメーターに以下の誤りがあります。
-mapping.show_error={0}のマッピングに以下の誤りがあります。
-mapping.possible_values=Backlogに設定可能な{0}は「{1}」です。
-mapping.confirm=インポートを実行しますか？ [y/N]:
-mapping.not_exist_redmine={1}「{0}」がRedmine内に存在しません。
-mapping.not_exist_backlog={1}「{0}」がBacklog内に存在しません。
-mapping.specify_item=Redmineの{0}「{1}」に対応する項目が指定されていません。
+# CLI Mapping
+cli.mapping.delete_status=削除されたステータス[{0}]
+cli.mapping.error.broken_file={0}のマッピングファイルが壊れています。
+cli.mapping.fix_file=[{0}]を修正する必要があります。\n再作成する場合は、[{0}]を削除し、サブコマンド[init]を実行してください。
+cli.mapping.show={0}のマッピングは以下のようになります。
+cli.mapping.error={0}のマッピングに以下の誤りがあります。
+cli.mapping.configurable=Backlogに設定可能な{0}は[{1}]です。
+cli.mapping.error.not_exist.item={1}[{0}]が{2}に存在しません。
+cli.mapping.error.empty.item=Redmineの{0}[{1}]に対応する項目が指定されていません。
+cli.mapping.output_file={0}のマッピングファイルを[{1}]に作成しました。
+cli.confirm.fix=マッピングファイルを確認し、必要に応じて修正してください。
 
 
-# IMPORT
-import.start=インポートを開始します。
-import.finish=インポートが完了しました。
-import.execute_users=ユーザーのインポートを実行します。(全{0,number,#}件)
-import.executed_users=ユーザーをインポートしました。({0,number,#}/{1,number,#})
-import.execute_groups=グループのインポートを実行します。(全{0,number,#}件)
-import.executed_groups=グループをインポートしました。({0,number,#}/{1,number,#})
-import.execute_custom_fields=カスタムフィールドをインポートしました。
-import.executed_issue_categories=カテゴリーをインポートしました。
-import.executed_issue_types=種別をインポートしました。
-import.executed_project_users=参加ユーザーをインポートしました。
-import.executed_versions=バージョンをインポートしました。
-import.execute_issues=課題のインポートを実行します。(全{0,number,#}件)
-import.executed_issue=課題をインポートしました。({0,number,#}/{1,number,#})
-import.already_exists_issue=課題ID[{0,number,#}]は、すでに登録されているため読み飛ばします。({1,number,#}/{2,number,#})
-import.execute_wikis=Wikiのインポートを実行します。(全{0,number,#}件)
-import.executed_wiki=Wikiをインポートしました。({0,number,#}/{1,number,#})
-import.project_not_join={0}は参加していないプロジェクトになります。課題を追加する場合はプロジェクトに参加してください。
-import.project_plan_limit=プロジェクト{0}をインポートできません。現在のプランではこれ以上プロジェクトを登録できません。プランをアップグレードしてください。
-import.project_not_import=以下の理由でプロジェクト{0}をインポートできません。:{1}
-import.user_plan_limit=ユーザー{0}をインポートできません。現在のプランではこれ以上ユーザーを登録できません。プランをアップグレードしてください。
-import.suspend=インポートを中断します。
-import.task_registration_failed=課題ID[{0,number,#}]の登録に失敗しました。
-import.task_update_failed=課題キー[{0}]の更新に失敗しました。:{1}
-import.attachment_upload_failed_too_large=添付ファイルを{0}をアップロードできませんでした。添付ファイルのサイズが大きすぎます。
-import.attachment_upload_failed=添付ファイルを{0}をアップロードできませんでした。:{1}
-import.wiki_attachment_attach_failed=添付ファイルをWikiに添付できませんでした。:{0}
+# CLI Project Info
+cli.project_info.start=プロジェクトに関連する情報を収集します。
+cli.project_info.finish=プロジェクトに関連する情報の収集が完了しました。
 
 
-# CONVERT
-convert.start=コンバートを開始します。
-convert.finish=コンバートが完了しました。
-convert.add_attachment=ファイル {0} を追加
-convert.del_attachment=ファイル を削除 ({0})
-convert.execute_wikis_convert=Wikiのコンバートを実行します。(全{0}件)
-convert.execute_wiki_convert=Wikiをコンバートしました。({0}/{1})
-convert.execute_issues_convert=課題のコンバートを実行します。(全{0}件)
-convert.execute_issue_convert=課題をコンバートしました。({0}/{1})
-
-
-# EXPORT
+# Export
 export.start=エクスポートを開始します。
 export.finish=エクスポートが完了しました。
+
+
+# Import
+import.start=インポートを開始します。
+import.finish=インポートが完了しました。
+import.suspend=インポートを中断します。
+import.remaining_time=[残り時間:{0}]
+import.issue.already_exists=課題[{0}]は、すでに登録されているため読み飛ばします。
+import.issue.create_dummy=ダミーの課題を作成しました。:{0}
+import.progress=進行状況...({0,number,#}/{1,number,#})
+import.date.execute={0}の{1}を{2}
+import.error.wiki.attachment=添付ファイルをWiki[{0}]に添付できませんでした。:{1}
+import.error.limit.project=プロジェクト[{0}]をインポートできません。\n現在のプランではこれ以上プロジェクトを登録できません。\nプランをアップグレードしてください。
+import.error.project.not.join=[{0}]は参加していないプロジェクトになります。課題を追加する場合はプロジェクトに参加してください。
+import.error.failed.import=次の理由でプロジェクト{0}をインポートできません。:{1}
+import.error.issue.attachment=添付ファイル[{0}]をアップロードできませんでした。:{1}
+import.error.attachment.too_large=添付ファイル{0}をアップロードできませんでした。添付ファイルのサイズが大きすぎます。

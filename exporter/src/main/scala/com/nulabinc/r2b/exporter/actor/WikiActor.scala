@@ -45,7 +45,7 @@ class WikiActor(apiConfig: RedmineConfig,
 
       val backlogWiki = Convert.toBacklog(wikiDetail)(wikiWrites)
       //TODO hashCode -> clean(title)
-      IOUtil.output(backlogPaths.wikiJson(wiki.getTitle.hashCode), backlogWiki.toJson.prettyPrint)
+      IOUtil.output(backlogPaths.wikiJson(wiki.getTitle), backlogWiki.toJson.prettyPrint)
 
       wikiDetail.getAttachments.asScala.foreach { attachment =>
         val url: URL = new URL(s"${attachment.getContentURL}?key=${apiConfig.key}")
@@ -57,8 +57,8 @@ class WikiActor(apiConfig: RedmineConfig,
   }
 
   private[this] def download(wiki: BacklogWiki, attachment: BacklogAttachment, name: String, content: InputStream) = {
-    val dir  = backlogPaths.wikiAttachmentDirectoryPath(wiki.id, attachment.id)
-    val path = backlogPaths.wikiAttachmentPath(wiki.id, attachment.id, name)
+    val dir  = backlogPaths.wikiAttachmentDirectoryPath(FileUtil.clean(wiki.name))
+    val path = backlogPaths.wikiAttachmentPath(FileUtil.clean(wiki.name), name)
     IOUtil.createDirectory(dir)
 
     val rbc = Channels.newChannel(content)

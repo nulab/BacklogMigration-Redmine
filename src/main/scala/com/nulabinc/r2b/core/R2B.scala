@@ -1,21 +1,16 @@
 package com.nulabinc.r2b.core
 
-import java.util.Locale
-
-import com.nulabinc.backlog.migration.conf.BacklogApiConfiguration
+import com.nulabinc.backlog.migration.conf.{BacklogApiConfiguration, BacklogConfiguration}
 import com.nulabinc.backlog.migration.utils.{ConsoleOut, Logging}
 import com.nulabinc.r2b.cli._
 import com.nulabinc.r2b.conf._
 import com.nulabinc.r2b.redmine.conf.RedmineConfig
 import com.nulabinc.r2b.utils.{ClassVersion, DisableSSLCertificateCheckUtil}
-import com.osinka.i18n.{Lang, Messages}
-import com.typesafe.config.ConfigFactory
+import com.osinka.i18n.Messages
 import org.fusesource.jansi.AnsiConsole
 import org.rogach.scallop._
 
-class CommandLineInterface(arguments: Seq[String]) extends ScallopConf(arguments) {
-
-  implicit val userLang = if (Locale.getDefault.equals(Locale.JAPAN)) Lang("ja") else Lang("en")
+class CommandLineInterface(arguments: Seq[String]) extends ScallopConf(arguments) with BacklogConfiguration with Logging {
 
   banner("""Usage: Backlog Migration for Redmine [OPTION]....
       | """.stripMargin)
@@ -49,10 +44,10 @@ class CommandLineInterface(arguments: Seq[String]) extends ScallopConf(arguments
   verify()
 }
 
-object R2B extends Logging {
+object R2B extends BacklogConfiguration with Logging {
 
   def main(args: Array[String]) {
-    ConsoleOut.println(s"""|${ConfigFactory.load().getString("application.title")}
+    ConsoleOut.println(s"""|${applicationName}
                  |--------------------------------------------------""".stripMargin)
     AnsiConsole.systemInstall()
     DisableSSLCertificateCheckUtil.disableChecks()
@@ -89,7 +84,7 @@ object R2B extends Logging {
 
   private[this] def getConfiguration(cli: CommandLineInterface) = {
     val keys: Array[String] = cli.execute.projectKey().split(":")
-    val redmine: String     = keys(0).toUpperCase.replaceAll("-", "_")
+    val redmine: String     = keys(0)
     val backlog: String     = if (keys.length == 2) keys(1) else keys(0).toUpperCase.replaceAll("-", "_")
 
     AppConfiguration(redmineConfig = new RedmineConfig(url = cli.execute.redmineUrl(), key = cli.execute.redmineKey(), projectKey = redmine),

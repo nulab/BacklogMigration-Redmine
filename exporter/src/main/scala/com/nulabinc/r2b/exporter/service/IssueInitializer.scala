@@ -111,7 +111,7 @@ class IssueInitializer(issueWrites: IssueWrites, userWrites: UserWrites, issueSe
   private[this] def categoryNames(issue: Issue): Seq[String] = {
     val issueInitialValue = new IssueInitialValue(RedmineConstantValue.ATTR, RedmineConstantValue.Attr.CATEGORY)
     val details           = issueInitialValue.findJournalDetails(journals)
-    if (details.isEmpty) Seq(issue.getCategory.getName)
+    if (details.isEmpty) Option(issue.getCategory).map(_.getName).toSeq
     else details.flatMap(detail => Option(detail.getOldValue))
   }
 
@@ -126,7 +126,7 @@ class IssueInitializer(issueWrites: IssueWrites, userWrites: UserWrites, issueSe
   private[this] def milestoneNames(issue: Issue): Seq[String] = {
     val issueInitialValue = new IssueInitialValue(RedmineConstantValue.ATTR, RedmineConstantValue.Attr.VERSION)
     val details           = issueInitialValue.findJournalDetails(journals)
-    if (details.isEmpty) Seq(issue.getTargetVersion.getName)
+    if (details.isEmpty) Option(issue.getTargetVersion).map(_.getName).toSeq
     else details.flatMap(detail => Option(detail.getOldValue))
   }
 

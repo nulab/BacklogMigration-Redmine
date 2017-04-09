@@ -27,7 +27,7 @@ class GroupsWrites @Inject()(implicit val userWrites: UserWrites, userService: U
     users.filter(user => condition(name, user)).map(Convert.toBacklog(_))
   }
 
-  def condition(membership: Membership) = Option(membership.getUser).isDefined
+  def condition(membership: Membership) = Option(membership.getGroup).isDefined
 
   def condition(name: String, user: User) = user.getGroups.asScala.toSeq.map(_.getName).contains(name)
 

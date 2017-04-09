@@ -27,7 +27,7 @@ object MappingController extends Logging {
     )
 
     ConsoleOut.println(s"""
-                          |${Messages("cli.collect_project_info.start")}
+                          |${Messages("cli.project_info.start")}
                           |--------------------------------------------------""".stripMargin)
 
     val mappingData = MappingData(mutable.Set.empty[User], mutable.Set.empty[String])
@@ -35,7 +35,7 @@ object MappingController extends Logging {
     service.execute(injector, mappingData)
 
     ConsoleOut.println(s"""|--------------------------------------------------
-                           |${Messages("cli.collect_project_info.finish")}""".stripMargin)
+                           |${Messages("cli.project_info.finish")}""".stripMargin)
 
     mappingData
   }

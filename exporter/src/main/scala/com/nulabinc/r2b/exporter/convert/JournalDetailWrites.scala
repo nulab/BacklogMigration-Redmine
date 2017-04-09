@@ -44,13 +44,13 @@ class JournalDetailWrites @Inject()(customFieldFormats: CustomFieldFormats) exte
         }
       case _ => None
     }
-    optTypeId.map(typeId => BacklogAttributeInfo(id = 0, typeId = typeId.toString))
+    optTypeId.map(typeId => BacklogAttributeInfo(optId = None, typeId = typeId.toString))
   }
 
   private[this] def attachmentInfo(detail: JournalDetail): Option[BacklogAttachmentInfo] = {
     detail.getProperty match {
       case RedmineConstantValue.ATTACHMENT =>
-        val attachment = BacklogAttachmentInfo(id = detail.getName.toInt, name = FileUtil.clean(detail.getNewValue))
+        val attachment = BacklogAttachmentInfo(optId = Some(detail.getName.toInt), name = FileUtil.clean(detail.getNewValue))
         Some(attachment)
       case _ => None
     }
@@ -58,6 +58,7 @@ class JournalDetailWrites @Inject()(customFieldFormats: CustomFieldFormats) exte
 
   private[this] def field(detail: JournalDetail): String = detail.getProperty match {
     case RedmineConstantValue.CUSTOM_FIELD => detail.getName
+    case RedmineConstantValue.ATTACHMENT   => BacklogConstantValue.ChangeLog.ATTACHMENT
     case _                                 => field(detail.getName)
   }
 

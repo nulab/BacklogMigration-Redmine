@@ -1,7 +1,7 @@
 package com.nulabinc.r2b.mapping.actor
 
 import java.util.concurrent.CountDownLatch
-import javax.inject.{Inject, Named}
+import javax.inject.Inject
 
 import akka.actor.SupervisorStrategy.Restart
 import akka.actor.{Actor, OneForOneStrategy, Props}
@@ -10,6 +10,7 @@ import com.nulabinc.backlog.migration.conf.BacklogConfiguration
 import com.nulabinc.backlog.migration.modules.akkaguice.NamedActor
 import com.nulabinc.backlog.migration.utils.{Logging, ProgressBar}
 import com.nulabinc.r2b.mapping.core.MappingData
+import com.nulabinc.r2b.redmine.conf.RedmineConfig
 import com.nulabinc.r2b.redmine.service.WikiService
 import com.osinka.i18n.Messages
 
@@ -18,7 +19,7 @@ import scala.concurrent.duration._
 /**
   * @author uchida
   */
-class WikisActor @Inject()(@Named("projectKey") projectKey: String, wikiService: WikiService) extends Actor with BacklogConfiguration with Logging {
+class WikisActor @Inject()(apiConfig: RedmineConfig, wikiService: WikiService) extends Actor with BacklogConfiguration with Logging {
 
   private[this] val strategy = OneForOneStrategy(maxNrOfRetries = 10, withinTimeRange = 1 minute) {
     case _ => Restart
@@ -33,7 +34,7 @@ class WikisActor @Inject()(@Named("projectKey") projectKey: String, wikiService:
       val router    = SmallestMailboxPool(akkaMailBoxPool, supervisorStrategy = strategy)
       val wikiActor = context.actorOf(router.props(Props(new WikiActor(wikiService, mappingData))))
 
-      wikis.foreach(wiki => wikiActor ! WikiActor.Do(projectKey, wiki, completion, wikis.size, console))
+      wikis.foreach(wiki => wikiActor ! WikiActor.Do(wiki, completion, wikis.size, console))
 
       completion.await
       sender() ! WikisActor.Done(mappingData)
