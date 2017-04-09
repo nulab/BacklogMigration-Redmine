@@ -1,24 +1,22 @@
 package com.nulabinc.r2b.cli
 
-import com.nulabinc.backlog.importer.conf.ImportConfig
 import com.nulabinc.backlog.importer.controllers.ImportController
-import com.nulabinc.backlog.migration.conf.BacklogDirectory
-import com.nulabinc.backlog.migration.utils.Logging
-import com.nulabinc.r2b.conf.{AppConfiguration, ProjectKeyMap, RedmineDirectory}
-import com.nulabinc.r2b.controllers.{ConvertController, ExportController, MappingController}
-import com.nulabinc.r2b.mapping._
-import com.nulabinc.r2b.service.BacklogService
+import com.nulabinc.backlog.migration.conf.BacklogPaths
+import com.nulabinc.backlog.migration.modules.ServiceInjector
+import com.nulabinc.backlog.migration.service.ProjectService
+import com.nulabinc.backlog.migration.utils.{ConsoleOut, Logging}
+import com.nulabinc.r2b.conf.AppConfiguration
+import com.nulabinc.r2b.controllers.MappingController
+import com.nulabinc.r2b.exporter.controllers.ExportController
+import com.nulabinc.r2b.mapping.core._
 import com.osinka.i18n.Messages
-import com.typesafe.config.ConfigFactory
-
-import scalax.file.Path
 
 /**
   * @author uchida
   */
 object R2BCli extends Logging {
 
-  def init(config: AppConfiguration) =
+  def init(config: AppConfiguration): Unit =
     if (validateParam(config)) {
       val propertyMappingFiles = createMapping(config)
       output(propertyMappingFiles.user)
@@ -26,33 +24,31 @@ object R2BCli extends Logging {
       output(propertyMappingFiles.priority)
     }
 
-  def migrate(config: AppConfiguration) =
+  def migrate(config: AppConfiguration): Unit =
     if (validateParam(config)) {
-      if (config.importOnly) ImportController.execute(getImportConfig(config))
+      if (config.importOnly) ImportController.execute(config.backlogConfig, false)
       else {
         val propertyMappingFiles = createMapping(config)
         if (validateMapping(propertyMappingFiles.user) &&
-          validateMapping(propertyMappingFiles.status) &&
-          validateMapping(propertyMappingFiles.priority)) {
+            validateMapping(propertyMappingFiles.status) &&
+            validateMapping(propertyMappingFiles.priority)) {
           if (confirmImport(config, propertyMappingFiles)) {
-            ExportController.execute(config, propertyMappingFiles.user.getNeedUsers())
-            ConvertController.execute(config, propertyMappingFiles.user.getNeedUsers())
-            ImportController.execute(getImportConfig(config))
+
+            val backlogInjector = ServiceInjector.createInjector(config.backlogConfig)
+            val backlogPaths    = backlogInjector.getInstance(classOf[BacklogPaths])
+            backlogPaths.outputPath.deleteRecursively(force = true, continueOnFailure = true)
+
+            ExportController.execute(config.redmineConfig, config.backlogConfig.projectKey)
+            ImportController.execute(config.backlogConfig, false)
           }
         }
       }
     }
 
-  def doImport(config: AppConfiguration) =
-    if (validateParam(config)) ImportController.execute(getImportConfig(config))
-
-  def help() =
-    log.info(
-      s"""
-         |${ConfigFactory.load().getString("application.title")}
-         |--------------------------------------------------
-         |${Messages("cli.help.sample_command")}
-         |${Messages("cli.help")}""".stripMargin)
+  def doImport(config: AppConfiguration): Unit =
+    if (validateParam(config)) {
+      ImportController.execute(config.backlogConfig, false)
+    }
 
   private[this] def confirmRecreate(mappingFile: MappingFile): Boolean = {
     val input: String = scala.io.StdIn.readLine(Messages("cli.confirm_recreate", mappingFile.itemName, mappingFile.filePath))
@@ -60,139 +56,162 @@ object R2BCli extends Logging {
   }
 
   private[this] def validateParam(config: AppConfiguration): Boolean = {
-    val validator = new ParameterValidator(config)
+    val validator           = new ParameterValidator(config)
     val errors: Seq[String] = validator.validate()
-    log.info(
-      s"""|${ConfigFactory.load().getString("application.title")}
-          |--------------------------------------------------""".stripMargin)
     if (errors.isEmpty) true
     else {
-      log.info(
-        s"""${Messages("mapping.show_parameter_error")}
+      val message =
+        s"""
+           |
+          |${Messages("mapping.show_parameter_error")}
            |--------------------------------------------------
            |${errors.mkString("\n")}
-           |--------------------------------------------------""".stripMargin)
+           |
+        """.stripMargin
+      ConsoleOut.error(message)
       false
     }
   }
 
   private[this] def validateMapping(mappingFile: MappingFile): Boolean = {
-    Path.fromString(RedmineDirectory.ROOT).deleteRecursively(force = true, continueOnFailure = true)
-    Path.fromString(BacklogDirectory.ROOT).deleteRecursively(force = true, continueOnFailure = true)
     if (!mappingFile.isExists) {
-      log.info(
-        s"""
+      ConsoleOut.error(s"""
            |--------------------------------------------------
            |${Messages("cli.invalid_setup")}""".stripMargin)
       false
     } else if (!mappingFile.isParsed) {
-      log.info(
+      val error =
         s"""
            |--------------------------------------------------
            |${Messages("mapping.broken_file", mappingFile.itemName)}
-           |${Messages("mapping.need_fix_file", mappingFile.filePath)}""".stripMargin)
+           |--------------------------------------------------
+        """.stripMargin
+      ConsoleOut.error(error)
+      val message =
+        s"""|--------------------------------------------------
+            |${Messages("mapping.need_fix_file", mappingFile.filePath)}""".stripMargin
+      ConsoleOut.println(message)
       false
     } else if (!mappingFile.isValid) {
-      log.info(
+      val error =
         s"""
            |${Messages("mapping.show_error", mappingFile.itemName)}
            |--------------------------------------------------
            |${mappingFile.errors.mkString("\n")}
+           |--------------------------------------------------""".stripMargin
+      ConsoleOut.error(error)
+      val message =
+        s"""
            |--------------------------------------------------
-           |
-          |--------------------------------------------------
-           |${Messages("mapping.need_fix_file", mappingFile.filePath)}""".stripMargin)
+           |${Messages("mapping.need_fix_file", mappingFile.filePath)}
+        """.stripMargin
+      ConsoleOut.println(message)
       false
     } else true
   }
 
   private[this] def confirmImport(config: AppConfiguration, propertyMappingFiles: PropertyMappingFiles): Boolean = {
-    val backlogService = new BacklogService(config.backlogConfig)
-    val optProjectKeyMap: Option[ProjectKeyMap] = confirmProject(backlogService, config.projectKeyMap)
-    log.info(
-      s"""
-         |${Messages("mapping.show", Messages("common.projects"))}
-         |--------------------------------------------------
-         |- ${config.projectKeyMap.redmine} => ${config.projectKeyMap.getBacklogKey()}
-         |--------------------------------------------------
-         |
+    confirmProject(config) match {
+      case Some(projectKeys) =>
+        val (redmine, backlog): (String, String) = projectKeys
+        ConsoleOut.println(s"""
+                              |${Messages("mapping.show", Messages("common.projects"))}
+                              |--------------------------------------------------
+                              |- ${redmine} => ${backlog}
+                              |--------------------------------------------------
+                              |
          |${Messages("mapping.show", propertyMappingFiles.user.itemName)}
-         |--------------------------------------------------
-         |${mappingString(propertyMappingFiles.user)}
-         |--------------------------------------------------
-         |
+                              |--------------------------------------------------
+                              |${mappingString(propertyMappingFiles.user)}
+                              |--------------------------------------------------
+                              |
          |${Messages("mapping.show", propertyMappingFiles.priority.itemName)}
-         |--------------------------------------------------
-         |${mappingString(propertyMappingFiles.priority)}
-         |--------------------------------------------------
-         |
+                              |--------------------------------------------------
+                              |${mappingString(propertyMappingFiles.priority)}
+                              |--------------------------------------------------
+                              |
          |${Messages("mapping.show", propertyMappingFiles.status.itemName)}
-         |--------------------------------------------------
-         |${mappingString(propertyMappingFiles.status)}
-         |--------------------------------------------------
-         |""".stripMargin)
-    val input: String = scala.io.StdIn.readLine(Messages("mapping.confirm"))
-    if (optProjectKeyMap.isDefined && input == "y" || input == "Y") true
-    else {
-      log.info(
-        s"""
-           |--------------------------------------------------
-           |${Messages("cli.cancel")}""".stripMargin)
-      false
+                              |--------------------------------------------------
+                              |${mappingString(propertyMappingFiles.status)}
+                              |--------------------------------------------------
+                              |""".stripMargin)
+        val input: String = scala.io.StdIn.readLine(Messages("mapping.confirm"))
+        if (input == "y" || input == "Y") true
+        else {
+          ConsoleOut.println(s"""
+                                |--------------------------------------------------
+                                |${Messages("cli.cancel")}""".stripMargin)
+          false
+        }
+      case _ =>
+        ConsoleOut.println(s"""
+                              |--------------------------------------------------
+                              |${Messages("cli.cancel")}""".stripMargin)
+        false
     }
   }
 
   private[this] def mappingString(mappingFile: MappingFile): String =
     mappingFile.unmarshal() match {
       case Some(mappings) =>
-        mappings.map(mapping =>
-          s"- ${mappingFile.display(mapping.redmine, mappingFile.redmines)} => ${mappingFile.display(mapping.backlog, mappingFile.backlogs)}"
-        ).mkString("\n")
+        mappings
+          .map(mapping =>
+            s"- ${mappingFile.display(mapping.redmine, mappingFile.redmines)} => ${mappingFile.display(mapping.backlog, mappingFile.backlogs)}")
+          .mkString("\n")
       case _ => throw new RuntimeException
     }
 
-  private[this] def confirmProject(backlogService: BacklogService, projectKeyMap: ProjectKeyMap): Option[ProjectKeyMap] =
-    backlogService.optProject(projectKeyMap.getBacklogKey()) match {
+  private[this] def confirmProject(config: AppConfiguration): Option[(String, String)] = {
+    val injector       = ServiceInjector.createInjector(config.backlogConfig)
+    val projectService = injector.getInstance(classOf[ProjectService])
+    val optProject     = projectService.optProject(config.backlogConfig.projectKey)
+    optProject match {
       case Some(_) =>
-        val input: String = scala.io.StdIn.readLine(Messages("cli.backlog_project_already_exist", projectKeyMap.getBacklogKey()))
-        if (input == "y" || input == "Y") Some(projectKeyMap)
+        val input: String = scala.io.StdIn.readLine(Messages("cli.backlog_project_already_exist", config.backlogConfig.projectKey))
+        if (input == "y" || input == "Y") Some((config.redmineConfig.projectKey, config.backlogConfig.projectKey))
         else None
       case None =>
-        Some(projectKeyMap)
+        Some((config.redmineConfig.projectKey, config.backlogConfig.projectKey))
     }
-
-  private[this] def getImportConfig(config: AppConfiguration) =
-    ImportConfig(
-      url = config.backlogConfig.url,
-      key = config.backlogConfig.key,
-      projectKey = config.projectKeyMap.getBacklogKey())
+  }
 
   private[this] def createMapping(config: AppConfiguration): PropertyMappingFiles = {
-    val mappingData = MappingController.execute(config)
-    val userMapping = new UserMappingFile(config, mappingData)
-    val statusMapping = new StatusMappingFile(config, mappingData)
-    val priorityMapping = new PriorityMappingFile(config)
-    PropertyMappingFiles(user = userMapping,
-      status = statusMapping,
-      priority = priorityMapping)
+    val mappingData     = MappingController.execute(config.redmineConfig)
+    val userMapping     = new UserMappingFile(config.redmineConfig, config.backlogConfig, mappingData)
+    val statusMapping   = new StatusMappingFile(config.redmineConfig, config.backlogConfig, mappingData)
+    val priorityMapping = new PriorityMappingFile(config.redmineConfig, config.backlogConfig)
+    PropertyMappingFiles(user = userMapping, status = statusMapping, priority = priorityMapping)
   }
 
   private[this] def output(mappingFile: MappingFile) = {
     if (mappingFile.isExists) {
       if (confirmRecreate(mappingFile)) {
         mappingFile.create()
-        log.info(
+        val message =
           s"""${Messages("cli.output_mapping_file", mappingFile.itemName, mappingFile.filePath)}
-             |
-               |${Messages("cli.confirm_fix")}""".stripMargin)
+            |
+            |${Messages("cli.confirm_fix")}
+          """.stripMargin
+        ConsoleOut.info(message)
       }
     } else {
       mappingFile.create()
-      log.info(
+      val message =
         s"""${Messages("cli.output_mapping_file", mappingFile.itemName, mappingFile.filePath)}
-           |
-             |${Messages("cli.confirm_fix")}""".stripMargin)
+          |
+          |${Messages("cli.confirm_fix")}
+        """.stripMargin
+      ConsoleOut.info(message)
     }
+  }
+
+  def help() = {
+    val message =
+      s"""
+         |${Messages("cli.help.sample_command")}
+         |${Messages("cli.help")}
+      """.stripMargin
+    ConsoleOut.println(message)
   }
 
 }

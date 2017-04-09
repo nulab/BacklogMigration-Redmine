@@ -1,4 +1,6 @@
-[COMMON]
+# Common
+common.backlog=Backlog
+common.redmine=Redmine
 common.projects=projects
 common.users=users
 common.statuses=statuses
@@ -15,7 +17,34 @@ common.change_comment={0}: {1} -> {2}
 common.comment=Comment
 common.parent_page=Parent page
 common.parent_issue=Parent issue
-[CLI]
+common.wikis=wikis
+common.custom_field=custom field
+common.trackers=trackers
+common.project_user=project users
+common.category=category
+common.news=news
+common.issues=issues
+common.issues_info=issues information
+
+
+# Message
+message.exporting=Exporting
+message.exported=Exported
+message.converting=Converting
+message.converted=Converted
+message.importing=Importing
+message.imported=Imported
+message.execute=Execute {1} {0}.({2,number,#})
+message.executed={0} {1}.
+message.progress.executed={0} {1}.
+message.progress.value=({0,number,#}/{1,number,#})
+message.analyzing=Analyzing
+message.analyzed=Analyzed
+message.collecting=Collecting
+message.collected=Collected
+
+
+# CLI
 cli.require_java8=The current version of Java is "{0}". Java 8 is required for this program.
 cli.help.projectKey=Your Redmine project identifier.(required) Example:--projectKey <your redmine project identifier1>:<your backllog project key>
 cli.collect_project_info.start=Collect the associated information with the project.
@@ -36,15 +65,22 @@ cli.help.redmine.key=Your Redmine api access key (required) Example:--redmine.ke
 cli.help.redmine.url=Your Redmine URL (required) Example:--redmine.url <your redmine url>
 cli.help.importOnly=If you set this property, only import will be run by the program.
 cli.error.unknown=Unknown error
-cli.can_not_load_project=The project {0} could not be loaded.
 cli.disable_access_backlog=Accessing Backlog failed.  Please check the URL or API access key.
 cli.disable_access_redmine=Accessing Redmine failed.  Please check the URL or API access key.
-cli.auth_error_redmine=Accessing Redmine failed due to an authorization error. Please make sure the API access key is valid and the REST API service is enabled on the server.
-cli.transport_error_redmine=Accessing Redmine failed.  "{0}" is unknown host.
-cli.transport_error_backlog=Accessing Backlog failed.  "{0}" is unknown host.
 cli.cancel=Import has been canceled.
 cli.invalid_setup=Setup is incomplete. Please complete the set up with the sub-command "init". Add "--help" option to know about the "init" command.
-[MAPPING]
+
+
+# CLI Validate Param
+cli.param.error.disable.project=The project [{0}] could not be loaded.
+cli.param.error.disable.access=The accessing {0} failed. Please check the url or api access key.
+cli.param.error.disable.host=The accessing {0} failed. [{1}] is unknown host.
+cli.param.check.access=Checking whether the {0} is accessible ...
+cli.param.get.project=Getting the {0} project ...
+cli.param.error.auth=Accessing {0} failed due to an authorization error. Please make sure the API access key is valid and the REST API service is enabled on the server.
+
+
+# MAPPING
 mapping.delete_status=Deleted status[{0}]
 mapping.not_exists_redmine_item={0} "{1}" does not exist in the Redmine''s mapping file. Recreating will automatically add it.  To recreate, delete "{1}" and run the sub-command "init".
 mapping.broken_file=The mapping file {0} is broken.
@@ -57,7 +93,9 @@ mapping.confirm=Start importing? [y/N]:
 mapping.not_exist_redmine={1} "{0}" does not exist in Redmine.
 mapping.not_exist_backlog={1} "{0}" does not exist in Backlog.
 mapping.specify_item=Corresponding item for {0} "{1}" in Redmine is not specified.
-[IMPORT]
+
+
+# IMPORT
 import.start=Start import.
 import.finish=Import completed.
 import.execute_users=Execute users import.({0,number,#})
@@ -84,29 +122,19 @@ import.task_update_failed=Issue key "{0}" update failed.:{1}
 import.attachment_upload_failed_too_large=Attachment file upload failed. The size of attached file is too large.:{0}
 import.attachment_upload_failed=Attachment file upload failed. :{0}
 import.wiki_attachment_attach_failed=Wiki attachment file attach failed. :{0}
-[CONVERT]
-convert.start_convert=Start convert.
-convert.completed_convert=Convert completed.
+
+
+# CONVERT
+convert.start=Start convert.
+convert.finish=Convert completed.
 convert.add_attachment=File {0} added
 convert.del_attachment=File deleted ({0})
-convert.start_groups_convert=Start converting groups.
-convert.execute_project_users_convert=Convert users.
-convert.execute_issue_categories_convert=Convert issue categories.
 convert.execute_wikis_convert=Convert wikis.({0} wikis)
 convert.execute_wiki_convert=Converted wiki.({0}/{1})
 convert.execute_issues_convert=Convert issues.({0} issues)
 convert.execute_issue_convert=Converted issue.({0}/{1})
-convert.execute_custom_fields_convert=Convert custom fields.
-convert.execute_issue_types_convert=Convert issue types.
-convert.execute_versions_convert=Convert versions.
-[EXPORT]
-export.start_redmine_export=Start Redmine export.
-export.completed_redmine_export=Redmine''s export completed.
-export.execute_redmine_user_export=Export users.
-export.execute_redmine_custom_fields_export=Export custom fields.
-export.execute_redmine_issue_statuses_export=Export statuses.
-export.execute_redmine_issue_trackers_export=Export project trackers.
-export.execute_redmine_memberships_export=Export members.
-export.execute_redmine_issue_categories_export=Export issue categories.
-export.execute_redmine_versions_export=Export versions.
-export.execute_redmine_news_export=Export news.
+
+
+# EXPORT
+export.start=Start export.
+export.finish=Export completed.
