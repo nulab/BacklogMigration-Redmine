@@ -31,22 +31,9 @@ class RedmineDefaultModule(apiConfig: RedmineConfig) extends AbstractModule {
     val users         = redmine.getUserManager.getUsers.asScala
     val propertyValue = PropertyValue(versions, users)
     bind(classOf[PropertyValue]).toInstance(propertyValue)
-
-    //TODO
-    //bind(classOf[ExportInfo]).toInstance(ExportInfo(needUsers))
     bind(classOf[Int]).annotatedWith(Names.named("projectId")).toInstance(project.getId)
 
-    //mapping
-//    val userMapping     = new ConvertUserMapping()
-//    val statusMapping   = new ConvertStatusMapping()
-//    val priorityMapping = new ConvertPriorityMapping()
-//    bind(classOf[ConvertUserMapping]).toInstance(userMapping)
-//    bind(classOf[ConvertStatusMapping]).toInstance(statusMapping)
-//    bind(classOf[ConvertPriorityMapping]).toInstance(priorityMapping)
-
     //service
-//    val propertyServiceImpl = new PropertyServiceImpl(project.getId, redmine, backlog, statusMapping, priorityMapping)
-//    bind(classOf[PropertyService]).toInstance(propertyServiceImpl)
     bind(classOf[IssueService]).to(classOf[IssueServiceImpl])
     bind(classOf[MembershipService]).to(classOf[MembershipServiceImpl])
     bind(classOf[ProjectService]).to(classOf[ProjectServiceImpl])
@@ -59,14 +46,7 @@ class RedmineDefaultModule(apiConfig: RedmineConfig) extends AbstractModule {
     bind(classOf[StatusService]).to(classOf[StatusServiceImpl])
     bind(classOf[TrackerService]).to(classOf[TrackerServiceImpl])
     bind(classOf[VersionService]).to(classOf[VersionServiceImpl])
-
-    //convert
-    //TODO
-    //    bind(classOf[ConvertIssueService]).to(classOf[ConvertIssueServiceImpl])
-    //    bind(classOf[ConvertCommentService]).to(classOf[ConvertCommentServiceImpl])
-    //    bind(classOf[ConvertWikiService]).to(classOf[ConvertWikiServiceImpl])
-    //    bind(classOf[ConvertCustomFieldDefinitionService]).to(classOf[ConvertCustomFieldDefinitionServiceImpl])
-    //bind(classOf[ConvertJournalDetailService]).to(classOf[ConvertJournalDetailServiceImpl])
+    bind(classOf[PriorityService]).to(classOf[PriorityServiceImpl])
   }
 
   private[this] def customFieldFormats(): CustomFieldFormats = {

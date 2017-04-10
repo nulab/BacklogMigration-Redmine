@@ -7,20 +7,33 @@ import com.nulabinc.backlog.migration.converter.Writes
 import com.nulabinc.backlog.migration.domain.{BacklogAttachmentInfo, BacklogAttributeInfo, BacklogChangeLog}
 import com.nulabinc.backlog.migration.utils.DateUtil
 import com.nulabinc.backlog4j.CustomField.FieldType
+import com.nulabinc.r2b.mapping.core.{ConvertPriorityMapping, ConvertStatusMapping, ConvertUserMapping}
 import com.nulabinc.r2b.redmine.conf.RedmineConstantValue
 import com.nulabinc.r2b.redmine.domain.CustomFieldFormats
+import com.nulabinc.r2b.redmine.service._
 import com.taskadapter.redmineapi.bean.JournalDetail
 
 /**
   * @author uchida
   */
-class JournalDetailWrites @Inject()(customFieldFormats: CustomFieldFormats) extends Writes[JournalDetail, BacklogChangeLog] {
+class JournalDetailWrites @Inject()(customFieldFormats: CustomFieldFormats,
+                                    statusService: StatusService,
+                                    priorityService: PriorityService,
+                                    userService: UserService,
+                                    versionService: VersionService,
+                                    trackerService: TrackerService,
+                                    categoryService: IssueCategoryService)
+    extends Writes[JournalDetail, BacklogChangeLog] {
+
+  val userMapping     = new ConvertUserMapping()
+  val statusMapping   = new ConvertStatusMapping()
+  val priorityMapping = new ConvertPriorityMapping()
 
   override def writes(detail: JournalDetail): BacklogChangeLog = {
     BacklogChangeLog(
       field = field(detail),
-      optOriginalValue = Option(detail.getOldValue).map(DateUtil.formatIfNeeded),
-      optNewValue = Option(detail.getNewValue).map(DateUtil.formatIfNeeded),
+      optOriginalValue = Option(detail.getOldValue).flatMap(value => detailValue(detail, value)).map(DateUtil.formatIfNeeded),
+      optNewValue = Option(detail.getNewValue).flatMap(value => detailValue(detail, value)).map(DateUtil.formatIfNeeded),
       optAttachmentInfo = attachmentInfo(detail),
       optAttributeInfo = attributeInfo(detail),
       optNotificationInfo = None
@@ -55,6 +68,45 @@ class JournalDetailWrites @Inject()(customFieldFormats: CustomFieldFormats) exte
       case _ => None
     }
   }
+
+  private[this] def detailValue(detail: JournalDetail, value: String): Option[String] =
+    detail.getProperty match {
+      case RedmineConstantValue.ATTR         => attr(detail, value)
+      case RedmineConstantValue.CUSTOM_FIELD => cf(detail, value)
+      case RedmineConstantValue.ATTACHMENT   => Option(value)
+      case RedmineConstantValue.RELATION     => Option(value)
+    }
+
+  private[this] def cf(detail: JournalDetail, value: String): Option[String] = {
+    customFieldFormats.map.get(detail.getName) match {
+      case Some(definition) =>
+        definition.fieldFormat match {
+          case "version" =>
+            versionService.allVersions().find(version => version.getId == value.toInt).map(_.getName)
+          case "user" =>
+            userService.optUserOfId(value.toInt).map(_.getLogin).map(userMapping.convert)
+          case _ => Option(value)
+        }
+      case _ => Option(value)
+    }
+  }
+
+  private[this] def attr(detail: JournalDetail, value: String): Option[String] =
+    detail.getName match {
+      case RedmineConstantValue.Attr.STATUS =>
+        statusService.allStatuses().find(status => status.getId == value.toInt).map(_.getName).map(statusMapping.convert)
+      case RedmineConstantValue.Attr.PRIORITY =>
+        priorityService.allPriorities().find(priority => priority.getId == value.toInt).map(_.getName).map(priorityMapping.convert)
+      case RedmineConstantValue.Attr.ASSIGNED =>
+        userService.optUserOfId(value.toInt).map(_.getLogin).map(userMapping.convert)
+      case RedmineConstantValue.Attr.VERSION =>
+        versionService.allVersions().find(version => version.getId == value.toInt).map(_.getName)
+      case RedmineConstantValue.Attr.TRACKER =>
+        trackerService.allTrackers().find(tracker => tracker.getId == value.toInt).map(_.getName)
+      case RedmineConstantValue.Attr.CATEGORY =>
+        categoryService.allCategories().find(category => category.getId == value.toInt).map(_.getName)
+      case _ => Option(value)
+    }
 
   private[this] def field(detail: JournalDetail): String = detail.getProperty match {
     case RedmineConstantValue.CUSTOM_FIELD => detail.getName
