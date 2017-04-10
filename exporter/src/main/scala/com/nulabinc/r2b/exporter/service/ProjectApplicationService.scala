@@ -10,7 +10,7 @@ import com.nulabinc.backlog.migration.domain.BacklogJsonProtocol._
 import com.nulabinc.backlog.migration.domain._
 import com.nulabinc.backlog.migration.modules.akkaguice.GuiceAkkaExtension
 import com.nulabinc.backlog.migration.utils.{ConsoleOut, IOUtil, Logging}
-import com.nulabinc.r2b.exporter.actor.{ContentActor, ExportInfo}
+import com.nulabinc.r2b.exporter.actor.ContentActor
 import com.nulabinc.r2b.exporter.convert._
 import com.nulabinc.r2b.redmine.service._
 import com.osinka.i18n.Messages
