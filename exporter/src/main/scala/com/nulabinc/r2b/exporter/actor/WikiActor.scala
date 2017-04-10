@@ -8,14 +8,14 @@ import java.util.concurrent.CountDownLatch
 import akka.actor.Actor
 import com.nulabinc.backlog.migration.conf.BacklogPaths
 import com.nulabinc.backlog.migration.converter.Convert
+import com.nulabinc.backlog.migration.domain.BacklogJsonProtocol._
 import com.nulabinc.backlog.migration.domain.{BacklogAttachment, BacklogWiki}
-import com.nulabinc.backlog.migration.utils.{FileUtil, IOUtil, Logging}
+import com.nulabinc.backlog.migration.utils.{IOUtil, Logging}
 import com.nulabinc.r2b.exporter.convert.{AttachmentWrites, WikiWrites}
 import com.nulabinc.r2b.redmine.conf.RedmineConfig
 import com.nulabinc.r2b.redmine.service.WikiService
 import com.taskadapter.redmineapi.bean.{WikiPage, WikiPageDetail}
 import spray.json._
-import com.nulabinc.backlog.migration.domain.BacklogJsonProtocol._
 
 import scala.collection.JavaConverters._
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -44,12 +44,11 @@ class WikiActor(apiConfig: RedmineConfig,
       val wikiDetail: WikiPageDetail = wikiService.wikiDetail(wiki.getTitle)
 
       val backlogWiki = Convert.toBacklog(wikiDetail)(wikiWrites)
-      //TODO hashCode -> clean(title)
       IOUtil.output(backlogPaths.wikiJson(wiki.getTitle), backlogWiki.toJson.prettyPrint)
 
       wikiDetail.getAttachments.asScala.foreach { attachment =>
         val url: URL = new URL(s"${attachment.getContentURL}?key=${apiConfig.key}")
-        download(backlogWiki, Convert.toBacklog(attachment)(attachmentWrites), FileUtil.clean(attachment.getFileName), url.openStream())
+        download(backlogWiki, Convert.toBacklog(attachment)(attachmentWrites), attachment.getFileName, url.openStream())
       }
 
       completion.countDown()
@@ -57,8 +56,8 @@ class WikiActor(apiConfig: RedmineConfig,
   }
 
   private[this] def download(wiki: BacklogWiki, attachment: BacklogAttachment, name: String, content: InputStream) = {
-    val dir  = backlogPaths.wikiAttachmentDirectoryPath(FileUtil.clean(wiki.name))
-    val path = backlogPaths.wikiAttachmentPath(FileUtil.clean(wiki.name), name)
+    val dir  = backlogPaths.wikiAttachmentDirectoryPath(wiki.name)
+    val path = backlogPaths.wikiAttachmentPath(wiki.name, name)
     IOUtil.createDirectory(dir)
 
     val rbc = Channels.newChannel(content)
