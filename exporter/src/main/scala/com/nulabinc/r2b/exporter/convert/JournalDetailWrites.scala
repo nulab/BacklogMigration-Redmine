@@ -41,23 +41,31 @@ class JournalDetailWrites @Inject()(customFieldFormats: CustomFieldFormats,
   }
 
   private[this] def attributeInfo(detail: JournalDetail): Option[BacklogAttributeInfo] = {
-    val optTypeId: Option[Int] = customFieldFormats.map.get(detail.getName) match {
-      case Some(definition) =>
-        definition.fieldFormat match {
-          case RedmineConstantValue.FieldFormat.TEXT                                           => Some(FieldType.Text.getIntValue)
-          case RedmineConstantValue.FieldFormat.STRING | RedmineConstantValue.FieldFormat.LINK => Some(FieldType.TextArea.getIntValue)
-          case RedmineConstantValue.FieldFormat.INT | RedmineConstantValue.FieldFormat.FLOAT   => Some(FieldType.Numeric.getIntValue)
-          case RedmineConstantValue.FieldFormat.DATE                                           => Some(FieldType.Date.getIntValue)
-          case RedmineConstantValue.FieldFormat.BOOL                                           => Some(FieldType.SingleList.getIntValue)
-          case RedmineConstantValue.FieldFormat.LIST if (!definition.multiple)                 => Some(FieldType.SingleList.getIntValue)
-          case RedmineConstantValue.FieldFormat.LIST if (definition.multiple)                  => Some(FieldType.MultipleList.getIntValue)
-          case RedmineConstantValue.FieldFormat.VERSION                                        => Some(FieldType.MultipleList.getIntValue)
-          case RedmineConstantValue.FieldFormat.USER                                           => Some(FieldType.MultipleList.getIntValue)
-          case _                                                                               => None
+    detail.getProperty match {
+      case RedmineConstantValue.CUSTOM_FIELD =>
+        val optDefinition = customFieldFormats.map.find {
+          case (_, definition) =>
+            definition.id == detail.getName.toInt
         }
+        val optTypeId = optDefinition match {
+          case Some((_, definition)) =>
+            definition.fieldFormat match {
+              case RedmineConstantValue.FieldFormat.TEXT                                           => Some(FieldType.Text.getIntValue)
+              case RedmineConstantValue.FieldFormat.STRING | RedmineConstantValue.FieldFormat.LINK => Some(FieldType.TextArea.getIntValue)
+              case RedmineConstantValue.FieldFormat.INT | RedmineConstantValue.FieldFormat.FLOAT   => Some(FieldType.Numeric.getIntValue)
+              case RedmineConstantValue.FieldFormat.DATE                                           => Some(FieldType.Date.getIntValue)
+              case RedmineConstantValue.FieldFormat.BOOL                                           => Some(FieldType.SingleList.getIntValue)
+              case RedmineConstantValue.FieldFormat.LIST if (!definition.multiple)                 => Some(FieldType.SingleList.getIntValue)
+              case RedmineConstantValue.FieldFormat.LIST if (definition.multiple)                  => Some(FieldType.MultipleList.getIntValue)
+              case RedmineConstantValue.FieldFormat.VERSION                                        => Some(FieldType.MultipleList.getIntValue)
+              case RedmineConstantValue.FieldFormat.USER                                           => Some(FieldType.MultipleList.getIntValue)
+              case _                                                                               => None
+            }
+          case _ => throw new RuntimeException(s"custom field id not found [${detail.getName}]")
+        }
+        optTypeId.map(typeId => BacklogAttributeInfo(optId = None, typeId = typeId.toString))
       case _ => None
     }
-    optTypeId.map(typeId => BacklogAttributeInfo(optId = None, typeId = typeId.toString))
   }
 
   private[this] def attachmentInfo(detail: JournalDetail): Option[BacklogAttachmentInfo] = {
