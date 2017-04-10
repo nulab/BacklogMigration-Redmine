@@ -54,7 +54,7 @@ trait SimpleFixture {
     val projectKey: String = prop.getProperty("projectKey")
 
     val keys: Array[String] = projectKey.split(":")
-    val redmine: String     = keys(0).toUpperCase.replaceAll("-", "_")
+    val redmine: String     = keys(0)
     val backlog: String     = if (keys.length == 2) keys(1) else keys(0).toUpperCase.replaceAll("-", "_")
 
     AppConfiguration(redmineConfig = new RedmineConfig(url = redmineUrl, key = redmineKey, projectKey = redmine),
