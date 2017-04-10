@@ -1,4 +1,6 @@
-[COMMON]
+# Common
+common.backlog=Backlog
+common.redmine=Redmine
 common.projects=projects
 common.users=users
 common.statuses=statuses
@@ -6,107 +8,110 @@ common.priorities=priorities
 common.yes=Yes
 common.no=No
 common.user=User
-common.relation=Related issue:
 common.project=Project
 common.done_ratio=% done
-common.private=Private
-common.not_set=New
-common.change_comment={0}: {1} -> {2}
 common.comment=Comment
 common.parent_page=Parent page
 common.parent_issue=Parent issue
-[CLI]
+common.wikis=wikis
+common.custom_field=custom field
+common.trackers=trackers
+common.project_user=project users
+common.category=category
+common.news=news
+common.issues=issues
+common.issues_info=issues information
+common.version=version
+common.groups=groups
+common.issue_type=issue type
+common.result_success=SUCCESSFUL
+common.result_failed=FAILED:{0,number,#}
+
+
+# Message
+message.exporting=Exporting
+message.exported=Exported
+message.importing=Importing
+message.imported=Imported
+message.execute=Execute {1} {0}.({2,number,#})
+message.executed={0} {1}.
+message.progress.executed={0} {1}.
+message.progress.value=({0,number,#}/{1,number,#})
+message.analyzing=Analyzing
+message.analyzed=Analyzed
+message.collecting=Collecting
+message.collected=Collected
+
+
+# CLI
+cli.confirm=Start migration? (y/n [n]):
 cli.require_java8=The current version of Java is "{0}". Java 8 is required for this program.
-cli.help.projectKey=Your Redmine project identifier.(required) Example:--projectKey <your redmine project identifier1>:<your backllog project key>
-cli.collect_project_info.start=Collect the associated information with the project.
-cli.collect_project_info.finish=Completed collecting the associated information with the project.
-cli.load_redmine_issue=Analyzing issues.({0,number,#}/{1,number,#})
-cli.load_redmine_wikis=Analyzing wikis.({0,number,#}/{1,number,#})
-cli.confirm_recreate=The mapping file {0} already exists. Do you want to overwrite it? [y/N]:
-cli.output_mapping_file=The mapping file {0} is created in {1}.
-cli.confirm_fix=Check the mapping file and fix it if necessary.
-cli.backlog_project_already_exist=Project "{0}" already exists. Do you want to import issues and wikis to project "{0}"? (Check the README file for details.)  [y/N]:
-cli.help=help=Run `java -jar backlog-migration-redmine-<latest version>.jar --help` command for help
-cli.help.sample_command=\nSample command:\n\nInit:The "init" command needs to be run in advance to create the mapping file.\n\njava -jar backlog-migration-redmine-<latest version>.jar init \\\n--backlog.url <your Backlog URL> \\\n--backlog.key <your Backlog API access key> \\\n--redmine.url <your Redmine URL> \\\n--redmine.key <your Redmine API access key> \\\n--projects <your project identifier1> <your project identifier2>\n\nExecute:Import by execute command.\n\njava -jar backlog-migration-redmine-<latest version>.jar execute \\\n--backlog.url <your backlog url> \\\n--backlog.key <your backlog api access key> \\\n--redmine.url <your Redmine Url> \\\n--redmine.key <your Redmine API access key> \\\n--projects <your project identifier1> <your project identifier2>\n
-cli.help.show_help=Show help message
-cli.help.show_version=Show version of this program
-cli.help.backlog.key=Your Backlog api access key (required) Example:--backlog.key <your backlog API access key>
-cli.help.backlog.url=Your Backlog url (required) Example:--backlog.url <your backlog url>
-cli.help.redmine.key=Your Redmine api access key (required) Example:--redmine.key <your redmine API access key>
-cli.help.redmine.url=Your Redmine URL (required) Example:--redmine.url <your redmine url>
-cli.help.importOnly=If you set this property, only import will be run by the program.
+cli.help.projectKey=Your Redmine project identifier.(required) Example:--projectKey [your redmine project identifier1]:[your backllog project key]
+cli.confirm_recreate=The mapping file {0} already exists. Do you want to overwrite it? (y/n [n]):
+cli.backlog_project_already_exist=Project "{0}" already exists. Do you want to import issues and wikis to project "{0}"? (Check the README file for details.)  (y/n [n]):
 cli.error.unknown=Unknown error
-cli.can_not_load_project=The project {0} could not be loaded.
-cli.disable_access_backlog=Accessing Backlog failed.  Please check the URL or API access key.
-cli.disable_access_redmine=Accessing Redmine failed.  Please check the URL or API access key.
-cli.auth_error_redmine=Accessing Redmine failed due to an authorization error. Please make sure the API access key is valid and the REST API service is enabled on the server.
-cli.transport_error_redmine=Accessing Redmine failed.  "{0}" is unknown host.
-cli.transport_error_backlog=Accessing Backlog failed.  "{0}" is unknown host.
 cli.cancel=Import has been canceled.
 cli.invalid_setup=Setup is incomplete. Please complete the set up with the sub-command "init". Add "--help" option to know about the "init" command.
-[MAPPING]
-mapping.delete_status=Deleted status[{0}]
-mapping.not_exists_redmine_item={0} "{1}" does not exist in the Redmine''s mapping file. Recreating will automatically add it.  To recreate, delete "{1}" and run the sub-command "init".
-mapping.broken_file=The mapping file {0} is broken.
-mapping.need_fix_file="{0}" needs to be fixed.\nTo recreate, delete "{0}" and run the sub-command "init".
-mapping.show=The mapping {0} is as follows.
-mapping.show_parameter_error=The parameter has the following error.
-mapping.show_error=The mapping of {0} has the following error.
-mapping.possible_values=The values accepted for {0} in Backlog are "{1}".
-mapping.confirm=Start importing? [y/N]:
-mapping.not_exist_redmine={1} "{0}" does not exist in Redmine.
-mapping.not_exist_backlog={1} "{0}" does not exist in Backlog.
-mapping.specify_item=Corresponding item for {0} "{1}" in Redmine is not specified.
-[IMPORT]
+
+
+# CLI Help
+cli.help=help=Run `java -jar backlog-migration-redmine-[latest version].jar --help` command for help
+cli.help.sample_command=\nSample command:\n\nInit:The "init" command create a mapping file.\n\njava -jar backlog-migration-redmine-[latest version].jar init \\\n--redmine.url [your Redmine URL] \\\n--redmine.key [your Redmine API access key] \\\n--backlog.url [your Backlog URL] \\\n--backlog.key [your Backlog API access key] \\\n--projectKey [your project identifier]\n\nExecute:The "execute" command execute migration.\n\njava -jar backlog-migration-redmine-[latest version].jar execute \\\n--redmine.url [your Redmine Url] \\\n--redmine.key [your Redmine API access key] \\\n--backlog.url [your backlog url] \\\n--backlog.key [your backlog api access key] \\\n--projectKey [your project identifier]\n
+cli.help.show_help=Show help message
+cli.help.show_version=Show version of this program
+cli.help.backlog.key=Your Backlog api access key (required) Example:--backlog.key [your backlog API access key]
+cli.help.backlog.url=Your Backlog url (required) Example:--backlog.url [your backlog url]
+cli.help.redmine.key=Your Redmine api access key (required) Example:--redmine.key [your redmine API access key]
+cli.help.redmine.url=Your Redmine URL (required) Example:--redmine.url [your redmine url]
+cli.help.importOnly=If you set this property, only import will be run by the program.
+
+
+# CLI Validate Param
+cli.param.error=The parameter has the following error.
+cli.param.check.access=Checking whether the {0} is accessible ...
+cli.param.get.project=Getting the {0} project ...
+cli.param.error.auth=Accessing {0} failed due to an authorization error. Please make sure the API access key is valid and the REST API service is enabled on the server.
+cli.param.error.disable.project=The project [{0}] could not be loaded.
+cli.param.error.disable.access=The accessing {0} failed. Please check the url or api access key.
+cli.param.error.disable.host=The accessing {0} failed. [{1}] is unknown host.
+cli.param.error.project_key=The project key [{0}] is incorrect.(Uppercase letters (A-Z), numbers (0-9) and underscore (_) can be used.)
+
+
+# CLI Mapping
+cli.mapping.delete_status=Deleted status[{0}]
+cli.mapping.error.broken_file=The mapping file {0} is broken.
+cli.mapping.fix_file="{0}" needs to be fixed.\nTo recreate, delete "{0}" and run the sub-command "init".
+cli.mapping.show=The mapping {0} is as follows.
+cli.mapping.error=The mapping of {0} has the following error.
+cli.mapping.configurable=The values accepted for {0} in Backlog are "{1}".
+cli.mapping.error.not_exist.item=The {1} [{0}] does not exist in {2}.
+cli.mapping.error.empty.item=Corresponding item for {0} "{1}" in Redmine is not specified.
+cli.mapping.output_file=The mapping file {0} is created in {1}.
+cli.confirm.fix=Check the mapping file and fix it if necessary.
+
+
+# CLI Project Info
+cli.project_info.start=Collect the associated information with the project.
+cli.project_info.finish=Completed collecting the associated information with the project.
+
+
+# Export
+export.start=Start export.
+export.finish=Export completed.
+
+
+# Import
 import.start=Start import.
 import.finish=Import completed.
-import.execute_users=Execute users import.({0,number,#})
-import.executed_users=Imported user.({0,number,#}/{1,number,#})
-import.execute_groups=Execute groups import.({0,number,#})
-import.executed_groups=Imported group.({0,number,#}/{1,number,#})
-import.execute_custom_fields=Imported custom fields.
-import.executed_issue_categories=Imported issue categories.
-import.executed_issue_types=Imported issue types.
-import.executed_project_users=Imported project users.
-import.executed_versions=Imported versions.
-import.execute_issues=Execute issues import.({0,number,#})
-import.executed_issue=Imported issue.({0,number,#}/{1,number,#})
-import.already_exists_issue=The issue ID [{0,number,#}] is skipped because it has already been registered.({1,number,#}/{2,number,#})
-import.execute_wikis=Execute wikis import.({0,number,#})
-import.executed_wiki=Imported wiki.({0,number,#}/{1,number,#})
-import.project_not_join=You dont join {0}. If you want to move this project, you need to join this project.
-import.project_plan_limit=You can not import {0} of project.You cannnot add more project, please upgrade your plan.
-import.project_not_import=You can not import {0} of project. For the following reason:{1}
-import.user_plan_limit=You can not import {0} of user.You cannnot add more user, please upgrade your plan.
 import.suspend=It will suspend the import.
-import.task_registration_failed=Issue [{0,number,#}] registration failed.
-import.task_update_failed=Issue key "{0}" update failed.:{1}
-import.attachment_upload_failed_too_large=Attachment file upload failed. The size of attached file is too large.:{0}
-import.attachment_upload_failed=Attachment file upload failed. :{0}
-import.wiki_attachment_attach_failed=Wiki attachment file attach failed. :{0}
-[CONVERT]
-convert.start_convert=Start convert.
-convert.completed_convert=Convert completed.
-convert.add_attachment=File {0} added
-convert.del_attachment=File deleted ({0})
-convert.start_groups_convert=Start converting groups.
-convert.execute_project_users_convert=Convert users.
-convert.execute_issue_categories_convert=Convert issue categories.
-convert.execute_wikis_convert=Convert wikis.({0} wikis)
-convert.execute_wiki_convert=Converted wiki.({0}/{1})
-convert.execute_issues_convert=Convert issues.({0} issues)
-convert.execute_issue_convert=Converted issue.({0}/{1})
-convert.execute_custom_fields_convert=Convert custom fields.
-convert.execute_issue_types_convert=Convert issue types.
-convert.execute_versions_convert=Convert versions.
-[EXPORT]
-export.start_redmine_export=Start Redmine export.
-export.completed_redmine_export=Redmine''s export completed.
-export.execute_redmine_user_export=Export users.
-export.execute_redmine_custom_fields_export=Export custom fields.
-export.execute_redmine_issue_statuses_export=Export statuses.
-export.execute_redmine_issue_trackers_export=Export project trackers.
-export.execute_redmine_memberships_export=Export members.
-export.execute_redmine_issue_categories_export=Export issue categories.
-export.execute_redmine_versions_export=Export versions.
-export.execute_redmine_news_export=Export news.
+import.remaining_time=[Remaining time:{0}]
+import.issue.already_exists=The issue [{0}] is skipped because it has already been registered.
+import.issue.create_dummy=Created dummy issue.:{0}
+import.progress=Progress...({0,number,#}/{1,number,#})
+import.date.execute={2} {1} about {0}.
+import.error.wiki.attachment=Failed to attachment to wiki [{0}]. :{1}
+import.error.limit.project=You can not import [{0}] of project.\nYou can not add more project, please upgrade your plan.
+import.error.project.not.join=You dont join [{0}]. If you want to move this project, you need to join this project.
+import.error.failed.import=You can not import {0} of project. For the following reason:{1}
+import.error.issue.attachment=Attachment file [{0}] upload failed. :{1}
+import.error.attachment.too_large=Attachment file upload failed. The size of attached file is too large.:{0}
