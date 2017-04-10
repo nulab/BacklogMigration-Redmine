@@ -7,7 +7,7 @@ import com.nulabinc.r2b.redmine.domain.{CustomFieldDefinitionSimple, CustomField
 import com.nulabinc.r2b.redmine.service._
 import com.taskadapter.redmineapi.bean.Project
 import com.taskadapter.redmineapi.{RedmineManager, RedmineManagerFactory}
-import spray.json.{JsArray, JsBoolean, JsString, JsonParser}
+import spray.json.{JsArray, JsBoolean, JsNumber, JsString, JsonParser}
 
 import scala.collection.JavaConverters._
 import scala.collection.mutable
@@ -55,10 +55,16 @@ class RedmineDefaultModule(apiConfig: RedmineConfig) extends AbstractModule {
     JsonParser(string).asJsObject.getFields("custom_fields") match {
       case Seq(JsArray(customFields)) =>
         customFields.foreach { json =>
-          json.asJsObject.getFields("name", "field_format", "multiple", "default_value") match {
-            case Seq(JsString(name), JsString(field_format), JsBoolean(multiple), JsString(default_value)) =>
-              map += name -> CustomFieldDefinitionSimple(field_format, multiple, default_value)
-            case _ =>
+          json.asJsObject.getFields("id", "name", "field_format", "multiple", "default_value") match {
+            case Seq(JsNumber(id), JsString(name), JsString(field_format), JsBoolean(multiple), JsString(default_value)) =>
+              map += name -> CustomFieldDefinitionSimple(id.intValue(), name, field_format, multiple, default_value)
+            case Seq(JsNumber(id), JsString(name), JsString(field_format), JsBoolean(multiple)) =>
+              map += name -> CustomFieldDefinitionSimple(id.intValue(), name, field_format, multiple, "")
+            case Seq(JsNumber(id), JsString(name), JsString(field_format), JsString(default_value)) =>
+              map += name -> CustomFieldDefinitionSimple(id.intValue(), name, field_format, false, default_value)
+            case Seq(JsNumber(id), JsString(name), JsString(field_format)) =>
+              map += name -> CustomFieldDefinitionSimple(id.intValue(), name, field_format, false, "")
+            case _ => throw new RuntimeException(s"unmatch fields ${json.toString()}")
           }
         }
       case _ =>

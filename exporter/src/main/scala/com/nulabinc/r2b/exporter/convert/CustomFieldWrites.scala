@@ -4,6 +4,7 @@ import javax.inject.Inject
 
 import com.nulabinc.backlog.migration.converter.Writes
 import com.nulabinc.backlog.migration.domain.BacklogCustomField
+import com.nulabinc.backlog.migration.utils.StringUtil
 import com.nulabinc.backlog4j.CustomField.FieldType
 import com.nulabinc.r2b.redmine.conf.RedmineConstantValue
 import com.nulabinc.r2b.redmine.domain.{CustomFieldFormats, PropertyValue}
@@ -92,7 +93,10 @@ class CustomFieldWrites @Inject()(propertyValue: PropertyValue, customFieldForma
 
   private[this] def version(customField: CustomField): BacklogCustomField = {
     def condition(version: Version, value: String) = {
-      value.toInt == version.getId.intValue()
+      StringUtil.safeStringToInt(value) match {
+        case Some(intValue) => intValue == version.getId.intValue()
+        case _              => false
+      }
     }
 
     def toName(value: String) = {
@@ -101,26 +105,29 @@ class CustomFieldWrites @Inject()(propertyValue: PropertyValue, customFieldForma
 
     BacklogCustomField(
       name = customField.getName,
-      fieldTypeId = FieldType.MultipleList.getIntValue,
-      optValue = None,
-      values = customField.getValues.asScala.flatMap(toName).map(_.getName)
+      fieldTypeId = FieldType.SingleList.getIntValue,
+      optValue = Option(customField.getValue).flatMap(toName).map(_.getName),
+      values = Seq.empty[String]
     )
   }
 
   private[this] def user(customField: CustomField): BacklogCustomField = {
     def condition(user: User, value: String) = {
-      value.toInt == user.getId.intValue()
+      StringUtil.safeStringToInt(value) match {
+        case Some(intValue) => intValue == user.getId.intValue()
+        case _              => false
+      }
     }
 
-    def toName(value: String) = {
+    def toName(value: String): Option[User] = {
       propertyValue.users.find(user => condition(user, value))
     }
 
     BacklogCustomField(
       name = customField.getName,
-      fieldTypeId = FieldType.MultipleList.getIntValue,
-      optValue = None,
-      values = customField.getValues.asScala.flatMap(toName).map(_.getFullName)
+      fieldTypeId = FieldType.SingleList.getIntValue,
+      optValue = Option(customField.getValue).flatMap(toName).map(_.getFullName),
+      values = Seq.empty[String]
     )
   }
 

@@ -81,9 +81,9 @@ class JournalDetailWrites @Inject()(customFieldFormats: CustomFieldFormats,
     customFieldFormats.map.get(detail.getName) match {
       case Some(definition) =>
         definition.fieldFormat match {
-          case "version" =>
+          case RedmineConstantValue.FieldFormat.VERSION =>
             versionService.allVersions().find(version => version.getId == value.toInt).map(_.getName)
-          case "user" =>
+          case RedmineConstantValue.FieldFormat.USER =>
             userService.optUserOfId(value.toInt).map(_.getLogin).map(userMapping.convert)
           case _ => Option(value)
         }
@@ -109,9 +109,17 @@ class JournalDetailWrites @Inject()(customFieldFormats: CustomFieldFormats,
     }
 
   private[this] def field(detail: JournalDetail): String = detail.getProperty match {
-    case RedmineConstantValue.CUSTOM_FIELD => detail.getName
-    case RedmineConstantValue.ATTACHMENT   => BacklogConstantValue.ChangeLog.ATTACHMENT
-    case _                                 => field(detail.getName)
+    case RedmineConstantValue.CUSTOM_FIELD =>
+      val optDefinition = customFieldFormats.map.find {
+        case (_, definition) =>
+          definition.id == detail.getName.toInt
+      }
+      optDefinition match {
+        case Some((name, _)) => name
+        case _               => throw new RuntimeException(s"custom field id not found [${detail.getName}]")
+      }
+    case RedmineConstantValue.ATTACHMENT => BacklogConstantValue.ChangeLog.ATTACHMENT
+    case _                               => field(detail.getName)
   }
 
   private def field(name: String): String = name match {
