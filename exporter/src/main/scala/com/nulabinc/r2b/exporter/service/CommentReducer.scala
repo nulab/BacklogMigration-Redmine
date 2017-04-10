@@ -6,9 +6,10 @@ import java.nio.channels.Channels
 
 import com.nulabinc.backlog.migration.conf.{BacklogConstantValue, BacklogPaths}
 import com.nulabinc.backlog.migration.domain.{BacklogAttachmentInfo, BacklogChangeLog, BacklogComment, BacklogIssue}
-import com.nulabinc.backlog.migration.utils.{FileUtil, IOUtil, Logging}
+import com.nulabinc.backlog.migration.utils.{FileUtil, IOUtil, Logging, StringUtil}
 import com.nulabinc.r2b.redmine.conf.RedmineConfig
-import com.nulabinc.r2b.redmine.service.IssueService
+import com.nulabinc.r2b.redmine.service.{IssueService, ProjectService}
+import com.osinka.i18n.Messages
 import com.taskadapter.redmineapi.bean.Attachment
 
 import scalax.file.Path
@@ -18,6 +19,7 @@ import scalax.file.Path
   */
 class CommentReducer(apiConfig: RedmineConfig,
                      issueService: IssueService,
+                     projectService: ProjectService,
                      backlogPaths: BacklogPaths,
                      issue: BacklogIssue,
                      comments: Seq[BacklogComment],
@@ -41,8 +43,35 @@ class CommentReducer(apiConfig: RedmineConfig,
   }
 
   private[this] def parse(comment: BacklogComment, changeLog: BacklogChangeLog): Option[BacklogChangeLog] = {
+
+    def getValue(value: Option[String]): String =
+      value.getOrElse(Messages("common.not_set"))
+
+    def getProjectName(optValue: Option[String]): String = {
+      optValue match {
+        case Some(value) =>
+          StringUtil.safeStringToInt(value) match {
+            case Some(intValue) => projectService.optProjectOfId(intValue).map(_.getName).getOrElse(Messages("label.not_set"))
+            case _              => Messages("label.not_set")
+          }
+        case _ => Messages("label.not_set")
+      }
+    }
+
     changeLog.field match {
       case BacklogConstantValue.ChangeLog.ATTACHMENT => attachment(changeLog)
+      case "done_ratio" =>
+        changeLogContent.append(Messages("common.done_ratio", getValue(changeLog.optOriginalValue), getValue(changeLog.optNewValue)))
+        None
+      case "relates" =>
+        changeLogContent.append(Messages("common.relation", getValue(changeLog.optOriginalValue), getValue(changeLog.optNewValue)))
+        None
+      case "is_private" =>
+        changeLogContent.append(Messages("common.private", getValue(changeLog.optOriginalValue), getValue(changeLog.optNewValue)))
+        None
+      case "project_id" =>
+        changeLogContent.append(Messages("common.project", getProjectName(changeLog.optOriginalValue), getProjectName(changeLog.optNewValue)))
+        None
       case _ =>
         Some(changeLog.copy(optNewValue = issuePropertyNewValue(comment, changeLog)))
     }

@@ -23,4 +23,15 @@ class ProjectServiceImpl @Inject()(apiConfig: RedmineConfig, redmine: RedmineMan
         logger.error(e.getMessage, e)
         None
     }
+
+  override def optProjectOfId(id: Int): Option[Project] = {
+    try {
+      Some(redmine.getProjectManager.getProjectById(id))
+    } catch {
+      case e: Throwable =>
+        logger.error(e.getMessage, e)
+        None
+    }
+  }
+
 }

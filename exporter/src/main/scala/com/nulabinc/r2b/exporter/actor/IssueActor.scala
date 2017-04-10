@@ -10,7 +10,7 @@ import com.nulabinc.backlog.migration.utils.{DateUtil, IOUtil, Logging}
 import com.nulabinc.r2b.exporter.convert.{IssueWrites, JournalWrites, UserWrites}
 import com.nulabinc.r2b.exporter.service.{CommentReducer, IssueInitializer}
 import com.nulabinc.r2b.redmine.conf.RedmineConfig
-import com.nulabinc.r2b.redmine.service.IssueService
+import com.nulabinc.r2b.redmine.service.{IssueService, ProjectService}
 import com.taskadapter.redmineapi.Include
 import com.taskadapter.redmineapi.bean.{Attachment, _}
 import spray.json._
@@ -24,6 +24,7 @@ import scala.collection.JavaConverters._
 class IssueActor(apiConfig: RedmineConfig,
                  backlogPaths: BacklogPaths,
                  issueService: IssueService,
+                 projectService: ProjectService,
                  issueWrites: IssueWrites,
                  journalWrites: JournalWrites,
                  userWrites: UserWrites)
@@ -73,8 +74,9 @@ class IssueActor(apiConfig: RedmineConfig,
     val issueDirPath =
       backlogPaths.issueDirectoryPath(DateUtil.yyyymmddFormat(commentCreated), s"${commentCreated.getTime}-${issue.id}-comment-${index}")
 
-    val commentReducer = new CommentReducer(apiConfig: RedmineConfig, issueService, backlogPaths, issue, comments, attachments, issueDirPath)
-    val reduced        = commentReducer.reduce(comment)
+    val commentReducer =
+      new CommentReducer(apiConfig: RedmineConfig, issueService, projectService, backlogPaths, issue, comments, attachments, issueDirPath)
+    val reduced = commentReducer.reduce(comment)
 
     IOUtil.output(backlogPaths.issueJson(issueDirPath), reduced.toJson.prettyPrint)
   }
