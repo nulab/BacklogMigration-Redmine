@@ -115,13 +115,17 @@ class R2BSpec extends FlatSpec with Matchers with SimpleFixture {
         sb.append("\n").append(Messages("common.parent_page")).append(":[[").append(redmineWikiPageDetail.getParent.getTitle).append("]]")
       val redmineContent: String = sb.result()
 
-      val redmineWikiUser   = redmine.getUserManager.getUserById(redmineWikiPageDetail.getUser.getId)
-      val redmineWikiUserId = userMapping.convert(redmineWikiUser.getLogin)
+      val redmineWikiUser = redmine.getUserManager.getUserById(redmineWikiPageDetail.getUser.getId)
 
       redmineWikiPageDetail.getTitle should equal(backlogWiki.getName)
       redmineContent should equal(backlogWiki.getContent)
-      redmineWikiUserId should equal(backlogWiki.getCreatedUser.getUserId)
-      redmineWikiUserId should equal(backlogWiki.getUpdatedUser.getUserId)
+
+      withClue(s"login:${redmineWikiUser.getLogin} converted:${userMapping.convert(redmineWikiUser.getLogin)}") {
+        userMapping.convert(redmineWikiUser.getLogin) should equal(backlogWiki.getCreatedUser.getUserId)
+      }
+      withClue(s"login:${redmineWikiUser.getLogin} converted:${userMapping.convert(redmineWikiUser.getLogin)}") {
+        userMapping.convert(redmineWikiUser.getLogin) should equal(backlogWiki.getUpdatedUser.getUserId)
+      }
       timestampToString(redmineWikiPageDetail.getCreatedOn) should equal(timestampToString(backlogWiki.getCreated))
 
       redmineWikiPageDetail.getAttachments.asScala.foreach(redmineAttachment => {
