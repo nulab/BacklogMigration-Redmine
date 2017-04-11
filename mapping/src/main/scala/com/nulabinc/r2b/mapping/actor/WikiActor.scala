@@ -20,7 +20,7 @@ class WikiActor(wikiService: WikiService, mappingData: MappingData) extends Acto
   override def preRestart(reason: Throwable, message: Option[Any]) = {
     logger.debug(s"preRestart: reason: ${reason}, message: ${message}")
     for { value <- message } yield {
-      context.system.scheduler.scheduleOnce(1.minute, self, value)
+      context.system.scheduler.scheduleOnce(10.seconds, self, value)
     }
   }
 

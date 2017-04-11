@@ -5,6 +5,7 @@ import java.util.concurrent.CountDownLatch
 import akka.actor.Actor
 import com.nulabinc.backlog.migration.conf.BacklogPaths
 import com.nulabinc.backlog.migration.converter.Convert
+import com.nulabinc.backlog.migration.domain.BacklogJsonProtocol._
 import com.nulabinc.backlog.migration.domain.{BacklogComment, BacklogIssue}
 import com.nulabinc.backlog.migration.utils.{DateUtil, IOUtil, Logging}
 import com.nulabinc.r2b.exporter.convert.{IssueWrites, JournalWrites, UserWrites}
@@ -17,6 +18,7 @@ import spray.json._
 import com.nulabinc.backlog.migration.domain.BacklogJsonProtocol._
 
 import scala.collection.JavaConverters._
+import scala.concurrent.duration._
 
 /**
   * @author uchida
@@ -31,8 +33,16 @@ class IssueActor(apiConfig: RedmineConfig,
     extends Actor
     with Logging {
 
+  override def preRestart(reason: Throwable, message: Option[Any]) = {
+    logger.debug(s"preRestart: reason: ${reason}, message: ${message}")
+    for { value <- message } yield {
+      context.system.scheduler.scheduleOnce(10.seconds, self, value)
+    }
+  }
+
   def receive: Receive = {
     case IssueActor.Do(issueId: Int, completion: CountDownLatch, allCount: Int, console: ((Int, Int) => Unit)) =>
+      logger.debug(s"[START ISSUE]${issueId} thread numbers:${java.lang.Thread.activeCount()}")
       val issue    = issueService.issueOfId(issueId, Include.attachments, Include.journals)
       val journals = issue.getJournals.asScala.toSeq.sortWith((c1, c2) => c1.getCreatedOn.before(c2.getCreatedOn))
 
