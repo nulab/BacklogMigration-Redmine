@@ -34,7 +34,7 @@ class IssueActor(apiConfig: RedmineConfig,
   def receive: Receive = {
     case IssueActor.Do(issueId: Int, completion: CountDownLatch, allCount: Int, console: ((Int, Int) => Unit)) =>
       val issue    = issueService.issueOfId(issueId, Include.attachments, Include.journals)
-      val journals = issue.getJournals.asScala.toSeq
+      val journals = issue.getJournals.asScala.toSeq.sortWith((c1, c2) => c1.getCreatedOn.before(c2.getCreatedOn))
 
       val attachments: Seq[Attachment] = issue.getAttachments.asScala.toSeq
 

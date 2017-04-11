@@ -2,7 +2,7 @@ package com.nulabinc.r2b.exporter.service
 
 import com.nulabinc.backlog.migration.converter.{Backlog4jConverters, Convert}
 import com.nulabinc.backlog.migration.domain._
-import com.nulabinc.backlog.migration.utils.{DateUtil, Logging}
+import com.nulabinc.backlog.migration.utils.{DateUtil, Logging, StringUtil}
 import com.nulabinc.r2b.exporter.convert.{IssueWrites, UserWrites}
 import com.nulabinc.r2b.mapping.core.ConvertPriorityMapping
 import com.nulabinc.r2b.redmine.conf.RedmineConstantValue
@@ -51,9 +51,10 @@ class IssueInitializer(issueWrites: IssueWrites, userWrites: UserWrites, issueSe
       case Some(detail) =>
         Option(detail.getOldValue) match {
           case Some(value) if (value.nonEmpty) =>
-            //TODO
-            //issueService.optIssueOfKey(value).map(_.id)
-            None
+            StringUtil.safeStringToInt(value) match {
+              case Some(intValue) => Some(intValue)
+              case _              => None
+            }
           case _ => None
         }
       case None => Option(issue.getParentId).map(_.intValue())
