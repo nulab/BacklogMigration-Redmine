@@ -11,13 +11,14 @@ import com.nulabinc.backlog.migration.utils.{DateUtil, IOUtil, Logging}
 import com.nulabinc.r2b.exporter.convert.{IssueWrites, JournalWrites, UserWrites}
 import com.nulabinc.r2b.exporter.service.{CommentReducer, IssueInitializer}
 import com.nulabinc.r2b.redmine.conf.RedmineConfig
+import com.nulabinc.r2b.redmine.domain.PropertyValue
 import com.nulabinc.r2b.redmine.service.{IssueService, ProjectService}
 import com.taskadapter.redmineapi.Include
 import com.taskadapter.redmineapi.bean.{Attachment, _}
 import spray.json._
-import com.nulabinc.backlog.migration.domain.BacklogJsonProtocol._
 
 import scala.collection.JavaConverters._
+import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration._
 
 /**
@@ -27,6 +28,7 @@ class IssueActor(apiConfig: RedmineConfig,
                  backlogPaths: BacklogPaths,
                  issueService: IssueService,
                  projectService: ProjectService,
+                 propertyValue: PropertyValue,
                  issueWrites: IssueWrites,
                  journalWrites: JournalWrites,
                  userWrites: UserWrites)
@@ -59,7 +61,7 @@ class IssueActor(apiConfig: RedmineConfig,
     val issueCreated = DateUtil.tryIsoParse(Option(issue.getCreatedOn).map(DateUtil.isoFormat))
     val issueDirPath =
       backlogPaths.issueDirectoryPath(DateUtil.yyyymmddFormat(issueCreated), s"${issueCreated.getTime}-${issue.getId.intValue()}-issue-0")
-    val issueInitializer = new IssueInitializer(issueWrites, userWrites, issueService, journals)
+    val issueInitializer = new IssueInitializer(issueWrites, userWrites, issueService, journals, propertyValue)
     val backlogIssue     = issueInitializer.initialize(issue)
     IOUtil.output(
       backlogPaths.issueJson(issueDirPath),

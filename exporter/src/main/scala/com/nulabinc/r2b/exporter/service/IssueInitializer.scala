@@ -6,13 +6,19 @@ import com.nulabinc.backlog.migration.utils.{DateUtil, Logging, StringUtil}
 import com.nulabinc.r2b.exporter.convert.{IssueWrites, UserWrites}
 import com.nulabinc.r2b.mapping.core.ConvertPriorityMapping
 import com.nulabinc.r2b.redmine.conf.RedmineConstantValue
+import com.nulabinc.r2b.redmine.domain.PropertyValue
 import com.nulabinc.r2b.redmine.service.IssueService
 import com.taskadapter.redmineapi.bean.{Issue, Journal}
 
 /**
   * @author uchida
   */
-class IssueInitializer(issueWrites: IssueWrites, userWrites: UserWrites, issueService: IssueService, journals: Seq[Journal]) extends Logging {
+class IssueInitializer(issueWrites: IssueWrites,
+                       userWrites: UserWrites,
+                       issueService: IssueService,
+                       journals: Seq[Journal],
+                       propertyValue: PropertyValue)
+    extends Logging {
 
   val priorityMapping = new ConvertPriorityMapping()
 
@@ -28,7 +34,6 @@ class IssueInitializer(issueWrites: IssueWrites, userWrites: UserWrites, issueSe
       //optActualHours = actualHours(issue),
       optIssueTypeName = issueTypeName(issue),
       categoryNames = categoryNames(issue),
-      //versionNames = versionNames(issue),
       milestoneNames = milestoneNames(issue),
       priorityName = priorityName(issue),
       optAssignee = assignee(issue),
@@ -116,19 +121,14 @@ class IssueInitializer(issueWrites: IssueWrites, userWrites: UserWrites, issueSe
     else details.flatMap(detail => Option(detail.getOldValue))
   }
 
-  //TODO
-//  private[this] def versionNames(issue: Issue): Seq[String] = {
-//    val issueInitialValue = new IssueInitialValue(RedmineConstantValue.ATTR, RedmineConstantValue.Attr.VERSION)
-//    val details           = issueInitialValue.findJournalDetails(journals)
-//    if (details.isEmpty) Seq(issue.getTargetVersion.getName)
-//    else details.flatMap(detail => Option(detail.getOldValue))
-//  }
-
   private[this] def milestoneNames(issue: Issue): Seq[String] = {
     val issueInitialValue = new IssueInitialValue(RedmineConstantValue.ATTR, RedmineConstantValue.Attr.VERSION)
     val details           = issueInitialValue.findJournalDetails(journals)
     if (details.isEmpty) Option(issue.getTargetVersion).map(_.getName).toSeq
-    else details.flatMap(detail => Option(detail.getOldValue))
+    else
+      details.flatMap { detail =>
+        propertyValue.versionOfId(detail.getOldValue).map(_.getName)
+      }
   }
 
   private[this] def priorityName(issue: Issue): String = {

@@ -6,7 +6,7 @@ import java.nio.channels.Channels
 
 import com.nulabinc.backlog.migration.conf.{BacklogConstantValue, BacklogPaths}
 import com.nulabinc.backlog.migration.domain.{BacklogAttachmentInfo, BacklogChangeLog, BacklogComment, BacklogIssue}
-import com.nulabinc.backlog.migration.utils.{FileUtil, IOUtil, Logging, StringUtil}
+import com.nulabinc.backlog.migration.utils.{IOUtil, Logging, StringUtil}
 import com.nulabinc.r2b.redmine.conf.RedmineConfig
 import com.nulabinc.r2b.redmine.service.{IssueService, ProjectService}
 import com.osinka.i18n.Messages
