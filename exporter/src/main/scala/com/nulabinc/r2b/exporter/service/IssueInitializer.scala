@@ -125,8 +125,9 @@ class IssueInitializer(issueWrites: IssueWrites,
   private[this] def priorityName(issue: Issue): String = {
     val issueInitialValue = new IssueInitialValue(RedmineConstantValue.ATTR, RedmineConstantValue.Attr.PRIORITY)
     issueInitialValue.findJournalDetail(journals) match {
-      case Some(detail) => Option(detail.getOldValue).getOrElse("")
-      case None         => priorityMapping.convert(issue.getPriorityText)
+      case Some(detail) =>
+        propertyValue.priorityOfId(detail.getOldValue).map(_.getName).map(priorityMapping.convert).getOrElse("")
+      case None => priorityMapping.convert(issue.getPriorityText)
     }
   }
 

@@ -26,11 +26,7 @@ class RedmineDefaultModule(apiConfig: RedmineConfig) extends AbstractModule {
     bind(classOf[Project]).toInstance(project)
     bind(classOf[RedmineConfig]).toInstance(apiConfig)
     bind(classOf[CustomFieldFormats]).toInstance(customFieldFormats())
-
-    val versions      = redmine.getProjectManager.getVersions(project.getId).asScala
-    val users         = redmine.getUserManager.getUsers.asScala
-    val propertyValue = PropertyValue(versions, users)
-    bind(classOf[PropertyValue]).toInstance(propertyValue)
+    bind(classOf[PropertyValue]).toInstance(createPropertyValue(redmine, project))
     bind(classOf[Int]).annotatedWith(Names.named("projectId")).toInstance(project.getId)
 
     //service
@@ -74,5 +70,12 @@ class RedmineDefaultModule(apiConfig: RedmineConfig) extends AbstractModule {
 
   private[this] def createRedmineClient(): RedmineManager =
     RedmineManagerFactory.createWithApiKey(apiConfig.url, apiConfig.key)
+
+  private[this] def createPropertyValue(redmine: RedmineManager, project: Project): PropertyValue = {
+    val versions   = redmine.getProjectManager.getVersions(project.getId).asScala
+    val users      = redmine.getUserManager.getUsers.asScala
+    val priorities = redmine.getIssueManager.getIssuePriorities.asScala
+    PropertyValue(users, versions, priorities)
+  }
 
 }
