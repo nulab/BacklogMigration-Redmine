@@ -100,8 +100,9 @@ class IssueInitializer(issueWrites: IssueWrites,
   private[this] def issueTypeName(issue: Issue): Option[String] = {
     val issueInitialValue = new IssueInitialValue(RedmineConstantValue.ATTR, RedmineConstantValue.Attr.TRACKER)
     issueInitialValue.findJournalDetail(journals) match {
-      case Some(detail) => Option(detail.getOldValue)
-      case None         => Option(issue.getTracker).map(_.getName)
+      case Some(detail) =>
+        propertyValue.trackerOfId(Option(detail.getOldValue)).map(_.getName)
+      case None => Option(issue.getTracker).map(_.getName)
     }
   }
 
@@ -109,7 +110,10 @@ class IssueInitializer(issueWrites: IssueWrites,
     val issueInitialValue = new IssueInitialValue(RedmineConstantValue.ATTR, RedmineConstantValue.Attr.CATEGORY)
     val details           = issueInitialValue.findJournalDetails(journals)
     if (details.isEmpty) Option(issue.getCategory).map(_.getName).toSeq
-    else details.flatMap(detail => Option(detail.getOldValue))
+    else
+      details.flatMap { detail =>
+        propertyValue.categoryOfId(Option(detail.getOldValue)).map(_.getName)
+      }
   }
 
   private[this] def milestoneNames(issue: Issue): Seq[String] = {
