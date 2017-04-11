@@ -118,7 +118,7 @@ class IssueInitializer(issueWrites: IssueWrites,
     if (details.isEmpty) Option(issue.getTargetVersion).map(_.getName).toSeq
     else
       details.flatMap { detail =>
-        propertyValue.versionOfId(detail.getOldValue).map(_.getName)
+        propertyValue.versionOfId(Option(detail.getOldValue)).map(_.getName)
       }
   }
 
@@ -126,7 +126,7 @@ class IssueInitializer(issueWrites: IssueWrites,
     val issueInitialValue = new IssueInitialValue(RedmineConstantValue.ATTR, RedmineConstantValue.Attr.PRIORITY)
     issueInitialValue.findJournalDetail(journals) match {
       case Some(detail) =>
-        propertyValue.priorityOfId(detail.getOldValue).map(_.getName).map(priorityMapping.convert).getOrElse("")
+        propertyValue.priorityOfId(Option(detail.getOldValue)).map(_.getName).map(priorityMapping.convert).getOrElse("")
       case None => priorityMapping.convert(issue.getPriorityText)
     }
   }
@@ -134,8 +134,9 @@ class IssueInitializer(issueWrites: IssueWrites,
   private[this] def assignee(issue: Issue): Option[BacklogUser] = {
     val issueInitialValue = new IssueInitialValue(RedmineConstantValue.ATTR, RedmineConstantValue.Attr.ASSIGNED)
     issueInitialValue.findJournalDetail(journals) match {
-      case Some(detail) => Option(detail.getOldValue).map(Backlog4jConverters.User.apply)
-      case None         => Option(issue.getAssignee).map(Convert.toBacklog(_)(userWrites))
+      case Some(detail) =>
+        propertyValue.userOfId(Option(detail.getOldValue)).map(Convert.toBacklog(_)(userWrites))
+      case None => Option(issue.getAssignee).map(Convert.toBacklog(_)(userWrites))
     }
   }
 
