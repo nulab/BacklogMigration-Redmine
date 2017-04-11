@@ -31,7 +31,6 @@ class IssueInitializer(issueWrites: IssueWrites,
       optStartDate = startDate(issue),
       optDueDate = dueDate(issue),
       optEstimatedHours = estimatedHours(issue),
-      //optActualHours = actualHours(issue),
       optIssueTypeName = issueTypeName(issue),
       categoryNames = categoryNames(issue),
       milestoneNames = milestoneNames(issue),
@@ -97,14 +96,6 @@ class IssueInitializer(issueWrites: IssueWrites,
       case None         => Option(issue.getEstimatedHours).map(_.toFloat)
     }
   }
-
-//  private[this] def actualHours(issue: Issue): Option[Float] = {
-//    val issueInitialValue = new IssueInitialValue(RedmineConstantValue.ATTR, RedmineConstantValue.Attr.ACTUAL_HOURS)
-//    issueInitialValue.findJournalDetail(journals) match {
-//      case Some(detail) => Option(detail.getOldValue).filter(value => value.nonEmpty).map(_.toFloat)
-//      case None         => issue.optActualHours
-//    }
-//  }
 
   private[this] def issueTypeName(issue: Issue): Option[String] = {
     val issueInitialValue = new IssueInitialValue(RedmineConstantValue.ATTR, RedmineConstantValue.Attr.TRACKER)
