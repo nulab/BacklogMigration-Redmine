@@ -50,8 +50,8 @@ class IssueActor(apiConfig: RedmineConfig,
 
       val attachments: Seq[Attachment] = issue.getAttachments.asScala.toSeq
 
-      val backlogIssue = exportIssue(issue, journals)
-      exportComments(backlogIssue, journals.map(Convert.toBacklog(_)(journalWrites)), attachments)
+      exportIssue(issue, journals)
+      exportComments(Convert.toBacklog(issue)(issueWrites), journals.map(Convert.toBacklog(_)(journalWrites)), attachments)
 
       completion.countDown()
       console((allCount - completion.getCount).toInt, allCount)
