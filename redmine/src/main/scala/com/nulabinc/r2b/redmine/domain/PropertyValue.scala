@@ -10,7 +10,9 @@ case class PropertyValue(users: Seq[User],
                          versions: Seq[Version],
                          categories: Seq[IssueCategory],
                          priorities: Seq[IssuePriority],
-                         trackers: Seq[Tracker]) {
+                         trackers: Seq[Tracker],
+                         memberships: Seq[Membership],
+                         statuses: Seq[IssueStatus]) {
 
   def versionOfId(optValue: Option[String]): Option[Version] =
     optValue match {
@@ -41,6 +43,16 @@ case class PropertyValue(users: Seq[User],
         }
       case _ => None
     }
+
+  def userOfId(id: Int): User =
+    users.find(user => user.getId == id) match {
+      case Some(user) => user
+      case _          => throw new RuntimeException(s"user not found.[${id}]")
+    }
+
+  def optUserOfId(id: Int): Option[User] = {
+    users.find(user => user.getId == id)
+  }
 
   def categoryOfId(optValue: Option[String]): Option[IssueCategory] =
     optValue match {

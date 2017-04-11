@@ -9,20 +9,13 @@ import com.nulabinc.backlog.migration.utils.DateUtil
 import com.nulabinc.backlog4j.CustomField.FieldType
 import com.nulabinc.r2b.mapping.core.{ConvertPriorityMapping, ConvertStatusMapping, ConvertUserMapping}
 import com.nulabinc.r2b.redmine.conf.RedmineConstantValue
-import com.nulabinc.r2b.redmine.domain.CustomFieldFormats
-import com.nulabinc.r2b.redmine.service._
+import com.nulabinc.r2b.redmine.domain.{CustomFieldFormats, PropertyValue}
 import com.taskadapter.redmineapi.bean.JournalDetail
 
 /**
   * @author uchida
   */
-class JournalDetailWrites @Inject()(customFieldFormats: CustomFieldFormats,
-                                    statusService: StatusService,
-                                    priorityService: PriorityService,
-                                    userService: UserService,
-                                    versionService: VersionService,
-                                    trackerService: TrackerService,
-                                    categoryService: IssueCategoryService)
+class JournalDetailWrites @Inject()(customFieldFormats: CustomFieldFormats, propertyValue: PropertyValue)
     extends Writes[JournalDetail, BacklogChangeLog] {
 
   val userMapping     = new ConvertUserMapping()
@@ -90,9 +83,9 @@ class JournalDetailWrites @Inject()(customFieldFormats: CustomFieldFormats,
       case Some(definition) =>
         definition.fieldFormat match {
           case RedmineConstantValue.FieldFormat.VERSION =>
-            versionService.allVersions().find(version => version.getId == value.toInt).map(_.getName)
+            propertyValue.versions.find(version => version.getId == value.toInt).map(_.getName)
           case RedmineConstantValue.FieldFormat.USER =>
-            userService.optUserOfId(value.toInt).map(_.getLogin).map(userMapping.convert)
+            propertyValue.optUserOfId(value.toInt).map(_.getLogin).map(userMapping.convert)
           case _ => Option(value)
         }
       case _ => Option(value)
@@ -102,17 +95,17 @@ class JournalDetailWrites @Inject()(customFieldFormats: CustomFieldFormats,
   private[this] def attr(detail: JournalDetail, value: String): Option[String] =
     detail.getName match {
       case RedmineConstantValue.Attr.STATUS =>
-        statusService.allStatuses().find(status => status.getId == value.toInt).map(_.getName).map(statusMapping.convert)
+        propertyValue.statuses.find(status => status.getId == value.toInt).map(_.getName).map(statusMapping.convert)
       case RedmineConstantValue.Attr.PRIORITY =>
-        priorityService.allPriorities().find(priority => priority.getId == value.toInt).map(_.getName).map(priorityMapping.convert)
+        propertyValue.priorities.find(priority => priority.getId == value.toInt).map(_.getName).map(priorityMapping.convert)
       case RedmineConstantValue.Attr.ASSIGNED =>
-        userService.optUserOfId(value.toInt).map(_.getLogin).map(userMapping.convert)
+        propertyValue.optUserOfId(value.toInt).map(_.getLogin).map(userMapping.convert)
       case RedmineConstantValue.Attr.VERSION =>
-        versionService.allVersions().find(version => version.getId == value.toInt).map(_.getName)
+        propertyValue.versions.find(version => version.getId == value.toInt).map(_.getName)
       case RedmineConstantValue.Attr.TRACKER =>
-        trackerService.allTrackers().find(tracker => tracker.getId == value.toInt).map(_.getName)
+        propertyValue.trackers.find(tracker => tracker.getId == value.toInt).map(_.getName)
       case RedmineConstantValue.Attr.CATEGORY =>
-        categoryService.allCategories().find(category => category.getId == value.toInt).map(_.getName)
+        propertyValue.categories.find(category => category.getId == value.toInt).map(_.getName)
       case _ => Option(value)
     }
 

@@ -6,20 +6,20 @@ import com.nulabinc.backlog.migration.conf.BacklogConstantValue
 import com.nulabinc.backlog.migration.converter.Writes
 import com.nulabinc.backlog.migration.domain.BacklogUser
 import com.nulabinc.r2b.mapping.core.ConvertUserMapping
-import com.nulabinc.r2b.redmine.service.UserService
+import com.nulabinc.r2b.redmine.domain.PropertyValue
 import com.taskadapter.redmineapi.bean.User
 
 /**
   * @author uchida
   */
-class UserWrites @Inject()(userService: UserService) extends Writes[User, BacklogUser] {
+class UserWrites @Inject()(propertyValue: PropertyValue) extends Writes[User, BacklogUser] {
 
   val userMapping = new ConvertUserMapping()
 
   override def writes(user: User): BacklogUser = {
     (Option(user.getLogin), Option(user.getFullName)) match {
       case (Some(_), Some(_)) => toBacklog(user)
-      case _                  => toBacklog(userService.tryUserOfId(user.getId))
+      case _                  => toBacklog(propertyValue.userOfId(user.getId))
     }
   }
 

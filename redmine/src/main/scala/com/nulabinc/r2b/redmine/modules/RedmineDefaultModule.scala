@@ -72,12 +72,14 @@ class RedmineDefaultModule(apiConfig: RedmineConfig) extends AbstractModule {
     RedmineManagerFactory.createWithApiKey(apiConfig.url, apiConfig.key)
 
   private[this] def createPropertyValue(redmine: RedmineManager, project: Project): PropertyValue = {
-    val versions   = redmine.getProjectManager.getVersions(project.getId).asScala
-    val categories = redmine.getIssueManager.getCategories(project.getId).asScala
-    val users      = redmine.getUserManager.getUsers.asScala
-    val priorities = redmine.getIssueManager.getIssuePriorities.asScala
-    val trackers   = redmine.getIssueManager.getTrackers.asScala
-    PropertyValue(users, versions, categories, priorities, trackers)
+    val versions    = redmine.getProjectManager.getVersions(project.getId).asScala
+    val categories  = redmine.getIssueManager.getCategories(project.getId).asScala
+    val users       = redmine.getUserManager.getUsers.asScala
+    val priorities  = redmine.getIssueManager.getIssuePriorities.asScala
+    val trackers    = redmine.getIssueManager.getTrackers.asScala
+    val memberships = redmine.getMembershipManager.getMemberships(apiConfig.projectKey).asScala
+    val statuses    = redmine.getIssueManager.getStatuses.asScala
+    PropertyValue(users, versions, categories, priorities, trackers, memberships, statuses)
   }
 
 }
