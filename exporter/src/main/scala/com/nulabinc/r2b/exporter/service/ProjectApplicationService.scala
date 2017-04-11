@@ -5,19 +5,21 @@ import javax.inject.Inject
 import akka.actor.ActorSystem
 import com.google.inject.Injector
 import com.nulabinc.backlog.migration.conf.BacklogPaths
-import com.nulabinc.backlog.migration.converter.Convert
+import com.nulabinc.backlog.migration.converter.{BacklogUnmarshaller, Convert}
 import com.nulabinc.backlog.migration.domain.BacklogJsonProtocol._
 import com.nulabinc.backlog.migration.domain._
 import com.nulabinc.backlog.migration.modules.akkaguice.GuiceAkkaExtension
 import com.nulabinc.backlog.migration.utils.{ConsoleOut, IOUtil, Logging}
 import com.nulabinc.r2b.exporter.actor.ContentActor
 import com.nulabinc.r2b.exporter.convert._
+import com.nulabinc.r2b.mapping.core.ConvertUserMapping
 import com.nulabinc.r2b.redmine.service._
 import com.osinka.i18n.Messages
 import com.taskadapter.redmineapi.bean._
 import net.codingwell.scalaguice.InjectorExtensions._
 import spray.json._
 
+import scala.collection.mutable
 import scala.concurrent.duration.Duration
 
 /**
@@ -39,6 +41,8 @@ class ProjectApplicationService @Inject()(implicit val projectWrites: ProjectWri
                                           versionService: VersionService)
     extends Logging {
 
+  val userMapping = new ConvertUserMapping()
+
   def execute(injector: Injector) = {
     val system = injector.instance[ActorSystem]
 
@@ -59,7 +63,11 @@ class ProjectApplicationService @Inject()(implicit val projectWrites: ProjectWri
     IOUtil.output(backlogPaths.groupsJson, BacklogGroupsWrapper(Convert.toBacklog(allMemberships)(groupsWrites)).toJson.prettyPrint)
 
     //memberships
-    IOUtil.output(backlogPaths.projectUsersJson, BacklogProjectUsersWrapper(Convert.toBacklog(allMemberships)(membershipWrites)).toJson.prettyPrint)
+    val allProjectUser = mutable.Set.empty[BacklogUser]
+    val projectUsers   = Convert.toBacklog(allMemberships)(membershipWrites)
+    projectUsers.foreach(projectUser => allProjectUser += projectUser)
+    userMapping.projectUsers().foreach(projectUser => allProjectUser += projectUser)
+    IOUtil.output(backlogPaths.projectUsersJson, BacklogProjectUsersWrapper(allProjectUser.toSeq).toJson.prettyPrint)
     ConsoleOut.boldln(Messages("message.executed", Messages("common.project_user"), Messages("message.exported")), 1)
 
     //customFields
