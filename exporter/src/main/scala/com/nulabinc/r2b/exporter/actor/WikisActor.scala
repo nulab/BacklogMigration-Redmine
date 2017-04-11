@@ -9,7 +9,7 @@ import akka.routing.SmallestMailboxPool
 import com.nulabinc.backlog.migration.conf.{BacklogConfiguration, BacklogPaths}
 import com.nulabinc.backlog.migration.modules.akkaguice.NamedActor
 import com.nulabinc.backlog.migration.utils.{Logging, ProgressBar}
-import com.nulabinc.r2b.exporter.convert.{AttachmentWrites, WikiWrites}
+import com.nulabinc.r2b.exporter.convert.WikiWrites
 import com.nulabinc.r2b.redmine.conf.RedmineConfig
 import com.nulabinc.r2b.redmine.service.WikiService
 import com.osinka.i18n.Messages
@@ -20,11 +20,7 @@ import scala.concurrent.duration._
 /**
   * @author uchida
   */
-class WikisActor @Inject()(apiConfig: RedmineConfig,
-                           backlogPaths: BacklogPaths,
-                           wikiWrites: WikiWrites,
-                           attachmentWrites: AttachmentWrites,
-                           wikiService: WikiService)
+class WikisActor @Inject()(apiConfig: RedmineConfig, backlogPaths: BacklogPaths, wikiWrites: WikiWrites, wikiService: WikiService)
     extends Actor
     with BacklogConfiguration
     with Logging {
@@ -40,7 +36,7 @@ class WikisActor @Inject()(apiConfig: RedmineConfig,
   def receive: Receive = {
     case WikisActor.Do =>
       val router    = SmallestMailboxPool(akkaMailBoxPool, supervisorStrategy = strategy)
-      val wikiActor = context.actorOf(router.props(Props(new WikiActor(apiConfig, backlogPaths, wikiWrites, attachmentWrites, wikiService))))
+      val wikiActor = context.actorOf(router.props(Props(new WikiActor(apiConfig, backlogPaths, wikiWrites, wikiService))))
 
       wikis.foreach(wiki => wikiActor ! WikiActor.Do(wiki, completion, wikis.size, console))
 

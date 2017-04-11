@@ -61,7 +61,7 @@ class IssueActor(apiConfig: RedmineConfig,
     val issueCreated = DateUtil.tryIsoParse(Option(issue.getCreatedOn).map(DateUtil.isoFormat))
     val issueDirPath =
       backlogPaths.issueDirectoryPath(DateUtil.yyyymmddFormat(issueCreated), s"${issueCreated.getTime}-${issue.getId.intValue()}-issue-0")
-    val issueInitializer = new IssueInitializer(issueWrites, userWrites, issueService, journals, propertyValue)
+    val issueInitializer = new IssueInitializer(issueWrites, userWrites, journals, propertyValue)
     val backlogIssue     = issueInitializer.initialize(issue)
     IOUtil.output(
       backlogPaths.issueJson(issueDirPath),
@@ -87,7 +87,7 @@ class IssueActor(apiConfig: RedmineConfig,
       backlogPaths.issueDirectoryPath(DateUtil.yyyymmddFormat(commentCreated), s"${commentCreated.getTime}-${issue.id}-comment-${index}")
 
     val commentReducer =
-      new CommentReducer(apiConfig: RedmineConfig, issueService, projectService, backlogPaths, issue, comments, attachments, issueDirPath)
+      new CommentReducer(apiConfig: RedmineConfig, projectService, backlogPaths, issue, comments, attachments, issueDirPath)
     val reduced = commentReducer.reduce(comment)
 
     IOUtil.output(backlogPaths.issueJson(issueDirPath), reduced.toJson.prettyPrint)

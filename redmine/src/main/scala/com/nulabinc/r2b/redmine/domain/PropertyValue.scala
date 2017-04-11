@@ -18,7 +18,7 @@ case class PropertyValue(users: Seq[User],
     optValue match {
       case Some(value) =>
         StringUtil.safeStringToInt(value) match {
-          case Some(intValue) => versions.find(version => version.getId == intValue)
+          case Some(intValue) => versions.find(version => version.getId.intValue() == intValue)
           case _              => None
         }
       case _ => None
@@ -28,7 +28,7 @@ case class PropertyValue(users: Seq[User],
     optValue match {
       case Some(value) =>
         StringUtil.safeStringToInt(value) match {
-          case Some(intValue) => priorities.find(priority => priority.getId == intValue)
+          case Some(intValue) => priorities.find(priority => priority.getId.intValue() == intValue)
           case _              => None
         }
       case _ => None
@@ -38,27 +38,27 @@ case class PropertyValue(users: Seq[User],
     optValue match {
       case Some(value) =>
         StringUtil.safeStringToInt(value) match {
-          case Some(intValue) => users.find(user => user.getId == intValue)
+          case Some(intValue) => users.find(user => user.getId.intValue() == intValue)
           case _              => None
         }
       case _ => None
     }
 
   def userOfId(id: Int): User =
-    users.find(user => user.getId == id) match {
+    users.find(user => user.getId.intValue() == id) match {
       case Some(user) => user
       case _          => throw new RuntimeException(s"user not found.[${id}]")
     }
 
   def optUserOfId(id: Int): Option[User] = {
-    users.find(user => user.getId == id)
+    users.find(user => user.getId.intValue() == id)
   }
 
   def categoryOfId(optValue: Option[String]): Option[IssueCategory] =
     optValue match {
       case Some(value) =>
         StringUtil.safeStringToInt(value) match {
-          case Some(intValue) => categories.find(category => category.getId == intValue)
+          case Some(intValue) => categories.find(category => category.getId.intValue() == intValue)
           case _              => None
         }
       case _ => None
@@ -68,7 +68,7 @@ case class PropertyValue(users: Seq[User],
     optValue match {
       case Some(value) =>
         StringUtil.safeStringToInt(value) match {
-          case Some(intValue) => trackers.find(tracker => tracker.getId == intValue)
+          case Some(intValue) => trackers.find(tracker => tracker.getId.intValue() == intValue)
           case _              => None
         }
       case _ => None

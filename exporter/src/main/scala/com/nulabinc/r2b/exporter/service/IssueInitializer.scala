@@ -1,24 +1,18 @@
 package com.nulabinc.r2b.exporter.service
 
-import com.nulabinc.backlog.migration.converter.{Backlog4jConverters, Convert}
+import com.nulabinc.backlog.migration.converter.Convert
 import com.nulabinc.backlog.migration.domain._
 import com.nulabinc.backlog.migration.utils.{DateUtil, Logging, StringUtil}
 import com.nulabinc.r2b.exporter.convert.{IssueWrites, UserWrites}
 import com.nulabinc.r2b.mapping.core.ConvertPriorityMapping
 import com.nulabinc.r2b.redmine.conf.RedmineConstantValue
 import com.nulabinc.r2b.redmine.domain.PropertyValue
-import com.nulabinc.r2b.redmine.service.IssueService
 import com.taskadapter.redmineapi.bean.{Issue, Journal}
 
 /**
   * @author uchida
   */
-class IssueInitializer(issueWrites: IssueWrites,
-                       userWrites: UserWrites,
-                       issueService: IssueService,
-                       journals: Seq[Journal],
-                       propertyValue: PropertyValue)
-    extends Logging {
+class IssueInitializer(issueWrites: IssueWrites, userWrites: UserWrites, journals: Seq[Journal], propertyValue: PropertyValue) extends Logging {
 
   val priorityMapping = new ConvertPriorityMapping()
 
@@ -26,7 +20,7 @@ class IssueInitializer(issueWrites: IssueWrites,
     val backlogIssue: BacklogIssue = Convert.toBacklog(issue)(issueWrites)
     backlogIssue.copy(
       summary = summary(issue),
-      optParentIssueId = parentIssueId(issueService, issue),
+      optParentIssueId = parentIssueId(issue),
       description = description(issue),
       optStartDate = startDate(issue),
       optDueDate = dueDate(issue),
@@ -49,7 +43,7 @@ class IssueInitializer(issueWrites: IssueWrites,
     }
   }
 
-  private[this] def parentIssueId(issueService: IssueService, issue: Issue): Option[Long] = {
+  private[this] def parentIssueId(issue: Issue): Option[Long] = {
     val issueInitialValue = new IssueInitialValue(RedmineConstantValue.ATTR, RedmineConstantValue.Attr.PARENT)
     issueInitialValue.findJournalDetail(journals) match {
       case Some(detail) =>

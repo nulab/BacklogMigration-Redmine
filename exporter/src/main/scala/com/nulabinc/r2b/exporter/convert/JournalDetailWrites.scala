@@ -83,7 +83,7 @@ class JournalDetailWrites @Inject()(customFieldFormats: CustomFieldFormats, prop
       case Some(definition) =>
         definition.fieldFormat match {
           case RedmineConstantValue.FieldFormat.VERSION =>
-            propertyValue.versions.find(version => version.getId == value.toInt).map(_.getName)
+            propertyValue.versions.find(version => version.getId.intValue() == value.toInt).map(_.getName)
           case RedmineConstantValue.FieldFormat.USER =>
             propertyValue.optUserOfId(value.toInt).map(_.getLogin).map(userMapping.convert)
           case _ => Option(value)
@@ -95,17 +95,17 @@ class JournalDetailWrites @Inject()(customFieldFormats: CustomFieldFormats, prop
   private[this] def attr(detail: JournalDetail, value: String): Option[String] =
     detail.getName match {
       case RedmineConstantValue.Attr.STATUS =>
-        propertyValue.statuses.find(status => status.getId == value.toInt).map(_.getName).map(statusMapping.convert)
+        propertyValue.statuses.find(status => status.getId.intValue() == value.toInt).map(_.getName).map(statusMapping.convert)
       case RedmineConstantValue.Attr.PRIORITY =>
-        propertyValue.priorities.find(priority => priority.getId == value.toInt).map(_.getName).map(priorityMapping.convert)
+        propertyValue.priorities.find(priority => priority.getId.intValue() == value.toInt).map(_.getName).map(priorityMapping.convert)
       case RedmineConstantValue.Attr.ASSIGNED =>
         propertyValue.optUserOfId(value.toInt).map(_.getLogin).map(userMapping.convert)
       case RedmineConstantValue.Attr.VERSION =>
-        propertyValue.versions.find(version => version.getId == value.toInt).map(_.getName)
+        propertyValue.versions.find(version => version.getId.intValue() == value.toInt).map(_.getName)
       case RedmineConstantValue.Attr.TRACKER =>
-        propertyValue.trackers.find(tracker => tracker.getId == value.toInt).map(_.getName)
+        propertyValue.trackers.find(tracker => tracker.getId.intValue() == value.toInt).map(_.getName)
       case RedmineConstantValue.Attr.CATEGORY =>
-        propertyValue.categories.find(category => category.getId == value.toInt).map(_.getName)
+        propertyValue.categories.find(category => category.getId.intValue() == value.toInt).map(_.getName)
       case _ => Option(value)
     }
 
