@@ -11,6 +11,10 @@ Migrate your projects from Redmine to [Backlog].
     * [http://backlog.jp](http://backlog.jp)
     * [http://backlogtool.com](http:///backlogtool.com)
 
+## DEMO
+
+![Demo](http://www.backlog.jp/backlog-migration/backlog-migration-redmine.gif)
+
 ## Requirements
 * **Java 8**
 * The Backlog Space's **administrator** roles.
