@@ -558,4 +558,4 @@ https://www.backlog.jp/contact/
 
 [Backlog]: http://www.backlog.jp/
 
-[Jar]: https://github.com/nulab/BacklogMigration-Redmine/releases/download/v0.9.0b35/backlog-migration-redmine-0.9.0b35.jar
+[Jar]: https://github.com/nulab/BacklogMigration-Redmine/releases/download/v0.10.0b2/backlog-migration-redmine-0.10.0b2.jar
