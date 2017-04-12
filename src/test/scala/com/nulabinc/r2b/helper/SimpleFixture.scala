@@ -59,7 +59,8 @@ trait SimpleFixture {
 
     AppConfiguration(redmineConfig = new RedmineConfig(url = redmineUrl, key = redmineKey, projectKey = redmine),
                      backlogConfig = new BacklogApiConfiguration(url = backlogUrl, key = backlogKey, projectKey = backlog),
-                     importOnly = false)
+                     importOnly = false,
+                     optOut = true)
   }
 
   private[this] def getBacklogClient(appConfiguration: BacklogApiConfiguration): BacklogClient = {
