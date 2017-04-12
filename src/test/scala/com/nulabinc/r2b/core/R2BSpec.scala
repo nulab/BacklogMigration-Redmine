@@ -161,14 +161,7 @@ class R2BSpec extends FlatSpec with Matchers with SimpleFixture {
     val allCount = redmineIssueCount()
     val COUNT    = 100
 
-    def loop(offset: Long): Unit = {
-      if (offset < allCount) {
-        issues(COUNT, offset)
-        loop(offset + COUNT)
-      }
-    }
-
-    loop(0)
+    (0 until (allCount, COUNT)).foreach(offset => issues(COUNT, offset))
   }
 
   private[this] def issues(count: Int, offset: Long) = {
