@@ -265,12 +265,6 @@ class R2BSpec extends FlatSpec with Matchers with SimpleFixture {
     }
   }
 
-  private[this] def findLastJournal(journals: Seq[Journal]): Journal = {
-    journals.sortWith((c1, c2) => {
-      c1.getCreatedOn.before(c2.getCreatedOn)
-    })(journals.size - 1)
-  }
-
   private[this] def tryIssue(issue: RedmineIssue): RedmineIssue = {
     redmine.getIssueManager.getIssueById(issue.getId.intValue(), Include.attachments, Include.journals)
   }
