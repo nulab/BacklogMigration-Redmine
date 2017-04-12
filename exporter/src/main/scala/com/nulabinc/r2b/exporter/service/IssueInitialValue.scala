@@ -7,7 +7,7 @@ import scala.collection.JavaConverters._
 /**
   * @author uchida
   */
-class IssueInitialValue(name: String, property: String) {
+class IssueInitialValue(property: String, name: String) {
 
   def findJournalDetail(journals: Seq[Journal]): Option[JournalDetail] =
     journals.find(isTargetjournal).flatMap(targetJournalDetail)

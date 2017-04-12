@@ -1,5 +1,7 @@
 package com.nulabinc.r2b.mapping.core
 
+import com.nulabinc.backlog.migration.conf.BacklogConstantValue
+import com.nulabinc.backlog.migration.domain.BacklogUser
 import com.nulabinc.r2b.mapping.domain.{Mapping, MappingsWrapper}
 import com.nulabinc.r2b.mapping.domain.MappingJsonProtocol._
 import spray.json.JsonParser
@@ -22,7 +24,7 @@ trait ConvertMapping {
         case _ => target
       }
 
-  private[this] val mappings: Seq[Mapping] = unmarshal(filePath)
+  val mappings: Seq[Mapping] = unmarshal(filePath)
 
   private[this] def unmarshal(strPath: String): Seq[Mapping] = {
     val path: Path = Path.fromString(strPath)
@@ -35,6 +37,19 @@ trait ConvertMapping {
 class ConvertUserMapping extends ConvertMapping {
 
   override def filePath: String = MappingDirectory.USER_MAPPING_FILE
+
+  def projectUsers(): Seq[BacklogUser] = {
+    mappings.map(toBacklog)
+  }
+
+  private[this] def toBacklog(mapping: Mapping): BacklogUser = {
+    BacklogUser(optId = None,
+                optUserId = Some(mapping.backlog),
+                optPassword = None,
+                name = mapping.redmine,
+                optMailAddress = None,
+                roleType = BacklogConstantValue.USER_ROLE)
+  }
 
 }
 

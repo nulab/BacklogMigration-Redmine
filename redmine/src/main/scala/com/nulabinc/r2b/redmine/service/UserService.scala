@@ -9,6 +9,8 @@ trait UserService {
 
   def allUsers(): Seq[User]
 
+  def tryUserOfId(id: Int): User
+
   def optUserOfId(id: Int): Option[User]
 
 }

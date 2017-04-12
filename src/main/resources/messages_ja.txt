@@ -26,6 +26,11 @@ common.groups=グループ
 common.issue_type=課題種別
 common.result_success=成功
 common.result_failed=失敗:{0,number,#}
+common.done_ratio=進捗率
+common.not_set=新規
+common.relation=関連している課題:
+common.private=プライベート
+common.project=プロジェクト
 
 
 # Message

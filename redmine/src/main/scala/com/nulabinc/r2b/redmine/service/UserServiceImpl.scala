@@ -18,6 +18,9 @@ class UserServiceImpl @Inject()(redmine: RedmineManager) extends UserService wit
     users.flatMap(user => optUserOfId(user.getId))
   }
 
+  override def tryUserOfId(id: Int): User =
+    redmine.getUserManager.getUserById(id)
+
   override def optUserOfId(id: Int): Option[User] = {
     try {
       Some(redmine.getUserManager.getUserById(id))

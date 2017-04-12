@@ -11,4 +11,6 @@ trait ProjectService {
 
   def optProject(): Option[Project]
 
+  def optProjectOfId(id: Int): Option[Project]
+
 }

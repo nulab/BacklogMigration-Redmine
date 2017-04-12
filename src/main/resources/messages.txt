@@ -26,6 +26,11 @@ common.groups=groups
 common.issue_type=issue type
 common.result_success=SUCCESSFUL
 common.result_failed=FAILED:{0,number,#}
+common.done_ratio=% done
+common.not_set=New
+common.relation=Related issue:
+common.private=Private
+common.project=Project
 
 
 # Message

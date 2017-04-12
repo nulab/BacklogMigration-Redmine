@@ -32,14 +32,14 @@ trait SimpleFixture {
   val dateFormat              = "yyyy-MM-dd"
   val timestampFormat: String = "yyyy-MM-dd'T'HH:mm:ssZ"
 
-  val config: AppConfiguration = getConfig
-  val redmine: RedmineManager  = RedmineManagerFactory.createWithApiKey(config.redmineConfig.url, config.redmineConfig.key)
-  val backlog: BacklogClient   = getBacklogClient(config.backlogConfig)
+  val appConfiguration: AppConfiguration = getConfig
+  val redmine: RedmineManager            = RedmineManagerFactory.createWithApiKey(appConfiguration.redmineConfig.url, appConfiguration.redmineConfig.key)
+  val backlog: BacklogClient             = getBacklogClient(appConfiguration.backlogConfig)
 
-  val redmineProject = redmine.getProjectManager.getProjectByKey(config.redmineConfig.projectKey)
+  val redmineProject = redmine.getProjectManager.getProjectByKey(appConfiguration.redmineConfig.projectKey)
 
-  val propertyMappingFiles = createMapping(config)
-  //TODO
+  val propertyMappingFiles = createMapping(appConfiguration)
+
   val userMapping: ConvertUserMapping         = new ConvertUserMapping()
   val statusMapping: ConvertStatusMapping     = new ConvertStatusMapping()
   val priorityMapping: ConvertPriorityMapping = new ConvertPriorityMapping()
@@ -54,7 +54,7 @@ trait SimpleFixture {
     val projectKey: String = prop.getProperty("projectKey")
 
     val keys: Array[String] = projectKey.split(":")
-    val redmine: String     = keys(0).toUpperCase.replaceAll("-", "_")
+    val redmine: String     = keys(0)
     val backlog: String     = if (keys.length == 2) keys(1) else keys(0).toUpperCase.replaceAll("-", "_")
 
     AppConfiguration(redmineConfig = new RedmineConfig(url = redmineUrl, key = redmineKey, projectKey = redmine),
@@ -62,23 +62,23 @@ trait SimpleFixture {
                      importOnly = false)
   }
 
-  private[this] def getBacklogClient(config: BacklogApiConfiguration): BacklogClient = {
-    val backlogPackageConfigure: BacklogPackageConfigure = new BacklogPackageConfigure(config.url)
-    val configure: BacklogConfigure                      = backlogPackageConfigure.apiKey(config.key)
+  private[this] def getBacklogClient(appConfiguration: BacklogApiConfiguration): BacklogClient = {
+    val backlogPackageConfigure: BacklogPackageConfigure = new BacklogPackageConfigure(appConfiguration.url)
+    val configure: BacklogConfigure                      = backlogPackageConfigure.apiKey(appConfiguration.key)
     new BacklogClientFactory(configure).newClient()
   }
 
-  private[this] def createMapping(config: AppConfiguration): PropertyMappingFiles = {
-    val mappingData     = MappingController.execute(config.redmineConfig)
-    val userMapping     = new UserMappingFile(config.redmineConfig, config.backlogConfig, mappingData)
-    val statusMapping   = new StatusMappingFile(config.redmineConfig, config.backlogConfig, mappingData)
-    val priorityMapping = new PriorityMappingFile(config.redmineConfig, config.backlogConfig)
+  private[this] def createMapping(appConfiguration: AppConfiguration): PropertyMappingFiles = {
+    val mappingData     = MappingController.execute(appConfiguration.redmineConfig)
+    val userMapping     = new UserMappingFile(appConfiguration.redmineConfig, appConfiguration.backlogConfig, mappingData)
+    val statusMapping   = new StatusMappingFile(appConfiguration.redmineConfig, appConfiguration.backlogConfig, mappingData)
+    val priorityMapping = new PriorityMappingFile(appConfiguration.redmineConfig, appConfiguration.backlogConfig)
     PropertyMappingFiles(user = userMapping, status = statusMapping, priority = priorityMapping)
   }
 
   def redmineIssueCount() = {
     val countIssueUrl =
-      s"${config.redmineConfig.url}/issues.json?limit=1&subproject_id=!*&project_id=${redmineProject.getId}&key=${config.redmineConfig.key}&status_id=*"
+      s"${appConfiguration.redmineConfig.url}/issues.json?limit=1&subproject_id=!*&project_id=${redmineProject.getId}&key=${appConfiguration.redmineConfig.key}&status_id=*"
     val str: String                                = httpGet(countIssueUrl)
     val redmineIssuesWrapper: RedmineIssuesWrapper = JsonParser(str).convertTo[RedmineIssuesWrapper]
     redmineIssuesWrapper.total_count

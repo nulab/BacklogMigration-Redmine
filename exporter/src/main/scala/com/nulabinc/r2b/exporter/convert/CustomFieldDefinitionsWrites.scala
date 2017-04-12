@@ -10,13 +10,13 @@ import com.nulabinc.backlog4j.CustomField.FieldType
 import com.nulabinc.backlog4j.internal.json.customFields.DateCustomFieldSetting
 import com.nulabinc.r2b.domain.RedmineCustomFieldDefinition
 import com.nulabinc.r2b.redmine.conf.RedmineConstantValue
-import com.nulabinc.r2b.redmine.service.{MembershipService, VersionService}
+import com.nulabinc.r2b.redmine.domain.PropertyValue
 import com.osinka.i18n.Messages
 
 /**
   * @author uchida
   */
-class CustomFieldDefinitionsWrites @Inject()(versionService: VersionService, membershipService: MembershipService)
+class CustomFieldDefinitionsWrites @Inject()(propertyValue: PropertyValue)
     extends Writes[Seq[RedmineCustomFieldDefinition], Seq[BacklogCustomFieldSetting]]
     with Logging {
 
@@ -68,8 +68,8 @@ class CustomFieldDefinitionsWrites @Inject()(versionService: VersionService, mem
 
   private[this] def possibleValues(redmineCustomFieldDefinition: RedmineCustomFieldDefinition): Seq[String] =
     redmineCustomFieldDefinition.fieldFormat match {
-      case RedmineConstantValue.FieldFormat.VERSION => versionService.allVersions().map(_.getName)
-      case RedmineConstantValue.FieldFormat.USER    => membershipService.allMemberships().filter(_.getUser != null).map(_.getUser.getFullName)
+      case RedmineConstantValue.FieldFormat.VERSION => propertyValue.versions.map(_.getName)
+      case RedmineConstantValue.FieldFormat.USER    => propertyValue.memberships.filter(_.getUser != null).map(_.getUser.getFullName)
       case RedmineConstantValue.FieldFormat.BOOL    => booleanPossibleValues()
       case _                                        => redmineCustomFieldDefinition.possibleValues
     }

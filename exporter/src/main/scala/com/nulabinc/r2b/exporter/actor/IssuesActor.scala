@@ -11,9 +11,9 @@ import com.nulabinc.backlog.migration.modules.akkaguice.NamedActor
 import com.nulabinc.backlog.migration.utils.{Logging, ProgressBar}
 import com.nulabinc.r2b.exporter.convert.{IssueWrites, JournalWrites, UserWrites}
 import com.nulabinc.r2b.redmine.conf.RedmineConfig
-import com.nulabinc.r2b.redmine.service.{IssueService, UserService}
+import com.nulabinc.r2b.redmine.domain.PropertyValue
+import com.nulabinc.r2b.redmine.service.{IssueService, ProjectService}
 import com.osinka.i18n.Messages
-import com.taskadapter.redmineapi.bean.Project
 
 import scala.concurrent.duration._
 
@@ -26,7 +26,9 @@ class IssuesActor @Inject()(apiConfig: RedmineConfig,
                             journalWrites: JournalWrites,
                             userWrites: UserWrites,
                             @Named("projectId") projectId: Int,
-                            issueService: IssueService)
+                            issueService: IssueService,
+                            projectService: ProjectService,
+                            propertyValue: PropertyValue)
     extends Actor
     with BacklogConfiguration
     with Logging {
@@ -48,7 +50,9 @@ class IssuesActor @Inject()(apiConfig: RedmineConfig,
     case IssuesActor.Do =>
       val router = SmallestMailboxPool(akkaMailBoxPool, supervisorStrategy = strategy)
       val issueActor =
-        context.actorOf(router.props(Props(new IssueActor(apiConfig, backlogPaths, issueService, issueWrites, journalWrites, userWrites))))
+        context.actorOf(
+          router.props(
+            Props(new IssueActor(apiConfig, backlogPaths, issueService, projectService, propertyValue, issueWrites, journalWrites, userWrites))))
 
       (0 until (allCount, limit))
         .foldLeft(Seq.empty[Int]) { (acc, offset) =>

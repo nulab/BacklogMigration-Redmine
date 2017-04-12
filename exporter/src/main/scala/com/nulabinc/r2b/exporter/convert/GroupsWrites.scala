@@ -4,7 +4,7 @@ import javax.inject.Inject
 
 import com.nulabinc.backlog.migration.converter.{Convert, Writes}
 import com.nulabinc.backlog.migration.domain.{BacklogGroup, BacklogUser}
-import com.nulabinc.r2b.redmine.service.UserService
+import com.nulabinc.r2b.redmine.domain.PropertyValue
 import com.taskadapter.redmineapi.bean.{Group, Membership, User}
 
 import scala.collection.JavaConverters._
@@ -12,10 +12,10 @@ import scala.collection.JavaConverters._
 /**
   * @author uchida
   */
-class GroupsWrites @Inject()(implicit val userWrites: UserWrites, userService: UserService) extends Writes[Seq[Membership], Seq[BacklogGroup]] {
+class GroupsWrites @Inject()(implicit val userWrites: UserWrites, propertyValue: PropertyValue) extends Writes[Seq[Membership], Seq[BacklogGroup]] {
 
   override def writes(memberships: Seq[Membership]): Seq[BacklogGroup] = {
-    val users = userService.allUsers()
+    val users = propertyValue.users
     memberships.filter(condition).map(_.getGroup).map(toBacklog).map(_(users))
   }
 

@@ -1,18 +1,18 @@
 package com.nulabinc.r2b.exporter.service
 
-import com.nulabinc.backlog.migration.converter.{Backlog4jConverters, Convert}
+import com.nulabinc.backlog.migration.converter.Convert
 import com.nulabinc.backlog.migration.domain._
-import com.nulabinc.backlog.migration.utils.{DateUtil, Logging}
+import com.nulabinc.backlog.migration.utils.{DateUtil, Logging, StringUtil}
 import com.nulabinc.r2b.exporter.convert.{IssueWrites, UserWrites}
 import com.nulabinc.r2b.mapping.core.ConvertPriorityMapping
 import com.nulabinc.r2b.redmine.conf.RedmineConstantValue
-import com.nulabinc.r2b.redmine.service.IssueService
+import com.nulabinc.r2b.redmine.domain.PropertyValue
 import com.taskadapter.redmineapi.bean.{Issue, Journal}
 
 /**
   * @author uchida
   */
-class IssueInitializer(issueWrites: IssueWrites, userWrites: UserWrites, issueService: IssueService, journals: Seq[Journal]) extends Logging {
+class IssueInitializer(issueWrites: IssueWrites, userWrites: UserWrites, journals: Seq[Journal], propertyValue: PropertyValue) extends Logging {
 
   val priorityMapping = new ConvertPriorityMapping()
 
@@ -20,15 +20,13 @@ class IssueInitializer(issueWrites: IssueWrites, userWrites: UserWrites, issueSe
     val backlogIssue: BacklogIssue = Convert.toBacklog(issue)(issueWrites)
     backlogIssue.copy(
       summary = summary(issue),
-      optParentIssueId = parentIssueId(issueService, issue),
+      optParentIssueId = parentIssueId(issue),
       description = description(issue),
       optStartDate = startDate(issue),
       optDueDate = dueDate(issue),
       optEstimatedHours = estimatedHours(issue),
-      //optActualHours = actualHours(issue),
       optIssueTypeName = issueTypeName(issue),
       categoryNames = categoryNames(issue),
-      //versionNames = versionNames(issue),
       milestoneNames = milestoneNames(issue),
       priorityName = priorityName(issue),
       optAssignee = assignee(issue),
@@ -45,15 +43,16 @@ class IssueInitializer(issueWrites: IssueWrites, userWrites: UserWrites, issueSe
     }
   }
 
-  private[this] def parentIssueId(issueService: IssueService, issue: Issue): Option[Long] = {
+  private[this] def parentIssueId(issue: Issue): Option[Long] = {
     val issueInitialValue = new IssueInitialValue(RedmineConstantValue.ATTR, RedmineConstantValue.Attr.PARENT)
     issueInitialValue.findJournalDetail(journals) match {
       case Some(detail) =>
         Option(detail.getOldValue) match {
           case Some(value) if (value.nonEmpty) =>
-            //TODO
-            //issueService.optIssueOfKey(value).map(_.id)
-            None
+            StringUtil.safeStringToInt(value) match {
+              case Some(intValue) => Some(intValue)
+              case _              => None
+            }
           case _ => None
         }
       case None => Option(issue.getParentId).map(_.intValue())
@@ -92,19 +91,12 @@ class IssueInitializer(issueWrites: IssueWrites, userWrites: UserWrites, issueSe
     }
   }
 
-//  private[this] def actualHours(issue: Issue): Option[Float] = {
-//    val issueInitialValue = new IssueInitialValue(RedmineConstantValue.ATTR, RedmineConstantValue.Attr.ACTUAL_HOURS)
-//    issueInitialValue.findJournalDetail(journals) match {
-//      case Some(detail) => Option(detail.getOldValue).filter(value => value.nonEmpty).map(_.toFloat)
-//      case None         => issue.optActualHours
-//    }
-//  }
-
   private[this] def issueTypeName(issue: Issue): Option[String] = {
     val issueInitialValue = new IssueInitialValue(RedmineConstantValue.ATTR, RedmineConstantValue.Attr.TRACKER)
     issueInitialValue.findJournalDetail(journals) match {
-      case Some(detail) => Option(detail.getOldValue)
-      case None         => Option(issue.getTracker).map(_.getName)
+      case Some(detail) =>
+        propertyValue.trackerOfId(Option(detail.getOldValue)).map(_.getName)
+      case None => Option(issue.getTracker).map(_.getName)
     }
   }
 
@@ -112,37 +104,37 @@ class IssueInitializer(issueWrites: IssueWrites, userWrites: UserWrites, issueSe
     val issueInitialValue = new IssueInitialValue(RedmineConstantValue.ATTR, RedmineConstantValue.Attr.CATEGORY)
     val details           = issueInitialValue.findJournalDetails(journals)
     if (details.isEmpty) Option(issue.getCategory).map(_.getName).toSeq
-    else details.flatMap(detail => Option(detail.getOldValue))
+    else
+      details.flatMap { detail =>
+        propertyValue.categoryOfId(Option(detail.getOldValue)).map(_.getName)
+      }
   }
-
-  //TODO
-//  private[this] def versionNames(issue: Issue): Seq[String] = {
-//    val issueInitialValue = new IssueInitialValue(RedmineConstantValue.ATTR, RedmineConstantValue.Attr.VERSION)
-//    val details           = issueInitialValue.findJournalDetails(journals)
-//    if (details.isEmpty) Seq(issue.getTargetVersion.getName)
-//    else details.flatMap(detail => Option(detail.getOldValue))
-//  }
 
   private[this] def milestoneNames(issue: Issue): Seq[String] = {
     val issueInitialValue = new IssueInitialValue(RedmineConstantValue.ATTR, RedmineConstantValue.Attr.VERSION)
     val details           = issueInitialValue.findJournalDetails(journals)
     if (details.isEmpty) Option(issue.getTargetVersion).map(_.getName).toSeq
-    else details.flatMap(detail => Option(detail.getOldValue))
+    else
+      details.flatMap { detail =>
+        propertyValue.versionOfId(Option(detail.getOldValue)).map(_.getName)
+      }
   }
 
   private[this] def priorityName(issue: Issue): String = {
     val issueInitialValue = new IssueInitialValue(RedmineConstantValue.ATTR, RedmineConstantValue.Attr.PRIORITY)
     issueInitialValue.findJournalDetail(journals) match {
-      case Some(detail) => Option(detail.getOldValue).getOrElse("")
-      case None         => priorityMapping.convert(issue.getPriorityText)
+      case Some(detail) =>
+        propertyValue.priorityOfId(Option(detail.getOldValue)).map(_.getName).map(priorityMapping.convert).getOrElse("")
+      case None => priorityMapping.convert(issue.getPriorityText)
     }
   }
 
   private[this] def assignee(issue: Issue): Option[BacklogUser] = {
     val issueInitialValue = new IssueInitialValue(RedmineConstantValue.ATTR, RedmineConstantValue.Attr.ASSIGNED)
     issueInitialValue.findJournalDetail(journals) match {
-      case Some(detail) => Option(detail.getOldValue).map(Backlog4jConverters.User.apply)
-      case None         => Option(issue.getAssignee).map(Convert.toBacklog(_)(userWrites))
+      case Some(detail) =>
+        propertyValue.userOfId(Option(detail.getOldValue)).map(Convert.toBacklog(_)(userWrites))
+      case None => Option(issue.getAssignee).map(Convert.toBacklog(_)(userWrites))
     }
   }
 
