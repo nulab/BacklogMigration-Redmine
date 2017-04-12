@@ -43,7 +43,11 @@ object R2BCli extends BacklogConfiguration with Logging {
 
             ExportController.execute(config.redmineConfig, config.backlogConfig.projectKey)
             ImportController.execute(config.backlogConfig, false)
-            tracking(config, backlogInjector)
+
+            if (config.optOut == false) {
+              tracking(config, backlogInjector)
+            }
+
           }
         }
       }
@@ -52,8 +56,11 @@ object R2BCli extends BacklogConfiguration with Logging {
   def doImport(config: AppConfiguration): Unit =
     if (validateParam(config)) {
       ImportController.execute(config.backlogConfig, false)
-      val backlogInjector = ServiceInjector.createInjector(config.backlogConfig)
-      //tracking(config, backlogInjector)
+
+      if (config.optOut == false) {
+        val backlogInjector = ServiceInjector.createInjector(config.backlogConfig)
+        tracking(config, backlogInjector)
+      }
     }
 
   private[this] def tracking(config: AppConfiguration, backlogInjector: Injector) = {

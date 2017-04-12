@@ -68,7 +68,8 @@ cli.help.backlog.key=Backlogのアクセスキーを指定します。(必須オ
 cli.help.backlog.url=BacklogのURLを指定します。(必須オプション)例：--backlog.url [BacklogのURL]
 cli.help.redmine.key=RedmineのAPIアクセスキーを指定します。(必須オプション)例：--redmine.key [RedmineのAPIアクセスキー]
 cli.help.redmine.url=RedmineのURLを指定します。(必須オプション)例：--redmine.url [RedmineのURL]
-cli.help.importOnly=このプロパティを設定した場合、インポートのみを行います。
+cli.help.importOnly=このオプションを設定した場合、インポートのみを行います。
+cli.help.optOut=このオプションを設定した場合、トラッキングを行いません。
 
 
 # CLI Validate Param

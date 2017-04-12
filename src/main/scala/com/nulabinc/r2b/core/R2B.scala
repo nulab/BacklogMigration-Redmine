@@ -27,6 +27,8 @@ class CommandLineInterface(arguments: Seq[String]) extends ScallopConf(arguments
 
     val projectKey = opt[String]("projectKey", descr = Messages("cli.help.projectKey"), required = true)
     val importOnly = opt[Boolean]("importOnly", descr = Messages("cli.help.importOnly"), required = true)
+    val optOut     = opt[Boolean]("optOut", descr = Messages("cli.help.optOut"), required = false)
+
   }
 
   val init = new Subcommand("init") {
@@ -90,7 +92,8 @@ object R2B extends BacklogConfiguration with Logging {
     AppConfiguration(redmineConfig = new RedmineConfig(url = cli.execute.redmineUrl(), key = cli.execute.redmineKey(), projectKey = redmine),
                      backlogConfig =
                        new BacklogApiConfiguration(url = cli.execute.backlogUrl(), key = cli.execute.backlogKey(), projectKey = backlog),
-                     importOnly = cli.execute.importOnly())
+                     importOnly = cli.execute.importOnly(),
+                     optOut = cli.execute.optOut())
   }
 
 }
