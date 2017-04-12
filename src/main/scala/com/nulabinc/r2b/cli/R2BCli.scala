@@ -53,7 +53,7 @@ object R2BCli extends BacklogConfiguration with Logging {
     if (validateParam(config)) {
       ImportController.execute(config.backlogConfig, false)
       val backlogInjector = ServiceInjector.createInjector(config.backlogConfig)
-      tracking(config, backlogInjector)
+      //tracking(config, backlogInjector)
     }
 
   private[this] def tracking(config: AppConfiguration, backlogInjector: Injector) = {
