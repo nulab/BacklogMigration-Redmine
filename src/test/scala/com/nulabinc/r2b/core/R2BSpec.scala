@@ -1,11 +1,16 @@
 package com.nulabinc.r2b.core
 
+import java.util.Date
+
+import com.nulabinc.backlog4j.{Issue => BacklogIssue}
 import com.nulabinc.backlog4j.api.option.GetIssuesParams
-import com.nulabinc.r2b.actor.utils.IssueTag
 import com.nulabinc.r2b.conf.AppConfiguration
 import com.nulabinc.r2b.helper.SimpleFixture
 import com.osinka.i18n.Messages
 import com.taskadapter.redmineapi.Include
+import com.taskadapter.redmineapi.bean.{Journal, User}
+import com.taskadapter.redmineapi.bean.{Issue => RedmineIssue}
+import org.joda.time.DateTime
 import org.scalatest.{FlatSpec, Matchers}
 
 import scala.collection.JavaConverters._
@@ -166,15 +171,14 @@ class R2BSpec extends FlatSpec with Matchers with SimpleFixture {
 
   private[this] def issues(count: Int, offset: Long) = {
     val backlogProject = backlog.getProject(appConfiguration.backlogConfig.projectKey)
-    val params         = new GetIssuesParams(List(java.lang.Long.valueOf(backlogProject.getId)).asJava)
+    val params         = new GetIssuesParams(List(Long.box(backlogProject.getId)).asJava)
     val backlogIssues  = backlog.getIssues(params).asScala
 
-    val redmineIssues = getRedmineIssues(count, offset).map(redmineIssue => {
-      redmine.getIssueManager.getIssueById(redmineIssue.getId, Include.attachments, Include.journals)
-    })
+    val redmineIssues = allRedmineIssues(count, offset).map(tryIssue)
 
     redmineIssues.foreach(redmineIssue =>
       "Issue" should s"match: ${redmineIssue.getSubject}[${redmineIssue.getId}]" in {
+
         val optBacklogIssue = backlogIssues.find(backlogIssue => redmineIssue.getSubject == backlogIssue.getSummary)
 
         withClue(s"""
@@ -184,31 +188,21 @@ class R2BSpec extends FlatSpec with Matchers with SimpleFixture {
         }
 
         for { backlogIssue <- optBacklogIssue } yield {
-          val redmineDescription = new StringBuilder
-          redmineDescription.append(redmineIssue.getDescription)
-          redmineDescription.append("\n").append(Messages("common.done_ratio")).append(":").append(redmineIssue.getDoneRatio)
-          redmineDescription.append("\n").append(IssueTag.getTag(redmineIssue.getId, appConfiguration.redmineConfig.url))
-
-          val spentHours  = BigDecimal(redmineIssue.getSpentHours.toString).setScale(2, BigDecimal.RoundingMode.HALF_UP)
-          val actualHours = BigDecimal(backlogIssue.getActualHours).setScale(2, BigDecimal.RoundingMode.HALF_UP)
-
-          val redmineIssueUser   = redmine.getUserManager.getUserById(redmineIssue.getAuthor.getId)
-          val redmineIssueUserId = userMapping.convert(redmineIssueUser.getLogin)
-
           //description
-          //redmineDescription.result() should equal(backlogIssue.getDescription)
+          redmineIssue.getDescription should equal(backlogIssue.getDescription)
 
           //issue type
           redmineIssue.getTracker.getName should equal(backlogIssue.getIssueType.getName)
 
           //category
-          if (redmineIssue.getCategory != null) {
-            redmineIssue.getCategory.getName should equal(backlogIssue.getCategory.get(0).getName)
+          for { category <- Option(redmineIssue.getCategory) } yield {
+            val optBacklogCategory = if (backlogIssue.getCategory.asScala.isEmpty) None else Some(backlogIssue.getCategory.asScala(0))
+            category.getName should equal(optBacklogCategory.map(_.getName).getOrElse(""))
           }
 
           //milestone
-          if (redmineIssue.getTargetVersion != null) {
-            redmineIssue.getTargetVersion.getName should equal(backlogIssue.getMilestone.get(0).getName)
+          for { version <- Option(redmineIssue.getTargetVersion) } yield {
+            version.getName should equal(backlogIssue.getMilestone.get(0).getName)
           }
 
           //due date
@@ -232,22 +226,61 @@ class R2BSpec extends FlatSpec with Matchers with SimpleFixture {
           }
 
           //actual hours
+          val spentHours  = BigDecimal(redmineIssue.getSpentHours.toString).setScale(2, BigDecimal.RoundingMode.HALF_UP)
+          val actualHours = BigDecimal(backlogIssue.getActualHours).setScale(2, BigDecimal.RoundingMode.HALF_UP)
           spentHours should equal(actualHours)
 
           //start date
           dateToString(redmineIssue.getStartDate) should equal(dateToString(backlogIssue.getStartDate))
 
           //created user
-          redmineIssueUserId should equal(backlogIssue.getCreatedUser.getUserId)
-
-          //updated user
-          //redmineIssueUserId should equal(backlogIssue.getUpdatedUser.getUserId)
+          userIdOfUser(redmineIssue.getAuthor) should equal(backlogIssue.getCreatedUser.getUserId)
 
           //created
           timestampToString(redmineIssue.getCreatedOn) should equal(timestampToString(backlogIssue.getCreated))
+
+          //updated user
+          withClue(s"""
+              |redmine:${timestampToString(redmineIssue.getUpdatedOn)}
+              |backlog:${timestampToString(updated(backlogIssue))}
+            """.stripMargin) {
+            timestampToString(redmineIssue.getUpdatedOn) should be(timestampToString(updated(backlogIssue)))
+          }
+
         }
 
     })
+  }
+
+  private[this] def updated(issue: BacklogIssue): Date = {
+    val comments = backlog.getIssueComments(issue.getId)
+    if (comments.isEmpty) issue.getUpdated
+    else {
+      val comment = comments.asScala.sortWith((c1, c2) => {
+        val dt1 = new DateTime(c1.getUpdated)
+        val dt2 = new DateTime(c2.getUpdated)
+        dt1.isBefore(dt2)
+      })(comments.size() - 1)
+      comment.getCreated
+    }
+  }
+
+  private[this] def findLastJournal(journals: Seq[Journal]): Journal = {
+    journals.sortWith((c1, c2) => {
+      c1.getCreatedOn.before(c2.getCreatedOn)
+    })(journals.size - 1)
+  }
+
+  private[this] def tryIssue(issue: RedmineIssue): RedmineIssue = {
+    redmine.getIssueManager.getIssueById(issue.getId.intValue(), Include.attachments, Include.journals)
+  }
+
+  private[this] def userOfId(id: Int): User = {
+    redmine.getUserManager.getUserById(id)
+  }
+
+  private[this] def userIdOfUser(user: User): String = {
+    userMapping.convert(userOfId(user.getId.intValue()).getLogin)
   }
 
 }

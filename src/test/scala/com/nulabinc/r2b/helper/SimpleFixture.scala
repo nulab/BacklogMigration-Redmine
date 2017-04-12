@@ -84,7 +84,7 @@ trait SimpleFixture {
     redmineIssuesWrapper.total_count
   }
 
-  def getRedmineIssues(count: Int, offset: Long) = {
+  def allRedmineIssues(count: Int, offset: Long) = {
     val params = Map("offset" -> offset.toString,
                      "limit"         -> count.toString,
                      "project_id"    -> redmineProject.getId.toString,
