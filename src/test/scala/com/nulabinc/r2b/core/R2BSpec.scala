@@ -2,8 +2,8 @@ package com.nulabinc.r2b.core
 
 import java.util.Date
 
-import com.nulabinc.backlog4j.{Issue => BacklogIssue}
-import com.nulabinc.backlog4j.api.option.GetIssuesParams
+import com.nulabinc.backlog4j.{BacklogClient, IssueComment, Issue => BacklogIssue}
+import com.nulabinc.backlog4j.api.option.{GetIssuesParams, QueryParams}
 import com.nulabinc.r2b.conf.AppConfiguration
 import com.nulabinc.r2b.helper.SimpleFixture
 import com.osinka.i18n.Messages
@@ -247,9 +247,35 @@ class R2BSpec extends FlatSpec with Matchers with SimpleFixture {
             timestampToString(redmineIssue.getUpdatedOn) should be(timestampToString(updated(backlogIssue)))
           }
 
+          //comments
+          val comments = allCommentsOfIssue(backlogIssue.getId)
+          redmineIssue.getJournals.asScala.size should equal(comments.size)
+
         }
 
     })
+  }
+
+  private[this] def allCommentsOfIssue(issueId: Long): Seq[IssueComment] = {
+    val allCount = backlog.getIssueCommentCount(issueId)
+
+    def loop(optMinId: Option[Long], comments: Seq[IssueComment], offset: Long): Seq[IssueComment] =
+      if (offset < allCount) {
+        val queryParams = new QueryParams()
+        for { minId <- optMinId } yield {
+          queryParams.minId(minId)
+        }
+        queryParams.count(100)
+        queryParams.order(QueryParams.Order.Asc)
+        val commentsPart =
+          backlog.getIssueComments(issueId, queryParams).asScala
+        val optLastId = for { lastComment <- commentsPart.lastOption } yield {
+          lastComment.getId
+        }
+        loop(optLastId, comments union commentsPart, offset + 100)
+      } else comments
+
+    loop(None, Seq.empty[IssueComment], 0).sortWith((c1, c2) => c1.getCreated.before(c2.getCreated))
   }
 
   private[this] def updated(issue: BacklogIssue): Date = {
