@@ -2,11 +2,12 @@ package com.nulabinc.r2b.mapping.core
 
 import com.nulabinc.backlog.migration.conf.BacklogApiConfiguration
 import com.nulabinc.backlog.migration.modules.{ServiceInjector => BacklogInjector}
-import com.nulabinc.backlog.migration.service.PriorityService
+import com.nulabinc.backlog.migration.service.{PriorityService => BacklogPriorityService}
 import com.nulabinc.backlog4j.Priority
 import com.nulabinc.r2b.mapping.domain.MappingItem
 import com.nulabinc.r2b.redmine.conf.RedmineConfig
-import com.nulabinc.r2b.redmine.service.RedmineService
+import com.nulabinc.r2b.redmine.modules.{ServiceInjector => RedmineInjector}
+import com.nulabinc.r2b.redmine.service.{PriorityService => RedminePriorityService}
 import com.osinka.i18n.Messages
 
 /**
@@ -18,15 +19,16 @@ class PriorityMappingFile(redmineApiConfig: RedmineConfig, backlogApiConfig: Bac
   private[this] val redmineDatas = loadRedmine()
 
   private[this] def loadRedmine(): Seq[MappingItem] = {
-    val redmineService: RedmineService = new RedmineService(redmineApiConfig)
-    val redminePriorities              = redmineService.getIssuePriorities()
-    val redmines: Seq[MappingItem]     = redminePriorities.map(redminePriority => MappingItem(redminePriority.getName, redminePriority.getName))
+    val injector                   = RedmineInjector.createInjector(redmineApiConfig)
+    val priorityService            = injector.getInstance(classOf[RedminePriorityService])
+    val redminePriorities          = priorityService.allPriorities()
+    val redmines: Seq[MappingItem] = redminePriorities.map(redminePriority => MappingItem(redminePriority.getName, redminePriority.getName))
     redmines
   }
 
   private[this] def loadBacklog(): Seq[MappingItem] = {
     val injector                         = BacklogInjector.createInjector(backlogApiConfig)
-    val priorityService                  = injector.getInstance(classOf[PriorityService])
+    val priorityService                  = injector.getInstance(classOf[BacklogPriorityService])
     val backlogPriorities: Seq[Priority] = priorityService.allPriorities()
     val backlogs: Seq[MappingItem]       = backlogPriorities.map(backlogPriority => MappingItem(backlogPriority.getName, backlogPriority.getName))
     backlogs

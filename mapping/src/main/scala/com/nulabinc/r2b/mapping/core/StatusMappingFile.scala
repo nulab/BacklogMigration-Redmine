@@ -2,11 +2,12 @@ package com.nulabinc.r2b.mapping.core
 
 import com.nulabinc.backlog.migration.conf.BacklogApiConfiguration
 import com.nulabinc.backlog.migration.modules.{ServiceInjector => BacklogInjector}
-import com.nulabinc.backlog.migration.service.StatusService
+import com.nulabinc.backlog.migration.service.{StatusService => BacklogStatusService}
 import com.nulabinc.backlog4j.Status
 import com.nulabinc.r2b.mapping.domain.MappingItem
 import com.nulabinc.r2b.redmine.conf.RedmineConfig
-import com.nulabinc.r2b.redmine.service.RedmineService
+import com.nulabinc.r2b.redmine.modules.{ServiceInjector => RedmineInjector}
+import com.nulabinc.r2b.redmine.service.{StatusService => RedmineStatusService}
 import com.osinka.i18n.Messages
 
 /**
@@ -18,9 +19,10 @@ class StatusMappingFile(redmineApiConfig: RedmineConfig, backlogApiConfig: Backl
   private[this] val redmineDatas = loadRedmine()
 
   private[this] def loadRedmine(): Seq[MappingItem] = {
-    val redmineService: RedmineService = new RedmineService(redmineApiConfig)
-    val redmineStatuses                = redmineService.getStatuses()
-    val redmines: Seq[MappingItem]     = redmineStatuses.map(redmineStatus => MappingItem(redmineStatus.getName, redmineStatus.getName))
+    val injector                   = RedmineInjector.createInjector(redmineApiConfig)
+    val statusService              = injector.getInstance(classOf[RedmineStatusService])
+    val redmineStatuses            = statusService.allStatuses()
+    val redmines: Seq[MappingItem] = redmineStatuses.map(redmineStatus => MappingItem(redmineStatus.getName, redmineStatus.getName))
     val deleteItems = mappingData.statuses.foldLeft(Seq.empty[MappingItem]) { (acc: Seq[MappingItem], status: String) =>
       {
         val exists = redmineStatuses.exists(redmineStatuse => redmineStatuse.getId.intValue() == status.toInt)
@@ -36,7 +38,7 @@ class StatusMappingFile(redmineApiConfig: RedmineConfig, backlogApiConfig: Backl
 
   private[this] def loadBacklog(): Seq[MappingItem] = {
     val injector                     = BacklogInjector.createInjector(backlogApiConfig)
-    val statusService                = injector.getInstance(classOf[StatusService])
+    val statusService                = injector.getInstance(classOf[BacklogStatusService])
     val backlogStatuses: Seq[Status] = statusService.allStatuses()
     val backlogs: Seq[MappingItem]   = backlogStatuses.map(backlogStatus => MappingItem(backlogStatus.getName, backlogStatus.getName))
     backlogs

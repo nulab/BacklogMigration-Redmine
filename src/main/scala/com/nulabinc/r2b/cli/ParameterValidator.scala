@@ -1,11 +1,12 @@
 package com.nulabinc.r2b.cli
 
 import com.nulabinc.backlog.migration.modules.{ServiceInjector => BacklogInjector}
-import com.nulabinc.backlog.migration.service.UserService
+import com.nulabinc.backlog.migration.service.{UserService => BacklogUserService}
 import com.nulabinc.backlog.migration.utils.{ConsoleOut, Logging}
 import com.nulabinc.backlog4j.BacklogAPIException
 import com.nulabinc.r2b.conf.AppConfiguration
-import com.nulabinc.r2b.redmine.service.RedmineService
+import com.nulabinc.r2b.redmine.modules.{ServiceInjector => RedmineInjector}
+import com.nulabinc.r2b.redmine.service.{ProjectService, UserService => RedmineUserService}
 import com.osinka.i18n.Messages
 import com.taskadapter.redmineapi.bean.Project
 import com.taskadapter.redmineapi.{RedmineAuthenticationException, RedmineTransportException}
@@ -44,7 +45,7 @@ class ParameterValidator(config: AppConfiguration) extends Logging {
     ConsoleOut.info(Messages("cli.param.check.access", Messages("common.backlog")))
     val messages = try {
       val injector    = BacklogInjector.createInjector(config.backlogConfig)
-      val userService = injector.getInstance(classOf[UserService])
+      val userService = injector.getInstance(classOf[BacklogUserService])
       userService.allUsers()
       Seq.empty[String]
     } catch {
@@ -59,8 +60,9 @@ class ParameterValidator(config: AppConfiguration) extends Logging {
   private[this] def validateConfigRedmine(): Seq[String] = {
     ConsoleOut.info(Messages("cli.param.check.access", Messages("common.redmine")))
     try {
-      val redmineService = new RedmineService(config.redmineConfig)
-      redmineService.getUsers
+      val injector    = RedmineInjector.createInjector(config.redmineConfig)
+      val userService = injector.getInstance(classOf[RedmineUserService])
+      userService.allUsers()
       Seq.empty[String]
     } catch {
       case _: RedmineAuthenticationException =>
@@ -80,8 +82,9 @@ class ParameterValidator(config: AppConfiguration) extends Logging {
   }
 
   private[this] def optProject(): Option[Project] = {
-    val redmineService = new RedmineService(config.redmineConfig)
-    redmineService.optProject(config.redmineConfig.projectKey)
+    val injector       = RedmineInjector.createInjector(config.redmineConfig)
+    val projectService = injector.getInstance(classOf[ProjectService])
+    projectService.optProjectOfKey(config.redmineConfig.projectKey)
   }
 
 }
