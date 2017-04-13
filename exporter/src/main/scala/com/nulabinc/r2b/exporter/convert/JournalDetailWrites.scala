@@ -87,9 +87,9 @@ class JournalDetailWrites @Inject()(customFieldFormats: CustomFieldFormats, prop
       case Some((_, definition)) =>
         definition.fieldFormat match {
           case RedmineConstantValue.FieldFormat.VERSION =>
-            propertyValue.versions.find(version => version.getId.intValue() == value.toInt).map(_.getName)
+            propertyValue.versionOfId(Option(value)).map(_.getName)
           case RedmineConstantValue.FieldFormat.USER =>
-            propertyValue.optUserOfId(value.toInt).map(_.getLogin).map(userMapping.convert)
+            propertyValue.optUserOfId(value).map(_.getLogin).map(userMapping.convert)
           case _ => Option(value)
         }
       case _ => Option(value)
@@ -103,7 +103,7 @@ class JournalDetailWrites @Inject()(customFieldFormats: CustomFieldFormats, prop
       case RedmineConstantValue.Attr.PRIORITY =>
         propertyValue.priorities.find(priority => priority.getId.intValue() == value.toInt).map(_.getName).map(priorityMapping.convert)
       case RedmineConstantValue.Attr.ASSIGNED =>
-        propertyValue.optUserOfId(value.toInt).map(_.getLogin).map(userMapping.convert)
+        propertyValue.optUserOfId(value).map(_.getLogin).map(userMapping.convert)
       case RedmineConstantValue.Attr.VERSION =>
         propertyValue.versions.find(version => version.getId.intValue() == value.toInt).map(_.getName)
       case RedmineConstantValue.Attr.TRACKER =>
