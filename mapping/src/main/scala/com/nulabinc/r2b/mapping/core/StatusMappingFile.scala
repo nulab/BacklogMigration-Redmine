@@ -1,7 +1,7 @@
 package com.nulabinc.r2b.mapping.core
 
 import com.nulabinc.backlog.migration.conf.BacklogApiConfiguration
-import com.nulabinc.backlog.migration.modules.ServiceInjector
+import com.nulabinc.backlog.migration.modules.{ServiceInjector => BacklogInjector}
 import com.nulabinc.backlog.migration.service.StatusService
 import com.nulabinc.backlog4j.Status
 import com.nulabinc.r2b.mapping.domain.MappingItem
@@ -35,7 +35,7 @@ class StatusMappingFile(redmineApiConfig: RedmineConfig, backlogApiConfig: Backl
   }
 
   private[this] def loadBacklog(): Seq[MappingItem] = {
-    val injector                     = ServiceInjector.createInjector(backlogApiConfig)
+    val injector                     = BacklogInjector.createInjector(backlogApiConfig)
     val statusService                = injector.getInstance(classOf[StatusService])
     val backlogStatuses: Seq[Status] = statusService.allStatuses()
     val backlogs: Seq[MappingItem]   = backlogStatuses.map(backlogStatus => MappingItem(backlogStatus.getName, backlogStatus.getName))

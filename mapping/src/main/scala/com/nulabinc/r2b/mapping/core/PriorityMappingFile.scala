@@ -1,7 +1,7 @@
 package com.nulabinc.r2b.mapping.core
 
 import com.nulabinc.backlog.migration.conf.BacklogApiConfiguration
-import com.nulabinc.backlog.migration.modules.ServiceInjector
+import com.nulabinc.backlog.migration.modules.{ServiceInjector => BacklogInjector}
 import com.nulabinc.backlog.migration.service.PriorityService
 import com.nulabinc.backlog4j.Priority
 import com.nulabinc.r2b.mapping.domain.MappingItem
@@ -25,7 +25,7 @@ class PriorityMappingFile(redmineApiConfig: RedmineConfig, backlogApiConfig: Bac
   }
 
   private[this] def loadBacklog(): Seq[MappingItem] = {
-    val injector                         = ServiceInjector.createInjector(backlogApiConfig)
+    val injector                         = BacklogInjector.createInjector(backlogApiConfig)
     val priorityService                  = injector.getInstance(classOf[PriorityService])
     val backlogPriorities: Seq[Priority] = priorityService.allPriorities()
     val backlogs: Seq[MappingItem]       = backlogPriorities.map(backlogPriority => MappingItem(backlogPriority.getName, backlogPriority.getName))

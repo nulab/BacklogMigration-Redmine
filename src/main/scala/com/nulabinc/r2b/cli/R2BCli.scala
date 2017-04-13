@@ -3,7 +3,7 @@ package com.nulabinc.r2b.cli
 import com.google.inject.Injector
 import com.nulabinc.backlog.importer.controllers.ImportController
 import com.nulabinc.backlog.migration.conf.{BacklogConfiguration, BacklogPaths}
-import com.nulabinc.backlog.migration.modules.ServiceInjector
+import com.nulabinc.backlog.migration.modules.{ServiceInjector => BacklogInjector}
 import com.nulabinc.backlog.migration.service.{ProjectService, SpaceService, UserService}
 import com.nulabinc.backlog.migration.utils.{ConsoleOut, Logging, MixpanelUtil, TrackingData}
 import com.nulabinc.r2b.conf.AppConfiguration
@@ -37,7 +37,7 @@ object R2BCli extends BacklogConfiguration with Logging {
             validateMapping(propertyMappingFiles.priority)) {
           if (confirmImport(config, propertyMappingFiles)) {
 
-            val backlogInjector = ServiceInjector.createInjector(config.backlogConfig)
+            val backlogInjector = BacklogInjector.createInjector(config.backlogConfig)
             val backlogPaths    = backlogInjector.getInstance(classOf[BacklogPaths])
             backlogPaths.outputPath.deleteRecursively(force = true, continueOnFailure = true)
 
@@ -58,7 +58,7 @@ object R2BCli extends BacklogConfiguration with Logging {
       ImportController.execute(config.backlogConfig, false)
 
       if (config.optOut == false) {
-        val backlogInjector = ServiceInjector.createInjector(config.backlogConfig)
+        val backlogInjector = BacklogInjector.createInjector(config.backlogConfig)
         tracking(config, backlogInjector)
       }
     }
@@ -194,7 +194,7 @@ object R2BCli extends BacklogConfiguration with Logging {
     }
 
   private[this] def confirmProject(config: AppConfiguration): Option[(String, String)] = {
-    val injector       = ServiceInjector.createInjector(config.backlogConfig)
+    val injector       = BacklogInjector.createInjector(config.backlogConfig)
     val projectService = injector.getInstance(classOf[ProjectService])
     val optProject     = projectService.optProject(config.backlogConfig.projectKey)
     optProject match {

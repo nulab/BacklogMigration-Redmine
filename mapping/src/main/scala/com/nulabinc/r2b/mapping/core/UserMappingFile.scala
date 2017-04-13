@@ -2,7 +2,7 @@ package com.nulabinc.r2b.mapping.core
 
 import com.nulabinc.backlog.migration.conf.BacklogApiConfiguration
 import com.nulabinc.backlog.migration.domain.BacklogUser
-import com.nulabinc.backlog.migration.modules.ServiceInjector
+import com.nulabinc.backlog.migration.modules.{ServiceInjector => BacklogInjector}
 import com.nulabinc.backlog.migration.service.UserService
 import com.nulabinc.r2b.mapping.domain.MappingItem
 import com.nulabinc.r2b.redmine.conf.RedmineConfig
@@ -35,7 +35,7 @@ class UserMappingFile(redmineApiConfig: RedmineConfig, backlogApiConfig: Backlog
   }
 
   private[this] def loadBacklog(): Seq[MappingItem] = {
-    val injector                       = ServiceInjector.createInjector(backlogApiConfig)
+    val injector                       = BacklogInjector.createInjector(backlogApiConfig)
     val userService                    = injector.getInstance(classOf[UserService])
     val backlogUsers: Seq[BacklogUser] = userService.allUsers()
     val backlogs: Seq[MappingItem]     = backlogUsers.map(backlogUser => MappingItem(backlogUser.optUserId.getOrElse(""), backlogUser.name))

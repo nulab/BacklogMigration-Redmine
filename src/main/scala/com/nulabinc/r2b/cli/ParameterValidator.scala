@@ -1,6 +1,6 @@
 package com.nulabinc.r2b.cli
 
-import com.nulabinc.backlog.migration.modules.ServiceInjector
+import com.nulabinc.backlog.migration.modules.{ServiceInjector => BacklogInjector}
 import com.nulabinc.backlog.migration.service.UserService
 import com.nulabinc.backlog.migration.utils.{ConsoleOut, Logging}
 import com.nulabinc.backlog4j.BacklogAPIException
@@ -43,7 +43,7 @@ class ParameterValidator(config: AppConfiguration) extends Logging {
   private[this] def validateConfigBacklog(): Seq[String] = {
     ConsoleOut.info(Messages("cli.param.check.access", Messages("common.backlog")))
     val messages = try {
-      val injector    = ServiceInjector.createInjector(config.backlogConfig)
+      val injector    = BacklogInjector.createInjector(config.backlogConfig)
       val userService = injector.getInstance(classOf[UserService])
       userService.allUsers()
       Seq.empty[String]
