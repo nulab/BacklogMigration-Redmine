@@ -79,8 +79,12 @@ class JournalDetailWrites @Inject()(customFieldFormats: CustomFieldFormats, prop
     }
 
   private[this] def cf(detail: JournalDetail, value: String): Option[String] = {
-    customFieldFormats.map.get(detail.getName) match {
-      case Some(definition) =>
+    val optDefinition = customFieldFormats.map.find {
+      case (_, definition) =>
+        definition.id == detail.getName.toInt
+    }
+    optDefinition match {
+      case Some((_, definition)) =>
         definition.fieldFormat match {
           case RedmineConstantValue.FieldFormat.VERSION =>
             propertyValue.versions.find(version => version.getId.intValue() == value.toInt).map(_.getName)
