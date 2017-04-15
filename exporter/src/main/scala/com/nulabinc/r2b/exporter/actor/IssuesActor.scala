@@ -11,7 +11,7 @@ import com.nulabinc.backlog.migration.modules.akkaguice.NamedActor
 import com.nulabinc.backlog.migration.utils.{Logging, ProgressBar}
 import com.nulabinc.r2b.exporter.convert.{CustomFieldWrites, IssueWrites, JournalWrites, UserWrites}
 import com.nulabinc.r2b.redmine.conf.RedmineConfig
-import com.nulabinc.r2b.redmine.domain.{CustomFieldFormats, PropertyValue}
+import com.nulabinc.r2b.redmine.domain.PropertyValue
 import com.nulabinc.r2b.redmine.service.{IssueService, ProjectService}
 import com.osinka.i18n.Messages
 
@@ -29,8 +29,7 @@ class IssuesActor @Inject()(apiConfig: RedmineConfig,
                             @Named("projectId") projectId: Int,
                             issueService: IssueService,
                             projectService: ProjectService,
-                            propertyValue: PropertyValue,
-                            customFieldFormats: CustomFieldFormats)
+                            propertyValue: PropertyValue)
     extends Actor
     with BacklogConfiguration
     with Logging {
@@ -63,8 +62,7 @@ class IssuesActor @Inject()(apiConfig: RedmineConfig,
                              issueWrites,
                              journalWrites,
                              userWrites,
-                             customFieldWrites,
-                             customFieldFormats))))
+                             customFieldWrites))))
 
       (0 until (allCount, limit))
         .foldLeft(Seq.empty[Int]) { (acc, offset) =>

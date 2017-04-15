@@ -3,14 +3,12 @@ package com.nulabinc.r2b.redmine.modules
 import com.google.inject.AbstractModule
 import com.google.inject.name.Names
 import com.nulabinc.r2b.redmine.conf.RedmineConfig
-import com.nulabinc.r2b.redmine.domain.{CustomFieldDefinitionSimple, CustomFieldFormats, PropertyValue}
+import com.nulabinc.r2b.redmine.domain.PropertyValue
 import com.nulabinc.r2b.redmine.service._
 import com.taskadapter.redmineapi.bean.Project
 import com.taskadapter.redmineapi.{RedmineManager, RedmineManagerFactory}
-import spray.json.{JsArray, JsBoolean, JsNumber, JsString, JsonParser}
 
 import scala.collection.JavaConverters._
-import scala.collection.mutable
 
 /**
   * @author uchida
@@ -25,7 +23,6 @@ class RedmineDefaultModule(apiConfig: RedmineConfig) extends AbstractModule {
     bind(classOf[RedmineManager]).toInstance(redmine)
     bind(classOf[Project]).toInstance(project)
     bind(classOf[RedmineConfig]).toInstance(apiConfig)
-    bind(classOf[CustomFieldFormats]).toInstance(customFieldFormats())
     bind(classOf[PropertyValue]).toInstance(createPropertyValue(redmine, project))
     bind(classOf[Int]).annotatedWith(Names.named("projectId")).toInstance(project.getId)
 
@@ -45,29 +42,6 @@ class RedmineDefaultModule(apiConfig: RedmineConfig) extends AbstractModule {
     bind(classOf[PriorityService]).to(classOf[PriorityServiceImpl])
   }
 
-  private[this] def customFieldFormats(): CustomFieldFormats = {
-    val map    = mutable.Map[String, CustomFieldDefinitionSimple]()
-    val string = scala.io.Source.fromURL(s"${apiConfig.url}/custom_fields.json?key=${apiConfig.key}").mkString
-    JsonParser(string).asJsObject.getFields("custom_fields") match {
-      case Seq(JsArray(customFields)) =>
-        customFields.foreach { json =>
-          json.asJsObject.getFields("id", "name", "field_format", "multiple", "default_value") match {
-            case Seq(JsNumber(id), JsString(name), JsString(field_format), JsBoolean(multiple), JsString(default_value)) =>
-              map += name -> CustomFieldDefinitionSimple(id.intValue(), name, field_format, multiple, default_value)
-            case Seq(JsNumber(id), JsString(name), JsString(field_format), JsBoolean(multiple)) =>
-              map += name -> CustomFieldDefinitionSimple(id.intValue(), name, field_format, multiple, "")
-            case Seq(JsNumber(id), JsString(name), JsString(field_format), JsString(default_value)) =>
-              map += name -> CustomFieldDefinitionSimple(id.intValue(), name, field_format, false, default_value)
-            case Seq(JsNumber(id), JsString(name), JsString(field_format)) =>
-              map += name -> CustomFieldDefinitionSimple(id.intValue(), name, field_format, false, "")
-            case _ => throw new RuntimeException(s"unmatch fields ${json.toString()}")
-          }
-        }
-      case _ =>
-    }
-    CustomFieldFormats(map)
-  }
-
   private[this] def createRedmineClient(): RedmineManager =
     RedmineManagerFactory.createWithApiKey(apiConfig.url, apiConfig.key)
 
@@ -79,7 +53,11 @@ class RedmineDefaultModule(apiConfig: RedmineConfig) extends AbstractModule {
     val trackers    = redmine.getIssueManager.getTrackers.asScala
     val memberships = redmine.getMembershipManager.getMemberships(apiConfig.projectKey).asScala
     val statuses    = redmine.getIssueManager.getStatuses.asScala
-    PropertyValue(users, versions, categories, priorities, trackers, memberships, statuses)
+
+    val customFieldServiceImpl = new CustomFieldServiceImpl(apiConfig, redmine)
+    val customFieldDefinitions = customFieldServiceImpl.allCustomFieldDefinitions()
+
+    PropertyValue(users, versions, categories, priorities, trackers, memberships, statuses, customFieldDefinitions)
   }
 
 }

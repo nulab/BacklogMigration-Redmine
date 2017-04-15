@@ -9,14 +9,13 @@ import com.nulabinc.backlog.migration.utils.DateUtil
 import com.nulabinc.backlog4j.CustomField.FieldType
 import com.nulabinc.r2b.mapping.core.{ConvertPriorityMapping, ConvertStatusMapping, ConvertUserMapping}
 import com.nulabinc.r2b.redmine.conf.RedmineConstantValue
-import com.nulabinc.r2b.redmine.domain.{CustomFieldFormats, PropertyValue}
+import com.nulabinc.r2b.redmine.domain.PropertyValue
 import com.taskadapter.redmineapi.bean.JournalDetail
 
 /**
   * @author uchida
   */
-class JournalDetailWrites @Inject()(customFieldFormats: CustomFieldFormats, propertyValue: PropertyValue)
-    extends Writes[JournalDetail, BacklogChangeLog] {
+class JournalDetailWrites @Inject()(propertyValue: PropertyValue) extends Writes[JournalDetail, BacklogChangeLog] {
 
   val userMapping     = new ConvertUserMapping()
   val statusMapping   = new ConvertStatusMapping()
@@ -36,20 +35,17 @@ class JournalDetailWrites @Inject()(customFieldFormats: CustomFieldFormats, prop
   private[this] def attributeInfo(detail: JournalDetail): Option[BacklogAttributeInfo] = {
     detail.getProperty match {
       case RedmineConstantValue.CUSTOM_FIELD =>
-        val optDefinition = customFieldFormats.map.find {
-          case (_, definition) =>
-            definition.id == detail.getName.toInt
-        }
-        val optTypeId = optDefinition match {
-          case Some((_, definition)) =>
-            definition.fieldFormat match {
+        val optCustomFieldDefinition = propertyValue.customFieldDefinitionOfId(detail.getName)
+        val optTypeId = optCustomFieldDefinition match {
+          case Some(customFieldDefinition) =>
+            customFieldDefinition.fieldFormat match {
               case RedmineConstantValue.FieldFormat.TEXT                                           => Some(FieldType.Text.getIntValue)
               case RedmineConstantValue.FieldFormat.STRING | RedmineConstantValue.FieldFormat.LINK => Some(FieldType.TextArea.getIntValue)
               case RedmineConstantValue.FieldFormat.INT | RedmineConstantValue.FieldFormat.FLOAT   => Some(FieldType.Numeric.getIntValue)
               case RedmineConstantValue.FieldFormat.DATE                                           => Some(FieldType.Date.getIntValue)
               case RedmineConstantValue.FieldFormat.BOOL                                           => Some(FieldType.SingleList.getIntValue)
-              case RedmineConstantValue.FieldFormat.LIST if (!definition.multiple)                 => Some(FieldType.SingleList.getIntValue)
-              case RedmineConstantValue.FieldFormat.LIST if (definition.multiple)                  => Some(FieldType.MultipleList.getIntValue)
+              case RedmineConstantValue.FieldFormat.LIST if (!customFieldDefinition.isMultiple)    => Some(FieldType.SingleList.getIntValue)
+              case RedmineConstantValue.FieldFormat.LIST if (customFieldDefinition.isMultiple)     => Some(FieldType.MultipleList.getIntValue)
               case RedmineConstantValue.FieldFormat.VERSION                                        => Some(FieldType.MultipleList.getIntValue)
               case RedmineConstantValue.FieldFormat.USER                                           => Some(FieldType.MultipleList.getIntValue)
               case _                                                                               => None
@@ -79,13 +75,10 @@ class JournalDetailWrites @Inject()(customFieldFormats: CustomFieldFormats, prop
     }
 
   private[this] def cf(detail: JournalDetail, value: String): Option[String] = {
-    val optDefinition = customFieldFormats.map.find {
-      case (_, definition) =>
-        definition.id == detail.getName.toInt
-    }
-    optDefinition match {
-      case Some((_, definition)) =>
-        definition.fieldFormat match {
+    val optCustomFieldDefinition = propertyValue.customFieldDefinitionOfId(detail.getName)
+    optCustomFieldDefinition match {
+      case Some(customFieldDefinition) =>
+        customFieldDefinition.fieldFormat match {
           case RedmineConstantValue.FieldFormat.VERSION =>
             propertyValue.versionOfId(Option(value)).map(_.getName)
           case RedmineConstantValue.FieldFormat.USER =>
@@ -115,13 +108,10 @@ class JournalDetailWrites @Inject()(customFieldFormats: CustomFieldFormats, prop
 
   private[this] def field(detail: JournalDetail): String = detail.getProperty match {
     case RedmineConstantValue.CUSTOM_FIELD =>
-      val optDefinition = customFieldFormats.map.find {
-        case (_, definition) =>
-          definition.id == detail.getName.toInt
-      }
-      optDefinition match {
-        case Some((name, _)) => name
-        case _               => throw new RuntimeException(s"custom field id not found [${detail.getName}]")
+      val optCustomFieldDefinition = propertyValue.customFieldDefinitionOfId(detail.getName)
+      optCustomFieldDefinition match {
+        case Some(customFieldDefinition) => customFieldDefinition.name
+        case _                           => throw new RuntimeException(s"custom field id not found [${detail.getName}]")
       }
     case RedmineConstantValue.ATTACHMENT => BacklogConstantValue.ChangeLog.ATTACHMENT
     case _                               => field(detail.getName)

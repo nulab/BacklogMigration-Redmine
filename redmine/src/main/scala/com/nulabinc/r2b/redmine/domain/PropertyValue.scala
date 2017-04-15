@@ -12,7 +12,8 @@ case class PropertyValue(users: Seq[User],
                          priorities: Seq[IssuePriority],
                          trackers: Seq[Tracker],
                          memberships: Seq[Membership],
-                         statuses: Seq[IssueStatus]) {
+                         statuses: Seq[IssueStatus],
+                         customFieldDefinitions: Seq[RedmineCustomFieldDefinition]) {
 
   def versionOfId(optValue: Option[String]): Option[Version] =
     optValue match {
@@ -75,5 +76,17 @@ case class PropertyValue(users: Seq[User],
         }
       case _ => None
     }
+
+  def customFieldDefinitionOfId(strId: String): Option[RedmineCustomFieldDefinition] = {
+    StringUtil.safeStringToInt(strId) match {
+      case Some(id) =>
+        customFieldDefinitions.find(customFieldDefinition => customFieldDefinition.id == id)
+      case _ => None
+    }
+  }
+
+  def customFieldDefinitionOfName(name: String): Option[RedmineCustomFieldDefinition] = {
+    customFieldDefinitions.find(customFieldDefinition => customFieldDefinition.name == name)
+  }
 
 }
