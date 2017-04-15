@@ -45,11 +45,4 @@ class IssueServiceImpl @Inject()(apiConfig: RedmineConfig, @Named("projectId") p
         Left(e)
     }
 
-  private[this] def httpGet(url: String): String = {
-    val httpGet: HttpGet = new HttpGet(url)
-    val client           = new DefaultHttpClient
-    val response         = client.execute(httpGet)
-    EntityUtils.toString(response.getEntity, "UTF-8")
-  }
-
 }
