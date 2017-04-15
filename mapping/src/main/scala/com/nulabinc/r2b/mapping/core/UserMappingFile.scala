@@ -5,7 +5,7 @@ import com.nulabinc.backlog.migration.domain.BacklogUser
 import com.nulabinc.backlog.migration.modules.{ServiceInjector => BacklogInjector}
 import com.nulabinc.backlog.migration.service.{UserService => BacklogUserService}
 import com.nulabinc.r2b.mapping.domain.MappingItem
-import com.nulabinc.r2b.redmine.conf.RedmineConfig
+import com.nulabinc.r2b.redmine.conf.RedmineApiConfiguration
 import com.nulabinc.r2b.redmine.modules.{ServiceInjector => RedmineInjector}
 import com.nulabinc.r2b.redmine.service.{UserService => RedmineUserService}
 import com.osinka.i18n.Messages
@@ -14,7 +14,8 @@ import com.taskadapter.redmineapi.bean.{User => RedmineUser}
 /**
   * @author uchida
   */
-class UserMappingFile(redmineApiConfig: RedmineConfig, backlogApiConfig: BacklogApiConfiguration, mappingData: MappingData) extends MappingFile {
+class UserMappingFile(redmineApiConfig: RedmineApiConfiguration, backlogApiConfig: BacklogApiConfiguration, mappingData: MappingData)
+    extends MappingFile {
 
   private[this] val backlogDatas = loadBacklog()
   private[this] val redmineDatas = loadRedmine()

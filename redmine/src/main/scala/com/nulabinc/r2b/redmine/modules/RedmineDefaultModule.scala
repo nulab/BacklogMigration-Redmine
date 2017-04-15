@@ -2,7 +2,7 @@ package com.nulabinc.r2b.redmine.modules
 
 import com.google.inject.AbstractModule
 import com.google.inject.name.Names
-import com.nulabinc.r2b.redmine.conf.RedmineConfig
+import com.nulabinc.r2b.redmine.conf.RedmineApiConfiguration
 import com.nulabinc.r2b.redmine.domain.PropertyValue
 import com.nulabinc.r2b.redmine.service._
 import com.taskadapter.redmineapi.bean.Project
@@ -13,7 +13,7 @@ import scala.collection.JavaConverters._
 /**
   * @author uchida
   */
-class RedmineDefaultModule(apiConfig: RedmineConfig) extends AbstractModule {
+class RedmineDefaultModule(apiConfig: RedmineApiConfiguration) extends AbstractModule {
 
   override def configure() = {
 
@@ -22,7 +22,7 @@ class RedmineDefaultModule(apiConfig: RedmineConfig) extends AbstractModule {
     val project = redmine.getProjectManager.getProjectByKey(apiConfig.projectKey)
     bind(classOf[RedmineManager]).toInstance(redmine)
     bind(classOf[Project]).toInstance(project)
-    bind(classOf[RedmineConfig]).toInstance(apiConfig)
+    bind(classOf[RedmineApiConfiguration]).toInstance(apiConfig)
     bind(classOf[PropertyValue]).toInstance(createPropertyValue(redmine, project))
     bind(classOf[Int]).annotatedWith(Names.named("projectId")).toInstance(project.getId)
 

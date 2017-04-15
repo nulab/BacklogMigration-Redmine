@@ -5,7 +5,7 @@ import com.nulabinc.backlog.migration.modules.{ServiceInjector => BacklogInjecto
 import com.nulabinc.backlog.migration.service.{StatusService => BacklogStatusService}
 import com.nulabinc.backlog4j.Status
 import com.nulabinc.r2b.mapping.domain.MappingItem
-import com.nulabinc.r2b.redmine.conf.RedmineConfig
+import com.nulabinc.r2b.redmine.conf.RedmineApiConfiguration
 import com.nulabinc.r2b.redmine.modules.{ServiceInjector => RedmineInjector}
 import com.nulabinc.r2b.redmine.service.{StatusService => RedmineStatusService}
 import com.osinka.i18n.Messages
@@ -13,7 +13,8 @@ import com.osinka.i18n.Messages
 /**
   * @author uchida
   */
-class StatusMappingFile(redmineApiConfig: RedmineConfig, backlogApiConfig: BacklogApiConfiguration, mappingData: MappingData) extends MappingFile {
+class StatusMappingFile(redmineApiConfig: RedmineApiConfiguration, backlogApiConfig: BacklogApiConfiguration, mappingData: MappingData)
+    extends MappingFile {
 
   private[this] val backlogDatas = loadBacklog()
   private[this] val redmineDatas = loadRedmine()

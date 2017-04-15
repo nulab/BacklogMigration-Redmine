@@ -9,7 +9,7 @@ import com.nulabinc.backlog4j.{BacklogClient, BacklogClientFactory}
 import com.nulabinc.r2b.conf.AppConfiguration
 import com.nulabinc.r2b.controllers.MappingController
 import com.nulabinc.r2b.mapping.core._
-import com.nulabinc.r2b.redmine.conf.RedmineConfig
+import com.nulabinc.r2b.redmine.conf.RedmineApiConfiguration
 import com.osinka.i18n.Lang
 import com.taskadapter.redmineapi.{RedmineManager, RedmineManagerFactory}
 import org.apache.http.client.methods.HttpGet
@@ -55,7 +55,7 @@ trait SimpleFixture {
     val redmine: String     = keys(0)
     val backlog: String     = if (keys.length == 2) keys(1) else keys(0).toUpperCase.replaceAll("-", "_")
 
-    AppConfiguration(redmineConfig = new RedmineConfig(url = redmineUrl, key = redmineKey, projectKey = redmine),
+    AppConfiguration(redmineConfig = new RedmineApiConfiguration(url = redmineUrl, key = redmineKey, projectKey = redmine),
                      backlogConfig = new BacklogApiConfiguration(url = backlogUrl, key = backlogKey, projectKey = backlog),
                      importOnly = false,
                      optOut = true)

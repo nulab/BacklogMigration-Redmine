@@ -3,7 +3,7 @@ package com.nulabinc.r2b.redmine.service
 import javax.inject.Inject
 
 import com.nulabinc.backlog.migration.utils.Logging
-import com.nulabinc.r2b.redmine.conf.RedmineConfig
+import com.nulabinc.r2b.redmine.conf.RedmineApiConfiguration
 import com.nulabinc.r2b.redmine.domain.{RedmineCustomFieldDefinition, RedmineTracker}
 import com.taskadapter.redmineapi.bean.{CustomFieldDefinition, Tracker}
 import com.taskadapter.redmineapi.{RedmineFormatException, RedmineManager}
@@ -14,7 +14,7 @@ import scala.collection.JavaConverters._
 /**
   * @author uchida
   */
-class CustomFieldServiceImpl @Inject()(apiConfig: RedmineConfig, redmine: RedmineManager) extends CustomFieldService with Logging {
+class CustomFieldServiceImpl @Inject()(apiConfig: RedmineApiConfiguration, redmine: RedmineManager) extends CustomFieldService with Logging {
 
   override def allCustomFieldDefinitions(): Seq[RedmineCustomFieldDefinition] =
     try {

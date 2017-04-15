@@ -1,7 +1,7 @@
 package com.nulabinc.r2b.redmine.modules
 
 import com.google.inject.{AbstractModule, Guice, Injector}
-import com.nulabinc.r2b.redmine.conf.RedmineConfig
+import com.nulabinc.r2b.redmine.conf.RedmineApiConfiguration
 import com.nulabinc.r2b.redmine.service._
 import com.taskadapter.redmineapi.{RedmineManager, RedmineManagerFactory}
 
@@ -10,7 +10,7 @@ import com.taskadapter.redmineapi.{RedmineManager, RedmineManagerFactory}
   */
 object ServiceInjector {
 
-  def createInjector(apiConfig: RedmineConfig): Injector = {
+  def createInjector(apiConfig: RedmineApiConfiguration): Injector = {
     Guice.createInjector(new AbstractModule() {
       override def configure(): Unit = {
         val redmine = RedmineManagerFactory.createWithApiKey(apiConfig.url, apiConfig.key)

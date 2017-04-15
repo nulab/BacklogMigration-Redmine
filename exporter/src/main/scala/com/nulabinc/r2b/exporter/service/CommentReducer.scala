@@ -7,7 +7,7 @@ import java.nio.channels.Channels
 import com.nulabinc.backlog.migration.conf.{BacklogConstantValue, BacklogPaths}
 import com.nulabinc.backlog.migration.domain.{BacklogChangeLog, BacklogComment, BacklogIssue}
 import com.nulabinc.backlog.migration.utils.{IOUtil, Logging, StringUtil}
-import com.nulabinc.r2b.redmine.conf.RedmineConfig
+import com.nulabinc.r2b.redmine.conf.RedmineApiConfiguration
 import com.nulabinc.r2b.redmine.service.ProjectService
 import com.osinka.i18n.Messages
 import com.taskadapter.redmineapi.bean.Attachment
@@ -17,7 +17,7 @@ import scalax.file.Path
 /**
   * @author uchida
   */
-class CommentReducer(apiConfig: RedmineConfig,
+class CommentReducer(apiConfig: RedmineApiConfiguration,
                      projectService: ProjectService,
                      backlogPaths: BacklogPaths,
                      issue: BacklogIssue,

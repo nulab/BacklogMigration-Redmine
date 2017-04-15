@@ -5,7 +5,7 @@ import com.nulabinc.backlog.migration.modules.{ServiceInjector => BacklogInjecto
 import com.nulabinc.backlog.migration.service.{PriorityService => BacklogPriorityService}
 import com.nulabinc.backlog4j.Priority
 import com.nulabinc.r2b.mapping.domain.MappingItem
-import com.nulabinc.r2b.redmine.conf.RedmineConfig
+import com.nulabinc.r2b.redmine.conf.RedmineApiConfiguration
 import com.nulabinc.r2b.redmine.modules.{ServiceInjector => RedmineInjector}
 import com.nulabinc.r2b.redmine.service.{PriorityService => RedminePriorityService}
 import com.osinka.i18n.Messages
@@ -13,7 +13,7 @@ import com.osinka.i18n.Messages
 /**
   * @author uchida
   */
-class PriorityMappingFile(redmineApiConfig: RedmineConfig, backlogApiConfig: BacklogApiConfiguration) extends MappingFile {
+class PriorityMappingFile(redmineApiConfig: RedmineApiConfiguration, backlogApiConfig: BacklogApiConfiguration) extends MappingFile {
 
   private[this] val backlogDatas = loadBacklog()
   private[this] val redmineDatas = loadRedmine()

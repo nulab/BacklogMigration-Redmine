@@ -3,7 +3,7 @@ package com.nulabinc.r2b.redmine.service
 import javax.inject.{Inject, Named}
 
 import com.nulabinc.backlog.migration.utils.Logging
-import com.nulabinc.r2b.redmine.conf.RedmineConfig
+import com.nulabinc.r2b.redmine.conf.RedmineApiConfiguration
 import com.taskadapter.redmineapi.bean.Issue
 import com.taskadapter.redmineapi.{Include, RedmineManager}
 import org.apache.http.client.methods.HttpGet
@@ -16,7 +16,7 @@ import scala.collection.JavaConverters._
 /**
   * @author uchida
   */
-class IssueServiceImpl @Inject()(apiConfig: RedmineConfig, @Named("projectId") projectId: Int, redmine: RedmineManager)
+class IssueServiceImpl @Inject()(apiConfig: RedmineApiConfiguration, @Named("projectId") projectId: Int, redmine: RedmineManager)
     extends IssueService
     with Logging {
 

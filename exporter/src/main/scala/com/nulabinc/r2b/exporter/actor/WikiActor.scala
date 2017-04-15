@@ -12,7 +12,7 @@ import com.nulabinc.backlog.migration.domain.BacklogJsonProtocol._
 import com.nulabinc.backlog.migration.domain.BacklogWiki
 import com.nulabinc.backlog.migration.utils.{IOUtil, Logging}
 import com.nulabinc.r2b.exporter.convert.WikiWrites
-import com.nulabinc.r2b.redmine.conf.RedmineConfig
+import com.nulabinc.r2b.redmine.conf.RedmineApiConfiguration
 import com.nulabinc.r2b.redmine.service.WikiService
 import com.taskadapter.redmineapi.bean.{WikiPage, WikiPageDetail}
 import spray.json._
@@ -24,7 +24,9 @@ import scala.concurrent.duration._
 /**
   * @author uchida
   */
-class WikiActor(apiConfig: RedmineConfig, backlogPaths: BacklogPaths, wikiWrites: WikiWrites, wikiService: WikiService) extends Actor with Logging {
+class WikiActor(apiConfig: RedmineApiConfiguration, backlogPaths: BacklogPaths, wikiWrites: WikiWrites, wikiService: WikiService)
+    extends Actor
+    with Logging {
 
   override def preRestart(reason: Throwable, message: Option[Any]) = {
     logger.debug(s"preRestart: reason: ${reason}, message: ${message}")

@@ -4,7 +4,7 @@ import com.nulabinc.backlog.migration.conf.{BacklogApiConfiguration, BacklogConf
 import com.nulabinc.backlog.migration.utils.{ConsoleOut, Logging}
 import com.nulabinc.r2b.cli._
 import com.nulabinc.r2b.conf._
-import com.nulabinc.r2b.redmine.conf.RedmineConfig
+import com.nulabinc.r2b.redmine.conf.RedmineApiConfiguration
 import com.nulabinc.r2b.utils.{ClassVersion, DisableSSLCertificateCheckUtil}
 import com.osinka.i18n.Messages
 import org.fusesource.jansi.AnsiConsole
@@ -89,11 +89,11 @@ object R2B extends BacklogConfiguration with Logging {
     val redmine: String     = keys(0)
     val backlog: String     = if (keys.length == 2) keys(1) else keys(0).toUpperCase.replaceAll("-", "_")
 
-    AppConfiguration(redmineConfig = new RedmineConfig(url = cli.execute.redmineUrl(), key = cli.execute.redmineKey(), projectKey = redmine),
-                     backlogConfig =
-                       new BacklogApiConfiguration(url = cli.execute.backlogUrl(), key = cli.execute.backlogKey(), projectKey = backlog),
-                     importOnly = cli.execute.importOnly(),
-                     optOut = cli.execute.optOut())
+    AppConfiguration(
+      redmineConfig = new RedmineApiConfiguration(url = cli.execute.redmineUrl(), key = cli.execute.redmineKey(), projectKey = redmine),
+      backlogConfig = new BacklogApiConfiguration(url = cli.execute.backlogUrl(), key = cli.execute.backlogKey(), projectKey = backlog),
+      importOnly = cli.execute.importOnly(),
+      optOut = cli.execute.optOut())
   }
 
 }
