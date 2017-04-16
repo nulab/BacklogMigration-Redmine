@@ -5,17 +5,18 @@ import javax.inject.Inject
 import com.nulabinc.backlog.migration.conf.BacklogConstantValue
 import com.nulabinc.backlog.migration.converter.Writes
 import com.nulabinc.backlog.migration.domain.{BacklogAttachmentInfo, BacklogAttributeInfo, BacklogChangeLog}
-import com.nulabinc.backlog.migration.utils.{DateUtil, StringUtil}
+import com.nulabinc.backlog.migration.utils.{DateUtil, Logging, StringUtil}
 import com.nulabinc.backlog4j.CustomField.FieldType
 import com.nulabinc.r2b.mapping.core.{ConvertPriorityMapping, ConvertStatusMapping, ConvertUserMapping}
 import com.nulabinc.r2b.redmine.conf.RedmineConstantValue
 import com.nulabinc.r2b.redmine.domain.PropertyValue
+import com.osinka.i18n.Messages
 import com.taskadapter.redmineapi.bean.JournalDetail
 
 /**
   * @author uchida
   */
-class JournalDetailWrites @Inject()(propertyValue: PropertyValue) extends Writes[JournalDetail, BacklogChangeLog] {
+class JournalDetailWrites @Inject()(propertyValue: PropertyValue) extends Writes[JournalDetail, BacklogChangeLog] with Logging {
 
   val userMapping     = new ConvertUserMapping()
   val statusMapping   = new ConvertStatusMapping()
@@ -82,7 +83,9 @@ class JournalDetailWrites @Inject()(propertyValue: PropertyValue) extends Writes
           case RedmineConstantValue.FieldFormat.VERSION =>
             propertyValue.versionOfId(Option(value)).map(_.getName)
           case RedmineConstantValue.FieldFormat.USER =>
-            propertyValue.optUserOfId(value).map(_.getLogin).map(userMapping.convert)
+            propertyValue.optUserOfId(value).map(_.getFullName)
+          case RedmineConstantValue.FieldFormat.BOOL =>
+            if (value == "1") Some(Messages("common.yes")) else Some(Messages("common.no"))
           case _ => Option(value)
         }
       case _ => Option(value)

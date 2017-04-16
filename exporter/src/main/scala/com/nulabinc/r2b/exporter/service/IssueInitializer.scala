@@ -7,7 +7,8 @@ import com.nulabinc.r2b.exporter.convert.{CustomFieldWrites, IssueWrites, UserWr
 import com.nulabinc.r2b.mapping.core.{ConvertPriorityMapping, ConvertUserMapping}
 import com.nulabinc.r2b.redmine.conf.RedmineConstantValue
 import com.nulabinc.r2b.redmine.domain.{PropertyValue, RedmineCustomFieldDefinition}
-import com.taskadapter.redmineapi.bean.{CustomField, Issue, Journal, User}
+import com.osinka.i18n.Messages
+import com.taskadapter.redmineapi.bean._
 
 import scala.collection.JavaConverters._
 
@@ -110,22 +111,26 @@ class IssueInitializer(issueWrites: IssueWrites,
 
   private[this] def categoryNames(issue: Issue): Seq[String] = {
     val issueInitialValue = new IssueInitialValue(RedmineConstantValue.ATTR, RedmineConstantValue.Attr.CATEGORY)
-    val details           = issueInitialValue.findJournalDetails(journals)
-    if (details.isEmpty) Option(issue.getCategory).map(_.getName).toSeq
-    else
-      details.flatMap { detail =>
-        propertyValue.categoryOfId(Option(detail.getOldValue)).map(_.getName)
-      }
+    val optDetails        = issueInitialValue.findJournalDetails(journals)
+    optDetails match {
+      case Some(details) =>
+        details.flatMap { detail =>
+          propertyValue.categoryOfId(Option(detail.getOldValue)).map(_.getName)
+        }
+      case _ => Option(issue.getCategory).map(_.getName).toSeq
+    }
   }
 
   private[this] def milestoneNames(issue: Issue): Seq[String] = {
     val issueInitialValue = new IssueInitialValue(RedmineConstantValue.ATTR, RedmineConstantValue.Attr.VERSION)
-    val details           = issueInitialValue.findJournalDetails(journals)
-    if (details.isEmpty) Option(issue.getTargetVersion).map(_.getName).toSeq
-    else
-      details.flatMap { detail =>
-        propertyValue.versionOfId(Option(detail.getOldValue)).map(_.getName)
-      }
+    val optDetails        = issueInitialValue.findJournalDetails(journals)
+    optDetails match {
+      case Some(details) =>
+        details.flatMap { detail =>
+          propertyValue.versionOfId(Option(detail.getOldValue)).map(_.getName)
+        }
+      case _ => Option(issue.getTargetVersion).map(_.getName).toSeq
+    }
   }
 
   private[this] def priorityName(issue: Issue): String = {
@@ -157,11 +162,13 @@ class IssueInitializer(issueWrites: IssueWrites,
   }
 
   private[this] def multipleCustomField(customField: CustomField, customFieldDefinition: RedmineCustomFieldDefinition): Option[BacklogCustomField] = {
-    val issueInitialValue = new IssueInitialValue(RedmineConstantValue.CUSTOM_FIELD, customFieldDefinition.id.toString)
-    val details           = issueInitialValue.findJournalDetails(journals)
+    val issueInitialValue                      = new IssueInitialValue(RedmineConstantValue.CUSTOM_FIELD, customFieldDefinition.id.toString)
+    val optDetails: Option[Seq[JournalDetail]] = issueInitialValue.findJournalDetails(journals)
     val initialValues: Seq[String] =
-      if (details.isEmpty) customField.getValues.asScala
-      else details.flatMap(detail => Option(detail.getOldValue))
+      optDetails match {
+        case Some(details) => details.flatMap(detail => Option(detail.getOldValue))
+        case _             => customField.getValues.asScala
+      }
     Convert.toBacklog(customField)(customFieldWrites) match {
       case Some(backlogCustomField) => Some(backlogCustomField.copy(values = initialValues))
       case _                        => None
@@ -182,7 +189,9 @@ class IssueInitializer(issueWrites: IssueWrites,
 
     def value(optValue: Option[String]): Option[String] = {
       if (customFieldDefinition.fieldFormat == RedmineConstantValue.FieldFormat.USER) {
-        optValue.flatMap(toName).map(_.getLogin).map(userMapping.convert)
+        optValue.flatMap(toName).map(_.getFullName)
+      } else if (customFieldDefinition.fieldFormat == RedmineConstantValue.FieldFormat.BOOL) {
+        optValue.map(value => if (value == "1") Messages("common.yes") else Messages("common.no"))
       } else optValue
     }
 

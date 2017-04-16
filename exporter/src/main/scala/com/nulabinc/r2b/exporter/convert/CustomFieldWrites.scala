@@ -4,10 +4,11 @@ import javax.inject.Inject
 
 import com.nulabinc.backlog.migration.converter.Writes
 import com.nulabinc.backlog.migration.domain.BacklogCustomField
-import com.nulabinc.backlog.migration.utils.StringUtil
+import com.nulabinc.backlog.migration.utils.{Logging, StringUtil}
 import com.nulabinc.backlog4j.CustomField.FieldType
 import com.nulabinc.r2b.redmine.conf.RedmineConstantValue
 import com.nulabinc.r2b.redmine.domain.PropertyValue
+import com.osinka.i18n.Messages
 import com.taskadapter.redmineapi.bean.{CustomField, User, Version}
 
 import scala.collection.JavaConverters._
@@ -15,7 +16,7 @@ import scala.collection.JavaConverters._
 /**
   * @author uchida
   */
-class CustomFieldWrites @Inject()(propertyValue: PropertyValue) extends Writes[CustomField, Option[BacklogCustomField]] {
+class CustomFieldWrites @Inject()(propertyValue: PropertyValue) extends Writes[CustomField, Option[BacklogCustomField]] with Logging {
 
   override def writes(customField: CustomField): Option[BacklogCustomField] = {
     val optCustomFieldDefinition = propertyValue.customFieldDefinitionOfName(customField.getName)
@@ -26,7 +27,7 @@ class CustomFieldWrites @Inject()(propertyValue: PropertyValue) extends Writes[C
           case RedmineConstantValue.FieldFormat.STRING | RedmineConstantValue.FieldFormat.LINK => Some(toTextAreaCustomField(customField))
           case RedmineConstantValue.FieldFormat.INT | RedmineConstantValue.FieldFormat.FLOAT   => Some(toNumericCustomField(customField))
           case RedmineConstantValue.FieldFormat.DATE                                           => Some(toDateCustomField(customField))
-          case RedmineConstantValue.FieldFormat.BOOL                                           => Some(toSingleListCustomField(customField))
+          case RedmineConstantValue.FieldFormat.BOOL                                           => Some(bool(customField))
           case RedmineConstantValue.FieldFormat.LIST if (!customFieldDefinition.isMultiple)    => Some(toSingleListCustomField(customField))
           case RedmineConstantValue.FieldFormat.LIST if (customFieldDefinition.isMultiple)     => Some(toMultipleListCustomField(customField))
           case RedmineConstantValue.FieldFormat.VERSION                                        => Some(version(customField))
@@ -127,6 +128,20 @@ class CustomFieldWrites @Inject()(propertyValue: PropertyValue) extends Writes[C
       name = customField.getName,
       fieldTypeId = FieldType.SingleList.getIntValue,
       optValue = Option(customField.getValue).flatMap(toName).map(_.getFullName),
+      values = Seq.empty[String]
+    )
+  }
+
+  private[this] def bool(customField: CustomField): BacklogCustomField = {
+
+    def toName(value: String): String = {
+      if (value == "1") Messages("common.yes") else Messages("common.no")
+    }
+
+    BacklogCustomField(
+      name = customField.getName,
+      fieldTypeId = FieldType.SingleList.getIntValue,
+      optValue = Option(customField.getValue).map(toName),
       values = Seq.empty[String]
     )
   }
