@@ -134,14 +134,18 @@ class CustomFieldWrites @Inject()(propertyValue: PropertyValue) extends Writes[C
 
   private[this] def bool(customField: CustomField): BacklogCustomField = {
 
-    def toName(value: String): String = {
-      if (value == "1") Messages("common.yes") else Messages("common.no")
+    def toName(optValue: Option[String]): Option[String] = {
+      optValue match {
+        case Some("0") => Some(Messages("common.no"))
+        case Some("1") => Some(Messages("common.yes"))
+        case _         => None
+      }
     }
 
     BacklogCustomField(
       name = customField.getName,
       fieldTypeId = FieldType.SingleList.getIntValue,
-      optValue = Option(customField.getValue).map(toName),
+      optValue = toName(Option(customField.getValue)),
       values = Seq.empty[String]
     )
   }

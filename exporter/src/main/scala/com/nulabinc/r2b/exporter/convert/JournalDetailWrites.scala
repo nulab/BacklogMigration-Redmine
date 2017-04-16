@@ -85,7 +85,11 @@ class JournalDetailWrites @Inject()(propertyValue: PropertyValue) extends Writes
           case RedmineConstantValue.FieldFormat.USER =>
             propertyValue.optUserOfId(value).map(_.getFullName)
           case RedmineConstantValue.FieldFormat.BOOL =>
-            if (value == "1") Some(Messages("common.yes")) else Some(Messages("common.no"))
+            value match {
+              case "0" => Some(Messages("common.no"))
+              case "1" => Some(Messages("common.yes"))
+              case _   => None
+            }
           case _ => Option(value)
         }
       case _ => Option(value)

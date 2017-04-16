@@ -191,7 +191,11 @@ class IssueInitializer(issueWrites: IssueWrites,
       if (customFieldDefinition.fieldFormat == RedmineConstantValue.FieldFormat.USER) {
         optValue.flatMap(toName).map(_.getFullName)
       } else if (customFieldDefinition.fieldFormat == RedmineConstantValue.FieldFormat.BOOL) {
-        optValue.map(value => if (value == "1") Messages("common.yes") else Messages("common.no"))
+        optValue match {
+          case Some("0") => Some(Messages("common.no"))
+          case Some("1") => Some(Messages("common.yes"))
+          case _         => None
+        }
       } else optValue
     }
 
