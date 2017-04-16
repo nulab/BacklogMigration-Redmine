@@ -1,5 +1,7 @@
 package com.nulabinc.r2b.core
 
+import java.util.Locale
+
 import com.nulabinc.backlog.migration.conf.{BacklogApiConfiguration, BacklogConfiguration}
 import com.nulabinc.backlog.migration.utils.{ConsoleOut, Logging}
 import com.nulabinc.r2b.cli._
@@ -52,6 +54,7 @@ object R2B extends BacklogConfiguration with Logging {
     ConsoleOut.println(s"""|${applicationName}
                  |--------------------------------------------------""".stripMargin)
     AnsiConsole.systemInstall()
+    setLang()
     DisableSSLCertificateCheckUtil.disableChecks()
     if (ClassVersion.isValid()) {
       try {
@@ -94,6 +97,14 @@ object R2B extends BacklogConfiguration with Logging {
       backlogConfig = new BacklogApiConfiguration(url = cli.execute.backlogUrl(), key = cli.execute.backlogKey(), projectKey = backlog),
       importOnly = cli.execute.importOnly(),
       optOut = cli.execute.optOut())
+  }
+
+  private[this] def setLang() = {
+    if (language == "ja") {
+      Locale.setDefault(Locale.JAPAN)
+    } else if (language == "en") {
+      Locale.setDefault(Locale.US)
+    }
   }
 
 }
