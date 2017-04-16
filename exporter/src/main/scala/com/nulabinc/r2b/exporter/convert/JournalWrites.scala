@@ -4,7 +4,7 @@ import javax.inject.Inject
 
 import com.nulabinc.backlog.migration.converter.{Convert, Writes}
 import com.nulabinc.backlog.migration.domain.{BacklogComment, BacklogNotification}
-import com.nulabinc.backlog.migration.utils.DateUtil
+import com.nulabinc.backlog.migration.utils.{DateUtil, StringUtil}
 import com.taskadapter.redmineapi.bean.Journal
 
 import scala.collection.JavaConverters._
@@ -19,7 +19,7 @@ class JournalWrites @Inject()(implicit val userWrites: UserWrites, implicit val 
     BacklogComment(
       eventType = "comment",
       optIssueId = None,
-      optContent = Option(journal.getNotes),
+      optContent = StringUtil.notEmpty(journal.getNotes),
       changeLogs = journal.getDetails.asScala.map(Convert.toBacklog(_)),
       notifications = Seq.empty[BacklogNotification],
       isCreateIssue = false,

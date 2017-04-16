@@ -16,11 +16,13 @@ class StatusConverter(backlogStatuses: Seq[Status]) {
     val list: mutable.ArrayBuffer[BacklogComment] = mutable.ArrayBuffer()
 
     comments.foreach(comment => list += comment)
-    list.map(convertComment)
+    list.flatMap(convertComment)
   }
 
-  def convertComment(comment: BacklogComment): BacklogComment = {
-    comment.copy(changeLogs = comment.changeLogs.flatMap(convertChangeLog))
+  def convertComment(comment: BacklogComment): Option[BacklogComment] = {
+    val newChangeLogs = comment.changeLogs.flatMap(convertChangeLog)
+    if (newChangeLogs.isEmpty && comment.optContent.isEmpty) None
+    else Some(comment.copy(changeLogs = newChangeLogs))
   }
 
   def convertChangeLog(changeLog: BacklogChangeLog): Option[BacklogChangeLog] = {
