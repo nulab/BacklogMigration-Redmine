@@ -8,8 +8,7 @@ import com.nulabinc.backlog.migration.converter.Convert
 import com.nulabinc.backlog.migration.domain.BacklogJsonProtocol._
 import com.nulabinc.backlog.migration.domain.{BacklogComment, BacklogIssue}
 import com.nulabinc.backlog.migration.utils.{DateUtil, IOUtil, Logging}
-import com.nulabinc.backlog4j.Status
-import com.nulabinc.r2b.exporter.convert._
+import com.nulabinc.r2b.exporter.convert.{CustomFieldWrites, IssueWrites, JournalWrites, UserWrites}
 import com.nulabinc.r2b.exporter.service.{CommentReducer, IssueInitializer}
 import com.nulabinc.r2b.redmine.conf.RedmineApiConfiguration
 import com.nulabinc.r2b.redmine.domain.PropertyValue
@@ -33,8 +32,7 @@ class IssueActor(apiConfig: RedmineApiConfiguration,
                  issueWrites: IssueWrites,
                  journalWrites: JournalWrites,
                  userWrites: UserWrites,
-                 customFieldWrites: CustomFieldWrites,
-                 backlogStatuses: Seq[Status])
+                 customFieldWrites: CustomFieldWrites)
     extends Actor
     with Logging {
 
@@ -48,9 +46,10 @@ class IssueActor(apiConfig: RedmineApiConfiguration,
   def receive: Receive = {
     case IssueActor.Do(issueId: Int, completion: CountDownLatch, allCount: Int, console: ((Int, Int) => Unit)) =>
       logger.debug(s"[START ISSUE]${issueId} thread numbers:${java.lang.Thread.activeCount()}")
-      val issue       = issueService.issueOfId(issueId, Include.attachments, Include.journals)
-      val journals    = issue.getJournals.asScala.toSeq.sortWith((c1, c2) => c1.getCreatedOn.before(c2.getCreatedOn))
-      val attachments = issue.getAttachments.asScala.toSeq
+      val issue    = issueService.issueOfId(issueId, Include.attachments, Include.journals)
+      val journals = issue.getJournals.asScala.toSeq.sortWith((c1, c2) => c1.getCreatedOn.before(c2.getCreatedOn))
+
+      val attachments: Seq[Attachment] = issue.getAttachments.asScala.toSeq
 
       exportIssue(issue, journals)
       exportComments(Convert.toBacklog(issue)(issueWrites), journals.map(Convert.toBacklog(_)(journalWrites)), attachments)
@@ -64,17 +63,17 @@ class IssueActor(apiConfig: RedmineApiConfiguration,
     val issueDirPath     = backlogPaths.issueDirectoryPath("issue", issue.getId.intValue(), issueCreated, 0)
     val issueInitializer = new IssueInitializer(issueWrites, userWrites, customFieldWrites, journals, propertyValue)
     val backlogIssue     = issueInitializer.initialize(issue)
-
-    IOUtil.output(backlogPaths.issueJson(issueDirPath), backlogIssue.toJson.prettyPrint)
+    IOUtil.output(
+      backlogPaths.issueJson(issueDirPath),
+      backlogIssue.toJson.prettyPrint
+    )
     backlogIssue
   }
 
   private[this] def exportComments(issue: BacklogIssue, comments: Seq[BacklogComment], attachments: Seq[Attachment]) = {
-    val statusConverter = new StatusConverter(backlogStatuses)
-    val converted       = statusConverter.convert(comments)
-    converted.zipWithIndex.foreach {
+    comments.zipWithIndex.foreach {
       case (comment, index) =>
-        exportComment(comment, issue, converted, attachments, index)
+        exportComment(comment, issue, comments, attachments, index)
     }
   }
 
@@ -85,8 +84,10 @@ class IssueActor(apiConfig: RedmineApiConfiguration,
                                   index: Int) = {
     val commentCreated = DateUtil.tryIsoParse(comment.optCreated)
     val issueDirPath   = backlogPaths.issueDirectoryPath("comment", issue.id, commentCreated, index)
-    val commentReducer = new CommentReducer(apiConfig, projectService, backlogPaths, issue, comments, attachments, issueDirPath)
-    val reduced        = commentReducer.reduce(comment)
+
+    val commentReducer =
+      new CommentReducer(apiConfig: RedmineApiConfiguration, projectService, backlogPaths, issue, comments, attachments, issueDirPath)
+    val reduced = commentReducer.reduce(comment)
 
     IOUtil.output(backlogPaths.issueJson(issueDirPath), reduced.toJson.prettyPrint)
   }
