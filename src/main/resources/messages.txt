@@ -48,6 +48,19 @@ message.collecting=Collecting
 message.collected=Collected
 
 
+# Mapping
+mapping.status.backlog.open=Open
+mapping.status.backlog.in_progress=In Progress
+mapping.status.backlog.resolved=Resolved
+mapping.status.backlog.closed=Closed
+mapping.status.redmine.new=New
+mapping.status.redmine.in_progress=InProgress
+mapping.status.redmine.resolved=Resolved
+mapping.status.redmine.feedback=Feedback
+mapping.status.redmine.closed=Closed
+mapping.status.redmine.rejected=Rejected
+
+
 # CLI
 cli.confirm=Start migration? (y/n [n]):
 cli.require_java8=The current version of Java is "{0}". Java 8 is required for this program.

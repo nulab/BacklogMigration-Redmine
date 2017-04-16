@@ -9,7 +9,7 @@ import com.nulabinc.r2b.mapping.domain.MappingItem
 import com.nulabinc.r2b.redmine.conf.RedmineApiConfiguration
 import com.nulabinc.r2b.redmine.modules.{ServiceInjector => RedmineInjector}
 import com.nulabinc.r2b.redmine.service.{StatusService => RedmineStatusService}
-import com.osinka.i18n.Messages
+import com.osinka.i18n.{Lang, Messages}
 
 /**
   * @author uchida
@@ -47,14 +47,14 @@ class StatusMappingFile(redmineApiConfig: RedmineApiConfiguration, backlogApiCon
   }
 
   private[this] object Backlog {
-    val OPEN_JA: String        = "未対応"
-    val IN_PROGRESS_JA: String = "処理中"
-    val RESOLVED_JA: String    = "処理済み"
-    val CLOSED_JA: String      = "完了"
-    val OPEN_EN: String        = "Open"
-    val IN_PROGRESS_EN: String = "In Progress"
-    val RESOLVED_EN: String    = "Resolved"
-    val CLOSED_EN: String      = "Closed"
+    val OPEN_JA: String        = Messages("mapping.status.backlog.open")(Lang("ja"))
+    val IN_PROGRESS_JA: String = Messages("mapping.status.backlog.in_progress")(Lang("ja"))
+    val RESOLVED_JA: String    = Messages("mapping.status.backlog.resolved")(Lang("ja"))
+    val CLOSED_JA: String      = Messages("mapping.status.backlog.closed")(Lang("ja"))
+    val OPEN_EN: String        = Messages("mapping.status.backlog.open")(Lang("en"))
+    val IN_PROGRESS_EN: String = Messages("mapping.status.backlog.in_progress")(Lang("en"))
+    val RESOLVED_EN: String    = Messages("mapping.status.backlog.resolved")(Lang("en"))
+    val CLOSED_EN: String      = Messages("mapping.status.backlog.closed")(Lang("en"))
 
     def open(): String = backlogs.map(_.name).find(_ == OPEN_JA).getOrElse(backlogs.map(_.name).find(_ == OPEN_EN).getOrElse(""))
 
@@ -66,18 +66,18 @@ class StatusMappingFile(redmineApiConfig: RedmineApiConfiguration, backlogApiCon
   }
 
   private[this] object Redmine {
-    val NEW_JA: String         = "新規"
-    val IN_PROGRESS_JA: String = "進行中"
-    val RESOLVED_JA: String    = "解決"
-    val FEEDBACK_JA: String    = "フィードバック"
-    val CLOSED_JA: String      = "終了"
-    val REJECTED_JA: String    = "却下"
-    val NEW_EN: String         = "New"
-    val IN_PROGRESS_EN: String = "InProgress"
-    val RESOLVED_EN: String    = "Resolved"
-    val FEEDBACK_EN: String    = "Feedback"
-    val CLOSED_EN: String      = "Closed"
-    val REJECTED_EN: String    = "Rejected"
+    val NEW_JA: String         = Messages("mapping.status.redmine.new")(Lang("ja"))
+    val IN_PROGRESS_JA: String = Messages("mapping.status.redmine.in_progress")(Lang("ja"))
+    val RESOLVED_JA: String    = Messages("mapping.status.redmine.resolved")(Lang("ja"))
+    val FEEDBACK_JA: String    = Messages("mapping.status.redmine.feedback")(Lang("ja"))
+    val CLOSED_JA: String      = Messages("mapping.status.redmine.closed")(Lang("ja"))
+    val REJECTED_JA: String    = Messages("mapping.status.redmine.rejected")(Lang("ja"))
+    val NEW_EN: String         = Messages("mapping.status.redmine.new")(Lang("en"))
+    val IN_PROGRESS_EN: String = Messages("mapping.status.redmine.in_progress")(Lang("en"))
+    val RESOLVED_EN: String    = Messages("mapping.status.redmine.resolved")(Lang("en"))
+    val FEEDBACK_EN: String    = Messages("mapping.status.redmine.feedback")(Lang("en"))
+    val CLOSED_EN: String      = Messages("mapping.status.redmine.closed")(Lang("en"))
+    val REJECTED_EN: String    = Messages("mapping.status.redmine.rejected")(Lang("en"))
   }
 
   override def matchWithBacklog(redmine: MappingItem): String =

@@ -48,6 +48,19 @@ message.collecting=収集しています...
 message.collected=収集しました。
 
 
+# Mapping
+mapping.status.backlog.open=未対応
+mapping.status.backlog.in_progress=処理中
+mapping.status.backlog.resolved=処理済み
+mapping.status.backlog.closed=完了
+mapping.status.redmine.new=新規
+mapping.status.redmine.in_progress=進行中
+mapping.status.redmine.resolved=解決
+mapping.status.redmine.feedback=フィードバック
+mapping.status.redmine.closed=終了
+mapping.status.redmine.rejected=却下
+
+
 # CLI
 cli.confirm=移行を実行しますか？ (y/n [n]):
 cli.require_java8=現在のJavaのバージョンは[{0}]です。Java8以上が必須になります。
