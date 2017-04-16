@@ -59,6 +59,14 @@ mapping.status.redmine.resolved=Resolved
 mapping.status.redmine.feedback=Feedback
 mapping.status.redmine.closed=Closed
 mapping.status.redmine.rejected=Rejected
+mapping.priority.backlog.low=Low
+mapping.priority.backlog.normal=Normal
+mapping.priority.backlog.high=High
+mapping.priority.redmine.low=Low
+mapping.priority.redmine.normal=Normal
+mapping.priority.redmine.high=High
+mapping.priority.redmine.urgent=Urgent
+mapping.priority.redmine.immediate=Immediate
 
 
 # CLI

@@ -59,6 +59,14 @@ mapping.status.redmine.resolved=解決
 mapping.status.redmine.feedback=フィードバック
 mapping.status.redmine.closed=終了
 mapping.status.redmine.rejected=却下
+mapping.priority.backlog.low=低
+mapping.priority.backlog.normal=中
+mapping.priority.backlog.high=高
+mapping.priority.redmine.low=低め
+mapping.priority.redmine.normal=通常
+mapping.priority.redmine.high=高め
+mapping.priority.redmine.urgent=急いで
+mapping.priority.redmine.immediate=今すぐ
 
 
 # CLI
