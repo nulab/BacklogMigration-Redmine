@@ -3,6 +3,7 @@ package com.nulabinc.r2b.mapping.core
 import com.nulabinc.backlog.migration.conf.BacklogApiConfiguration
 import com.nulabinc.backlog.migration.modules.{ServiceInjector => BacklogInjector}
 import com.nulabinc.backlog.migration.service.{StatusService => BacklogStatusService}
+import com.nulabinc.backlog.migration.utils.StringUtil
 import com.nulabinc.backlog4j.Status
 import com.nulabinc.r2b.mapping.domain.MappingItem
 import com.nulabinc.r2b.redmine.conf.RedmineApiConfiguration
@@ -26,7 +27,7 @@ class StatusMappingFile(redmineApiConfig: RedmineApiConfiguration, backlogApiCon
     val redmines: Seq[MappingItem] = redmineStatuses.map(redmineStatus => MappingItem(redmineStatus.getName, redmineStatus.getName))
     val deleteItems = mappingData.statuses.foldLeft(Seq.empty[MappingItem]) { (acc: Seq[MappingItem], status: String) =>
       {
-        val exists = redmineStatuses.exists(redmineStatuse => redmineStatuse.getId.intValue() == status.toInt)
+        val exists = redmineStatuses.exists(redmineStatuse => StringUtil.safeEquals(redmineStatuse.getId.intValue(), status))
         if (exists) acc
         else {
           val name = Messages("cli.mapping.delete_status", status)

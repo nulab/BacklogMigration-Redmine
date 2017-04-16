@@ -5,7 +5,7 @@ import javax.inject.Inject
 import com.nulabinc.backlog.migration.conf.BacklogConstantValue
 import com.nulabinc.backlog.migration.converter.Writes
 import com.nulabinc.backlog.migration.domain.{BacklogAttachmentInfo, BacklogAttributeInfo, BacklogChangeLog}
-import com.nulabinc.backlog.migration.utils.DateUtil
+import com.nulabinc.backlog.migration.utils.{DateUtil, StringUtil}
 import com.nulabinc.backlog4j.CustomField.FieldType
 import com.nulabinc.r2b.mapping.core.{ConvertPriorityMapping, ConvertStatusMapping, ConvertUserMapping}
 import com.nulabinc.r2b.redmine.conf.RedmineConstantValue
@@ -60,7 +60,7 @@ class JournalDetailWrites @Inject()(propertyValue: PropertyValue) extends Writes
   private[this] def attachmentInfo(detail: JournalDetail): Option[BacklogAttachmentInfo] = {
     detail.getProperty match {
       case RedmineConstantValue.ATTACHMENT =>
-        val attachment = BacklogAttachmentInfo(optId = Some(detail.getName.toInt), name = detail.getNewValue)
+        val attachment = BacklogAttachmentInfo(optId = StringUtil.safeStringToLong(detail.getName), name = detail.getNewValue)
         Some(attachment)
       case _ => None
     }
@@ -92,17 +92,20 @@ class JournalDetailWrites @Inject()(propertyValue: PropertyValue) extends Writes
   private[this] def attr(detail: JournalDetail, value: String): Option[String] =
     detail.getName match {
       case RedmineConstantValue.Attr.STATUS =>
-        propertyValue.statuses.find(status => status.getId.intValue() == value.toInt).map(_.getName).map(statusMapping.convert)
+        propertyValue.statuses.find(status => StringUtil.safeEquals(status.getId.intValue(), value)).map(_.getName).map(statusMapping.convert)
       case RedmineConstantValue.Attr.PRIORITY =>
-        propertyValue.priorities.find(priority => priority.getId.intValue() == value.toInt).map(_.getName).map(priorityMapping.convert)
+        propertyValue.priorities
+          .find(priority => StringUtil.safeEquals(priority.getId.intValue(), value))
+          .map(_.getName)
+          .map(priorityMapping.convert)
       case RedmineConstantValue.Attr.ASSIGNED =>
         propertyValue.optUserOfId(value).map(_.getLogin).map(userMapping.convert)
       case RedmineConstantValue.Attr.VERSION =>
-        propertyValue.versions.find(version => version.getId.intValue() == value.toInt).map(_.getName)
+        propertyValue.versions.find(version => StringUtil.safeEquals(version.getId.intValue(), value)).map(_.getName)
       case RedmineConstantValue.Attr.TRACKER =>
-        propertyValue.trackers.find(tracker => tracker.getId.intValue() == value.toInt).map(_.getName)
+        propertyValue.trackers.find(tracker => StringUtil.safeEquals(tracker.getId.intValue(), value)).map(_.getName)
       case RedmineConstantValue.Attr.CATEGORY =>
-        propertyValue.categories.find(category => category.getId.intValue() == value.toInt).map(_.getName)
+        propertyValue.categories.find(category => StringUtil.safeEquals(category.getId.intValue(), value)).map(_.getName)
       case _ => Option(value)
     }
 
