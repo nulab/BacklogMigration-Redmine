@@ -33,10 +33,10 @@ class CommentReducer(apiConfig: RedmineApiConfiguration,
     val optNewContent = comment.optContent match {
       case Some(content) =>
         val newContent = (s"${changeLogContent.toString()}\n${content}").trim
-        if (newContent.isEmpty) None else Some(newContent)
+        StringUtil.notEmpty(newContent)
       case None =>
         val newContent = changeLogContent.toString().trim
-        if (newContent.isEmpty) None else Some(newContent)
+        StringUtil.notEmpty(newContent)
     }
     comment.copy(optIssueId = Some(issue.id), optContent = optNewContent, isCreateIssue = false, changeLogs = newChangeLogs)
   }

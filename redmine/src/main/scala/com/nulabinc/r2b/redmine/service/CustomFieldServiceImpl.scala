@@ -2,7 +2,7 @@ package com.nulabinc.r2b.redmine.service
 
 import javax.inject.Inject
 
-import com.nulabinc.backlog.migration.utils.Logging
+import com.nulabinc.backlog.migration.utils.{Logging, StringUtil}
 import com.nulabinc.r2b.redmine.conf.RedmineApiConfiguration
 import com.nulabinc.r2b.redmine.domain.{RedmineCustomFieldDefinition, RedmineTracker}
 import com.taskadapter.redmineapi.bean.{CustomFieldDefinition, Tracker}
@@ -29,20 +29,18 @@ class CustomFieldServiceImpl @Inject()(apiConfig: RedmineApiConfiguration, redmi
     }
 
   private[this] def toCustomFields(customFieldDefinition: CustomFieldDefinition): RedmineCustomFieldDefinition =
-    RedmineCustomFieldDefinition(
-      id = customFieldDefinition.getId,
-      name = customFieldDefinition.getName,
-      customizedType = customFieldDefinition.getCustomizedType,
-      fieldFormat = customFieldDefinition.getFieldFormat,
-      optRegexp = Option(customFieldDefinition.getRegexp),
-      optMinLength = Option(customFieldDefinition.getMinLength).map(_.intValue()),
-      optMaxLength = Option(customFieldDefinition.getMaxLength).map(_.intValue()),
-      isRequired = customFieldDefinition.isRequired,
-      isMultiple = customFieldDefinition.isMultiple,
-      optDefaultValue =
-        if (Option(customFieldDefinition.getDefaultValue).getOrElse("").isEmpty) None else Some(customFieldDefinition.getDefaultValue),
-      trackers = customFieldDefinition.getTrackers.asScala.map(toTracker),
-      possibleValues = Option(customFieldDefinition.getPossibleValues.asScala).getOrElse(Seq.empty[String]))
+    RedmineCustomFieldDefinition(id = customFieldDefinition.getId,
+                                 name = customFieldDefinition.getName,
+                                 customizedType = customFieldDefinition.getCustomizedType,
+                                 fieldFormat = customFieldDefinition.getFieldFormat,
+                                 optRegexp = Option(customFieldDefinition.getRegexp),
+                                 optMinLength = Option(customFieldDefinition.getMinLength).map(_.intValue()),
+                                 optMaxLength = Option(customFieldDefinition.getMaxLength).map(_.intValue()),
+                                 isRequired = customFieldDefinition.isRequired,
+                                 isMultiple = customFieldDefinition.isMultiple,
+                                 optDefaultValue = StringUtil.notEmpty(customFieldDefinition.getDefaultValue),
+                                 trackers = customFieldDefinition.getTrackers.asScala.map(toTracker),
+                                 possibleValues = Option(customFieldDefinition.getPossibleValues.asScala).getOrElse(Seq.empty[String]))
 
   private[this] def toTracker(tracker: Tracker): RedmineTracker =
     RedmineTracker(tracker.getId, tracker.getName)
