@@ -58,16 +58,13 @@ class IssueActor(apiConfig: RedmineApiConfiguration,
       console((allCount - completion.getCount).toInt, allCount)
   }
 
-  private[this] def exportIssue(issue: Issue, journals: Seq[Journal]): BacklogIssue = {
+  private[this] def exportIssue(issue: Issue, journals: Seq[Journal]) = {
     val issueCreated     = DateUtil.tryIsoParse(Option(issue.getCreatedOn).map(DateUtil.isoFormat))
     val issueDirPath     = backlogPaths.issueDirectoryPath("issue", issue.getId.intValue(), issueCreated, 0)
     val issueInitializer = new IssueInitializer(issueWrites, userWrites, customFieldWrites, journals, propertyValue)
     val backlogIssue     = issueInitializer.initialize(issue)
-    IOUtil.output(
-      backlogPaths.issueJson(issueDirPath),
-      backlogIssue.toJson.prettyPrint
-    )
-    backlogIssue
+
+    IOUtil.output(backlogPaths.issueJson(issueDirPath), backlogIssue.toJson.prettyPrint)
   }
 
   private[this] def exportComments(issue: BacklogIssue, comments: Seq[BacklogComment], attachments: Seq[Attachment]) = {
@@ -84,10 +81,8 @@ class IssueActor(apiConfig: RedmineApiConfiguration,
                                   index: Int) = {
     val commentCreated = DateUtil.tryIsoParse(comment.optCreated)
     val issueDirPath   = backlogPaths.issueDirectoryPath("comment", issue.id, commentCreated, index)
-
-    val commentReducer =
-      new CommentReducer(apiConfig: RedmineApiConfiguration, projectService, backlogPaths, issue, comments, attachments, issueDirPath)
-    val reduced = commentReducer.reduce(comment)
+    val commentReducer = new CommentReducer(apiConfig, projectService, backlogPaths, issue, comments, attachments, issueDirPath)
+    val reduced        = commentReducer.reduce(comment)
 
     IOUtil.output(backlogPaths.issueJson(issueDirPath), reduced.toJson.prettyPrint)
   }
