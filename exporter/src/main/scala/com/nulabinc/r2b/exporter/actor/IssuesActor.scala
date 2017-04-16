@@ -8,6 +8,7 @@ import akka.actor.{Actor, ActorRef, OneForOneStrategy, Props}
 import akka.routing.SmallestMailboxPool
 import com.nulabinc.backlog.migration.conf.{BacklogConfiguration, BacklogPaths}
 import com.nulabinc.backlog.migration.modules.akkaguice.NamedActor
+import com.nulabinc.backlog.migration.service.StatusService
 import com.nulabinc.backlog.migration.utils.{Logging, ProgressBar}
 import com.nulabinc.r2b.exporter.convert.{CustomFieldWrites, IssueWrites, JournalWrites, UserWrites}
 import com.nulabinc.r2b.redmine.conf.RedmineApiConfiguration
@@ -29,7 +30,8 @@ class IssuesActor @Inject()(apiConfig: RedmineApiConfiguration,
                             @Named("projectId") projectId: Int,
                             issueService: IssueService,
                             projectService: ProjectService,
-                            propertyValue: PropertyValue)
+                            propertyValue: PropertyValue,
+                            statusService: StatusService)
     extends Actor
     with BacklogConfiguration
     with Logging {
@@ -49,6 +51,8 @@ class IssuesActor @Inject()(apiConfig: RedmineApiConfiguration,
 
   def receive: Receive = {
     case IssuesActor.Do =>
+      val backlogStatuses = statusService.allStatuses()
+
       val router = SmallestMailboxPool(akkaMailBoxPool, supervisorStrategy = strategy)
       val issueActor =
         context.actorOf(
@@ -62,7 +66,8 @@ class IssuesActor @Inject()(apiConfig: RedmineApiConfiguration,
                              issueWrites,
                              journalWrites,
                              userWrites,
-                             customFieldWrites))))
+                             customFieldWrites,
+                             backlogStatuses))))
 
       (0 until (allCount, limit))
         .foldLeft(Seq.empty[Int]) { (acc, offset) =>

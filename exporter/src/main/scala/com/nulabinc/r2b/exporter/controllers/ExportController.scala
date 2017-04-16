@@ -1,6 +1,7 @@
 package com.nulabinc.r2b.exporter.controllers
 
 import com.google.inject.Guice
+import com.nulabinc.backlog.migration.conf.BacklogApiConfiguration
 import com.nulabinc.backlog.migration.modules.{AkkaModule, ConfigModule}
 import com.nulabinc.backlog.migration.utils.{ConsoleOut, Logging}
 import com.nulabinc.r2b.exporter.modules.{ActorModule, RedmineModule}
@@ -13,10 +14,10 @@ import com.osinka.i18n.Messages
   */
 object ExportController extends Logging {
 
-  def execute(apiConfig: RedmineApiConfiguration, backlogProjectKey: String) = {
+  def execute(redmineApiConfig: RedmineApiConfiguration, backlogApiConfig: BacklogApiConfiguration) = {
 
     val injector = Guice.createInjector(
-      new RedmineModule(apiConfig, backlogProjectKey),
+      new RedmineModule(redmineApiConfig, backlogApiConfig),
       new ConfigModule(),
       new AkkaModule(),
       new ActorModule()
