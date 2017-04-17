@@ -3,20 +3,21 @@ package com.nulabinc.r2b.exporter.convert
 import javax.inject.Inject
 
 import com.nulabinc.backlog.migration.conf.BacklogConstantValue
-import com.nulabinc.backlog.migration.converter.Writes
+import com.nulabinc.backlog.migration.converter.{Convert, Writes}
 import com.nulabinc.backlog.migration.domain.{BacklogAttachmentInfo, BacklogAttributeInfo, BacklogChangeLog}
 import com.nulabinc.backlog.migration.utils.{DateUtil, Logging, StringUtil}
 import com.nulabinc.backlog4j.CustomField.FieldType
 import com.nulabinc.r2b.mapping.core.{ConvertPriorityMapping, ConvertStatusMapping, ConvertUserMapping}
 import com.nulabinc.r2b.redmine.conf.RedmineConstantValue
 import com.nulabinc.r2b.redmine.domain.PropertyValue
-import com.osinka.i18n.Messages
 import com.taskadapter.redmineapi.bean.JournalDetail
 
 /**
   * @author uchida
   */
-class JournalDetailWrites @Inject()(propertyValue: PropertyValue) extends Writes[JournalDetail, BacklogChangeLog] with Logging {
+class JournalDetailWrites @Inject()(propertyValue: PropertyValue, customFieldValueWrites: CustomFieldValueWrites)
+    extends Writes[JournalDetail, BacklogChangeLog]
+    with Logging {
 
   val userMapping     = new ConvertUserMapping()
   val statusMapping   = new ConvertStatusMapping()
@@ -70,31 +71,10 @@ class JournalDetailWrites @Inject()(propertyValue: PropertyValue) extends Writes
   private[this] def detailValue(detail: JournalDetail, value: String): Option[String] =
     detail.getProperty match {
       case RedmineConstantValue.ATTR         => attr(detail, value)
-      case RedmineConstantValue.CUSTOM_FIELD => cf(detail, value)
+      case RedmineConstantValue.CUSTOM_FIELD => Convert.toBacklog((detail.getName, Option(value)))(customFieldValueWrites)
       case RedmineConstantValue.ATTACHMENT   => Option(value)
       case RedmineConstantValue.RELATION     => Option(value)
     }
-
-  private[this] def cf(detail: JournalDetail, value: String): Option[String] = {
-    val optCustomFieldDefinition = propertyValue.customFieldDefinitionOfId(detail.getName)
-    optCustomFieldDefinition match {
-      case Some(customFieldDefinition) =>
-        customFieldDefinition.fieldFormat match {
-          case RedmineConstantValue.FieldFormat.VERSION =>
-            propertyValue.versionOfId(Option(value)).map(_.getName)
-          case RedmineConstantValue.FieldFormat.USER =>
-            propertyValue.optUserOfId(value).map(_.getFullName)
-          case RedmineConstantValue.FieldFormat.BOOL =>
-            value match {
-              case "0" => Some(Messages("common.no"))
-              case "1" => Some(Messages("common.yes"))
-              case _   => None
-            }
-          case _ => Option(value)
-        }
-      case _ => Option(value)
-    }
-  }
 
   private[this] def attr(detail: JournalDetail, value: String): Option[String] =
     detail.getName match {
@@ -106,7 +86,7 @@ class JournalDetailWrites @Inject()(propertyValue: PropertyValue) extends Writes
           .map(_.getName)
           .map(priorityMapping.convert)
       case RedmineConstantValue.Attr.ASSIGNED =>
-        propertyValue.optUserOfId(value).map(_.getLogin).map(userMapping.convert)
+        propertyValue.optUserOfId(Some(value)).map(_.getLogin).map(userMapping.convert)
       case RedmineConstantValue.Attr.VERSION =>
         propertyValue.versions.find(version => StringUtil.safeEquals(version.getId.intValue(), value)).map(_.getName)
       case RedmineConstantValue.Attr.TRACKER =>

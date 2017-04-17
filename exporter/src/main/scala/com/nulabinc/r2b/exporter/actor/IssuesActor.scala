@@ -9,7 +9,7 @@ import akka.routing.SmallestMailboxPool
 import com.nulabinc.backlog.migration.conf.{BacklogConfiguration, BacklogPaths}
 import com.nulabinc.backlog.migration.modules.akkaguice.NamedActor
 import com.nulabinc.backlog.migration.utils.{Logging, ProgressBar}
-import com.nulabinc.r2b.exporter.convert.{CustomFieldWrites, IssueWrites, JournalWrites, UserWrites}
+import com.nulabinc.r2b.exporter.convert._
 import com.nulabinc.r2b.redmine.conf.RedmineApiConfiguration
 import com.nulabinc.r2b.redmine.domain.PropertyValue
 import com.nulabinc.r2b.redmine.service.{IssueService, ProjectService}
@@ -20,13 +20,14 @@ import scala.concurrent.duration._
 /**
   * @author uchida
   */
-class IssuesActor @Inject()(apiConfig: RedmineApiConfiguration,
+class IssuesActor @Inject()(@Named("projectId") projectId: Int,
+                            apiConfig: RedmineApiConfiguration,
                             backlogPaths: BacklogPaths,
                             issueWrites: IssueWrites,
                             journalWrites: JournalWrites,
                             userWrites: UserWrites,
                             customFieldWrites: CustomFieldWrites,
-                            @Named("projectId") projectId: Int,
+                            customFieldValueWrites: CustomFieldValueWrites,
                             issueService: IssueService,
                             projectService: ProjectService,
                             propertyValue: PropertyValue)
@@ -62,7 +63,8 @@ class IssuesActor @Inject()(apiConfig: RedmineApiConfiguration,
                              issueWrites,
                              journalWrites,
                              userWrites,
-                             customFieldWrites))))
+                             customFieldWrites,
+                             customFieldValueWrites))))
 
       (0 until (allCount, limit))
         .foldLeft(Seq.empty[Int]) { (acc, offset) =>

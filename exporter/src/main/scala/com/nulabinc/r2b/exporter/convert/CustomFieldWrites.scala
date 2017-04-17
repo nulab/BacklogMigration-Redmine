@@ -2,21 +2,22 @@ package com.nulabinc.r2b.exporter.convert
 
 import javax.inject.Inject
 
-import com.nulabinc.backlog.migration.converter.Writes
+import com.nulabinc.backlog.migration.converter.{Convert, Writes}
 import com.nulabinc.backlog.migration.domain.BacklogCustomField
-import com.nulabinc.backlog.migration.utils.{Logging, StringUtil}
+import com.nulabinc.backlog.migration.utils.Logging
 import com.nulabinc.backlog4j.CustomField.FieldType
 import com.nulabinc.r2b.redmine.conf.RedmineConstantValue
 import com.nulabinc.r2b.redmine.domain.PropertyValue
-import com.osinka.i18n.Messages
-import com.taskadapter.redmineapi.bean.{CustomField, User, Version}
+import com.taskadapter.redmineapi.bean.CustomField
 
 import scala.collection.JavaConverters._
 
 /**
   * @author uchida
   */
-class CustomFieldWrites @Inject()(propertyValue: PropertyValue) extends Writes[CustomField, Option[BacklogCustomField]] with Logging {
+class CustomFieldWrites @Inject()(propertyValue: PropertyValue, customFieldValueWrites: CustomFieldValueWrites)
+    extends Writes[CustomField, Option[BacklogCustomField]]
+    with Logging {
 
   override def writes(customField: CustomField): Option[BacklogCustomField] = {
     val optCustomFieldDefinition = propertyValue.customFieldDefinitionOfName(customField.getName)
@@ -92,62 +93,28 @@ class CustomFieldWrites @Inject()(propertyValue: PropertyValue) extends Writes[C
     )
   }
 
-  private[this] def version(customField: CustomField): BacklogCustomField = {
-    def condition(version: Version, value: String) = {
-      StringUtil.safeStringToInt(value) match {
-        case Some(intValue) => intValue == version.getId.intValue()
-        case _              => false
-      }
-    }
-
-    def toName(value: String) = {
-      propertyValue.versions.find(version => condition(version, value))
-    }
-
+  private[this] def version(customField: CustomField): BacklogCustomField =
     BacklogCustomField(
       name = customField.getName,
       fieldTypeId = FieldType.SingleList.getIntValue,
-      optValue = Option(customField.getValue).flatMap(toName).map(_.getName),
+      optValue = Convert.toBacklog((customField.getId.toString, Option(customField.getValue)))(customFieldValueWrites),
       values = Seq.empty[String]
     )
-  }
 
-  private[this] def user(customField: CustomField): BacklogCustomField = {
-    def condition(user: User, value: String) = {
-      StringUtil.safeStringToInt(value) match {
-        case Some(intValue) => intValue == user.getId.intValue()
-        case _              => false
-      }
-    }
-
-    def toName(value: String): Option[User] = {
-      propertyValue.users.find(user => condition(user, value))
-    }
-
+  private[this] def user(customField: CustomField): BacklogCustomField =
     BacklogCustomField(
       name = customField.getName,
       fieldTypeId = FieldType.SingleList.getIntValue,
-      optValue = Option(customField.getValue).flatMap(toName).map(_.getFullName),
+      optValue = Convert.toBacklog((customField.getId.toString, Option(customField.getValue)))(customFieldValueWrites),
       values = Seq.empty[String]
     )
-  }
 
-  private[this] def bool(customField: CustomField): BacklogCustomField = {
-
-    def toName(optValue: Option[String]): Option[String] = {
-      optValue match {
-        case Some("0") => Some(Messages("common.no"))
-        case Some("1") => Some(Messages("common.yes"))
-        case _         => None
-      }
-    }
-
+  private[this] def bool(customField: CustomField): BacklogCustomField =
     BacklogCustomField(
       name = customField.getName,
       fieldTypeId = FieldType.SingleList.getIntValue,
-      optValue = toName(Option(customField.getValue)),
+      optValue = Convert.toBacklog((customField.getId.toString, Option(customField.getValue)))(customFieldValueWrites),
       values = Seq.empty[String]
     )
-  }
 
 }
