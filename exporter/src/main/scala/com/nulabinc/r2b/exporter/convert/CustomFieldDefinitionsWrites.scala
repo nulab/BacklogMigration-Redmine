@@ -8,9 +8,8 @@ import com.nulabinc.backlog.migration.domain._
 import com.nulabinc.backlog.migration.utils.Logging
 import com.nulabinc.backlog4j.CustomField.FieldType
 import com.nulabinc.backlog4j.internal.json.customFields.DateCustomFieldSetting
-import com.nulabinc.r2b.domain.RedmineCustomFieldDefinition
 import com.nulabinc.r2b.redmine.conf.RedmineConstantValue
-import com.nulabinc.r2b.redmine.domain.PropertyValue
+import com.nulabinc.r2b.redmine.domain.{PropertyValue, RedmineCustomFieldDefinition}
 import com.osinka.i18n.Messages
 
 /**
@@ -60,8 +59,8 @@ class CustomFieldDefinitionsWrites @Inject()(propertyValue: PropertyValue)
     BacklogCustomFieldNumericProperty(typeId = BacklogConstantValue.CustomField.Numeric,
                                       optInitialValue = initialValueNumeric(redmineCustomFieldDefinition),
                                       optUnit = None,
-                                      optMin = minNumeric(redmineCustomFieldDefinition.maxLength),
-                                      optMax = maxNumeric(redmineCustomFieldDefinition.maxLength))
+                                      optMin = minNumeric(redmineCustomFieldDefinition.optMinLength),
+                                      optMax = maxNumeric(redmineCustomFieldDefinition.optMaxLength))
 
   private[this] def textProperty(): BacklogCustomFieldTextProperty =
     BacklogCustomFieldTextProperty(BacklogConstantValue.CustomField.Text)
@@ -75,7 +74,7 @@ class CustomFieldDefinitionsWrites @Inject()(propertyValue: PropertyValue)
     }
 
   private[this] def initialValueNumeric(redmineCustomFieldDefinition: RedmineCustomFieldDefinition): Option[Float] =
-    (redmineCustomFieldDefinition.fieldFormat, redmineCustomFieldDefinition.defaultValue) match {
+    (redmineCustomFieldDefinition.fieldFormat, redmineCustomFieldDefinition.optDefaultValue) match {
       case ("int" | "float", Some(defaultValue)) if (defaultValue.nonEmpty) => Some(defaultValue.toFloat)
       case _                                                                => None
     }
@@ -90,7 +89,7 @@ class CustomFieldDefinitionsWrites @Inject()(propertyValue: PropertyValue)
     if (redmineCustomFieldDefinition.fieldFormat == RedmineConstantValue.FieldFormat.DATE) {
       val initialDate =
         BacklogCustomFieldInitialDate(typeId = DateCustomFieldSetting.InitialValueType.FixedDate.getIntValue.toLong,
-                                      optDate = redmineCustomFieldDefinition.defaultValue,
+                                      optDate = redmineCustomFieldDefinition.optDefaultValue,
                                       optShift = None)
       Some(initialDate)
     } else None

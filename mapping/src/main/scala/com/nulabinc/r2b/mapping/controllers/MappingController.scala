@@ -6,7 +6,7 @@ import com.nulabinc.backlog.migration.utils.{ConsoleOut, Logging}
 import com.nulabinc.r2b.mapping.core.MappingData
 import com.nulabinc.r2b.mapping.modules.{ActorModule, RedmineModule}
 import com.nulabinc.r2b.mapping.service.ProjectApplicationService
-import com.nulabinc.r2b.redmine.conf.RedmineConfig
+import com.nulabinc.r2b.redmine.conf.RedmineApiConfiguration
 import com.osinka.i18n.Messages
 import com.taskadapter.redmineapi.bean.User
 
@@ -17,7 +17,7 @@ import scala.collection.mutable
   */
 object MappingController extends Logging {
 
-  def execute(apiConfig: RedmineConfig): MappingData = {
+  def execute(apiConfig: RedmineApiConfiguration): MappingData = {
 
     val injector = Guice.createInjector(
       new RedmineModule(apiConfig),

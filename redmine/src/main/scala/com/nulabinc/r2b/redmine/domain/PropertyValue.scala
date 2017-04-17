@@ -12,7 +12,8 @@ case class PropertyValue(users: Seq[User],
                          priorities: Seq[IssuePriority],
                          trackers: Seq[Tracker],
                          memberships: Seq[Membership],
-                         statuses: Seq[IssueStatus]) {
+                         statuses: Seq[IssueStatus],
+                         customFieldDefinitions: Seq[RedmineCustomFieldDefinition]) {
 
   def versionOfId(optValue: Option[String]): Option[Version] =
     optValue match {
@@ -50,9 +51,11 @@ case class PropertyValue(users: Seq[User],
       case _          => throw new RuntimeException(s"user not found.[${id}]")
     }
 
-  def optUserOfId(id: Int): Option[User] = {
-    users.find(user => user.getId.intValue() == id)
-  }
+  def optUserOfId(value: String): Option[User] =
+    StringUtil.safeStringToInt(value) match {
+      case Some(intValue) => users.find(user => user.getId.intValue() == intValue)
+      case _              => None
+    }
 
   def categoryOfId(optValue: Option[String]): Option[IssueCategory] =
     optValue match {
@@ -73,5 +76,17 @@ case class PropertyValue(users: Seq[User],
         }
       case _ => None
     }
+
+  def customFieldDefinitionOfId(strId: String): Option[RedmineCustomFieldDefinition] = {
+    StringUtil.safeStringToInt(strId) match {
+      case Some(id) =>
+        customFieldDefinitions.find(customFieldDefinition => customFieldDefinition.id == id)
+      case _ => None
+    }
+  }
+
+  def customFieldDefinitionOfName(name: String): Option[RedmineCustomFieldDefinition] = {
+    customFieldDefinitions.find(customFieldDefinition => customFieldDefinition.name == name)
+  }
 
 }

@@ -9,8 +9,8 @@ import akka.routing.SmallestMailboxPool
 import com.nulabinc.backlog.migration.conf.{BacklogConfiguration, BacklogPaths}
 import com.nulabinc.backlog.migration.modules.akkaguice.NamedActor
 import com.nulabinc.backlog.migration.utils.{Logging, ProgressBar}
-import com.nulabinc.r2b.exporter.convert.{IssueWrites, JournalWrites, UserWrites}
-import com.nulabinc.r2b.redmine.conf.RedmineConfig
+import com.nulabinc.r2b.exporter.convert.{CustomFieldWrites, IssueWrites, JournalWrites, UserWrites}
+import com.nulabinc.r2b.redmine.conf.RedmineApiConfiguration
 import com.nulabinc.r2b.redmine.domain.PropertyValue
 import com.nulabinc.r2b.redmine.service.{IssueService, ProjectService}
 import com.osinka.i18n.Messages
@@ -20,11 +20,12 @@ import scala.concurrent.duration._
 /**
   * @author uchida
   */
-class IssuesActor @Inject()(apiConfig: RedmineConfig,
+class IssuesActor @Inject()(apiConfig: RedmineApiConfiguration,
                             backlogPaths: BacklogPaths,
                             issueWrites: IssueWrites,
                             journalWrites: JournalWrites,
                             userWrites: UserWrites,
+                            customFieldWrites: CustomFieldWrites,
                             @Named("projectId") projectId: Int,
                             issueService: IssueService,
                             projectService: ProjectService,
@@ -52,7 +53,16 @@ class IssuesActor @Inject()(apiConfig: RedmineConfig,
       val issueActor =
         context.actorOf(
           router.props(
-            Props(new IssueActor(apiConfig, backlogPaths, issueService, projectService, propertyValue, issueWrites, journalWrites, userWrites))))
+            Props(
+              new IssueActor(apiConfig,
+                             backlogPaths,
+                             issueService,
+                             projectService,
+                             propertyValue,
+                             issueWrites,
+                             journalWrites,
+                             userWrites,
+                             customFieldWrites))))
 
       (0 until (allCount, limit))
         .foldLeft(Seq.empty[Int]) { (acc, offset) =>

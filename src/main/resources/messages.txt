@@ -26,11 +26,9 @@ common.groups=groups
 common.issue_type=issue type
 common.result_success=SUCCESSFUL
 common.result_failed=FAILED:{0,number,#}
-common.done_ratio=% done
 common.not_set=New
 common.relation=Related issue:
 common.private=Private
-common.project=Project
 
 
 # Message
@@ -46,6 +44,27 @@ message.analyzing=Analyzing
 message.analyzed=Analyzed
 message.collecting=Collecting
 message.collected=Collected
+
+
+# Mapping
+mapping.status.backlog.open=Open
+mapping.status.backlog.in_progress=In Progress
+mapping.status.backlog.resolved=Resolved
+mapping.status.backlog.closed=Closed
+mapping.status.redmine.new=New
+mapping.status.redmine.in_progress=InProgress
+mapping.status.redmine.resolved=Resolved
+mapping.status.redmine.feedback=Feedback
+mapping.status.redmine.closed=Closed
+mapping.status.redmine.rejected=Rejected
+mapping.priority.backlog.low=Low
+mapping.priority.backlog.normal=Normal
+mapping.priority.backlog.high=High
+mapping.priority.redmine.low=Low
+mapping.priority.redmine.normal=Normal
+mapping.priority.redmine.high=High
+mapping.priority.redmine.urgent=Urgent
+mapping.priority.redmine.immediate=Immediate
 
 
 # CLI
@@ -68,7 +87,8 @@ cli.help.backlog.key=Your Backlog api access key (required) Example:--backlog.ke
 cli.help.backlog.url=Your Backlog url (required) Example:--backlog.url [your backlog url]
 cli.help.redmine.key=Your Redmine api access key (required) Example:--redmine.key [your redmine API access key]
 cli.help.redmine.url=Your Redmine URL (required) Example:--redmine.url [your redmine url]
-cli.help.importOnly=If you set this property, only import will be run by the program.
+cli.help.importOnly=If you set this option, only import will be run by the program.
+cli.help.optOut=If you set this option, tracking will not be run by the program.
 
 
 # CLI Validate Param

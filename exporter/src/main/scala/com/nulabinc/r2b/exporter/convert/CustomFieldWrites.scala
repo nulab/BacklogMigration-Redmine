@@ -4,10 +4,11 @@ import javax.inject.Inject
 
 import com.nulabinc.backlog.migration.converter.Writes
 import com.nulabinc.backlog.migration.domain.BacklogCustomField
-import com.nulabinc.backlog.migration.utils.StringUtil
+import com.nulabinc.backlog.migration.utils.{Logging, StringUtil}
 import com.nulabinc.backlog4j.CustomField.FieldType
 import com.nulabinc.r2b.redmine.conf.RedmineConstantValue
-import com.nulabinc.r2b.redmine.domain.{CustomFieldFormats, PropertyValue}
+import com.nulabinc.r2b.redmine.domain.PropertyValue
+import com.osinka.i18n.Messages
 import com.taskadapter.redmineapi.bean.{CustomField, User, Version}
 
 import scala.collection.JavaConverters._
@@ -15,20 +16,20 @@ import scala.collection.JavaConverters._
 /**
   * @author uchida
   */
-class CustomFieldWrites @Inject()(propertyValue: PropertyValue, customFieldFormats: CustomFieldFormats)
-    extends Writes[CustomField, Option[BacklogCustomField]] {
+class CustomFieldWrites @Inject()(propertyValue: PropertyValue) extends Writes[CustomField, Option[BacklogCustomField]] with Logging {
 
   override def writes(customField: CustomField): Option[BacklogCustomField] = {
-    customFieldFormats.map.get(customField.getName) match {
-      case Some(definition) =>
-        definition.fieldFormat match {
+    val optCustomFieldDefinition = propertyValue.customFieldDefinitionOfName(customField.getName)
+    optCustomFieldDefinition match {
+      case Some(customFieldDefinition) =>
+        customFieldDefinition.fieldFormat match {
           case RedmineConstantValue.FieldFormat.TEXT                                           => Some(toTextCustomField(customField))
           case RedmineConstantValue.FieldFormat.STRING | RedmineConstantValue.FieldFormat.LINK => Some(toTextAreaCustomField(customField))
           case RedmineConstantValue.FieldFormat.INT | RedmineConstantValue.FieldFormat.FLOAT   => Some(toNumericCustomField(customField))
           case RedmineConstantValue.FieldFormat.DATE                                           => Some(toDateCustomField(customField))
-          case RedmineConstantValue.FieldFormat.BOOL                                           => Some(toSingleListCustomField(customField))
-          case RedmineConstantValue.FieldFormat.LIST if (!definition.multiple)                 => Some(toSingleListCustomField(customField))
-          case RedmineConstantValue.FieldFormat.LIST if (definition.multiple)                  => Some(toMultipleListCustomField(customField))
+          case RedmineConstantValue.FieldFormat.BOOL                                           => Some(bool(customField))
+          case RedmineConstantValue.FieldFormat.LIST if (!customFieldDefinition.isMultiple)    => Some(toSingleListCustomField(customField))
+          case RedmineConstantValue.FieldFormat.LIST if (customFieldDefinition.isMultiple)     => Some(toMultipleListCustomField(customField))
           case RedmineConstantValue.FieldFormat.VERSION                                        => Some(version(customField))
           case RedmineConstantValue.FieldFormat.USER                                           => Some(user(customField))
           case _                                                                               => None
@@ -127,6 +128,24 @@ class CustomFieldWrites @Inject()(propertyValue: PropertyValue, customFieldForma
       name = customField.getName,
       fieldTypeId = FieldType.SingleList.getIntValue,
       optValue = Option(customField.getValue).flatMap(toName).map(_.getFullName),
+      values = Seq.empty[String]
+    )
+  }
+
+  private[this] def bool(customField: CustomField): BacklogCustomField = {
+
+    def toName(optValue: Option[String]): Option[String] = {
+      optValue match {
+        case Some("0") => Some(Messages("common.no"))
+        case Some("1") => Some(Messages("common.yes"))
+        case _         => None
+      }
+    }
+
+    BacklogCustomField(
+      name = customField.getName,
+      fieldTypeId = FieldType.SingleList.getIntValue,
+      optValue = toName(Option(customField.getValue)),
       values = Seq.empty[String]
     )
   }

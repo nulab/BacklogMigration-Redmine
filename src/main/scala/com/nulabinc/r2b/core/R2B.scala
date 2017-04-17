@@ -1,10 +1,12 @@
 package com.nulabinc.r2b.core
 
+import java.util.Locale
+
 import com.nulabinc.backlog.migration.conf.{BacklogApiConfiguration, BacklogConfiguration}
 import com.nulabinc.backlog.migration.utils.{ConsoleOut, Logging}
 import com.nulabinc.r2b.cli._
 import com.nulabinc.r2b.conf._
-import com.nulabinc.r2b.redmine.conf.RedmineConfig
+import com.nulabinc.r2b.redmine.conf.RedmineApiConfiguration
 import com.nulabinc.r2b.utils.{ClassVersion, DisableSSLCertificateCheckUtil}
 import com.osinka.i18n.Messages
 import org.fusesource.jansi.AnsiConsole
@@ -27,6 +29,8 @@ class CommandLineInterface(arguments: Seq[String]) extends ScallopConf(arguments
 
     val projectKey = opt[String]("projectKey", descr = Messages("cli.help.projectKey"), required = true)
     val importOnly = opt[Boolean]("importOnly", descr = Messages("cli.help.importOnly"), required = true)
+    val optOut     = opt[Boolean]("optOut", descr = Messages("cli.help.optOut"), required = false)
+
   }
 
   val init = new Subcommand("init") {
@@ -50,6 +54,7 @@ object R2B extends BacklogConfiguration with Logging {
     ConsoleOut.println(s"""|${applicationName}
                  |--------------------------------------------------""".stripMargin)
     AnsiConsole.systemInstall()
+    setLang()
     DisableSSLCertificateCheckUtil.disableChecks()
     if (ClassVersion.isValid()) {
       try {
@@ -87,10 +92,19 @@ object R2B extends BacklogConfiguration with Logging {
     val redmine: String     = keys(0)
     val backlog: String     = if (keys.length == 2) keys(1) else keys(0).toUpperCase.replaceAll("-", "_")
 
-    AppConfiguration(redmineConfig = new RedmineConfig(url = cli.execute.redmineUrl(), key = cli.execute.redmineKey(), projectKey = redmine),
-                     backlogConfig =
-                       new BacklogApiConfiguration(url = cli.execute.backlogUrl(), key = cli.execute.backlogKey(), projectKey = backlog),
-                     importOnly = cli.execute.importOnly())
+    AppConfiguration(
+      redmineConfig = new RedmineApiConfiguration(url = cli.execute.redmineUrl(), key = cli.execute.redmineKey(), projectKey = redmine),
+      backlogConfig = new BacklogApiConfiguration(url = cli.execute.backlogUrl(), key = cli.execute.backlogKey(), projectKey = backlog),
+      importOnly = cli.execute.importOnly(),
+      optOut = cli.execute.optOut())
+  }
+
+  private[this] def setLang() = {
+    if (language == "ja") {
+      Locale.setDefault(Locale.JAPAN)
+    } else if (language == "en") {
+      Locale.setDefault(Locale.US)
+    }
   }
 
 }

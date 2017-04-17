@@ -8,17 +8,15 @@ import com.nulabinc.backlog4j.conf.{BacklogConfigure, BacklogPackageConfigure}
 import com.nulabinc.backlog4j.{BacklogClient, BacklogClientFactory}
 import com.nulabinc.r2b.conf.AppConfiguration
 import com.nulabinc.r2b.controllers.MappingController
-import com.nulabinc.r2b.domain.RedmineIssuesWrapper
-import com.nulabinc.r2b.domain.RedmineJsonProtocol._
 import com.nulabinc.r2b.mapping.core._
-import com.nulabinc.r2b.redmine.conf.RedmineConfig
+import com.nulabinc.r2b.redmine.conf.RedmineApiConfiguration
 import com.osinka.i18n.Lang
 import com.taskadapter.redmineapi.{RedmineManager, RedmineManagerFactory}
 import org.apache.http.client.methods.HttpGet
 import org.apache.http.impl.client.DefaultHttpClient
 import org.apache.http.util.EntityUtils
 import org.joda.time.DateTime
-import spray.json.JsonParser
+import spray.json.{JsNumber, JsonParser}
 
 import scala.collection.JavaConverters._
 
@@ -57,9 +55,10 @@ trait SimpleFixture {
     val redmine: String     = keys(0)
     val backlog: String     = if (keys.length == 2) keys(1) else keys(0).toUpperCase.replaceAll("-", "_")
 
-    AppConfiguration(redmineConfig = new RedmineConfig(url = redmineUrl, key = redmineKey, projectKey = redmine),
+    AppConfiguration(redmineConfig = new RedmineApiConfiguration(url = redmineUrl, key = redmineKey, projectKey = redmine),
                      backlogConfig = new BacklogApiConfiguration(url = backlogUrl, key = backlogKey, projectKey = backlog),
-                     importOnly = false)
+                     importOnly = false,
+                     optOut = true)
   }
 
   private[this] def getBacklogClient(appConfiguration: BacklogApiConfiguration): BacklogClient = {
@@ -77,27 +76,23 @@ trait SimpleFixture {
   }
 
   def redmineIssueCount() = {
-    val countIssueUrl =
-      s"${appConfiguration.redmineConfig.url}/issues.json?limit=1&subproject_id=!*&project_id=${redmineProject.getId}&key=${appConfiguration.redmineConfig.key}&status_id=*"
-    val str: String                                = httpGet(countIssueUrl)
-    val redmineIssuesWrapper: RedmineIssuesWrapper = JsonParser(str).convertTo[RedmineIssuesWrapper]
-    redmineIssuesWrapper.total_count
+    val string = scala.io.Source
+      .fromURL(
+        s"${appConfiguration.redmineConfig.url}/issues.json?limit=1&subproject_id=!*&project_id=${redmineProject.getId}&key=${appConfiguration.redmineConfig.key}&status_id=*")
+      .mkString
+    JsonParser(string).asJsObject.getFields("total_count") match {
+      case Seq(JsNumber(totalCount)) => totalCount.intValue()
+      case _                         => 0
+    }
   }
 
-  def getRedmineIssues(count: Int, offset: Long) = {
+  def allRedmineIssues(count: Int, offset: Long) = {
     val params = Map("offset" -> offset.toString,
                      "limit"         -> count.toString,
                      "project_id"    -> redmineProject.getId.toString,
                      "status_id"     -> "*",
                      "subproject_id" -> "!*")
     redmine.getIssueManager.getIssues(params.asJava).asScala
-  }
-
-  private[this] def httpGet(url: String): String = {
-    val httpGet: HttpGet = new HttpGet(url)
-    val client           = new DefaultHttpClient
-    val response         = client.execute(httpGet)
-    EntityUtils.toString(response.getEntity, "UTF-8")
   }
 
   def dateToString(date: Date) = new DateTime(date).toString(dateFormat)

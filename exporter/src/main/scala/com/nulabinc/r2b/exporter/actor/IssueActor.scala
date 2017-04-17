@@ -8,9 +8,9 @@ import com.nulabinc.backlog.migration.converter.Convert
 import com.nulabinc.backlog.migration.domain.BacklogJsonProtocol._
 import com.nulabinc.backlog.migration.domain.{BacklogComment, BacklogIssue}
 import com.nulabinc.backlog.migration.utils.{DateUtil, IOUtil, Logging}
-import com.nulabinc.r2b.exporter.convert.{IssueWrites, JournalWrites, UserWrites}
+import com.nulabinc.r2b.exporter.convert.{CustomFieldWrites, IssueWrites, JournalWrites, UserWrites}
 import com.nulabinc.r2b.exporter.service.{CommentReducer, IssueInitializer}
-import com.nulabinc.r2b.redmine.conf.RedmineConfig
+import com.nulabinc.r2b.redmine.conf.RedmineApiConfiguration
 import com.nulabinc.r2b.redmine.domain.PropertyValue
 import com.nulabinc.r2b.redmine.service.{IssueService, ProjectService}
 import com.taskadapter.redmineapi.Include
@@ -24,14 +24,15 @@ import scala.concurrent.duration._
 /**
   * @author uchida
   */
-class IssueActor(apiConfig: RedmineConfig,
+class IssueActor(apiConfig: RedmineApiConfiguration,
                  backlogPaths: BacklogPaths,
                  issueService: IssueService,
                  projectService: ProjectService,
                  propertyValue: PropertyValue,
                  issueWrites: IssueWrites,
                  journalWrites: JournalWrites,
-                 userWrites: UserWrites)
+                 userWrites: UserWrites,
+                 customFieldWrites: CustomFieldWrites)
     extends Actor
     with Logging {
 
@@ -57,17 +58,13 @@ class IssueActor(apiConfig: RedmineConfig,
       console((allCount - completion.getCount).toInt, allCount)
   }
 
-  private[this] def exportIssue(issue: Issue, journals: Seq[Journal]): BacklogIssue = {
-    val issueCreated = DateUtil.tryIsoParse(Option(issue.getCreatedOn).map(DateUtil.isoFormat))
-    val issueDirPath =
-      backlogPaths.issueDirectoryPath(DateUtil.yyyymmddFormat(issueCreated), s"${issueCreated.getTime}-${issue.getId.intValue()}-issue-0")
-    val issueInitializer = new IssueInitializer(issueWrites, userWrites, journals, propertyValue)
+  private[this] def exportIssue(issue: Issue, journals: Seq[Journal]) = {
+    val issueCreated     = DateUtil.tryIsoParse(Option(issue.getCreatedOn).map(DateUtil.isoFormat))
+    val issueDirPath     = backlogPaths.issueDirectoryPath("issue", issue.getId.intValue(), issueCreated, 0)
+    val issueInitializer = new IssueInitializer(issueWrites, userWrites, customFieldWrites, journals, propertyValue)
     val backlogIssue     = issueInitializer.initialize(issue)
-    IOUtil.output(
-      backlogPaths.issueJson(issueDirPath),
-      backlogIssue.toJson.prettyPrint
-    )
-    backlogIssue
+
+    IOUtil.output(backlogPaths.issueJson(issueDirPath), backlogIssue.toJson.prettyPrint)
   }
 
   private[this] def exportComments(issue: BacklogIssue, comments: Seq[BacklogComment], attachments: Seq[Attachment]) = {
@@ -83,12 +80,9 @@ class IssueActor(apiConfig: RedmineConfig,
                                   attachments: Seq[Attachment],
                                   index: Int) = {
     val commentCreated = DateUtil.tryIsoParse(comment.optCreated)
-    val issueDirPath =
-      backlogPaths.issueDirectoryPath(DateUtil.yyyymmddFormat(commentCreated), s"${commentCreated.getTime}-${issue.id}-comment-${index}")
-
-    val commentReducer =
-      new CommentReducer(apiConfig: RedmineConfig, projectService, backlogPaths, issue, comments, attachments, issueDirPath)
-    val reduced = commentReducer.reduce(comment)
+    val issueDirPath   = backlogPaths.issueDirectoryPath("comment", issue.id, commentCreated, index)
+    val commentReducer = new CommentReducer(apiConfig, projectService, backlogPaths, issue, comments, attachments, issueDirPath)
+    val reduced        = commentReducer.reduce(comment)
 
     IOUtil.output(backlogPaths.issueJson(issueDirPath), reduced.toJson.prettyPrint)
   }

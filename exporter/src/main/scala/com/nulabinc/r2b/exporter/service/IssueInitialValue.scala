@@ -12,8 +12,8 @@ class IssueInitialValue(property: String, name: String) {
   def findJournalDetail(journals: Seq[Journal]): Option[JournalDetail] =
     journals.find(isTargetjournal).flatMap(targetJournalDetail)
 
-  def findJournalDetails(journals: Seq[Journal]): Seq[JournalDetail] =
-    journals.find(isTargetjournal).map(targetJournalDetails).getOrElse(Seq.empty[JournalDetail])
+  def findJournalDetails(journals: Seq[Journal]): Option[Seq[JournalDetail]] =
+    journals.find(isTargetjournal).map(targetJournalDetails)
 
   private[this] def targetJournalDetail(journal: Journal): Option[JournalDetail] =
     journal.getDetails.asScala.find(isTargetJournalDetail)

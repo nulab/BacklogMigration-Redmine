@@ -26,11 +26,9 @@ common.groups=グループ
 common.issue_type=課題種別
 common.result_success=成功
 common.result_failed=失敗:{0,number,#}
-common.done_ratio=進捗率
 common.not_set=新規
 common.relation=関連している課題:
 common.private=プライベート
-common.project=プロジェクト
 
 
 # Message
@@ -46,6 +44,27 @@ message.analyzing=解析しています...
 message.analyzed=解析しました。
 message.collecting=収集しています...
 message.collected=収集しました。
+
+
+# Mapping
+mapping.status.backlog.open=未対応
+mapping.status.backlog.in_progress=処理中
+mapping.status.backlog.resolved=処理済み
+mapping.status.backlog.closed=完了
+mapping.status.redmine.new=新規
+mapping.status.redmine.in_progress=進行中
+mapping.status.redmine.resolved=解決
+mapping.status.redmine.feedback=フィードバック
+mapping.status.redmine.closed=終了
+mapping.status.redmine.rejected=却下
+mapping.priority.backlog.low=低
+mapping.priority.backlog.normal=中
+mapping.priority.backlog.high=高
+mapping.priority.redmine.low=低め
+mapping.priority.redmine.normal=通常
+mapping.priority.redmine.high=高め
+mapping.priority.redmine.urgent=急いで
+mapping.priority.redmine.immediate=今すぐ
 
 
 # CLI
@@ -68,7 +87,8 @@ cli.help.backlog.key=Backlogのアクセスキーを指定します。(必須オ
 cli.help.backlog.url=BacklogのURLを指定します。(必須オプション)例：--backlog.url [BacklogのURL]
 cli.help.redmine.key=RedmineのAPIアクセスキーを指定します。(必須オプション)例：--redmine.key [RedmineのAPIアクセスキー]
 cli.help.redmine.url=RedmineのURLを指定します。(必須オプション)例：--redmine.url [RedmineのURL]
-cli.help.importOnly=このプロパティを設定した場合、インポートのみを行います。
+cli.help.importOnly=このオプションを設定した場合、インポートのみを行います。
+cli.help.optOut=このオプションを設定した場合、トラッキングを行いません。
 
 
 # CLI Validate Param

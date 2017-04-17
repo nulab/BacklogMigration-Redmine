@@ -7,10 +7,10 @@ import com.taskadapter.redmineapi.bean.Project
   */
 trait ProjectService {
 
-  def project(): Project
-
-  def optProject(): Option[Project]
+  def tryProjectOfKey(projectKey: String): Project
 
   def optProjectOfId(id: Int): Option[Project]
+
+  def optProjectOfKey(projectKey: String): Option[Project]
 
 }

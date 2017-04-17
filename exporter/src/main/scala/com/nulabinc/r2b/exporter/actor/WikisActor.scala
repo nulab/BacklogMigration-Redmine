@@ -10,7 +10,7 @@ import com.nulabinc.backlog.migration.conf.{BacklogConfiguration, BacklogPaths}
 import com.nulabinc.backlog.migration.modules.akkaguice.NamedActor
 import com.nulabinc.backlog.migration.utils.{Logging, ProgressBar}
 import com.nulabinc.r2b.exporter.convert.WikiWrites
-import com.nulabinc.r2b.redmine.conf.RedmineConfig
+import com.nulabinc.r2b.redmine.conf.RedmineApiConfiguration
 import com.nulabinc.r2b.redmine.service.WikiService
 import com.osinka.i18n.Messages
 import com.taskadapter.redmineapi.bean.WikiPage
@@ -20,7 +20,7 @@ import scala.concurrent.duration._
 /**
   * @author uchida
   */
-class WikisActor @Inject()(apiConfig: RedmineConfig, backlogPaths: BacklogPaths, wikiWrites: WikiWrites, wikiService: WikiService)
+class WikisActor @Inject()(apiConfig: RedmineApiConfiguration, backlogPaths: BacklogPaths, wikiWrites: WikiWrites, wikiService: WikiService)
     extends Actor
     with BacklogConfiguration
     with Logging {

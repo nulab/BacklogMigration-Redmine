@@ -5,7 +5,7 @@ import com.nulabinc.backlog.migration.modules.{AkkaModule, ConfigModule}
 import com.nulabinc.backlog.migration.utils.{ConsoleOut, Logging}
 import com.nulabinc.r2b.exporter.modules.{ActorModule, RedmineModule}
 import com.nulabinc.r2b.exporter.service.ProjectApplicationService
-import com.nulabinc.r2b.redmine.conf.RedmineConfig
+import com.nulabinc.r2b.redmine.conf.RedmineApiConfiguration
 import com.osinka.i18n.Messages
 
 /**
@@ -13,7 +13,7 @@ import com.osinka.i18n.Messages
   */
 object ExportController extends Logging {
 
-  def execute(apiConfig: RedmineConfig, backlogProjectKey: String) = {
+  def execute(apiConfig: RedmineApiConfiguration, backlogProjectKey: String) = {
 
     val injector = Guice.createInjector(
       new RedmineModule(apiConfig, backlogProjectKey),
