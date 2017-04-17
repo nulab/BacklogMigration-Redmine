@@ -26,9 +26,10 @@ common.groups=groups
 common.issue_type=issue type
 common.result_success=SUCCESSFUL
 common.result_failed=FAILED:{0,number,#}
-common.not_set=New
-common.relation=Related issue:
+common.empty=empty
+common.relation=Related issue
 common.private=Private
+common.change_comment={0}: {1} -> {2}
 
 
 # Message

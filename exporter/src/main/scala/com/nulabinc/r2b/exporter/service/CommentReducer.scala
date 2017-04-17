@@ -32,10 +32,10 @@ class CommentReducer(apiConfig: RedmineApiConfiguration,
     val newChangeLogs = comment.changeLogs.flatMap(changeLog => parse(comment, changeLog))
     val optNewContent = comment.optContent match {
       case Some(content) =>
-        val newContent = (s"${changeLogContent.toString()}\n${content}").trim
+        val newContent = (s"${content}\n${changeLogContent.result()}").trim
         StringUtil.notEmpty(newContent)
       case None =>
-        val newContent = changeLogContent.toString().trim
+        val newContent = changeLogContent.result().trim
         StringUtil.notEmpty(newContent)
     }
     comment.copy(optIssueId = Some(issue.id), optContent = optNewContent, isCreateIssue = false, changeLogs = newChangeLogs)
@@ -43,33 +43,50 @@ class CommentReducer(apiConfig: RedmineApiConfiguration,
 
   private[this] def parse(comment: BacklogComment, changeLog: BacklogChangeLog): Option[BacklogChangeLog] = {
 
-    def getValue(value: Option[String]): String =
-      value.getOrElse(Messages("common.not_set"))
+    def getValue(optValue: Option[String]): String =
+      optValue.getOrElse(Messages("common.empty"))
 
     def getProjectName(optValue: Option[String]): String = {
       optValue match {
         case Some(value) =>
           StringUtil.safeStringToInt(value) match {
-            case Some(intValue) => projectService.optProjectOfId(intValue).map(_.getName).getOrElse(Messages("label.not_set"))
-            case _              => Messages("label.not_set")
+            case Some(intValue) => projectService.optProjectOfId(intValue).map(_.getName).getOrElse(Messages("common.empty"))
+            case _              => Messages("common.empty")
           }
-        case _ => Messages("label.not_set")
+        case _ => Messages("common.empty")
       }
     }
+
+    def privateValue(optValue: Option[String]): Option[String] =
+      optValue match {
+        case Some("0") => Some(Messages("common.no"))
+        case Some("1") => Some(Messages("common.yes"))
+        case _         => None
+      }
 
     changeLog.field match {
       case BacklogConstantValue.ChangeLog.ATTACHMENT => attachment(changeLog)
       case "done_ratio" =>
-        changeLogContent.append(Messages("common.done_ratio", getValue(changeLog.optOriginalValue), getValue(changeLog.optNewValue)))
+        changeLogContent.append(
+          Messages("common.change_comment", Messages("common.done_ratio"), getValue(changeLog.optOriginalValue), getValue(changeLog.optNewValue)))
         None
       case "relates" =>
-        changeLogContent.append(Messages("common.relation", getValue(changeLog.optOriginalValue), getValue(changeLog.optNewValue)))
+        changeLogContent.append(
+          Messages("common.change_comment", Messages("common.relation"), getValue(changeLog.optOriginalValue), getValue(changeLog.optNewValue)))
         None
       case "is_private" =>
-        changeLogContent.append(Messages("common.private", getValue(changeLog.optOriginalValue), getValue(changeLog.optNewValue)))
+        changeLogContent.append(
+          Messages("common.change_comment",
+                   Messages("common.private"),
+                   getValue(privateValue(changeLog.optOriginalValue)),
+                   getValue(privateValue(changeLog.optNewValue))))
         None
       case "project_id" =>
-        changeLogContent.append(Messages("common.project", getProjectName(changeLog.optOriginalValue), getProjectName(changeLog.optNewValue)))
+        changeLogContent.append(
+          Messages("common.change_comment",
+                   Messages("common.project"),
+                   getProjectName(changeLog.optOriginalValue),
+                   getProjectName(changeLog.optNewValue)))
         None
       case _ =>
         Some(changeLog.copy(optNewValue = issuePropertyNewValue(comment, changeLog)))
