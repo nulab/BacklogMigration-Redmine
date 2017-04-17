@@ -8,7 +8,7 @@ import com.nulabinc.backlog.migration.converter.Convert
 import com.nulabinc.backlog.migration.domain.BacklogJsonProtocol._
 import com.nulabinc.backlog.migration.domain.{BacklogComment, BacklogIssue}
 import com.nulabinc.backlog.migration.utils.{DateUtil, IOUtil, Logging}
-import com.nulabinc.r2b.exporter.convert.{CustomFieldWrites, IssueWrites, JournalWrites, UserWrites}
+import com.nulabinc.r2b.exporter.convert._
 import com.nulabinc.r2b.exporter.service.{CommentReducer, IssueInitializer}
 import com.nulabinc.r2b.redmine.conf.RedmineApiConfiguration
 import com.nulabinc.r2b.redmine.domain.PropertyValue
@@ -32,7 +32,8 @@ class IssueActor(apiConfig: RedmineApiConfiguration,
                  issueWrites: IssueWrites,
                  journalWrites: JournalWrites,
                  userWrites: UserWrites,
-                 customFieldWrites: CustomFieldWrites)
+                 customFieldWrites: CustomFieldWrites,
+                 customFieldValueWrites: CustomFieldValueWrites)
     extends Actor
     with Logging {
 
@@ -61,7 +62,7 @@ class IssueActor(apiConfig: RedmineApiConfiguration,
   private[this] def exportIssue(issue: Issue, journals: Seq[Journal]) = {
     val issueCreated     = DateUtil.tryIsoParse(Option(issue.getCreatedOn).map(DateUtil.isoFormat))
     val issueDirPath     = backlogPaths.issueDirectoryPath("issue", issue.getId.intValue(), issueCreated, 0)
-    val issueInitializer = new IssueInitializer(issueWrites, userWrites, customFieldWrites, journals, propertyValue)
+    val issueInitializer = new IssueInitializer(issueWrites, userWrites, customFieldWrites, customFieldValueWrites, journals, propertyValue)
     val backlogIssue     = issueInitializer.initialize(issue)
 
     IOUtil.output(backlogPaths.issueJson(issueDirPath), backlogIssue.toJson.prettyPrint)

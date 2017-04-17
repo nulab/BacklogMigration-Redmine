@@ -3,11 +3,10 @@ package com.nulabinc.r2b.exporter.service
 import com.nulabinc.backlog.migration.converter.Convert
 import com.nulabinc.backlog.migration.domain._
 import com.nulabinc.backlog.migration.utils.{DateUtil, Logging, StringUtil}
-import com.nulabinc.r2b.exporter.convert.{CustomFieldWrites, IssueWrites, UserWrites}
+import com.nulabinc.r2b.exporter.convert.{CustomFieldValueWrites, CustomFieldWrites, IssueWrites, UserWrites}
 import com.nulabinc.r2b.mapping.core.{ConvertPriorityMapping, ConvertUserMapping}
 import com.nulabinc.r2b.redmine.conf.RedmineConstantValue
 import com.nulabinc.r2b.redmine.domain.{PropertyValue, RedmineCustomFieldDefinition}
-import com.osinka.i18n.Messages
 import com.taskadapter.redmineapi.bean._
 
 import scala.collection.JavaConverters._
@@ -18,6 +17,7 @@ import scala.collection.JavaConverters._
 class IssueInitializer(issueWrites: IssueWrites,
                        userWrites: UserWrites,
                        customFieldWrites: CustomFieldWrites,
+                       customFieldValueWrites: CustomFieldValueWrites,
                        journals: Seq[Journal],
                        propertyValue: PropertyValue)
     extends Logging {
@@ -166,8 +166,9 @@ class IssueInitializer(issueWrites: IssueWrites,
     val optDetails: Option[Seq[JournalDetail]] = issueInitialValue.findJournalDetails(journals)
     val initialValues: Seq[String] =
       optDetails match {
-        case Some(details) => details.flatMap(detail => Option(detail.getOldValue))
-        case _             => customField.getValues.asScala
+        case Some(details) =>
+          details.flatMap(detail => Convert.toBacklog((customField.getId.toString, Option(detail.getOldValue)))(customFieldValueWrites))
+        case _ => customField.getValues.asScala
       }
     Convert.toBacklog(customField)(customFieldWrites) match {
       case Some(backlogCustomField) => Some(backlogCustomField.copy(values = initialValues))
@@ -176,34 +177,11 @@ class IssueInitializer(issueWrites: IssueWrites,
   }
 
   private[this] def singleCustomField(customField: CustomField, customFieldDefinition: RedmineCustomFieldDefinition): Option[BacklogCustomField] = {
-    def condition(user: User, value: String) = {
-      StringUtil.safeStringToInt(value) match {
-        case Some(intValue) => intValue == user.getId.intValue()
-        case _              => false
-      }
-    }
-
-    def toName(value: String): Option[User] = {
-      propertyValue.users.find(user => condition(user, value))
-    }
-
-    def value(optValue: Option[String]): Option[String] = {
-      if (customFieldDefinition.fieldFormat == RedmineConstantValue.FieldFormat.USER) {
-        optValue.flatMap(toName).map(_.getFullName)
-      } else if (customFieldDefinition.fieldFormat == RedmineConstantValue.FieldFormat.BOOL) {
-        optValue match {
-          case Some("0") => Some(Messages("common.no"))
-          case Some("1") => Some(Messages("common.yes"))
-          case _         => None
-        }
-      } else optValue
-    }
-
     val issueInitialValue = new IssueInitialValue(RedmineConstantValue.CUSTOM_FIELD, customFieldDefinition.id.toString)
     val initialValue: Option[String] =
       issueInitialValue.findJournalDetail(journals) match {
-        case Some(detail) => value(StringUtil.notEmpty(detail.getOldValue))
-        case _            => value(Option(customField.getValue))
+        case Some(detail) => Convert.toBacklog((customField.getId.toString, Option(detail.getOldValue)))(customFieldValueWrites)
+        case _            => Convert.toBacklog((customField.getId.toString, Option(customField.getValue)))(customFieldValueWrites)
       }
     Convert.toBacklog(customField)(customFieldWrites) match {
       case Some(backlogCustomField) => Some(backlogCustomField.copy(optValue = initialValue))
