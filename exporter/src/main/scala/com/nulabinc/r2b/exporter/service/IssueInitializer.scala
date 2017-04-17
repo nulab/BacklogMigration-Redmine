@@ -7,7 +7,6 @@ import com.nulabinc.r2b.exporter.convert.{CustomFieldValueWrites, CustomFieldWri
 import com.nulabinc.r2b.mapping.core.{ConvertPriorityMapping, ConvertUserMapping}
 import com.nulabinc.r2b.redmine.conf.RedmineConstantValue
 import com.nulabinc.r2b.redmine.domain.{PropertyValue, RedmineCustomFieldDefinition}
-import com.osinka.i18n.Messages
 import com.taskadapter.redmineapi.bean._
 
 import scala.collection.JavaConverters._
@@ -167,8 +166,9 @@ class IssueInitializer(issueWrites: IssueWrites,
     val optDetails: Option[Seq[JournalDetail]] = issueInitialValue.findJournalDetails(journals)
     val initialValues: Seq[String] =
       optDetails match {
-        case Some(details) => details.flatMap(detail => Option(detail.getOldValue))
-        case _             => customField.getValues.asScala
+        case Some(details) =>
+          details.flatMap(detail => Convert.toBacklog((customField.getId.toString, Option(detail.getOldValue)))(customFieldValueWrites))
+        case _ => customField.getValues.asScala
       }
     Convert.toBacklog(customField)(customFieldWrites) match {
       case Some(backlogCustomField) => Some(backlogCustomField.copy(values = initialValues))
