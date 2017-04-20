@@ -9,7 +9,7 @@ import com.nulabinc.backlog.migration.converter.{BacklogUnmarshaller, Convert}
 import com.nulabinc.backlog.migration.domain.BacklogJsonProtocol._
 import com.nulabinc.backlog.migration.domain._
 import com.nulabinc.backlog.migration.modules.akkaguice.GuiceAkkaExtension
-import com.nulabinc.backlog.migration.utils.{ConsoleOut, IOUtil, Logging}
+import com.nulabinc.backlog.migration.utils.{ConsoleOut, IOUtil, Logging, ProgressBar}
 import com.nulabinc.r2b.exporter.actor.ContentActor
 import com.nulabinc.r2b.exporter.convert._
 import com.nulabinc.r2b.mapping.core.ConvertUserMapping
@@ -30,6 +30,7 @@ class ProjectApplicationService @Inject()(implicit val projectWrites: ProjectWri
                                           implicit val versionsWrites: VersionsWrites,
                                           implicit val issueTypesWrites: IssueTypesWrites,
                                           implicit val issueCategoriesWrites: IssueCategoriesWrites,
+                                          implicit val newsWrites: NewsWrites,
                                           membershipWrites: MembershipWrites,
                                           groupsWrites: GroupsWrites,
                                           backlogPaths: BacklogPaths,
@@ -38,7 +39,8 @@ class ProjectApplicationService @Inject()(implicit val projectWrites: ProjectWri
                                           trackerService: TrackerService,
                                           membershipService: MembershipService,
                                           issueCategoryService: IssueCategoryService,
-                                          versionService: VersionService)
+                                          versionService: VersionService,
+                                          newsService: NewsService)
     extends Logging {
 
   val userMapping = new ConvertUserMapping()
@@ -90,10 +92,15 @@ class ProjectApplicationService @Inject()(implicit val projectWrites: ProjectWri
     val categories = issueCategoryService.allCategories()
     IOUtil.output(backlogPaths.issueCategoriesJson, BacklogIssueCategoriesWrapper(Convert.toBacklog(categories)).toJson.prettyPrint)
     ConsoleOut.boldln(Messages("message.executed", Messages("common.category"), Messages("message.exported")), 1)
+
     //news
-    //TODO
-//    IOUtil.output(redminePaths.newsJson, RedmineMarshaller.News(newsService.allNews(), userService.allUsers()))
-//    ConsoleOut.boldln(Messages("message.executed", Messages("common.news"), Messages("message.exported")), 1)
+    val console = (ProgressBar.progress _)(Messages("common.news"), Messages("message.exporting"), Messages("message.exported"))
+    val allNews = newsService.allNews()
+    allNews.zipWithIndex.foreach {
+      case (news, index) =>
+        IOUtil.output(backlogPaths.wikiJson(news.getTitle), Convert.toBacklog(news).toJson.prettyPrint)
+        console(index + 1, allNews.size)
+    }
 
   }
 

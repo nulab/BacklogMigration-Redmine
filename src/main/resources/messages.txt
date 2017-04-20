@@ -31,6 +31,8 @@ common.relation=Related issue
 common.private=Private
 common.change_comment={0}: {1} -> {2}
 common.anonymous=Anonymous
+common.link=Link
+
 
 # Message
 message.exporting=Exporting
