@@ -106,7 +106,7 @@ cli.param.error.project_key=The project key [{0}] is incorrect.(Uppercase letter
 # CLI Mapping
 cli.mapping.delete_status=Deleted status[{0}]
 cli.mapping.error.broken_file=The mapping file {0} is broken.
-cli.mapping.fix_file="{0}" needs to be fixed.\nTo recreate, delete "{0}" and run the sub-command "init".
+cli.mapping.fix_file="{0}" needs to be fixed.\nTo recreate, run the sub-command "init".
 cli.mapping.show=The mapping {0} is as follows.
 cli.mapping.error=The mapping of {0} has the following error.
 cli.mapping.configurable=The values accepted for {0} in Backlog are "{1}".

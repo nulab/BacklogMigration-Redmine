@@ -106,7 +106,7 @@ cli.param.error.project_key=プロジェクトキー[{0}]が正しくありま�
 # CLI Mapping
 cli.mapping.delete_status=削除されたステータス[{0}]
 cli.mapping.error.broken_file={0}のマッピングファイルが壊れています。
-cli.mapping.fix_file=[{0}]を修正する必要があります。\n再作成する場合は、[{0}]を削除し、サブコマンド[init]を実行してください。
+cli.mapping.fix_file=[{0}]を修正する必要があります。\n再作成する場合はサブコマンド[init]を実行してください。
 cli.mapping.show={0}のマッピングは以下のようになります。
 cli.mapping.error={0}のマッピングに以下の誤りがあります。
 cli.mapping.configurable=Backlogに設定可能な{0}は[{1}]です。
