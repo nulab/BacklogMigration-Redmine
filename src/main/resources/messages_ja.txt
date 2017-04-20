@@ -30,6 +30,7 @@ common.empty=未設定
 common.relation=関連している課題
 common.private=プライベート
 common.change_comment={0}: {1} -> {2}
+common.anonymous=匿名ユーザー
 
 
 # Message

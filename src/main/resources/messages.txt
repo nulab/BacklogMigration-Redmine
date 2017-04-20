@@ -30,7 +30,7 @@ common.empty=empty
 common.relation=Related issue
 common.private=Private
 common.change_comment={0}: {1} -> {2}
-
+common.anonymous=Anonymous
 
 # Message
 message.exporting=Exporting
