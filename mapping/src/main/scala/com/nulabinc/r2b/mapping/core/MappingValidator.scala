@@ -30,7 +30,7 @@ class MappingValidator(redmineMappings: Seq[MappingItem], backlogMappings: Seq[M
 
   private[this] def redmineItemExists(mappingItem: MappingItem, mappings: Seq[Mapping]): Option[String] =
     if (!mappings.exists(mapping => mapping.redmine == mappingItem.name))
-      Some("- " + Messages("cli.mapping.error.not_exist.item", itemName, mappingItem.name, fileName))
+      Some("- " + Messages("cli.mapping.error.not_defined.item", itemName, mappingItem.name, fileName))
     else None
 
   private[this] def itemsExists(mappings: Seq[Mapping]): Seq[String] =
@@ -41,12 +41,11 @@ class MappingValidator(redmineMappings: Seq[MappingItem], backlogMappings: Seq[M
       }
     })
 
-  private[this] def itemExists(mapping: Mapping): Option[String] =
+  private[this] def itemExists(mapping: Mapping): Option[String] = {
     if (mapping.backlog.nonEmpty && !backlogMappings.exists(_.name == mapping.backlog)) {
-      Some("- " + Messages("cli.mapping.error.not_exist.item", mapping.backlog, itemName, Messages("common.backlog")))
-    } else if (mapping.redmine.nonEmpty && !redmineMappings.exists(_.name == mapping.redmine)) {
-      Some("- " + Messages("cli.mapping.error.not_exist.item", mapping.redmine, itemName, Messages("common.redmine")))
+      Some(s"- ${Messages("cli.mapping.error.not_exist.item", itemName, mapping.backlog, Messages("common.backlog"))}")
     } else None
+  }
 
   private[this] def itemsRequired(mappings: Seq[Mapping]): Seq[String] =
     mappings.foldLeft(Seq.empty[String])((errors: Seq[String], mapping: Mapping) => {
