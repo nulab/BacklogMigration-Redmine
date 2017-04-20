@@ -20,7 +20,7 @@ class WikiWrites @Inject()(implicit val attachmentWrites: AttachmentWrites, impl
   override def writes(wiki: WikiPageDetail): BacklogWiki = {
     BacklogWiki(
       optId = None,
-      name = wiki.getTitle,
+      name = convert(wiki.getTitle),
       optContent = Some(content(wiki)),
       attachments = wiki.getAttachments.asScala.map(Convert.toBacklog(_)),
       sharedFiles = Seq.empty[BacklogSharedFile],
@@ -29,6 +29,10 @@ class WikiWrites @Inject()(implicit val attachmentWrites: AttachmentWrites, impl
       optUpdatedUser = Option(wiki.getUser).map(Convert.toBacklog(_)),
       optUpdated = Option(wiki.getCreatedOn).map(DateUtil.isoFormat)
     )
+  }
+
+  private[this] def convert(title: String) = {
+    if (title == "Wiki") "Home" else title
   }
 
   private[this] def content(wiki: WikiPageDetail): String = {

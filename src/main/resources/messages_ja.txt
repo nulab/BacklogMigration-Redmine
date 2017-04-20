@@ -30,6 +30,8 @@ common.empty=未設定
 common.relation=関連している課題
 common.private=プライベート
 common.change_comment={0}: {1} -> {2}
+common.anonymous=匿名ユーザー
+common.link=リンク
 
 
 # Message
@@ -106,11 +108,12 @@ cli.param.error.project_key=プロジェクトキー[{0}]が正しくありま�
 # CLI Mapping
 cli.mapping.delete_status=削除されたステータス[{0}]
 cli.mapping.error.broken_file={0}のマッピングファイルが壊れています。
-cli.mapping.fix_file=[{0}]を修正する必要があります。\n再作成する場合は、[{0}]を削除し、サブコマンド[init]を実行してください。
+cli.mapping.fix_file=[{0}]を修正する必要があります。\n再作成する場合はサブコマンド[init]を実行してください。
 cli.mapping.show={0}のマッピングは以下のようになります。
 cli.mapping.error={0}のマッピングに以下の誤りがあります。
 cli.mapping.configurable=Backlogに設定可能な{0}は[{1}]です。
-cli.mapping.error.not_exist.item={1}[{0}]が{2}に存在しません。
+cli.mapping.error.not_exist.item={0}[{1}]がBacklogに登録されていません。
+cli.mapping.error.not_defined.item=移行に必要な{0}[{1}]がマッピングファイル[{2}]に定義されていません。
 cli.mapping.error.empty.item=Redmineの{0}[{1}]に対応する項目が指定されていません。
 cli.mapping.output_file={0}のマッピングファイルを[{1}]に作成しました。
 cli.confirm.fix=マッピングファイルを確認し、必要に応じて修正してください。

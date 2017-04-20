@@ -45,10 +45,10 @@ case class PropertyValue(users: Seq[User],
       case _ => None
     }
 
-  def userOfId(id: Int): User =
+  def optUserOfId(id: Int): Option[User] =
     users.find(user => user.getId.intValue() == id) match {
-      case Some(user) => user
-      case _          => throw new RuntimeException(s"user not found.[${id}]")
+      case Some(user) => Some(user)
+      case _          => None
     }
 
   def optUserOfId(optValue: Option[String]): Option[User] =
