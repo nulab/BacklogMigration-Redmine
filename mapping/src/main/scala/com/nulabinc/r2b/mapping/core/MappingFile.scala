@@ -55,7 +55,8 @@ trait MappingFile extends Logging {
   }
 
   def errors: Seq[String] = {
-    val validator = new MappingValidator(redmines, backlogs, itemName, filePath)
+    val fileName  = Path.fromString(filePath).name
+    val validator = new MappingValidator(redmines, backlogs, itemName, fileName)
     validator.validate(unmarshal())
   }
 

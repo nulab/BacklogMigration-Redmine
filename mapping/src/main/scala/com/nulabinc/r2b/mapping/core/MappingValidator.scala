@@ -8,7 +8,7 @@ import com.osinka.i18n.{Lang, Messages}
 /**
   * @author uchida
   */
-class MappingValidator(redmineMappings: Seq[MappingItem], backlogMappings: Seq[MappingItem], itemName: String, filePath: String) {
+class MappingValidator(redmineMappings: Seq[MappingItem], backlogMappings: Seq[MappingItem], itemName: String, fileName: String) {
 
   implicit val userLang = if (Locale.getDefault.equals(Locale.JAPAN)) Lang("ja") else Lang("en")
 
@@ -30,7 +30,7 @@ class MappingValidator(redmineMappings: Seq[MappingItem], backlogMappings: Seq[M
 
   private[this] def redmineItemExists(mappingItem: MappingItem, mappings: Seq[Mapping]): Option[String] =
     if (!mappings.exists(mapping => mapping.redmine == mappingItem.name))
-      Some("- " + Messages("cli.mapping.error.not_exist.item", itemName, mappingItem.name, filePath))
+      Some("- " + Messages("cli.mapping.error.not_exist.item", itemName, mappingItem.name, fileName))
     else None
 
   private[this] def itemsExists(mappings: Seq[Mapping]): Seq[String] =
