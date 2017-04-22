@@ -31,7 +31,7 @@ class CommandLineInterface(arguments: Seq[String]) extends ScallopConf(arguments
     val projectKey = opt[String]("projectKey", descr = Messages("cli.help.projectKey"), required = true)
     val importOnly = opt[Boolean]("importOnly", descr = Messages("cli.help.importOnly"), required = true)
     val optOut     = opt[Boolean]("optOut", descr = Messages("cli.help.optOut"), required = false)
-
+    val help       = opt[String]("help", descr = Messages("cli.help.show_help"))
   }
 
   val init = new Subcommand("init") {
@@ -41,6 +41,7 @@ class CommandLineInterface(arguments: Seq[String]) extends ScallopConf(arguments
     val redmineUrl = opt[String]("redmine.url", descr = Messages("cli.help.redmine.url"), required = true, noshort = true)
 
     val projectKey = opt[String]("projectKey", descr = Messages("cli.help.projectKey"), required = true)
+    val help       = opt[String]("help", descr = Messages("cli.help.show_help"))
   }
 
   addSubcommand(execute)
