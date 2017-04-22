@@ -79,6 +79,7 @@ cli.backlog_project_already_exist=プロジェクト[{0}]はBacklog内に既に�
 cli.error.unknown=予期しないエラーが発生しました。
 cli.cancel=インポートを中止しました。
 cli.invalid_setup=セットアップが不十分です。サブコマンド[init]を使用しセットアップしてください。[init]コマンドについて知るには、[--help]オプションをつけて実行してください。
+cli.warn.not.latest=最新バージョン[{0}]がリリースされています。現在のバージョンは[{1}]です。
 
 
 # CLI Help

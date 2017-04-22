@@ -11,6 +11,7 @@ import com.nulabinc.r2b.utils.{ClassVersion, DisableSSLCertificateCheckUtil}
 import com.osinka.i18n.Messages
 import org.fusesource.jansi.AnsiConsole
 import org.rogach.scallop._
+import spray.json._
 
 class CommandLineInterface(arguments: Seq[String]) extends ScallopConf(arguments) with BacklogConfiguration with Logging {
 
@@ -56,6 +57,7 @@ object R2B extends BacklogConfiguration with Logging {
     AnsiConsole.systemInstall()
     setLang()
     DisableSSLCertificateCheckUtil.disableChecks()
+    checkRelease()
     if (ClassVersion.isValid()) {
       try {
         val cli: CommandLineInterface = new CommandLineInterface(args)
@@ -104,6 +106,26 @@ object R2B extends BacklogConfiguration with Logging {
       Locale.setDefault(Locale.JAPAN)
     } else if (language == "en") {
       Locale.setDefault(Locale.US)
+    }
+  }
+
+  private[this] def checkRelease() = {
+    try {
+      val string = scala.io.Source.fromURL(s"https://api.github.com/repos/nulab/BacklogMigration-Redmine/releases").mkString
+      val latest = string.parseJson match {
+        case JsArray(releases) if (releases.nonEmpty) =>
+          releases(0).asJsObject.fields.apply("tag_name").toString().replace("\"", "").replace("v", "")
+        case _ => ""
+      }
+      if (latest != versionName) {
+        ConsoleOut.warning(s"""
+            |--------------------------------------------------
+            |${Messages("cli.warn.not.latest", latest, versionName)}
+            |--------------------------------------------------
+          """.stripMargin)
+      }
+    } catch {
+      case _: Throwable =>
     }
   }
 
