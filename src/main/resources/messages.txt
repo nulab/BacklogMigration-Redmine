@@ -97,8 +97,10 @@ cli.help.optOut=If you set this option, tracking will not be run by the program.
 # CLI Validate Param
 cli.param.error=The parameter has the following error.
 cli.param.check.access=Checking whether the {0} is accessible ...
+cli.param.check.admin=Checking for the presence of admin role ...
 cli.param.get.project=Getting the {0} project ...
-cli.param.error.auth=Accessing {0} failed due to an authorization error. Please make sure the API access key is valid and the REST API service is enabled on the server.
+cli.param.error.auth=Accessing {0} failed due to an authorization error.\n  Please make sure the API access key is valid and the REST API service is enabled on the server.
+cli.param.error.auth.backlog=Backlog API key is not administrator authority. Please use API key of administrator authority.
 cli.param.error.disable.project=The project [{0}] could not be loaded.
 cli.param.error.disable.access=The accessing {0} failed. Please check the url or api access key.
 cli.param.error.disable.host=The accessing {0} failed. [{1}] is unknown host.
