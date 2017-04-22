@@ -2,14 +2,13 @@ package com.nulabinc.r2b.core
 
 import java.util.Date
 
-import com.nulabinc.backlog4j.{BacklogClient, IssueComment, Issue => BacklogIssue}
 import com.nulabinc.backlog4j.api.option.{GetIssuesParams, QueryParams}
+import com.nulabinc.backlog4j.{IssueComment, Issue => BacklogIssue}
 import com.nulabinc.r2b.conf.AppConfiguration
 import com.nulabinc.r2b.helper.SimpleFixture
 import com.osinka.i18n.Messages
 import com.taskadapter.redmineapi.Include
-import com.taskadapter.redmineapi.bean.{Journal, User}
-import com.taskadapter.redmineapi.bean.{Issue => RedmineIssue}
+import com.taskadapter.redmineapi.bean.{User, Issue => RedmineIssue}
 import org.joda.time.DateTime
 import org.scalatest.{FlatSpec, Matchers}
 
@@ -20,13 +19,15 @@ import scala.collection.JavaConverters._
   */
 class R2BSpec extends FlatSpec with Matchers with SimpleFixture {
 
-  testProject(appConfiguration)
-  testGroup(appConfiguration)
-  testProjectUsers(appConfiguration)
-  testVersion(appConfiguration)
-  testTracker(appConfiguration)
-  testWikis(appConfiguration)
-  testIssues(appConfiguration)
+  for { appConfiguration <- optAppConfiguration } yield {
+    testProject(appConfiguration)
+    testGroup(appConfiguration)
+    testProjectUsers(appConfiguration)
+    testVersion(appConfiguration)
+    testTracker(appConfiguration)
+    testWikis(appConfiguration)
+    testIssues(appConfiguration)
+  }
 
   private[this] def testProject(appConfiguration: AppConfiguration): Unit = {
     "Project" should "match" in {
@@ -68,7 +69,7 @@ class R2BSpec extends FlatSpec with Matchers with SimpleFixture {
           for { backlogGroup <- optBacklogGroup } yield {
             val backlogUsers = backlogGroup.getMembers.asScala
             backlogUsers.exists(backlogUser => {
-              backlogUser.getUserId == userMapping.convert(redmineUser.getLogin)
+              backlogUser.getUserId == convertUser(redmineUser.getLogin)
             }) should be(true)
           }
 
@@ -90,7 +91,7 @@ class R2BSpec extends FlatSpec with Matchers with SimpleFixture {
 
       redmineUsers.foreach(redmineUser => {
         backlogUsers.exists(backlogUser => {
-          backlogUser.getUserId == userMapping.convert(redmineUser.getLogin)
+          backlogUser.getUserId == convertUser(redmineUser.getLogin)
         }) should be(true)
       })
     }
@@ -146,11 +147,11 @@ class R2BSpec extends FlatSpec with Matchers with SimpleFixture {
         redmineWikiPageDetail.getTitle should equal(backlogWiki.getName)
         redmineContent should equal(backlogWiki.getContent)
 
-        withClue(s"login:${redmineWikiUser.getLogin} converted:${userMapping.convert(redmineWikiUser.getLogin)}") {
-          userMapping.convert(redmineWikiUser.getLogin) should equal(backlogWiki.getCreatedUser.getUserId)
+        withClue(s"login:${redmineWikiUser.getLogin} converted:${convertUser(redmineWikiUser.getLogin)}") {
+          convertUser(redmineWikiUser.getLogin) should equal(backlogWiki.getCreatedUser.getUserId)
         }
-        withClue(s"login:${redmineWikiUser.getLogin} converted:${userMapping.convert(redmineWikiUser.getLogin)}") {
-          userMapping.convert(redmineWikiUser.getLogin) should equal(backlogWiki.getUpdatedUser.getUserId)
+        withClue(s"login:${redmineWikiUser.getLogin} converted:${convertUser(redmineWikiUser.getLogin)}") {
+          convertUser(redmineWikiUser.getLogin) should equal(backlogWiki.getUpdatedUser.getUserId)
         }
         timestampToString(redmineWikiPageDetail.getCreatedOn) should equal(timestampToString(backlogWiki.getCreated))
 
@@ -163,13 +164,13 @@ class R2BSpec extends FlatSpec with Matchers with SimpleFixture {
   }
 
   private[this] def testIssues(appConfiguration: AppConfiguration) = {
-    val allCount = redmineIssueCount()
+    val allCount = redmineIssueCount(appConfiguration)
     val COUNT    = 100
 
-    (0 until (allCount, COUNT)).foreach(offset => issues(COUNT, offset))
+    (0 until (allCount, COUNT)).foreach(offset => issues(appConfiguration, COUNT, offset))
   }
 
-  private[this] def issues(count: Int, offset: Long) = {
+  private[this] def issues(appConfiguration: AppConfiguration, count: Int, offset: Long) = {
     val backlogProject = backlog.getProject(appConfiguration.backlogConfig.projectKey)
     val params         = new GetIssuesParams(List(Long.box(backlogProject.getId)).asJava)
     val backlogIssues  = backlog.getIssues(params).asScala
@@ -209,20 +210,20 @@ class R2BSpec extends FlatSpec with Matchers with SimpleFixture {
           dateToString(redmineIssue.getDueDate) should equal(dateToString(backlogIssue.getDueDate))
 
           //priority
-          priorityMapping.convert(redmineIssue.getPriorityText) should equal(backlogIssue.getPriority.getName)
+          convertPriority(redmineIssue.getPriorityText) should equal(backlogIssue.getPriority.getName)
 
           //status
           withClue(s"""
                |status:${redmineIssue.getStatusName}
-               |converted:${statusMapping.convert(redmineIssue.getStatusName)}
+               |converted:${convertStatus(redmineIssue.getStatusName)}
                |""".stripMargin) {
-            statusMapping.convert(redmineIssue.getStatusName) should equal(backlogIssue.getStatus.getName)
+            convertStatus(redmineIssue.getStatusName) should equal(backlogIssue.getStatus.getName)
           }
 
           //assignee
           if (redmineIssue.getAssignee != null) {
             val redmineUser = redmine.getUserManager.getUserById(redmineIssue.getAssignee.getId)
-            userMapping.convert(redmineUser.getLogin) should equal(backlogIssue.getAssignee.getUserId)
+            convertUser(redmineUser.getLogin) should equal(backlogIssue.getAssignee.getUserId)
           }
 
           //actual hours
@@ -300,7 +301,7 @@ class R2BSpec extends FlatSpec with Matchers with SimpleFixture {
   }
 
   private[this] def userIdOfUser(user: User): String = {
-    userMapping.convert(userOfId(user.getId.intValue()).getLogin)
+    convertUser(userOfId(user.getId.intValue()).getLogin)
   }
 
 }

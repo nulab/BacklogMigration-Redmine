@@ -79,6 +79,7 @@ cli.backlog_project_already_exist=Project "{0}" already exists. Do you want to i
 cli.error.unknown=Unknown error
 cli.cancel=Import has been canceled.
 cli.invalid_setup=Setup is incomplete. Please complete the set up with the sub-command "init". Add "--help" option to know about the "init" command.
+cli.warn.not.latest=The latest version [{0}] has been released. The current version is [{1}].
 
 
 # CLI Help
@@ -97,8 +98,10 @@ cli.help.optOut=If you set this option, tracking will not be run by the program.
 # CLI Validate Param
 cli.param.error=The parameter has the following error.
 cli.param.check.access=Checking whether the {0} is accessible ...
+cli.param.check.admin=Checking for the presence of admin role ...
 cli.param.get.project=Getting the {0} project ...
-cli.param.error.auth=Accessing {0} failed due to an authorization error. Please make sure the API access key is valid and the REST API service is enabled on the server.
+cli.param.error.auth=Accessing {0} failed due to an authorization error.\n  Please make sure the API access key is valid and the REST API service is enabled on the server.
+cli.param.error.auth.backlog=Backlog API key is not administrator authority. Please use API key of administrator authority.
 cli.param.error.disable.project=The project [{0}] could not be loaded.
 cli.param.error.disable.access=The accessing {0} failed. Please check the url or api access key.
 cli.param.error.disable.host=The accessing {0} failed. [{1}] is unknown host.
@@ -141,6 +144,7 @@ import.date.execute={2} {1} about {0}.
 import.error.wiki.attachment=Failed to attachment to wiki [{0}]. :{1}
 import.error.limit.project=You can not import [{0}] of project.\nYou can not add more project, please upgrade your plan.
 import.error.project.not.join=You dont join [{0}]. If you want to move this project, you need to join this project.
-import.error.failed.import=You can not import {0} of project. For the following reason:{1}
 import.error.issue.attachment=Attachment file [{0}] upload failed. :{1}
 import.error.attachment.too_large=Attachment file upload failed. The size of attached file is too large.:{0}
+import.error.failed.import=Could not register project [{0}]. : {1}
+import.error.failed.comment=Could not register comment on issue [{0}]. : {1}

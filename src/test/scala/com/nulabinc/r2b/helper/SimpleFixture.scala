@@ -1,20 +1,16 @@
 package com.nulabinc.r2b.helper
 
-import java.io.FileInputStream
+import java.io.{File, FileInputStream}
 import java.util.{Date, Locale, Properties}
 
 import com.nulabinc.backlog.migration.conf.BacklogApiConfiguration
 import com.nulabinc.backlog4j.conf.{BacklogConfigure, BacklogPackageConfigure}
 import com.nulabinc.backlog4j.{BacklogClient, BacklogClientFactory}
 import com.nulabinc.r2b.conf.AppConfiguration
-import com.nulabinc.r2b.controllers.MappingController
 import com.nulabinc.r2b.mapping.core._
 import com.nulabinc.r2b.redmine.conf.RedmineApiConfiguration
 import com.osinka.i18n.Lang
-import com.taskadapter.redmineapi.{RedmineManager, RedmineManagerFactory}
-import org.apache.http.client.methods.HttpGet
-import org.apache.http.impl.client.DefaultHttpClient
-import org.apache.http.util.EntityUtils
+import com.taskadapter.redmineapi.RedmineManagerFactory
 import org.joda.time.DateTime
 import spray.json.{JsNumber, JsonParser}
 
@@ -30,35 +26,74 @@ trait SimpleFixture {
   val dateFormat              = "yyyy-MM-dd"
   val timestampFormat: String = "yyyy-MM-dd'T'HH:mm:ssZ"
 
-  val appConfiguration: AppConfiguration = getConfig
-  val redmine: RedmineManager            = RedmineManagerFactory.createWithApiKey(appConfiguration.redmineConfig.url, appConfiguration.redmineConfig.key)
-  val backlog: BacklogClient             = getBacklogClient(appConfiguration.backlogConfig)
+  val optAppConfiguration: Option[AppConfiguration] = getAppConfiguration
 
-  val redmineProject = redmine.getProjectManager.getProjectByKey(appConfiguration.redmineConfig.projectKey)
+  def redmine() = {
+    optAppConfiguration match {
+      case Some(appConfiguration) => RedmineManagerFactory.createWithApiKey(appConfiguration.redmineConfig.url, appConfiguration.redmineConfig.key)
+      case _                      => throw new RuntimeException()
+    }
+  }
 
-  val propertyMappingFiles = createMapping(appConfiguration)
+  def backlog() = {
+    optAppConfiguration match {
+      case Some(appConfiguration) => getBacklogClient(appConfiguration.backlogConfig)
+      case _                      => throw new RuntimeException()
+    }
+  }
 
-  val userMapping: ConvertUserMapping         = new ConvertUserMapping()
-  val statusMapping: ConvertStatusMapping     = new ConvertStatusMapping()
-  val priorityMapping: ConvertPriorityMapping = new ConvertPriorityMapping()
+  def redmineProject() = {
+    optAppConfiguration match {
+      case Some(appConfiguration) => redmine().getProjectManager.getProjectByKey(appConfiguration.redmineConfig.projectKey)
+      case _                      => throw new RuntimeException()
+    }
+  }
 
-  private[this] def getConfig: AppConfiguration = {
-    val prop: Properties = new Properties()
-    prop.load(new FileInputStream("app.properties"))
-    val redmineKey: String = prop.getProperty("redmine.key")
-    val redmineUrl: String = prop.getProperty("redmine.url")
-    val backlogKey: String = prop.getProperty("backlog.key")
-    val backlogUrl: String = prop.getProperty("backlog.url")
-    val projectKey: String = prop.getProperty("projectKey")
+  def convertUser(target: String): String = {
+    val file = new File("users.json")
+    if (file.exists()) {
+      val userMapping = new ConvertUserMapping()
+      userMapping.convert(target)
+    } else target
+  }
 
-    val keys: Array[String] = projectKey.split(":")
-    val redmine: String     = keys(0)
-    val backlog: String     = if (keys.length == 2) keys(1) else keys(0).toUpperCase.replaceAll("-", "_")
+  def convertStatus(target: String): String = {
+    val file = new File("statuses.json")
+    if (file.exists()) {
+      val statusMapping = new ConvertStatusMapping()
+      statusMapping.convert(target)
+    } else target
+  }
 
-    AppConfiguration(redmineConfig = new RedmineApiConfiguration(url = redmineUrl, key = redmineKey, projectKey = redmine),
-                     backlogConfig = new BacklogApiConfiguration(url = backlogUrl, key = backlogKey, projectKey = backlog),
-                     importOnly = false,
-                     optOut = true)
+  def convertPriority(target: String): String = {
+    val file = new File("priorities.json")
+    if (file.exists()) {
+      val priorityMapping = new ConvertPriorityMapping()
+      priorityMapping.convert(target)
+    } else target
+  }
+
+  private[this] def getAppConfiguration: Option[AppConfiguration] = {
+    val file = new File("app.properties")
+    if (file.exists()) {
+      val prop: Properties = new Properties()
+      prop.load(new FileInputStream(file))
+      val redmineKey: String = prop.getProperty("redmine.key")
+      val redmineUrl: String = prop.getProperty("redmine.url")
+      val backlogKey: String = prop.getProperty("backlog.key")
+      val backlogUrl: String = prop.getProperty("backlog.url")
+      val projectKey: String = prop.getProperty("projectKey")
+
+      val keys: Array[String] = projectKey.split(":")
+      val redmine: String     = keys(0)
+      val backlog: String     = if (keys.length == 2) keys(1) else keys(0).toUpperCase.replaceAll("-", "_")
+
+      Some(
+        AppConfiguration(redmineConfig = new RedmineApiConfiguration(url = redmineUrl, key = redmineKey, projectKey = redmine),
+                         backlogConfig = new BacklogApiConfiguration(url = backlogUrl, key = backlogKey, projectKey = backlog),
+                         importOnly = false,
+                         optOut = true))
+    } else None
   }
 
   private[this] def getBacklogClient(appConfiguration: BacklogApiConfiguration): BacklogClient = {
@@ -67,15 +102,7 @@ trait SimpleFixture {
     new BacklogClientFactory(configure).newClient()
   }
 
-  private[this] def createMapping(appConfiguration: AppConfiguration): PropertyMappingFiles = {
-    val mappingData     = MappingController.execute(appConfiguration.redmineConfig)
-    val userMapping     = new UserMappingFile(appConfiguration.redmineConfig, appConfiguration.backlogConfig, mappingData)
-    val statusMapping   = new StatusMappingFile(appConfiguration.redmineConfig, appConfiguration.backlogConfig, mappingData)
-    val priorityMapping = new PriorityMappingFile(appConfiguration.redmineConfig, appConfiguration.backlogConfig)
-    PropertyMappingFiles(user = userMapping, status = statusMapping, priority = priorityMapping)
-  }
-
-  def redmineIssueCount() = {
+  def redmineIssueCount(appConfiguration: AppConfiguration) = {
     val string = scala.io.Source
       .fromURL(
         s"${appConfiguration.redmineConfig.url}/issues.json?limit=1&subproject_id=!*&project_id=${redmineProject.getId}&key=${appConfiguration.redmineConfig.key}&status_id=*")
