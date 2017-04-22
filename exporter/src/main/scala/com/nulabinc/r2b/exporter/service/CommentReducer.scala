@@ -32,11 +32,10 @@ class CommentReducer(apiConfig: RedmineApiConfiguration,
     val newChangeLogs = comment.changeLogs.flatMap(changeLog => parse(comment, changeLog))
     val optNewContent = comment.optContent match {
       case Some(content) =>
-        val newContent = (s"${content}\n${changeLogContent.result()}").trim
+        val newContent = (s"${changeLogContent.result()}\n${content}").trim
         StringUtil.notEmpty(newContent)
       case None =>
-        val newContent = changeLogContent.result().trim
-        StringUtil.notEmpty(newContent)
+        StringUtil.notEmpty(changeLogContent.result().trim)
     }
     comment.copy(optIssueId = Some(issue.id), optContent = optNewContent, isCreateIssue = false, changeLogs = newChangeLogs)
   }
@@ -67,26 +66,34 @@ class CommentReducer(apiConfig: RedmineApiConfiguration,
     changeLog.field match {
       case BacklogConstantValue.ChangeLog.ATTACHMENT => attachment(changeLog)
       case "done_ratio" =>
-        changeLogContent.append(
-          Messages("common.change_comment", Messages("common.done_ratio"), getValue(changeLog.optOriginalValue), getValue(changeLog.optNewValue)))
+        changeLogContent
+          .append(
+            Messages("common.change_comment", Messages("common.done_ratio"), getValue(changeLog.optOriginalValue), getValue(changeLog.optNewValue)))
+          .append("\n")
         None
       case "relates" =>
-        changeLogContent.append(
-          Messages("common.change_comment", Messages("common.relation"), getValue(changeLog.optOriginalValue), getValue(changeLog.optNewValue)))
+        changeLogContent
+          .append(
+            Messages("common.change_comment", Messages("common.relation"), getValue(changeLog.optOriginalValue), getValue(changeLog.optNewValue)))
+          .append("\n")
         None
       case "is_private" =>
-        changeLogContent.append(
-          Messages("common.change_comment",
-                   Messages("common.private"),
-                   getValue(privateValue(changeLog.optOriginalValue)),
-                   getValue(privateValue(changeLog.optNewValue))))
+        changeLogContent
+          .append(
+            Messages("common.change_comment",
+                     Messages("common.private"),
+                     getValue(privateValue(changeLog.optOriginalValue)),
+                     getValue(privateValue(changeLog.optNewValue))))
+          .append("\n")
         None
       case "project_id" =>
-        changeLogContent.append(
-          Messages("common.change_comment",
-                   Messages("common.project"),
-                   getProjectName(changeLog.optOriginalValue),
-                   getProjectName(changeLog.optNewValue)))
+        changeLogContent
+          .append(
+            Messages("common.change_comment",
+                     Messages("common.project"),
+                     getProjectName(changeLog.optOriginalValue),
+                     getProjectName(changeLog.optNewValue)))
+          .append("\n")
         None
       case _ =>
         Some(changeLog.copy(optNewValue = issuePropertyNewValue(comment, changeLog)))
