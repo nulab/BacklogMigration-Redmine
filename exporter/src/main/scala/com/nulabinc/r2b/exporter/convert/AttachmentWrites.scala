@@ -4,6 +4,7 @@ import javax.inject.Inject
 
 import com.nulabinc.backlog.migration.converter.Writes
 import com.nulabinc.backlog.migration.domain.BacklogAttachment
+import com.nulabinc.backlog.migration.utils.FileUtil
 import com.taskadapter.redmineapi.bean.Attachment
 
 /**
@@ -14,7 +15,7 @@ class AttachmentWrites @Inject()() extends Writes[Attachment, BacklogAttachment]
   override def writes(attachment: Attachment): BacklogAttachment = {
     BacklogAttachment(
       optId = Some(attachment.getId.intValue()),
-      name = attachment.getFileName
+      name = FileUtil.normalize(attachment.getFileName)
     )
   }
 
