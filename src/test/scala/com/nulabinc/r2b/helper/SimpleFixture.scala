@@ -50,7 +50,7 @@ trait SimpleFixture {
   }
 
   def convertUser(target: String): String = {
-    val file = new File("users.json")
+    val file = new File(MappingDirectory.USER_MAPPING_FILE)
     if (file.exists()) {
       val userMapping = new ConvertUserMapping()
       userMapping.convert(target)
@@ -58,7 +58,7 @@ trait SimpleFixture {
   }
 
   def convertStatus(target: String): String = {
-    val file = new File("statuses.json")
+    val file = new File(MappingDirectory.STATUS_MAPPING_FILE)
     if (file.exists()) {
       val statusMapping = new ConvertStatusMapping()
       statusMapping.convert(target)
@@ -66,7 +66,7 @@ trait SimpleFixture {
   }
 
   def convertPriority(target: String): String = {
-    val file = new File("priorities.json")
+    val file = new File(MappingDirectory.PRIORITY_MAPPING_FILE)
     if (file.exists()) {
       val priorityMapping = new ConvertPriorityMapping()
       priorityMapping.convert(target)

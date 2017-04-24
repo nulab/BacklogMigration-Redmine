@@ -1,31 +1,48 @@
 package com.nulabinc.r2b.exporter.service
 
+import java.io.{FileOutputStream, InputStream}
+import java.net.URL
+import java.nio.channels.Channels
+
+import com.nulabinc.backlog.migration.conf.BacklogPaths
 import com.nulabinc.backlog.migration.converter.Convert
 import com.nulabinc.backlog.migration.domain._
-import com.nulabinc.backlog.migration.utils.{DateUtil, Logging, StringUtil}
-import com.nulabinc.r2b.exporter.convert.{CustomFieldValueWrites, CustomFieldWrites, IssueWrites, UserWrites}
+import com.nulabinc.backlog.migration.utils.{DateUtil, IOUtil, Logging, StringUtil}
+import com.nulabinc.r2b.exporter.convert._
 import com.nulabinc.r2b.mapping.core.{ConvertPriorityMapping, ConvertUserMapping}
-import com.nulabinc.r2b.redmine.conf.RedmineConstantValue
+import com.nulabinc.r2b.redmine.conf.{RedmineApiConfiguration, RedmineConstantValue}
 import com.nulabinc.r2b.redmine.domain.{PropertyValue, RedmineCustomFieldDefinition}
 import com.taskadapter.redmineapi.bean._
 
 import scala.collection.JavaConverters._
+import scalax.file.Path
 
 /**
   * @author uchida
   */
-class IssueInitializer(issueWrites: IssueWrites,
+class IssueInitializer(apiConfig: RedmineApiConfiguration,
+                       backlogPaths: BacklogPaths,
+                       propertyValue: PropertyValue,
+                       issueDirPath: Path,
+                       journals: Seq[Journal],
+                       attachments: Seq[Attachment],
+                       issueWrites: IssueWrites,
                        userWrites: UserWrites,
                        customFieldWrites: CustomFieldWrites,
                        customFieldValueWrites: CustomFieldValueWrites,
-                       journals: Seq[Journal],
-                       propertyValue: PropertyValue)
+                       attachmentWrites: AttachmentWrites)
     extends Logging {
 
   val userMapping     = new ConvertUserMapping()
   val priorityMapping = new ConvertPriorityMapping()
 
   def initialize(issue: Issue): BacklogIssue = {
+    //attachments
+    val attachmentFilter    = new AttachmentFilter(journals)
+    val filteredAttachments = attachmentFilter.filter(attachments)
+    val backlogAttachments  = filteredAttachments.map(Convert.toBacklog(_)(attachmentWrites))
+    filteredAttachments.foreach(attachment)
+
     val backlogIssue: BacklogIssue = Convert.toBacklog(issue)(issueWrites)
     backlogIssue.copy(
       summary = summary(issue),
@@ -40,15 +57,16 @@ class IssueInitializer(issueWrites: IssueWrites,
       priorityName = priorityName(issue),
       optAssignee = assignee(issue),
       customFields = issue.getCustomFields.asScala.toSeq.flatMap(customField),
+      attachments = backlogAttachments,
       notifiedUsers = Seq.empty[BacklogUser]
     )
   }
 
-  private[this] def summary(issue: Issue): String = {
+  private[this] def summary(issue: Issue): BacklogIssueSummary = {
     val issueInitialValue = new IssueInitialValue(RedmineConstantValue.ATTR, RedmineConstantValue.Attr.SUBJECT)
     issueInitialValue.findJournalDetail(journals) match {
-      case Some(detail) => Option(detail.getOldValue).getOrElse("")
-      case None         => issue.getSubject
+      case Some(detail) => BacklogIssueSummary(value = Option(detail.getOldValue).getOrElse(""), original = issue.getSubject)
+      case None         => BacklogIssueSummary(value = issue.getSubject, original = issue.getSubject)
     }
   }
 
@@ -187,6 +205,23 @@ class IssueInitializer(issueWrites: IssueWrites,
       case Some(backlogCustomField) => Some(backlogCustomField.copy(optValue = initialValue))
       case _                        => None
     }
+  }
+
+  private[this] def attachment(attachment: Attachment) = {
+    val url: URL = new URL(s"${attachment.getContentURL}?key=${apiConfig.key}")
+    download(attachment.getFileName, url.openStream())
+  }
+
+  private[this] def download(name: String, content: InputStream) = {
+    val dir  = backlogPaths.issueAttachmentDirectoryPath(issueDirPath)
+    val path = backlogPaths.issueAttachmentPath(dir, name)
+    IOUtil.createDirectory(dir)
+    val rbc = Channels.newChannel(content)
+    val fos = new FileOutputStream(path.path)
+    fos.getChannel.transferFrom(rbc, 0, java.lang.Long.MAX_VALUE)
+
+    rbc.close()
+    fos.close()
   }
 
 }

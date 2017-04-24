@@ -33,7 +33,8 @@ class IssueActor(apiConfig: RedmineApiConfiguration,
                  journalWrites: JournalWrites,
                  userWrites: UserWrites,
                  customFieldWrites: CustomFieldWrites,
-                 customFieldValueWrites: CustomFieldValueWrites)
+                 customFieldValueWrites: CustomFieldValueWrites,
+                 attachmentWrites: AttachmentWrites)
     extends Actor
     with Logging {
 
@@ -47,31 +48,43 @@ class IssueActor(apiConfig: RedmineApiConfiguration,
   def receive: Receive = {
     case IssueActor.Do(issueId: Int, completion: CountDownLatch, allCount: Int, console: ((Int, Int) => Unit)) =>
       logger.debug(s"[START ISSUE]${issueId} thread numbers:${java.lang.Thread.activeCount()}")
-      val issue    = issueService.issueOfId(issueId, Include.attachments, Include.journals)
-      val journals = issue.getJournals.asScala.toSeq.sortWith((c1, c2) => c1.getCreatedOn.before(c2.getCreatedOn))
 
+      val issue                        = issueService.issueOfId(issueId, Include.attachments, Include.journals)
+      val journals                     = issue.getJournals.asScala.toSeq.sortWith((c1, c2) => c1.getCreatedOn.before(c2.getCreatedOn))
       val attachments: Seq[Attachment] = issue.getAttachments.asScala.toSeq
 
-      exportIssue(issue, journals)
-      exportComments(Convert.toBacklog(issue)(issueWrites), journals.map(Convert.toBacklog(_)(journalWrites)), attachments)
+      exportIssue(issue, journals, attachments)
+      exportComments(issue, journals, attachments)
 
       completion.countDown()
       console((allCount - completion.getCount).toInt, allCount)
   }
 
-  private[this] def exportIssue(issue: Issue, journals: Seq[Journal]) = {
-    val issueCreated     = DateUtil.tryIsoParse(Option(issue.getCreatedOn).map(DateUtil.isoFormat))
-    val issueDirPath     = backlogPaths.issueDirectoryPath("issue", issue.getId.intValue(), issueCreated, 0)
-    val issueInitializer = new IssueInitializer(issueWrites, userWrites, customFieldWrites, customFieldValueWrites, journals, propertyValue)
-    val backlogIssue     = issueInitializer.initialize(issue)
+  private[this] def exportIssue(issue: Issue, journals: Seq[Journal], attachments: Seq[Attachment]) = {
+    val issueCreated = DateUtil.tryIsoParse(Option(issue.getCreatedOn).map(DateUtil.isoFormat))
+    val issueDirPath = backlogPaths.issueDirectoryPath("issue", issue.getId.intValue(), issueCreated, 0)
+    val issueInitializer = new IssueInitializer(apiConfig,
+                                                backlogPaths,
+                                                propertyValue,
+                                                issueDirPath,
+                                                journals,
+                                                attachments,
+                                                issueWrites,
+                                                userWrites,
+                                                customFieldWrites,
+                                                customFieldValueWrites,
+                                                attachmentWrites)
+    val backlogIssue = issueInitializer.initialize(issue)
 
     IOUtil.output(backlogPaths.issueJson(issueDirPath), backlogIssue.toJson.prettyPrint)
   }
 
-  private[this] def exportComments(issue: BacklogIssue, comments: Seq[BacklogComment], attachments: Seq[Attachment]) = {
-    comments.zipWithIndex.foreach {
+  private[this] def exportComments(issue: Issue, journals: Seq[Journal], attachments: Seq[Attachment]) = {
+    val backlogIssue    = Convert.toBacklog(issue)(issueWrites)
+    val backlogComments = journals.map(Convert.toBacklog(_)(journalWrites))
+    backlogComments.zipWithIndex.foreach {
       case (comment, index) =>
-        exportComment(comment, issue, comments, attachments, index)
+        exportComment(comment, backlogIssue, backlogComments, attachments, index)
     }
   }
 
