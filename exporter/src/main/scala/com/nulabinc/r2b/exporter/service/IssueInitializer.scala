@@ -44,11 +44,11 @@ class IssueInitializer(issueWrites: IssueWrites,
     )
   }
 
-  private[this] def summary(issue: Issue): String = {
+  private[this] def summary(issue: Issue): BacklogIssueSummary = {
     val issueInitialValue = new IssueInitialValue(RedmineConstantValue.ATTR, RedmineConstantValue.Attr.SUBJECT)
     issueInitialValue.findJournalDetail(journals) match {
-      case Some(detail) => Option(detail.getOldValue).getOrElse("")
-      case None         => issue.getSubject
+      case Some(detail) => BacklogIssueSummary(value = Option(detail.getOldValue).getOrElse(""), original = issue.getSubject)
+      case None         => BacklogIssueSummary(value = issue.getSubject, original = issue.getSubject)
     }
   }
 
