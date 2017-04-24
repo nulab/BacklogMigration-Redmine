@@ -2,6 +2,7 @@ package com.nulabinc.r2b.core
 
 import java.util.Date
 
+import com.nulabinc.backlog.migration.utils.FileUtil
 import com.nulabinc.backlog4j.api.option.{GetIssuesParams, QueryParams}
 import com.nulabinc.backlog4j.{IssueComment, Issue => BacklogIssue}
 import com.nulabinc.r2b.conf.AppConfiguration
@@ -132,7 +133,7 @@ class R2BSpec extends FlatSpec with Matchers with SimpleFixture {
           redmineWiki.getAttachments.asScala.foreach(redmineAttachment => {
             withClue(s"name:${redmineAttachment.getFileName}") {
               backlogWiki.getAttachments.asScala.exists(backlogAttachment => {
-                backlogAttachment.getName == redmineAttachment.getFileName
+                FileUtil.normalize(backlogAttachment.getName) == FileUtil.normalize(redmineAttachment.getFileName)
               }) should be(true)
             }
           })
