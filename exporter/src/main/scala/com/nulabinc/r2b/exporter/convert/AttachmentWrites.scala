@@ -13,8 +13,8 @@ class AttachmentWrites @Inject()() extends Writes[Attachment, BacklogAttachment]
 
   override def writes(attachment: Attachment): BacklogAttachment = {
     BacklogAttachment(
-      id = attachment.getId.intValue(),
-      fileName = attachment.getFileName
+      optId = Some(attachment.getId.intValue()),
+      name = attachment.getFileName
     )
   }
 

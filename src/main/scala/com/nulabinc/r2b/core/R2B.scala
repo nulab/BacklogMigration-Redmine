@@ -112,7 +112,7 @@ object R2B extends BacklogConfiguration with Logging {
 
   private[this] def checkRelease() = {
     try {
-      val string = scala.io.Source.fromURL(s"https://api.github.com/repos/nulab/BacklogMigration-Redmine/releases").mkString
+      val string = scala.io.Source.fromURL("https://api.github.com/repos/nulab/BacklogMigration-Redmine/releases").mkString
       val latest = string.parseJson match {
         case JsArray(releases) if (releases.nonEmpty) =>
           releases(0).asJsObject.fields.apply("tag_name").toString().replace("\"", "").replace("v", "")
@@ -126,7 +126,7 @@ object R2B extends BacklogConfiguration with Logging {
           """.stripMargin)
       }
     } catch {
-      case _: Throwable =>
+      case e: Throwable => logger.error(e.getMessage, e)
     }
   }
 

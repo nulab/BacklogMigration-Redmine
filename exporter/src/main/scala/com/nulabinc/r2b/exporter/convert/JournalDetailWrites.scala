@@ -4,7 +4,7 @@ import javax.inject.Inject
 
 import com.nulabinc.backlog.migration.conf.BacklogConstantValue
 import com.nulabinc.backlog.migration.converter.{Convert, Writes}
-import com.nulabinc.backlog.migration.domain.{BacklogAttachmentInfo, BacklogAttributeInfo, BacklogChangeLog}
+import com.nulabinc.backlog.migration.domain.{BacklogAttachment, BacklogAttributeInfo, BacklogChangeLog}
 import com.nulabinc.backlog.migration.utils.{DateUtil, Logging, StringUtil}
 import com.nulabinc.backlog4j.CustomField.FieldType
 import com.nulabinc.r2b.mapping.core.{ConvertPriorityMapping, ConvertStatusMapping, ConvertUserMapping}
@@ -59,10 +59,10 @@ class JournalDetailWrites @Inject()(propertyValue: PropertyValue, customFieldVal
     }
   }
 
-  private[this] def attachmentInfo(detail: JournalDetail): Option[BacklogAttachmentInfo] = {
+  private[this] def attachmentInfo(detail: JournalDetail): Option[BacklogAttachment] = {
     detail.getProperty match {
       case RedmineConstantValue.ATTACHMENT =>
-        val attachment = BacklogAttachmentInfo(optId = StringUtil.safeStringToLong(detail.getName), name = detail.getNewValue)
+        val attachment = BacklogAttachment(optId = StringUtil.safeStringToLong(detail.getName), name = detail.getNewValue)
         Some(attachment)
       case _ => None
     }
