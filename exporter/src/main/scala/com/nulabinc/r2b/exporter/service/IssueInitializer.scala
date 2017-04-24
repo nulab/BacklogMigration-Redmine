@@ -3,7 +3,7 @@ package com.nulabinc.r2b.exporter.service
 import com.nulabinc.backlog.migration.converter.Convert
 import com.nulabinc.backlog.migration.domain._
 import com.nulabinc.backlog.migration.utils.{DateUtil, Logging, StringUtil}
-import com.nulabinc.r2b.exporter.convert.{CustomFieldValueWrites, CustomFieldWrites, IssueWrites, UserWrites}
+import com.nulabinc.r2b.exporter.convert._
 import com.nulabinc.r2b.mapping.core.{ConvertPriorityMapping, ConvertUserMapping}
 import com.nulabinc.r2b.redmine.conf.RedmineConstantValue
 import com.nulabinc.r2b.redmine.domain.{PropertyValue, RedmineCustomFieldDefinition}
@@ -18,7 +18,9 @@ class IssueInitializer(issueWrites: IssueWrites,
                        userWrites: UserWrites,
                        customFieldWrites: CustomFieldWrites,
                        customFieldValueWrites: CustomFieldValueWrites,
+                       attachmentWrites: AttachmentWrites,
                        journals: Seq[Journal],
+                       attachments: Seq[Attachment],
                        propertyValue: PropertyValue)
     extends Logging {
 
@@ -26,6 +28,10 @@ class IssueInitializer(issueWrites: IssueWrites,
   val priorityMapping = new ConvertPriorityMapping()
 
   def initialize(issue: Issue): BacklogIssue = {
+    //attachments
+    val attachmentFilter   = new AttachmentFilter(journals)
+    val backlogAttachments = attachmentFilter.filter(attachments).map(Convert.toBacklog(_)(attachmentWrites))
+
     val backlogIssue: BacklogIssue = Convert.toBacklog(issue)(issueWrites)
     backlogIssue.copy(
       summary = summary(issue),
@@ -40,6 +46,7 @@ class IssueInitializer(issueWrites: IssueWrites,
       priorityName = priorityName(issue),
       optAssignee = assignee(issue),
       customFields = issue.getCustomFields.asScala.toSeq.flatMap(customField),
+      attachments = backlogAttachments,
       notifiedUsers = Seq.empty[BacklogUser]
     )
   }

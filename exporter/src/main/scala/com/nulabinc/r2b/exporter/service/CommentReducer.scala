@@ -6,7 +6,7 @@ import java.nio.channels.Channels
 
 import com.nulabinc.backlog.migration.conf.{BacklogConstantValue, BacklogPaths}
 import com.nulabinc.backlog.migration.domain.{BacklogChangeLog, BacklogComment, BacklogIssue}
-import com.nulabinc.backlog.migration.utils.{IOUtil, Logging, StringUtil}
+import com.nulabinc.backlog.migration.utils.{FileUtil, IOUtil, Logging, StringUtil}
 import com.nulabinc.r2b.redmine.conf.RedmineApiConfiguration
 import com.nulabinc.r2b.redmine.service.ProjectService
 import com.osinka.i18n.Messages
@@ -103,7 +103,7 @@ class CommentReducer(apiConfig: RedmineApiConfiguration,
   private[this] def attachment(changeLog: BacklogChangeLog): Option[BacklogChangeLog] = {
     changeLog.optAttachmentInfo match {
       case Some(attachmentInfo) =>
-        val optAttachment = attachments.find(attachment => attachment.getFileName == attachmentInfo.name)
+        val optAttachment = attachments.find(attachment => FileUtil.normalize(attachment.getFileName) == attachmentInfo.name)
         optAttachment match {
           case Some(attachment) =>
             val url: URL = new URL(s"${attachment.getContentURL}?key=${apiConfig.key}")

@@ -28,6 +28,7 @@ class IssuesActor @Inject()(@Named("projectId") projectId: Int,
                             userWrites: UserWrites,
                             customFieldWrites: CustomFieldWrites,
                             customFieldValueWrites: CustomFieldValueWrites,
+                            attachmentWrites: AttachmentWrites,
                             issueService: IssueService,
                             projectService: ProjectService,
                             propertyValue: PropertyValue)
@@ -64,7 +65,8 @@ class IssuesActor @Inject()(@Named("projectId") projectId: Int,
                              journalWrites,
                              userWrites,
                              customFieldWrites,
-                             customFieldValueWrites))))
+                             customFieldValueWrites,
+                             attachmentWrites))))
 
       (0 until (allCount, limit))
         .foldLeft(Seq.empty[Int]) { (acc, offset) =>
