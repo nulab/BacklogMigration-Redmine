@@ -63,14 +63,17 @@ class IssueActor(apiConfig: RedmineApiConfiguration,
   private[this] def exportIssue(issue: Issue, journals: Seq[Journal], attachments: Seq[Attachment]) = {
     val issueCreated = DateUtil.tryIsoParse(Option(issue.getCreatedOn).map(DateUtil.isoFormat))
     val issueDirPath = backlogPaths.issueDirectoryPath("issue", issue.getId.intValue(), issueCreated, 0)
-    val issueInitializer = new IssueInitializer(issueWrites,
+    val issueInitializer = new IssueInitializer(apiConfig,
+                                                backlogPaths,
+                                                propertyValue,
+                                                issueDirPath,
+                                                journals,
+                                                attachments,
+                                                issueWrites,
                                                 userWrites,
                                                 customFieldWrites,
                                                 customFieldValueWrites,
-                                                attachmentWrites,
-                                                journals,
-                                                attachments,
-                                                propertyValue)
+                                                attachmentWrites)
     val backlogIssue = issueInitializer.initialize(issue)
 
     IOUtil.output(backlogPaths.issueJson(issueDirPath), backlogIssue.toJson.prettyPrint)
