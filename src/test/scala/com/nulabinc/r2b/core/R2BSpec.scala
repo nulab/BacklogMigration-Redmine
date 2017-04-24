@@ -227,6 +227,7 @@ class R2BSpec extends FlatSpec with Matchers with SimpleFixture {
           }
 
           //comments
+          allCommentsOfIssue(backlogIssue.getId)
 //          val comments = allCommentsOfIssue(backlogIssue.getId)
 //          redmineIssue.getJournals.asScala.size should equal(comments.size)
 
