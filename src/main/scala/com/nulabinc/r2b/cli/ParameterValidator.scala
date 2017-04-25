@@ -47,8 +47,10 @@ class ParameterValidator(config: AppConfiguration) extends Logging {
       None
     } catch {
       case unknown: BacklogAPIException if unknown.getStatusCode == 404 =>
+        logger.error(unknown.getMessage, unknown)
         Some(s"- ${Messages("cli.param.error.disable.host", Messages("common.backlog"), config.backlogConfig.url)}")
-      case _: Throwable =>
+      case e: Throwable =>
+        logger.error(e.getMessage, e)
         Some(s"- ${Messages("cli.param.error.disable.access", Messages("common.backlog"))}")
     }
     messages
@@ -72,11 +74,14 @@ class ParameterValidator(config: AppConfiguration) extends Logging {
       userService.allUsers()
       None
     } catch {
-      case _: RedmineAuthenticationException =>
+      case auth: RedmineAuthenticationException =>
+        logger.error(auth.getMessage, auth)
         Some(s"- ${Messages("cli.param.error.auth", Messages("common.redmine"))}")
-      case _: RedmineTransportException =>
+      case transport: RedmineTransportException =>
+        logger.error(transport.getMessage, transport)
         Some(s"- ${Messages("cli.param.error.disable.host", Messages("common.redmine"), config.redmineConfig.url)}")
-      case _: Throwable =>
+      case e: Throwable =>
+        logger.error(e.getMessage, e)
         Some(s"- ${Messages("cli.param.error.disable.access", Messages("common.redmine"))}")
     }
   }

@@ -42,8 +42,10 @@ class RedmineDefaultModule(apiConfig: RedmineApiConfiguration) extends AbstractM
     bind(classOf[PriorityService]).to(classOf[PriorityServiceImpl])
   }
 
-  private[this] def createRedmineClient(): RedmineManager =
-    RedmineManagerFactory.createWithApiKey(apiConfig.url, apiConfig.key)
+  private[this] def createRedmineClient(): RedmineManager = {
+    val transportConfig = RedmineManagerFactory.createShortTermConfig(RedmineManagerFactory.createInsecureConnectionManager())
+    RedmineManagerFactory.createWithApiKey(apiConfig.url, apiConfig.key, transportConfig)
+  }
 
   private[this] def createPropertyValue(redmine: RedmineManager, project: Project): PropertyValue = {
     val versions    = redmine.getProjectManager.getVersions(project.getId).asScala
