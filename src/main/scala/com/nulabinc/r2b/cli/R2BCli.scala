@@ -10,6 +10,7 @@ import com.nulabinc.r2b.conf.AppConfiguration
 import com.nulabinc.r2b.controllers.MappingController
 import com.nulabinc.r2b.exporter.controllers.ExportController
 import com.nulabinc.r2b.mapping.core._
+import com.nulabinc.r2b.mapping.domain.Mapping
 import com.osinka.i18n.Messages
 
 import scala.util.Try
@@ -79,11 +80,6 @@ object R2BCli extends BacklogConfiguration with Logging {
                               dstSpaceCreated = space.created)
       MixpanelUtil.track(token = mixpanelToken, data = data)
     }
-  }
-
-  private[this] def confirmRecreate(mappingFile: MappingFile): Boolean = {
-    val input: String = scala.io.StdIn.readLine(Messages("cli.confirm_recreate", mappingFile.itemName, mappingFile.filePath))
-    input == "y" || input == "Y"
   }
 
   private[this] def validateParam(config: AppConfiguration): Boolean = {
@@ -216,22 +212,36 @@ object R2BCli extends BacklogConfiguration with Logging {
 
   private[this] def output(mappingFile: MappingFile) = {
     if (mappingFile.isExists) {
-      if (confirmRecreate(mappingFile)) {
-        mappingFile.create()
-        val message =
-          s"""${Messages("cli.mapping.output_file", mappingFile.itemName, mappingFile.filePath)}
-            |
-            |${Messages("cli.confirm.fix")}
-          """.stripMargin
-        ConsoleOut.info(message)
+      val addItems = mappingFile.merge()
+      val message = if (addItems.nonEmpty) {
+        def displayItem(value: String) = {
+          if (value.isEmpty) Messages("common.empty") else value
+        }
+        def display(mapping: Mapping) = {
+          s"- ${mapping.redmine} => ${displayItem(mapping.backlog)}"
+        }
+        val mappingString = addItems.map(display).mkString("\n")
+        s"""
+           |--------------------------------------------------
+           |${Messages("cli.mapping.merge_file", mappingFile.itemName, mappingFile.filePath)}
+           |[${mappingFile.filePath}]
+           |${mappingString}
+           |--------------------------------------------------""".stripMargin
+      } else {
+        s"""
+           |--------------------------------------------------
+           |${Messages("cli.mapping.no_change", mappingFile.itemName)}
+           |--------------------------------------------------""".stripMargin
       }
+      ConsoleOut.info(message)
     } else {
       mappingFile.create()
       val message =
-        s"""${Messages("cli.mapping.output_file", mappingFile.itemName, mappingFile.filePath)}
-          |
-          |${Messages("cli.confirm.fix")}
-        """.stripMargin
+        s"""
+          |--------------------------------------------------
+          |${Messages("cli.mapping.output_file", mappingFile.itemName)}
+          |[${mappingFile.filePath}]
+          |--------------------------------------------------""".stripMargin
       ConsoleOut.info(message)
     }
   }

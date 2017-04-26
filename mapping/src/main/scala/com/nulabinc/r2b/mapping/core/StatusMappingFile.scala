@@ -10,6 +10,7 @@ import com.nulabinc.r2b.redmine.conf.RedmineApiConfiguration
 import com.nulabinc.r2b.redmine.modules.{ServiceInjector => RedmineInjector}
 import com.nulabinc.r2b.redmine.service.{StatusService => RedmineStatusService}
 import com.osinka.i18n.{Lang, Messages}
+import com.taskadapter.redmineapi.bean.IssueStatus
 
 /**
   * @author uchida
@@ -17,33 +18,42 @@ import com.osinka.i18n.{Lang, Messages}
 class StatusMappingFile(redmineApiConfig: RedmineApiConfiguration, backlogApiConfig: BacklogApiConfiguration, mappingData: MappingData)
     extends MappingFile {
 
-  private[this] val backlogDatas = loadBacklog()
   private[this] val redmineDatas = loadRedmine()
+  private[this] val backlogDatas = loadBacklog()
 
   private[this] def loadRedmine(): Seq[MappingItem] = {
-    val injector                   = RedmineInjector.createInjector(redmineApiConfig)
-    val statusService              = injector.getInstance(classOf[RedmineStatusService])
-    val redmineStatuses            = statusService.allStatuses()
-    val redmines: Seq[MappingItem] = redmineStatuses.map(redmineStatus => MappingItem(redmineStatus.getName, redmineStatus.getName))
-    val deleteItems = mappingData.statuses.foldLeft(Seq.empty[MappingItem]) { (acc: Seq[MappingItem], status: String) =>
-      {
-        val exists = redmineStatuses.exists(redmineStatuse => StringUtil.safeEquals(redmineStatuse.getId.intValue(), status))
-        if (exists) acc
-        else {
-          val name = Messages("cli.mapping.delete_status", status)
-          acc :+ MappingItem(name, name)
-        }
-      }
+
+    val injector        = RedmineInjector.createInjector(redmineApiConfig)
+    val statusService   = injector.getInstance(classOf[RedmineStatusService])
+    val redmineStatuses = statusService.allStatuses()
+
+    def createItem(status: IssueStatus): MappingItem = {
+      MappingItem(status.getName, status.getName)
     }
+
+    def condition(target: String)(status: IssueStatus): Boolean = {
+      StringUtil.safeEquals(status.getId.intValue(), target)
+    }
+
+    def collectItems(acc: Seq[MappingItem], status: String): Seq[MappingItem] = {
+      if (redmineStatuses.exists(condition(status))) acc
+      else acc :+ MappingItem(Messages("cli.mapping.delete_status", status), Messages("cli.mapping.delete_status", status))
+    }
+
+    val redmines    = redmineStatuses.map(createItem)
+    val deleteItems = mappingData.statuses.foldLeft(Seq.empty[MappingItem])(collectItems)
     redmines union deleteItems
   }
 
   private[this] def loadBacklog(): Seq[MappingItem] = {
-    val injector                     = BacklogInjector.createInjector(backlogApiConfig)
-    val statusService                = injector.getInstance(classOf[BacklogStatusService])
-    val backlogStatuses: Seq[Status] = statusService.allStatuses()
-    val backlogs: Seq[MappingItem]   = backlogStatuses.map(backlogStatus => MappingItem(backlogStatus.getName, backlogStatus.getName))
-    backlogs
+    def createItem(status: Status): MappingItem = {
+      MappingItem(status.getName, status.getName)
+    }
+
+    val injector        = BacklogInjector.createInjector(backlogApiConfig)
+    val statusService   = injector.getInstance(classOf[BacklogStatusService])
+    val backlogStatuses = statusService.allStatuses()
+    backlogStatuses.map(createItem)
   }
 
   private[this] object Backlog {
@@ -80,7 +90,7 @@ class StatusMappingFile(redmineApiConfig: RedmineApiConfiguration, backlogApiCon
     val REJECTED_EN: String    = Messages("mapping.status.redmine.rejected")(Lang("en"))
   }
 
-  override def matchWithBacklog(redmine: MappingItem): String =
+  override def findMatchItem(redmine: MappingItem): String =
     backlogs.map(_.name).find(_ == redmine.name) match {
       case Some(backlog) => backlog
       case None =>

@@ -5,6 +5,7 @@ import com.nulabinc.r2b.mapping.domain.MappingJsonProtocol._
 import com.nulabinc.r2b.mapping.domain.{Mapping, MappingItem, MappingsWrapper}
 import spray.json.{JsonParser, _}
 
+import scala.collection.mutable.ArrayBuffer
 import scalax.file.Path
 
 /**
@@ -15,7 +16,7 @@ trait MappingFile extends Logging {
   val OTHER_MAPPING: Boolean  = true
   val COMMAND_FINISH: Boolean = false
 
-  def matchWithBacklog(redmine: MappingItem): String
+  def findMatchItem(redmine: MappingItem): String
 
   def backlogs: Seq[MappingItem]
 
@@ -40,6 +41,27 @@ trait MappingFile extends Logging {
 
   def create() =
     IOUtil.output(Path.fromString(filePath), MappingsWrapper(description, redmines.map(convert)).toJson.prettyPrint)
+
+  def merge(): Seq[Mapping] = {
+    unmarshal() match {
+      case Some(currentItems) =>
+        val mergeList: ArrayBuffer[Mapping] = ArrayBuffer()
+        val addedList: ArrayBuffer[Mapping] = ArrayBuffer()
+        redmines.foreach { redmineItem =>
+          val optCurrentItem = currentItems.find(_.redmine == redmineItem.name)
+          optCurrentItem match {
+            case Some(currentItem) => mergeList += currentItem
+            case _ =>
+              mergeList += convert(redmineItem)
+              addedList += convert(redmineItem)
+          }
+        }
+        IOUtil.output(Path.fromString(filePath), MappingsWrapper(description, mergeList).toJson.prettyPrint)
+        addedList
+      case _ =>
+        Seq.empty[Mapping]
+    }
+  }
 
   def unmarshal(): Option[Seq[Mapping]] = {
     val path: Path = Path.fromString(filePath)
@@ -68,6 +90,6 @@ trait MappingFile extends Logging {
       case _ => name
     }
 
-  private[this] def convert(redmine: MappingItem): Mapping = Mapping(redmine.name, matchWithBacklog(redmine))
+  private[this] def convert(redmine: MappingItem): Mapping = Mapping(redmine.name, findMatchItem(redmine))
 
 }
