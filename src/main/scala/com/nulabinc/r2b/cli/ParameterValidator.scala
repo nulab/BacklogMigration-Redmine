@@ -1,7 +1,7 @@
 package com.nulabinc.r2b.cli
 
 import com.nulabinc.backlog.migration.modules.{ServiceInjector => BacklogInjector}
-import com.nulabinc.backlog.migration.service.{SpaceService}
+import com.nulabinc.backlog.migration.service.SpaceService
 import com.nulabinc.backlog.migration.utils.{ConsoleOut, Logging}
 import com.nulabinc.backlog4j.BacklogAPIException
 import com.nulabinc.r2b.conf.AppConfiguration
@@ -9,7 +9,7 @@ import com.nulabinc.r2b.redmine.modules.{ServiceInjector => RedmineInjector}
 import com.nulabinc.r2b.redmine.service.{ProjectService, UserService => RedmineUserService}
 import com.osinka.i18n.Messages
 import com.taskadapter.redmineapi.bean.Project
-import com.taskadapter.redmineapi.{RedmineAuthenticationException, RedmineTransportException}
+import com.taskadapter.redmineapi.{NotAuthorizedException, RedmineAuthenticationException, RedmineTransportException}
 
 /**
   * @author uchida
@@ -77,6 +77,9 @@ class ParameterValidator(config: AppConfiguration) extends Logging {
       case auth: RedmineAuthenticationException =>
         logger.error(auth.getMessage, auth)
         Some(s"- ${Messages("cli.param.error.auth", Messages("common.redmine"))}")
+      case noauth: NotAuthorizedException =>
+        logger.error(noauth.getMessage, noauth)
+        Some(s"- ${Messages("cli.param.error.auth.not.auth", noauth.getMessage)}")
       case transport: RedmineTransportException =>
         logger.error(transport.getMessage, transport)
         Some(s"- ${Messages("cli.param.error.disable.host", Messages("common.redmine"), config.redmineConfig.url)}")
