@@ -100,6 +100,7 @@ cli.param.error=The parameter has the following error.
 cli.param.check.access=Checking whether the {0} is accessible ...
 cli.param.check.admin=Checking for the presence of admin role ...
 cli.param.get.project=Getting the {0} project ...
+cli.param.error.auth.not.auth=You do not have the necessary authority to migrate Redmine. System administrator authority is required.:[{0}]
 cli.param.error.auth=Accessing {0} failed due to an authorization error.\n  Please make sure the API access key is valid and the REST API service is enabled on the server.
 cli.param.error.auth.backlog=Backlog API key is not administrator authority. Please use API key of administrator authority.
 cli.param.error.disable.project=The project [{0}] could not be loaded.
@@ -118,8 +119,9 @@ cli.mapping.configurable=The values accepted for {0} in Backlog are "{1}".
 cli.mapping.error.not_exist.item=The {0}[{1}] is not registered in destination backlog.
 cli.mapping.error.not_defined.item={0} [{1}] required for migration is not defined in mapping file [{2}].
 cli.mapping.error.empty.item=Corresponding item for {0} "{1}" in Redmine is not specified.
-cli.mapping.output_file=The mapping file {0} is created in {1}.
-cli.confirm.fix=Check the mapping file and fix it if necessary.
+cli.mapping.output_file=The mapping file about {0} is created. Check the mapping file and fix it if necessary.
+cli.mapping.merge_file=The following {0} was added to the mapping file of {0}. Check the mapping file and fix it if necessary.
+cli.mapping.no_change=There was no change in the mapping file of {0}.
 
 
 # CLI Project Info

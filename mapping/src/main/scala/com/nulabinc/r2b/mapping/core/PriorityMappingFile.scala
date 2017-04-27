@@ -9,29 +9,35 @@ import com.nulabinc.r2b.redmine.conf.RedmineApiConfiguration
 import com.nulabinc.r2b.redmine.modules.{ServiceInjector => RedmineInjector}
 import com.nulabinc.r2b.redmine.service.{PriorityService => RedminePriorityService}
 import com.osinka.i18n.{Lang, Messages}
+import com.taskadapter.redmineapi.bean.IssuePriority
 
 /**
   * @author uchida
   */
 class PriorityMappingFile(redmineApiConfig: RedmineApiConfiguration, backlogApiConfig: BacklogApiConfiguration) extends MappingFile {
 
-  private[this] val backlogDatas = loadBacklog()
   private[this] val redmineDatas = loadRedmine()
+  private[this] val backlogDatas = loadBacklog()
 
   private[this] def loadRedmine(): Seq[MappingItem] = {
-    val injector                   = RedmineInjector.createInjector(redmineApiConfig)
-    val priorityService            = injector.getInstance(classOf[RedminePriorityService])
-    val redminePriorities          = priorityService.allPriorities()
-    val redmines: Seq[MappingItem] = redminePriorities.map(redminePriority => MappingItem(redminePriority.getName, redminePriority.getName))
-    redmines
+    def createItem(priority: IssuePriority): MappingItem = {
+      MappingItem(priority.getName, priority.getName)
+    }
+
+    val injector          = RedmineInjector.createInjector(redmineApiConfig)
+    val priorityService   = injector.getInstance(classOf[RedminePriorityService])
+    val redminePriorities = priorityService.allPriorities()
+    redminePriorities.map(createItem)
   }
 
   private[this] def loadBacklog(): Seq[MappingItem] = {
-    val injector                         = BacklogInjector.createInjector(backlogApiConfig)
-    val priorityService                  = injector.getInstance(classOf[BacklogPriorityService])
-    val backlogPriorities: Seq[Priority] = priorityService.allPriorities()
-    val backlogs: Seq[MappingItem]       = backlogPriorities.map(backlogPriority => MappingItem(backlogPriority.getName, backlogPriority.getName))
-    backlogs
+    def createItem(priority: Priority): MappingItem = {
+      MappingItem(priority.getName, priority.getName)
+    }
+    val injector          = BacklogInjector.createInjector(backlogApiConfig)
+    val priorityService   = injector.getInstance(classOf[BacklogPriorityService])
+    val backlogPriorities = priorityService.allPriorities()
+    backlogPriorities.map(createItem)
   }
 
   private object Backlog {
@@ -62,7 +68,7 @@ class PriorityMappingFile(redmineApiConfig: RedmineApiConfiguration, backlogApiC
     val IMMEDIATE_EN: String = Messages("mapping.priority.redmine.immediate")(Lang("en"))
   }
 
-  override def matchWithBacklog(redmine: MappingItem): String =
+  override def findMatchItem(redmine: MappingItem): String =
     backlogs.map(_.name).find(_ == redmine.name) match {
       case Some(backlog) => backlog
       case None =>

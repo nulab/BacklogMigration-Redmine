@@ -100,6 +100,7 @@ cli.param.error=パラメーターに以下の誤りがあります。
 cli.param.check.access={0}にアクセス可能かチェックしています...
 cli.param.check.admin=管理者権限の有無をチェックしています...
 cli.param.get.project={0}のプロジェクトを取得しています...
+cli.param.error.auth.not.auth=Redmineの移行に必要な権限がありません。システム管理者権限が必要です。:[{0}]
 cli.param.error.auth={0}にアクセスできませんでした。認証エラーが発生しました。\n  有効なAPIアクセスキーになっていることと、REST APIサービスがサーバー上で有効になっていることを確認してください。
 cli.param.error.auth.backlog=BacklogのAPIキーが管理者権限ではありません。管理者権限のAPIキーを使用してください。
 cli.param.error.disable.project=プロジェクト[{0}]を読み込むことができませんでした。
@@ -118,8 +119,9 @@ cli.mapping.configurable=Backlogに設定可能な{0}は[{1}]です。
 cli.mapping.error.not_exist.item={0}[{1}]がBacklogに登録されていません。
 cli.mapping.error.not_defined.item=移行に必要な{0}[{1}]がマッピングファイル[{2}]に定義されていません。
 cli.mapping.error.empty.item=Redmineの{0}[{1}]に対応する項目が指定されていません。
-cli.mapping.output_file={0}のマッピングファイルを[{1}]に作成しました。
-cli.confirm.fix=マッピングファイルを確認し、必要に応じて修正してください。
+cli.mapping.output_file={0}のマッピングファイルを作成しました。マッピングファイルを確認し、必要に応じて修正してください。
+cli.mapping.merge_file={0}のマッピングファイルに次の{0}を追加しました。マッピングファイルを確認し、必要に応じて修正してください。
+cli.mapping.no_change={0}のマッピングファイルに変更はありませんでした。
 
 
 # CLI Project Info
