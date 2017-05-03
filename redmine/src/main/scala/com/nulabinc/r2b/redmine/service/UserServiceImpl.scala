@@ -14,8 +14,15 @@ import scala.collection.JavaConverters._
 class UserServiceImpl @Inject()(redmine: RedmineManager) extends UserService with Logging {
 
   override def allUsers(): Seq[User] = {
+    def addInfo(user: User): Option[User] = {
+      (Option(user.getLogin), Option(user.getFullName)) match {
+        case (Some(_), Some(_)) => Some(user)
+        case _                  => optUserOfId(user.getId)
+      }
+    }
+
     val users: Seq[User] = redmine.getUserManager.getUsers.asScala
-    users.flatMap(user => optUserOfId(user.getId))
+    users.flatMap(addInfo)
   }
 
   override def tryUserOfId(id: Int): User =
