@@ -26,8 +26,10 @@ class UserMappingFile(redmineApiConfig: RedmineApiConfiguration, backlogApiConfi
     val userService = injector.getInstance(classOf[RedmineUserService])
 
     def resolve(user: RedmineUser): Option[RedmineUser] = {
-      if (Option(user.getLogin).isDefined && Option(user.getFullName).isDefined) Some(user)
-      else userService.optUserOfId(user.getId)
+      (Option(user.getLogin), Option(user.getFullName)) match {
+        case (Some(_), Some(_)) => Some(user)
+        case _                  => userService.optUserOfId(user.getId)
+      }
     }
 
     def condition(user: RedmineUser): Boolean = {
