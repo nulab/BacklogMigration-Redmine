@@ -3,7 +3,7 @@ package com.nulabinc.r2b.exporter.convert
 import javax.inject.Inject
 
 import com.nulabinc.backlog.migration.conf.BacklogConstantValue
-import com.nulabinc.backlog.migration.converter.{Convert, Writes}
+import com.nulabinc.backlog.migration.convert.{Convert, Writes}
 import com.nulabinc.backlog.migration.domain.{BacklogAttachment, BacklogAttributeInfo, BacklogChangeLog}
 import com.nulabinc.backlog.migration.utils.{DateUtil, FileUtil, Logging, StringUtil}
 import com.nulabinc.backlog4j.CustomField.FieldType

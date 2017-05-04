@@ -2,7 +2,7 @@ package com.nulabinc.r2b.exporter.convert
 
 import javax.inject.Inject
 
-import com.nulabinc.backlog.migration.converter.{Convert, Writes}
+import com.nulabinc.backlog.migration.convert.{Convert, Writes}
 import com.nulabinc.backlog.migration.domain.{BacklogComment, BacklogNotification}
 import com.nulabinc.backlog.migration.utils.{DateUtil, StringUtil}
 import com.taskadapter.redmineapi.bean.Journal

@@ -3,7 +3,7 @@ package com.nulabinc.r2b.exporter.convert
 import javax.inject.Inject
 
 import com.nulabinc.backlog.migration.conf.BacklogConstantValue
-import com.nulabinc.backlog.migration.converter.Writes
+import com.nulabinc.backlog.migration.convert.Writes
 import com.nulabinc.backlog.migration.domain.BacklogIssueType
 import com.taskadapter.redmineapi.bean.Tracker
 

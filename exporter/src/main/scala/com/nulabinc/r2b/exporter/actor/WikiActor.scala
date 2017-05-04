@@ -7,7 +7,7 @@ import java.util.concurrent.CountDownLatch
 
 import akka.actor.Actor
 import com.nulabinc.backlog.migration.conf.BacklogPaths
-import com.nulabinc.backlog.migration.converter.Convert
+import com.nulabinc.backlog.migration.convert.Convert
 import com.nulabinc.backlog.migration.domain.BacklogJsonProtocol._
 import com.nulabinc.backlog.migration.domain.BacklogWiki
 import com.nulabinc.backlog.migration.utils.{IOUtil, Logging}

@@ -5,7 +5,7 @@ import java.net.URL
 import java.nio.channels.Channels
 
 import com.nulabinc.backlog.migration.conf.BacklogPaths
-import com.nulabinc.backlog.migration.converter.Convert
+import com.nulabinc.backlog.migration.convert.Convert
 import com.nulabinc.backlog.migration.domain._
 import com.nulabinc.backlog.migration.utils.{DateUtil, IOUtil, Logging, StringUtil}
 import com.nulabinc.r2b.exporter.convert._

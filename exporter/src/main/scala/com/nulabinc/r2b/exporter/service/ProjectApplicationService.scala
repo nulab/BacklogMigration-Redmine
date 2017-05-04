@@ -5,7 +5,7 @@ import javax.inject.Inject
 import akka.actor.ActorSystem
 import com.google.inject.Injector
 import com.nulabinc.backlog.migration.conf.BacklogPaths
-import com.nulabinc.backlog.migration.converter.{BacklogUnmarshaller, Convert}
+import com.nulabinc.backlog.migration.convert.{BacklogUnmarshaller, Convert}
 import com.nulabinc.backlog.migration.domain.BacklogJsonProtocol._
 import com.nulabinc.backlog.migration.domain._
 import com.nulabinc.backlog.migration.modules.akkaguice.GuiceAkkaExtension
