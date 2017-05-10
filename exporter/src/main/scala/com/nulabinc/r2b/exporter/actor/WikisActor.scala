@@ -6,9 +6,9 @@ import javax.inject.Inject
 import akka.actor.SupervisorStrategy.Restart
 import akka.actor.{Actor, OneForOneStrategy, Props}
 import akka.routing.SmallestMailboxPool
-import com.nulabinc.backlog.migration.conf.{BacklogConfiguration, BacklogPaths}
-import com.nulabinc.backlog.migration.modules.akkaguice.NamedActor
-import com.nulabinc.backlog.migration.utils.{Logging, ProgressBar}
+import com.nulabinc.backlog.migration.common.conf.{BacklogConfiguration, BacklogPaths}
+import com.nulabinc.backlog.migration.common.modules.akkaguice.NamedActor
+import com.nulabinc.backlog.migration.common.utils.{Logging, ProgressBar}
 import com.nulabinc.r2b.exporter.convert.WikiWrites
 import com.nulabinc.r2b.redmine.conf.RedmineApiConfiguration
 import com.nulabinc.r2b.redmine.service.WikiService

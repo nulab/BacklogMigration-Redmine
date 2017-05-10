@@ -2,7 +2,7 @@ package com.nulabinc.r2b.redmine.service
 
 import javax.inject.Inject
 
-import com.nulabinc.backlog.migration.utils.Logging
+import com.nulabinc.backlog.migration.common.utils.Logging
 import com.taskadapter.redmineapi.RedmineManager
 import com.taskadapter.redmineapi.bean.IssueStatus
 

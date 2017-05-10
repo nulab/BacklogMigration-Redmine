@@ -2,9 +2,9 @@ package com.nulabinc.r2b.exporter.convert
 
 import javax.inject.Inject
 
-import com.nulabinc.backlog.migration.convert.{Convert, Writes}
-import com.nulabinc.backlog.migration.domain.{BacklogAttachment, BacklogSharedFile, BacklogWiki}
-import com.nulabinc.backlog.migration.utils.{DateUtil, Logging}
+import com.nulabinc.backlog.migration.common.convert.{Convert, Writes}
+import com.nulabinc.backlog.migration.common.domain.{BacklogAttachment, BacklogSharedFile, BacklogWiki}
+import com.nulabinc.backlog.migration.common.utils.{DateUtil, Logging}
 import com.osinka.i18n.Messages
 import com.taskadapter.redmineapi.bean.News
 

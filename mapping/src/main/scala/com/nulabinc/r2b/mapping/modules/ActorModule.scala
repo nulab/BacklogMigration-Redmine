@@ -5,7 +5,7 @@ import javax.inject.Inject
 import akka.actor.{Actor, ActorRef, ActorSystem}
 import com.google.inject.name.{Named, Names}
 import com.google.inject.{AbstractModule, Provides}
-import com.nulabinc.backlog.migration.modules.akkaguice.GuiceAkkaActorRefProvider
+import com.nulabinc.backlog.migration.common.modules.akkaguice.GuiceAkkaActorRefProvider
 import com.nulabinc.r2b.mapping.actor.{ContentActor, IssuesActor, WikisActor}
 import net.codingwell.scalaguice.ScalaModule
 

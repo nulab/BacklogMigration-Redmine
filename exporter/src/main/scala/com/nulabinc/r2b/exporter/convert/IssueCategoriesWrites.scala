@@ -2,8 +2,8 @@ package com.nulabinc.r2b.exporter.convert
 
 import javax.inject.Inject
 
-import com.nulabinc.backlog.migration.convert.Writes
-import com.nulabinc.backlog.migration.domain.BacklogIssueCategory
+import com.nulabinc.backlog.migration.common.convert.Writes
+import com.nulabinc.backlog.migration.common.domain.BacklogIssueCategory
 import com.taskadapter.redmineapi.bean.IssueCategory
 
 /**

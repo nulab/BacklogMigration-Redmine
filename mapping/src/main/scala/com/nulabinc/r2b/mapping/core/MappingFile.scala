@@ -1,6 +1,6 @@
 package com.nulabinc.r2b.mapping.core
 
-import com.nulabinc.backlog.migration.utils.{IOUtil, Logging}
+import com.nulabinc.backlog.migration.common.utils.{IOUtil, Logging}
 import com.nulabinc.r2b.mapping.domain.MappingJsonProtocol._
 import com.nulabinc.r2b.mapping.domain.{Mapping, MappingItem, MappingsWrapper}
 import spray.json.{JsonParser, _}

@@ -2,8 +2,8 @@ package com.nulabinc.r2b.core
 
 import java.util.Locale
 
-import com.nulabinc.backlog.migration.conf.{BacklogApiConfiguration, BacklogConfiguration}
-import com.nulabinc.backlog.migration.utils.{ConsoleOut, Logging}
+import com.nulabinc.backlog.migration.common.conf.{BacklogApiConfiguration, BacklogConfiguration}
+import com.nulabinc.backlog.migration.common.utils.{ConsoleOut, Logging}
 import com.nulabinc.r2b.cli._
 import com.nulabinc.r2b.conf._
 import com.nulabinc.r2b.redmine.conf.RedmineApiConfiguration

@@ -4,10 +4,10 @@ import java.io.{FileOutputStream, InputStream}
 import java.net.URL
 import java.nio.channels.Channels
 
-import com.nulabinc.backlog.migration.conf.BacklogPaths
-import com.nulabinc.backlog.migration.convert.Convert
-import com.nulabinc.backlog.migration.domain._
-import com.nulabinc.backlog.migration.utils.{DateUtil, IOUtil, Logging, StringUtil}
+import com.nulabinc.backlog.migration.common.conf.BacklogPaths
+import com.nulabinc.backlog.migration.common.convert.Convert
+import com.nulabinc.backlog.migration.common.domain._
+import com.nulabinc.backlog.migration.common.utils.{DateUtil, IOUtil, Logging, StringUtil}
 import com.nulabinc.r2b.exporter.convert._
 import com.nulabinc.r2b.mapping.core.{ConvertPriorityMapping, ConvertUserMapping}
 import com.nulabinc.r2b.redmine.conf.{RedmineApiConfiguration, RedmineConstantValue}

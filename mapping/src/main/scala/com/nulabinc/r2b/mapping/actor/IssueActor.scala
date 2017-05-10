@@ -3,7 +3,7 @@ package com.nulabinc.r2b.mapping.actor
 import java.util.concurrent.CountDownLatch
 
 import akka.actor.Actor
-import com.nulabinc.backlog.migration.utils.Logging
+import com.nulabinc.backlog.migration.common.utils.Logging
 import com.nulabinc.r2b.mapping.core.MappingData
 import com.nulabinc.r2b.redmine.conf.RedmineConstantValue
 import com.nulabinc.r2b.redmine.service.IssueService

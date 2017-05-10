@@ -6,11 +6,11 @@ import java.nio.channels.Channels
 import java.util.concurrent.CountDownLatch
 
 import akka.actor.Actor
-import com.nulabinc.backlog.migration.conf.BacklogPaths
-import com.nulabinc.backlog.migration.convert.Convert
-import com.nulabinc.backlog.migration.domain.BacklogJsonProtocol._
-import com.nulabinc.backlog.migration.domain.BacklogWiki
-import com.nulabinc.backlog.migration.utils.{IOUtil, Logging}
+import com.nulabinc.backlog.migration.common.conf.BacklogPaths
+import com.nulabinc.backlog.migration.common.convert.Convert
+import com.nulabinc.backlog.migration.common.domain.BacklogJsonProtocol._
+import com.nulabinc.backlog.migration.common.domain.BacklogWiki
+import com.nulabinc.backlog.migration.common.utils.{IOUtil, Logging}
 import com.nulabinc.r2b.exporter.convert.WikiWrites
 import com.nulabinc.r2b.redmine.conf.RedmineApiConfiguration
 import com.nulabinc.r2b.redmine.service.WikiService

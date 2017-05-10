@@ -1,6 +1,6 @@
 package com.nulabinc.r2b.redmine.domain
 
-import com.nulabinc.backlog.migration.utils.StringUtil
+import com.nulabinc.backlog.migration.common.utils.StringUtil
 import com.taskadapter.redmineapi.bean._
 
 /**

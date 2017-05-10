@@ -3,7 +3,7 @@ package com.nulabinc.r2b.utils
 import java.security.cert.X509Certificate
 import javax.net.ssl._
 
-import com.nulabinc.backlog.migration.utils.Logging
+import com.nulabinc.backlog.migration.common.utils.Logging
 
 /**
   * @author uchida

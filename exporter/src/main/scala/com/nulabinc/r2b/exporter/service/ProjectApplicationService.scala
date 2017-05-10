@@ -4,12 +4,12 @@ import javax.inject.Inject
 
 import akka.actor.ActorSystem
 import com.google.inject.Injector
-import com.nulabinc.backlog.migration.conf.BacklogPaths
-import com.nulabinc.backlog.migration.convert.{BacklogUnmarshaller, Convert}
-import com.nulabinc.backlog.migration.domain.BacklogJsonProtocol._
-import com.nulabinc.backlog.migration.domain._
-import com.nulabinc.backlog.migration.modules.akkaguice.GuiceAkkaExtension
-import com.nulabinc.backlog.migration.utils.{ConsoleOut, IOUtil, Logging, ProgressBar}
+import com.nulabinc.backlog.migration.common.conf.BacklogPaths
+import com.nulabinc.backlog.migration.common.convert.{BacklogUnmarshaller, Convert}
+import com.nulabinc.backlog.migration.common.domain.BacklogJsonProtocol._
+import com.nulabinc.backlog.migration.common.domain._
+import com.nulabinc.backlog.migration.common.modules.akkaguice.GuiceAkkaExtension
+import com.nulabinc.backlog.migration.common.utils.{ConsoleOut, IOUtil, Logging, ProgressBar}
 import com.nulabinc.r2b.exporter.actor.ContentActor
 import com.nulabinc.r2b.exporter.convert._
 import com.nulabinc.r2b.mapping.core.ConvertUserMapping

@@ -4,8 +4,8 @@ import javax.inject.Inject
 
 import akka.actor.ActorSystem
 import com.google.inject.Injector
-import com.nulabinc.backlog.migration.modules.akkaguice.GuiceAkkaExtension
-import com.nulabinc.backlog.migration.utils.{Logging, ProgressBar}
+import com.nulabinc.backlog.migration.common.modules.akkaguice.GuiceAkkaExtension
+import com.nulabinc.backlog.migration.common.utils.{Logging, ProgressBar}
 import com.nulabinc.r2b.mapping.actor.ContentActor
 import com.nulabinc.r2b.mapping.core.MappingData
 import com.nulabinc.r2b.redmine.service.{MembershipService, NewsService, UserService}

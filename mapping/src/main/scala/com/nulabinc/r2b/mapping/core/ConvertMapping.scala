@@ -1,7 +1,7 @@
 package com.nulabinc.r2b.mapping.core
 
-import com.nulabinc.backlog.migration.conf.BacklogConstantValue
-import com.nulabinc.backlog.migration.domain.BacklogUser
+import com.nulabinc.backlog.migration.common.conf.BacklogConstantValue
+import com.nulabinc.backlog.migration.common.domain.BacklogUser
 import com.nulabinc.r2b.mapping.domain.{Mapping, MappingsWrapper}
 import com.nulabinc.r2b.mapping.domain.MappingJsonProtocol._
 import spray.json.JsonParser

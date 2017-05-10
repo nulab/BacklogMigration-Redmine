@@ -2,10 +2,10 @@ package com.nulabinc.r2b.exporter.convert
 
 import javax.inject.Inject
 
-import com.nulabinc.backlog.migration.conf.BacklogConstantValue
-import com.nulabinc.backlog.migration.convert.Writes
-import com.nulabinc.backlog.migration.domain.BacklogUser
-import com.nulabinc.backlog.migration.utils.Logging
+import com.nulabinc.backlog.migration.common.conf.BacklogConstantValue
+import com.nulabinc.backlog.migration.common.convert.Writes
+import com.nulabinc.backlog.migration.common.domain.BacklogUser
+import com.nulabinc.backlog.migration.common.utils.Logging
 import com.nulabinc.r2b.mapping.core.ConvertUserMapping
 import com.nulabinc.r2b.redmine.domain.PropertyValue
 import com.osinka.i18n.Messages

@@ -3,8 +3,8 @@ package com.nulabinc.r2b.exporter.actor
 import akka.actor.{Actor, ActorRef}
 import com.google.inject.Inject
 import com.google.inject.name.Named
-import com.nulabinc.backlog.migration.modules.akkaguice.NamedActor
-import com.nulabinc.backlog.migration.utils.Logging
+import com.nulabinc.backlog.migration.common.modules.akkaguice.NamedActor
+import com.nulabinc.backlog.migration.common.utils.Logging
 
 /**
   * @author uchida

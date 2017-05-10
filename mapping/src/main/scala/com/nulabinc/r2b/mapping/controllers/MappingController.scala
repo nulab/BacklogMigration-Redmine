@@ -1,8 +1,8 @@
 package com.nulabinc.r2b.controllers
 
 import com.google.inject.Guice
-import com.nulabinc.backlog.migration.modules.{AkkaModule, ConfigModule}
-import com.nulabinc.backlog.migration.utils.{ConsoleOut, Logging}
+import com.nulabinc.backlog.migration.common.modules.{AkkaModule, ConfigModule}
+import com.nulabinc.backlog.migration.common.utils.{ConsoleOut, Logging}
 import com.nulabinc.r2b.mapping.core.MappingData
 import com.nulabinc.r2b.mapping.modules.{ActorModule, RedmineModule}
 import com.nulabinc.r2b.mapping.service.ProjectApplicationService

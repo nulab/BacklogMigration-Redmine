@@ -2,7 +2,7 @@ package com.nulabinc.r2b.core
 
 import java.util.Date
 
-import com.nulabinc.backlog.migration.utils.FileUtil
+import com.nulabinc.backlog.migration.common.utils.FileUtil
 import com.nulabinc.backlog4j.api.option.{GetIssuesParams, QueryParams}
 import com.nulabinc.backlog4j.{IssueComment, Issue => BacklogIssue}
 import com.nulabinc.r2b.conf.AppConfiguration

@@ -2,8 +2,8 @@ package com.nulabinc.r2b.exporter.convert
 
 import javax.inject.Inject
 
-import com.nulabinc.backlog.migration.convert.{Convert, Writes}
-import com.nulabinc.backlog.migration.domain.BacklogUser
+import com.nulabinc.backlog.migration.common.convert.{Convert, Writes}
+import com.nulabinc.backlog.migration.common.domain.BacklogUser
 import com.taskadapter.redmineapi.bean.Membership
 
 /**

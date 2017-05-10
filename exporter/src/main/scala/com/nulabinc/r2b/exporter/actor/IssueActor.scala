@@ -3,11 +3,11 @@ package com.nulabinc.r2b.exporter.actor
 import java.util.concurrent.CountDownLatch
 
 import akka.actor.Actor
-import com.nulabinc.backlog.migration.conf.BacklogPaths
-import com.nulabinc.backlog.migration.convert.Convert
-import com.nulabinc.backlog.migration.domain.BacklogJsonProtocol._
-import com.nulabinc.backlog.migration.domain.{BacklogComment, BacklogIssue}
-import com.nulabinc.backlog.migration.utils.{DateUtil, IOUtil, Logging}
+import com.nulabinc.backlog.migration.common.conf.BacklogPaths
+import com.nulabinc.backlog.migration.common.convert.Convert
+import com.nulabinc.backlog.migration.common.domain.BacklogJsonProtocol._
+import com.nulabinc.backlog.migration.common.domain.{BacklogComment, BacklogIssue}
+import com.nulabinc.backlog.migration.common.utils.{DateUtil, IOUtil, Logging}
 import com.nulabinc.r2b.exporter.convert._
 import com.nulabinc.r2b.exporter.service.{CommentReducer, IssueInitializer}
 import com.nulabinc.r2b.redmine.conf.RedmineApiConfiguration

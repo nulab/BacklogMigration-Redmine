@@ -1,6 +1,6 @@
 package com.nulabinc.r2b.exporter.service
 
-import com.nulabinc.backlog.migration.utils.FileUtil
+import com.nulabinc.backlog.migration.common.utils.FileUtil
 import com.nulabinc.r2b.redmine.conf.RedmineConstantValue
 import com.taskadapter.redmineapi.bean.{Attachment, Journal, JournalDetail}
 
