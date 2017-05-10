@@ -6,10 +6,10 @@ import com.nulabinc.backlog.migration.common.conf.BacklogConstantValue
 import com.nulabinc.backlog.migration.common.convert.{Convert, Writes}
 import com.nulabinc.backlog.migration.common.domain.{BacklogAttachment, BacklogAttributeInfo, BacklogChangeLog}
 import com.nulabinc.backlog.migration.common.utils.{DateUtil, FileUtil, Logging, StringUtil}
-import com.nulabinc.backlog4j.CustomField.FieldType
 import com.nulabinc.backlog.r2b.mapping.core.{ConvertPriorityMapping, ConvertStatusMapping, ConvertUserMapping}
-import com.nulabinc.r2b.redmine.conf.RedmineConstantValue
-import com.nulabinc.r2b.redmine.domain.PropertyValue
+import com.nulabinc.backlog.r2b.redmine.conf.RedmineConstantValue
+import com.nulabinc.backlog.r2b.redmine.domain.PropertyValue
+import com.nulabinc.backlog4j.CustomField.FieldType
 import com.taskadapter.redmineapi.bean.JournalDetail
 
 /**

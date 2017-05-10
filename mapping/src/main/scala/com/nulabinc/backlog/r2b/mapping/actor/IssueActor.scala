@@ -5,8 +5,8 @@ import java.util.concurrent.CountDownLatch
 import akka.actor.Actor
 import com.nulabinc.backlog.migration.common.utils.Logging
 import com.nulabinc.backlog.r2b.mapping.core.MappingData
-import com.nulabinc.r2b.redmine.conf.RedmineConstantValue
-import com.nulabinc.r2b.redmine.service.IssueService
+import com.nulabinc.backlog.r2b.redmine.conf.RedmineConstantValue
+import com.nulabinc.backlog.r2b.redmine.service.IssueService
 import com.taskadapter.redmineapi.Include
 import com.taskadapter.redmineapi.bean.{Issue, Journal, JournalDetail, User}
 

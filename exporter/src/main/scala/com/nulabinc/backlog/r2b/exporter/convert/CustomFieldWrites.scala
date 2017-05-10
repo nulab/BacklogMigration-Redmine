@@ -5,9 +5,9 @@ import javax.inject.Inject
 import com.nulabinc.backlog.migration.common.convert.{Convert, Writes}
 import com.nulabinc.backlog.migration.common.domain.BacklogCustomField
 import com.nulabinc.backlog.migration.common.utils.Logging
+import com.nulabinc.backlog.r2b.redmine.conf.RedmineConstantValue
+import com.nulabinc.backlog.r2b.redmine.domain.PropertyValue
 import com.nulabinc.backlog4j.CustomField.FieldType
-import com.nulabinc.r2b.redmine.conf.RedmineConstantValue
-import com.nulabinc.r2b.redmine.domain.PropertyValue
 import com.taskadapter.redmineapi.bean.CustomField
 
 import scala.collection.JavaConverters._

@@ -12,8 +12,8 @@ import com.nulabinc.backlog.migration.common.domain.BacklogJsonProtocol._
 import com.nulabinc.backlog.migration.common.domain.BacklogWiki
 import com.nulabinc.backlog.migration.common.utils.{IOUtil, Logging}
 import com.nulabinc.backlog.r2b.exporter.convert.WikiWrites
-import com.nulabinc.r2b.redmine.conf.RedmineApiConfiguration
-import com.nulabinc.r2b.redmine.service.WikiService
+import com.nulabinc.backlog.r2b.redmine.conf.RedmineApiConfiguration
+import com.nulabinc.backlog.r2b.redmine.service.WikiService
 import com.taskadapter.redmineapi.bean.{WikiPage, WikiPageDetail}
 import spray.json._
 

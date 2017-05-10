@@ -4,8 +4,8 @@ import javax.inject.Inject
 
 import com.nulabinc.backlog.migration.common.convert.Writes
 import com.nulabinc.backlog.migration.common.utils.Logging
-import com.nulabinc.r2b.redmine.conf.RedmineConstantValue
-import com.nulabinc.r2b.redmine.domain.{PropertyValue, RedmineCustomFieldDefinition}
+import com.nulabinc.backlog.r2b.redmine.conf.RedmineConstantValue
+import com.nulabinc.backlog.r2b.redmine.domain.{PropertyValue, RedmineCustomFieldDefinition}
 import com.osinka.i18n.Messages
 
 /**

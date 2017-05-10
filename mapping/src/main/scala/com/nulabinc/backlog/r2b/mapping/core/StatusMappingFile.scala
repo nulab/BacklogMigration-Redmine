@@ -6,9 +6,9 @@ import com.nulabinc.backlog.migration.common.service.{StatusService => BacklogSt
 import com.nulabinc.backlog.migration.common.utils.StringUtil
 import com.nulabinc.backlog4j.Status
 import com.nulabinc.backlog.r2b.mapping.domain.MappingItem
-import com.nulabinc.r2b.redmine.conf.RedmineApiConfiguration
-import com.nulabinc.r2b.redmine.modules.{ServiceInjector => RedmineInjector}
-import com.nulabinc.r2b.redmine.service.{StatusService => RedmineStatusService}
+import com.nulabinc.backlog.r2b.redmine.conf.RedmineApiConfiguration
+import com.nulabinc.backlog.r2b.redmine.modules.{ServiceInjector => RedmineInjector}
+import com.nulabinc.backlog.r2b.redmine.service.{StatusService => RedmineStatusService}
 import com.osinka.i18n.{Lang, Messages}
 import com.taskadapter.redmineapi.bean.IssueStatus
 

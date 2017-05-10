@@ -10,9 +10,10 @@ import com.nulabinc.backlog.migration.common.conf.{BacklogConfiguration, Backlog
 import com.nulabinc.backlog.migration.common.modules.akkaguice.NamedActor
 import com.nulabinc.backlog.migration.common.utils.{Logging, ProgressBar}
 import com.nulabinc.backlog.r2b.exporter.convert._
-import com.nulabinc.r2b.redmine.conf.RedmineApiConfiguration
-import com.nulabinc.r2b.redmine.domain.PropertyValue
-import com.nulabinc.r2b.redmine.service.{IssueService, ProjectService}
+import com.nulabinc.backlog.r2b.redmine.conf.RedmineApiConfiguration
+import com.nulabinc.backlog.r2b.redmine.service.IssueService
+import com.nulabinc.backlog.r2b.redmine.domain.PropertyValue
+import com.nulabinc.backlog.r2b.redmine.service.ProjectService
 import com.osinka.i18n.Messages
 
 import scala.concurrent.duration._

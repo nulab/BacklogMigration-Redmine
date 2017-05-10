@@ -10,8 +10,8 @@ import com.nulabinc.backlog.migration.common.conf.{BacklogConfiguration, Backlog
 import com.nulabinc.backlog.migration.common.modules.akkaguice.NamedActor
 import com.nulabinc.backlog.migration.common.utils.{Logging, ProgressBar}
 import com.nulabinc.backlog.r2b.exporter.convert.WikiWrites
-import com.nulabinc.r2b.redmine.conf.RedmineApiConfiguration
-import com.nulabinc.r2b.redmine.service.WikiService
+import com.nulabinc.backlog.r2b.redmine.conf.RedmineApiConfiguration
+import com.nulabinc.backlog.r2b.redmine.service.WikiService
 import com.osinka.i18n.Messages
 import com.taskadapter.redmineapi.bean.WikiPage
 

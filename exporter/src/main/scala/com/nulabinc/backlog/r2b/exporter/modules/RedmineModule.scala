@@ -2,8 +2,8 @@ package com.nulabinc.backlog.r2b.exporter.modules
 
 import com.google.inject.name.Names
 import com.nulabinc.backlog.migration.common.conf.BacklogPaths
-import com.nulabinc.r2b.redmine.conf.RedmineApiConfiguration
-import com.nulabinc.r2b.redmine.modules.RedmineDefaultModule
+import com.nulabinc.backlog.r2b.redmine.conf.RedmineApiConfiguration
+import com.nulabinc.backlog.r2b.redmine.modules.RedmineDefaultModule
 
 /**
   * @author uchida

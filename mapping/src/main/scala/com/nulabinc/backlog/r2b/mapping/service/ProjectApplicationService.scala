@@ -8,7 +8,8 @@ import com.nulabinc.backlog.migration.common.modules.akkaguice.GuiceAkkaExtensio
 import com.nulabinc.backlog.migration.common.utils.{Logging, ProgressBar}
 import com.nulabinc.backlog.r2b.mapping.actor.ContentActor
 import com.nulabinc.backlog.r2b.mapping.core.MappingData
-import com.nulabinc.r2b.redmine.service.{MembershipService, NewsService, UserService}
+import com.nulabinc.backlog.r2b.redmine.service.MembershipService
+import com.nulabinc.backlog.r2b.redmine.service.{NewsService, UserService}
 import com.osinka.i18n.Messages
 import com.taskadapter.redmineapi.bean.{Group, Membership, User}
 import net.codingwell.scalaguice.InjectorExtensions._

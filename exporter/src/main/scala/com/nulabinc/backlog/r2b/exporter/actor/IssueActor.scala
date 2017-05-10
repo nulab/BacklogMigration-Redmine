@@ -10,9 +10,10 @@ import com.nulabinc.backlog.migration.common.domain.{BacklogComment, BacklogIssu
 import com.nulabinc.backlog.migration.common.utils.{DateUtil, IOUtil, Logging}
 import com.nulabinc.backlog.r2b.exporter.convert._
 import com.nulabinc.backlog.r2b.exporter.service.{CommentReducer, IssueInitializer}
-import com.nulabinc.r2b.redmine.conf.RedmineApiConfiguration
-import com.nulabinc.r2b.redmine.domain.PropertyValue
-import com.nulabinc.r2b.redmine.service.{IssueService, ProjectService}
+import com.nulabinc.backlog.r2b.redmine.conf.RedmineApiConfiguration
+import com.nulabinc.backlog.r2b.redmine.service.IssueService
+import com.nulabinc.backlog.r2b.redmine.domain.PropertyValue
+import com.nulabinc.backlog.r2b.redmine.service.ProjectService
 import com.taskadapter.redmineapi.Include
 import com.taskadapter.redmineapi.bean.{Attachment, _}
 import spray.json._

@@ -7,7 +7,7 @@ import com.nulabinc.backlog.migration.common.convert.Writes
 import com.nulabinc.backlog.migration.common.domain.BacklogUser
 import com.nulabinc.backlog.migration.common.utils.Logging
 import com.nulabinc.backlog.r2b.mapping.core.ConvertUserMapping
-import com.nulabinc.r2b.redmine.domain.PropertyValue
+import com.nulabinc.backlog.r2b.redmine.domain.PropertyValue
 import com.osinka.i18n.Messages
 import com.taskadapter.redmineapi.bean.User
 

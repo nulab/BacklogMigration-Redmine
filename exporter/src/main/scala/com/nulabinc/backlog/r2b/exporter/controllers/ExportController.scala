@@ -5,7 +5,7 @@ import com.nulabinc.backlog.migration.common.modules.{AkkaModule, ConfigModule}
 import com.nulabinc.backlog.migration.common.utils.{ConsoleOut, Logging}
 import com.nulabinc.backlog.r2b.exporter.modules.{ActorModule, RedmineModule}
 import com.nulabinc.backlog.r2b.exporter.service.ProjectApplicationService
-import com.nulabinc.r2b.redmine.conf.RedmineApiConfiguration
+import com.nulabinc.backlog.r2b.redmine.conf.RedmineApiConfiguration
 import com.osinka.i18n.Messages
 
 /**

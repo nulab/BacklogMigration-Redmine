@@ -10,7 +10,7 @@ import com.nulabinc.backlog.migration.common.conf.BacklogConfiguration
 import com.nulabinc.backlog.migration.common.modules.akkaguice.NamedActor
 import com.nulabinc.backlog.migration.common.utils.{Logging, ProgressBar}
 import com.nulabinc.backlog.r2b.mapping.core.MappingData
-import com.nulabinc.r2b.redmine.service.WikiService
+import com.nulabinc.backlog.r2b.redmine.service.WikiService
 import com.osinka.i18n.Messages
 
 import scala.concurrent.duration._

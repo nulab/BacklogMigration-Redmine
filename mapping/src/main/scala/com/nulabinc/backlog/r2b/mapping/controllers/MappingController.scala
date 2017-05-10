@@ -6,7 +6,7 @@ import com.nulabinc.backlog.migration.common.utils.{ConsoleOut, Logging}
 import com.nulabinc.backlog.r2b.mapping.core.MappingData
 import com.nulabinc.backlog.r2b.mapping.service.ProjectApplicationService
 import com.nulabinc.backlog.r2b.mapping.modules.{ActorModule, RedmineModule}
-import com.nulabinc.r2b.redmine.conf.RedmineApiConfiguration
+import com.nulabinc.backlog.r2b.redmine.conf.RedmineApiConfiguration
 import com.osinka.i18n.Messages
 import com.taskadapter.redmineapi.bean.User
 

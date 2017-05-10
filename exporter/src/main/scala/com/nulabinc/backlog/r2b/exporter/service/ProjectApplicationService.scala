@@ -5,7 +5,7 @@ import javax.inject.Inject
 import akka.actor.ActorSystem
 import com.google.inject.Injector
 import com.nulabinc.backlog.migration.common.conf.BacklogPaths
-import com.nulabinc.backlog.migration.common.convert.{BacklogUnmarshaller, Convert}
+import com.nulabinc.backlog.migration.common.convert.Convert
 import com.nulabinc.backlog.migration.common.domain.BacklogJsonProtocol._
 import com.nulabinc.backlog.migration.common.domain._
 import com.nulabinc.backlog.migration.common.modules.akkaguice.GuiceAkkaExtension
@@ -13,7 +13,7 @@ import com.nulabinc.backlog.migration.common.utils.{ConsoleOut, IOUtil, Logging,
 import com.nulabinc.backlog.r2b.exporter.actor.ContentActor
 import com.nulabinc.backlog.r2b.exporter.convert._
 import com.nulabinc.backlog.r2b.mapping.core.ConvertUserMapping
-import com.nulabinc.r2b.redmine.service._
+import com.nulabinc.backlog.r2b.redmine.service.{MembershipService, _}
 import com.osinka.i18n.Messages
 import com.taskadapter.redmineapi.bean._
 import net.codingwell.scalaguice.InjectorExtensions._
