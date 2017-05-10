@@ -5,7 +5,7 @@ import javax.inject.Inject
 import com.nulabinc.backlog.migration.common.convert.{Convert, Writes}
 import com.nulabinc.backlog.migration.common.domain._
 import com.nulabinc.backlog.migration.common.utils.DateUtil
-import com.nulabinc.r2b.mapping.core.{ConvertPriorityMapping, ConvertStatusMapping}
+import com.nulabinc.backlog.r2b.mapping.core.{ConvertPriorityMapping, ConvertStatusMapping}
 import com.taskadapter.redmineapi.bean.Issue
 
 import scala.collection.JavaConverters._

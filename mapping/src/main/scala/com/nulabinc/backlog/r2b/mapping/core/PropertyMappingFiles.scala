@@ -1,4 +1,4 @@
-package com.nulabinc.r2b.mapping.core
+package com.nulabinc.backlog.r2b.mapping.core
 
 /**
   * @author uchida

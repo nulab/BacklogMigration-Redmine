@@ -12,7 +12,7 @@ import com.nulabinc.backlog.migration.common.modules.akkaguice.GuiceAkkaExtensio
 import com.nulabinc.backlog.migration.common.utils.{ConsoleOut, IOUtil, Logging, ProgressBar}
 import com.nulabinc.backlog.r2b.exporter.actor.ContentActor
 import com.nulabinc.backlog.r2b.exporter.convert._
-import com.nulabinc.r2b.mapping.core.ConvertUserMapping
+import com.nulabinc.backlog.r2b.mapping.core.ConvertUserMapping
 import com.nulabinc.r2b.redmine.service._
 import com.osinka.i18n.Messages
 import com.taskadapter.redmineapi.bean._

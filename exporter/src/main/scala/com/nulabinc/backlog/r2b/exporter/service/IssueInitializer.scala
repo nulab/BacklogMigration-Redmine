@@ -9,7 +9,7 @@ import com.nulabinc.backlog.migration.common.convert.Convert
 import com.nulabinc.backlog.migration.common.domain._
 import com.nulabinc.backlog.migration.common.utils.{DateUtil, IOUtil, Logging, StringUtil}
 import com.nulabinc.backlog.r2b.exporter.convert._
-import com.nulabinc.r2b.mapping.core.{ConvertPriorityMapping, ConvertUserMapping}
+import com.nulabinc.backlog.r2b.mapping.core.{ConvertPriorityMapping, ConvertUserMapping}
 import com.nulabinc.r2b.redmine.conf.{RedmineApiConfiguration, RedmineConstantValue}
 import com.nulabinc.r2b.redmine.domain.{PropertyValue, RedmineCustomFieldDefinition}
 import com.taskadapter.redmineapi.bean._

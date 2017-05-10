@@ -1,4 +1,4 @@
-package com.nulabinc.r2b.mapping.modules
+package com.nulabinc.backlog.r2b.mapping.modules
 
 import com.nulabinc.r2b.redmine.conf.RedmineApiConfiguration
 import com.nulabinc.r2b.redmine.modules.RedmineDefaultModule

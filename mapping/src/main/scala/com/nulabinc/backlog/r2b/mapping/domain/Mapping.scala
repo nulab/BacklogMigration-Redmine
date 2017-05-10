@@ -1,4 +1,4 @@
-package com.nulabinc.r2b.mapping.domain
+package com.nulabinc.backlog.r2b.mapping.domain
 
 import spray.json.DefaultJsonProtocol
 

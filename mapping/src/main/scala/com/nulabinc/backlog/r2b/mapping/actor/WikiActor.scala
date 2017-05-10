@@ -1,10 +1,10 @@
-package com.nulabinc.r2b.mapping.actor
+package com.nulabinc.backlog.r2b.mapping.actor
 
 import java.util.concurrent.CountDownLatch
 
 import akka.actor.Actor
 import com.nulabinc.backlog.migration.common.utils.Logging
-import com.nulabinc.r2b.mapping.core.MappingData
+import com.nulabinc.backlog.r2b.mapping.core.MappingData
 import com.nulabinc.r2b.redmine.service.WikiService
 import com.taskadapter.redmineapi.bean.{User, WikiPage, WikiPageDetail}
 

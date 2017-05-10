@@ -1,9 +1,9 @@
-package com.nulabinc.r2b.mapping.core
+package com.nulabinc.backlog.r2b.mapping.core
 
 import com.nulabinc.backlog.migration.common.conf.BacklogConstantValue
 import com.nulabinc.backlog.migration.common.domain.BacklogUser
-import com.nulabinc.r2b.mapping.domain.{Mapping, MappingsWrapper}
-import com.nulabinc.r2b.mapping.domain.MappingJsonProtocol._
+import com.nulabinc.backlog.r2b.mapping.domain.{Mapping, MappingsWrapper}
+import com.nulabinc.backlog.r2b.mapping.domain.MappingJsonProtocol._
 import spray.json.JsonParser
 
 import scalax.file.Path

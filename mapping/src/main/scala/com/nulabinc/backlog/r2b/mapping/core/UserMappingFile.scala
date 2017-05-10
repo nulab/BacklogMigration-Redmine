@@ -1,11 +1,11 @@
-package com.nulabinc.r2b.mapping.core
+package com.nulabinc.backlog.r2b.mapping.core
 
 import com.nulabinc.backlog.migration.common.conf.BacklogApiConfiguration
 import com.nulabinc.backlog.migration.common.domain.BacklogUser
 import com.nulabinc.backlog.migration.common.modules.{ServiceInjector => BacklogInjector}
 import com.nulabinc.backlog.migration.common.service.{UserService => BacklogUserService}
 import com.nulabinc.backlog.migration.common.utils.StringUtil
-import com.nulabinc.r2b.mapping.domain.MappingItem
+import com.nulabinc.backlog.r2b.mapping.domain.MappingItem
 import com.nulabinc.r2b.redmine.conf.RedmineApiConfiguration
 import com.nulabinc.r2b.redmine.modules.{ServiceInjector => RedmineInjector}
 import com.nulabinc.r2b.redmine.service.{UserService => RedmineUserService}

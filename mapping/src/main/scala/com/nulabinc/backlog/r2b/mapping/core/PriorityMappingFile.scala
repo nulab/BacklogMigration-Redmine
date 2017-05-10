@@ -1,10 +1,10 @@
-package com.nulabinc.r2b.mapping.core
+package com.nulabinc.backlog.r2b.mapping.core
 
 import com.nulabinc.backlog.migration.common.conf.BacklogApiConfiguration
 import com.nulabinc.backlog.migration.common.modules.{ServiceInjector => BacklogInjector}
 import com.nulabinc.backlog.migration.common.service.{PriorityService => BacklogPriorityService}
 import com.nulabinc.backlog4j.Priority
-import com.nulabinc.r2b.mapping.domain.MappingItem
+import com.nulabinc.backlog.r2b.mapping.domain.MappingItem
 import com.nulabinc.r2b.redmine.conf.RedmineApiConfiguration
 import com.nulabinc.r2b.redmine.modules.{ServiceInjector => RedmineInjector}
 import com.nulabinc.r2b.redmine.service.{PriorityService => RedminePriorityService}

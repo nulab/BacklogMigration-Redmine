@@ -1,8 +1,8 @@
-package com.nulabinc.r2b.mapping.core
+package com.nulabinc.backlog.r2b.mapping.core
 
 import java.util.Locale
 
-import com.nulabinc.r2b.mapping.domain.{Mapping, MappingItem}
+import com.nulabinc.backlog.r2b.mapping.domain.{Mapping, MappingItem}
 import com.osinka.i18n.{Lang, Messages}
 
 /**
