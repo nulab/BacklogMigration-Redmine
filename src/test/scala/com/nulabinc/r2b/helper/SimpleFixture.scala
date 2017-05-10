@@ -4,11 +4,11 @@ import java.io.{File, FileInputStream}
 import java.util.{Date, Locale, Properties}
 
 import com.nulabinc.backlog.migration.common.conf.BacklogApiConfiguration
+import com.nulabinc.backlog.r2b.conf.AppConfiguration
 import com.nulabinc.backlog.r2b.mapping.core._
 import com.nulabinc.backlog.r2b.redmine.conf.RedmineApiConfiguration
 import com.nulabinc.backlog4j.conf.{BacklogConfigure, BacklogPackageConfigure}
 import com.nulabinc.backlog4j.{BacklogClient, BacklogClientFactory}
-import com.nulabinc.r2b.conf.AppConfiguration
 import com.osinka.i18n.Lang
 import com.taskadapter.redmineapi.RedmineManagerFactory
 import org.joda.time.DateTime

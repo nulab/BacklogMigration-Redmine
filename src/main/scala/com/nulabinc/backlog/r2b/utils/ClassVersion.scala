@@ -1,4 +1,4 @@
-package com.nulabinc.r2b.utils
+package com.nulabinc.backlog.r2b.utils
 
 /**
   * @author uchida

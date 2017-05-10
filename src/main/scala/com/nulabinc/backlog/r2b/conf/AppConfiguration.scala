@@ -1,4 +1,4 @@
-package com.nulabinc.r2b.conf
+package com.nulabinc.backlog.r2b.conf
 
 import com.nulabinc.backlog.migration.common.conf.BacklogApiConfiguration
 import com.nulabinc.backlog.r2b.redmine.conf.RedmineApiConfiguration
