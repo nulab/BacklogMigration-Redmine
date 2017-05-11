@@ -20,7 +20,10 @@ import scala.concurrent.duration._
 /**
   * @author uchida
   */
-class WikisActor @Inject()(apiConfig: RedmineApiConfiguration, backlogPaths: BacklogPaths, wikiWrites: WikiWrites, wikiService: WikiService)
+private[exporter] class WikisActor @Inject()(apiConfig: RedmineApiConfiguration,
+                                             backlogPaths: BacklogPaths,
+                                             wikiWrites: WikiWrites,
+                                             wikiService: WikiService)
     extends Actor
     with BacklogConfiguration
     with Logging {
@@ -46,7 +49,7 @@ class WikisActor @Inject()(apiConfig: RedmineApiConfiguration, backlogPaths: Bac
 
 }
 
-object WikisActor extends NamedActor {
+private[exporter] object WikisActor extends NamedActor {
 
   override final val name = "WikisActor"
 

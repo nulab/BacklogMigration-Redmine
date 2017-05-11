@@ -14,7 +14,7 @@ import com.taskadapter.redmineapi.bean.User
 /**
   * @author uchida
   */
-class UserWrites @Inject()(propertyValue: PropertyValue) extends Writes[User, BacklogUser] with Logging {
+private[exporter] class UserWrites @Inject()(propertyValue: PropertyValue) extends Writes[User, BacklogUser] with Logging {
 
   val userMapping = new ConvertUserMapping()
 

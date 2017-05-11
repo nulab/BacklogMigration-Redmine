@@ -12,7 +12,7 @@ import scala.collection.JavaConverters._
 /**
   * @author uchida
   */
-class JournalWrites @Inject()(implicit val userWrites: UserWrites, implicit val journalDetailWrites: JournalDetailWrites)
+private[exporter] class JournalWrites @Inject()(implicit val userWrites: UserWrites, implicit val journalDetailWrites: JournalDetailWrites)
     extends Writes[Journal, BacklogComment] {
 
   override def writes(journal: Journal): BacklogComment = {

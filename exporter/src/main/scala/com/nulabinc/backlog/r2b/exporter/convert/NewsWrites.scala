@@ -11,7 +11,7 @@ import com.taskadapter.redmineapi.bean.News
 /**
   * @author uchida
   */
-class NewsWrites @Inject()(implicit val userWrites: UserWrites) extends Writes[News, BacklogWiki] with Logging {
+private[exporter] class NewsWrites @Inject()(implicit val userWrites: UserWrites) extends Writes[News, BacklogWiki] with Logging {
   override def writes(news: News): BacklogWiki = {
     BacklogWiki(
       optId = None,

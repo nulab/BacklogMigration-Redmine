@@ -21,17 +21,17 @@ import scalax.file.Path
 /**
   * @author uchida
   */
-class IssueInitializer(apiConfig: RedmineApiConfiguration,
-                       backlogPaths: BacklogPaths,
-                       propertyValue: PropertyValue,
-                       issueDirPath: Path,
-                       journals: Seq[Journal],
-                       attachments: Seq[Attachment],
-                       issueWrites: IssueWrites,
-                       userWrites: UserWrites,
-                       customFieldWrites: CustomFieldWrites,
-                       customFieldValueWrites: CustomFieldValueWrites,
-                       attachmentWrites: AttachmentWrites)
+private[exporter] class IssueInitializer(apiConfig: RedmineApiConfiguration,
+                                         backlogPaths: BacklogPaths,
+                                         propertyValue: PropertyValue,
+                                         issueDirPath: Path,
+                                         journals: Seq[Journal],
+                                         attachments: Seq[Attachment],
+                                         issueWrites: IssueWrites,
+                                         userWrites: UserWrites,
+                                         customFieldWrites: CustomFieldWrites,
+                                         customFieldValueWrites: CustomFieldValueWrites,
+                                         attachmentWrites: AttachmentWrites)
     extends Logging {
 
   val userMapping     = new ConvertUserMapping()

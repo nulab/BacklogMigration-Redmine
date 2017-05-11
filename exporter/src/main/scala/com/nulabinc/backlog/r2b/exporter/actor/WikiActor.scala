@@ -24,7 +24,7 @@ import scala.concurrent.duration._
 /**
   * @author uchida
   */
-class WikiActor(apiConfig: RedmineApiConfiguration, backlogPaths: BacklogPaths, wikiWrites: WikiWrites, wikiService: WikiService)
+private[exporter] class WikiActor(apiConfig: RedmineApiConfiguration, backlogPaths: BacklogPaths, wikiWrites: WikiWrites, wikiService: WikiService)
     extends Actor
     with Logging {
 
@@ -66,7 +66,7 @@ class WikiActor(apiConfig: RedmineApiConfiguration, backlogPaths: BacklogPaths, 
 
 }
 
-object WikiActor {
+private[exporter] object WikiActor {
 
   case class Do(wiki: WikiPage, completion: CountDownLatch, allCount: Int, console: ((Int, Int) => Unit))
 

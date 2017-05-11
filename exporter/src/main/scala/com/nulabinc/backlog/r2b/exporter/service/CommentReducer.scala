@@ -17,13 +17,13 @@ import scalax.file.Path
 /**
   * @author uchida
   */
-class CommentReducer(apiConfig: RedmineApiConfiguration,
-                     projectService: ProjectService,
-                     backlogPaths: BacklogPaths,
-                     issue: BacklogIssue,
-                     comments: Seq[BacklogComment],
-                     attachments: Seq[Attachment],
-                     issueDirPath: Path)
+private[exporter] class CommentReducer(apiConfig: RedmineApiConfiguration,
+                                       projectService: ProjectService,
+                                       backlogPaths: BacklogPaths,
+                                       issue: BacklogIssue,
+                                       comments: Seq[BacklogComment],
+                                       attachments: Seq[Attachment],
+                                       issueDirPath: Path)
     extends Logging {
 
   private[this] val changeLogContent = new StringBuilder()

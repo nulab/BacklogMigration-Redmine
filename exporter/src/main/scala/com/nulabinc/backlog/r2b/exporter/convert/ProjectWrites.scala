@@ -10,7 +10,7 @@ import com.taskadapter.redmineapi.bean._
 /**
   * @author uchida
   */
-class ProjectWrites @Inject()(@Named("backlogProjectKey") backlogProjectKey: String) extends Writes[Project, BacklogProject] {
+private[exporter] class ProjectWrites @Inject()(@Named("backlogProjectKey") backlogProjectKey: String) extends Writes[Project, BacklogProject] {
 
   override def writes(project: Project): BacklogProject = {
     BacklogProject(optId = Some(project.getId.intValue()),

@@ -9,7 +9,7 @@ import com.nulabinc.backlog.migration.common.utils.Logging
 /**
   * @author uchida
   */
-class ContentActor @Inject()(@Named(IssuesActor.name) issuesActor: ActorRef, @Named(WikisActor.name) wikisActor: ActorRef)
+private[exporter] class ContentActor @Inject()(@Named(IssuesActor.name) issuesActor: ActorRef, @Named(WikisActor.name) wikisActor: ActorRef)
     extends Actor
     with Logging {
 
@@ -24,7 +24,7 @@ class ContentActor @Inject()(@Named(IssuesActor.name) issuesActor: ActorRef, @Na
 
 }
 
-object ContentActor extends NamedActor {
+private[exporter] object ContentActor extends NamedActor {
 
   override final val name = "ContentActor"
 

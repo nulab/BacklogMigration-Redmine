@@ -21,18 +21,18 @@ import scala.concurrent.duration._
 /**
   * @author uchida
   */
-class IssuesActor @Inject()(@Named("projectId") projectId: Int,
-                            apiConfig: RedmineApiConfiguration,
-                            backlogPaths: BacklogPaths,
-                            issueWrites: IssueWrites,
-                            journalWrites: JournalWrites,
-                            userWrites: UserWrites,
-                            customFieldWrites: CustomFieldWrites,
-                            customFieldValueWrites: CustomFieldValueWrites,
-                            attachmentWrites: AttachmentWrites,
-                            issueService: IssueService,
-                            projectService: ProjectService,
-                            propertyValue: PropertyValue)
+private[exporter] class IssuesActor @Inject()(@Named("projectId") projectId: Int,
+                                              apiConfig: RedmineApiConfiguration,
+                                              backlogPaths: BacklogPaths,
+                                              issueWrites: IssueWrites,
+                                              journalWrites: JournalWrites,
+                                              userWrites: UserWrites,
+                                              customFieldWrites: CustomFieldWrites,
+                                              customFieldValueWrites: CustomFieldValueWrites,
+                                              attachmentWrites: AttachmentWrites,
+                                              issueService: IssueService,
+                                              projectService: ProjectService,
+                                              propertyValue: PropertyValue)
     extends Actor
     with BacklogConfiguration
     with Logging {
@@ -94,7 +94,7 @@ class IssuesActor @Inject()(@Named("projectId") projectId: Int,
 
 }
 
-object IssuesActor extends NamedActor {
+private[exporter] object IssuesActor extends NamedActor {
 
   override final val name = "IssuesActor"
 

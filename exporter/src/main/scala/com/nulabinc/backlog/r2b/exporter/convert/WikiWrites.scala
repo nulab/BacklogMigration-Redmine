@@ -13,7 +13,7 @@ import scala.collection.JavaConverters._
 /**
   * @author uchida
   */
-class WikiWrites @Inject()(implicit val attachmentWrites: AttachmentWrites, implicit val userWrites: UserWrites)
+private[exporter] class WikiWrites @Inject()(implicit val attachmentWrites: AttachmentWrites, implicit val userWrites: UserWrites)
     extends Writes[WikiPageDetail, BacklogWiki]
     with Logging {
 

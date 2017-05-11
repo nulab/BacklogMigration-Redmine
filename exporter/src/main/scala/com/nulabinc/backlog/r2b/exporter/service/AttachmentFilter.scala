@@ -9,7 +9,7 @@ import scala.collection.JavaConverters._
 /**
   * @author uchida
   */
-class AttachmentFilter(journals: Seq[Journal]) {
+private[exporter] class AttachmentFilter(journals: Seq[Journal]) {
 
   def filter(attachments: Seq[Attachment]): Seq[Attachment] = {
     attachments.filterNot(condition)

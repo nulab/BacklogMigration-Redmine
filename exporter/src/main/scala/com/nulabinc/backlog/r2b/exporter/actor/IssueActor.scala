@@ -25,17 +25,17 @@ import scala.concurrent.duration._
 /**
   * @author uchida
   */
-class IssueActor(apiConfig: RedmineApiConfiguration,
-                 backlogPaths: BacklogPaths,
-                 issueService: IssueService,
-                 projectService: ProjectService,
-                 propertyValue: PropertyValue,
-                 issueWrites: IssueWrites,
-                 journalWrites: JournalWrites,
-                 userWrites: UserWrites,
-                 customFieldWrites: CustomFieldWrites,
-                 customFieldValueWrites: CustomFieldValueWrites,
-                 attachmentWrites: AttachmentWrites)
+private[exporter] class IssueActor(apiConfig: RedmineApiConfiguration,
+                                   backlogPaths: BacklogPaths,
+                                   issueService: IssueService,
+                                   projectService: ProjectService,
+                                   propertyValue: PropertyValue,
+                                   issueWrites: IssueWrites,
+                                   journalWrites: JournalWrites,
+                                   userWrites: UserWrites,
+                                   customFieldWrites: CustomFieldWrites,
+                                   customFieldValueWrites: CustomFieldValueWrites,
+                                   attachmentWrites: AttachmentWrites)
     extends Actor
     with Logging {
 
@@ -104,7 +104,7 @@ class IssueActor(apiConfig: RedmineApiConfiguration,
 
 }
 
-object IssueActor {
+private[exporter] object IssueActor {
 
   case class Do(issueId: Int, completion: CountDownLatch, allCount: Int, console: ((Int, Int) => Unit))
 

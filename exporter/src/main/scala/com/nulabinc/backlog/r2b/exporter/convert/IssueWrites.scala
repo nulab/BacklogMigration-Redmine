@@ -13,9 +13,9 @@ import scala.collection.JavaConverters._
 /**
   * @author uchida
   */
-class IssueWrites @Inject()(implicit val attachmentWrites: AttachmentWrites,
-                            implicit val userWrites: UserWrites,
-                            implicit val customFieldWrites: CustomFieldWrites)
+private[exporter] class IssueWrites @Inject()(implicit val attachmentWrites: AttachmentWrites,
+                                              implicit val userWrites: UserWrites,
+                                              implicit val customFieldWrites: CustomFieldWrites)
     extends Writes[Issue, BacklogIssue] {
 
   val statusMapping   = new ConvertStatusMapping()

@@ -25,22 +25,22 @@ import scala.concurrent.duration.Duration
 /**
   * @author uchida
   */
-class ProjectApplicationService @Inject()(implicit val projectWrites: ProjectWrites,
-                                          implicit val customFieldDefinitionsWrites: CustomFieldDefinitionsWrites,
-                                          implicit val versionsWrites: VersionsWrites,
-                                          implicit val issueTypesWrites: IssueTypesWrites,
-                                          implicit val issueCategoriesWrites: IssueCategoriesWrites,
-                                          implicit val newsWrites: NewsWrites,
-                                          membershipWrites: MembershipWrites,
-                                          groupsWrites: GroupsWrites,
-                                          backlogPaths: BacklogPaths,
-                                          project: Project,
-                                          customFieldService: CustomFieldService,
-                                          trackerService: TrackerService,
-                                          membershipService: MembershipService,
-                                          issueCategoryService: IssueCategoryService,
-                                          versionService: VersionService,
-                                          newsService: NewsService)
+private[exporter] class ProjectApplicationService @Inject()(implicit val projectWrites: ProjectWrites,
+                                                            implicit val customFieldDefinitionsWrites: CustomFieldDefinitionsWrites,
+                                                            implicit val versionsWrites: VersionsWrites,
+                                                            implicit val issueTypesWrites: IssueTypesWrites,
+                                                            implicit val issueCategoriesWrites: IssueCategoriesWrites,
+                                                            implicit val newsWrites: NewsWrites,
+                                                            membershipWrites: MembershipWrites,
+                                                            groupsWrites: GroupsWrites,
+                                                            backlogPaths: BacklogPaths,
+                                                            project: Project,
+                                                            customFieldService: CustomFieldService,
+                                                            trackerService: TrackerService,
+                                                            membershipService: MembershipService,
+                                                            issueCategoryService: IssueCategoryService,
+                                                            versionService: VersionService,
+                                                            newsService: NewsService)
     extends Logging {
 
   val userMapping = new ConvertUserMapping()

@@ -15,7 +15,7 @@ import com.taskadapter.redmineapi.bean.JournalDetail
 /**
   * @author uchida
   */
-class JournalDetailWrites @Inject()(propertyValue: PropertyValue, customFieldValueWrites: CustomFieldValueWrites)
+private[exporter] class JournalDetailWrites @Inject()(propertyValue: PropertyValue, customFieldValueWrites: CustomFieldValueWrites)
     extends Writes[JournalDetail, BacklogChangeLog]
     with Logging {
 

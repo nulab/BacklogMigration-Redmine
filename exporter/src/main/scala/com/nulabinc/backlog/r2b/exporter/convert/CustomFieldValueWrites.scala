@@ -11,7 +11,9 @@ import com.osinka.i18n.Messages
 /**
   * @author uchida
   */
-class CustomFieldValueWrites @Inject()(propertyValue: PropertyValue) extends Writes[(String, Option[String]), Option[String]] with Logging {
+private[exporter] class CustomFieldValueWrites @Inject()(propertyValue: PropertyValue)
+    extends Writes[(String, Option[String]), Option[String]]
+    with Logging {
 
   override def writes(customFieldValue: (String, Option[String])): Option[String] = {
     val (strId, optValue)        = customFieldValue

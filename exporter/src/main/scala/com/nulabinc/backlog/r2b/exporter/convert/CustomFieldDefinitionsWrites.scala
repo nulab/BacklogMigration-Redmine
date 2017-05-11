@@ -15,7 +15,7 @@ import com.osinka.i18n.Messages
 /**
   * @author uchida
   */
-class CustomFieldDefinitionsWrites @Inject()(propertyValue: PropertyValue)
+private[exporter] class CustomFieldDefinitionsWrites @Inject()(propertyValue: PropertyValue)
     extends Writes[Seq[RedmineCustomFieldDefinition], Seq[BacklogCustomFieldSetting]]
     with Logging {
 

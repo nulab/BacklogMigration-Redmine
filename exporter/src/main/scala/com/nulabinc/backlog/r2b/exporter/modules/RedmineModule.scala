@@ -8,7 +8,7 @@ import com.nulabinc.backlog.r2b.redmine.modules.RedmineDefaultModule
 /**
   * @author uchida
   */
-class RedmineModule(apiConfig: RedmineApiConfiguration, backlogProjectKey: String) extends RedmineDefaultModule(apiConfig) {
+private[exporter] class RedmineModule(apiConfig: RedmineApiConfiguration, backlogProjectKey: String) extends RedmineDefaultModule(apiConfig) {
 
   override def configure() = {
     super.configure()
