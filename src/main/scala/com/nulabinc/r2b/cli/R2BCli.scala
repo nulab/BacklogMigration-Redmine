@@ -8,9 +8,9 @@ import com.nulabinc.backlog.migration.common.utils.{ConsoleOut, Logging, Mixpane
 import com.nulabinc.backlog.migration.importer.controllers.ImportController
 import com.nulabinc.backlog.r2b.conf.AppConfiguration
 import com.nulabinc.backlog.r2b.exporter.controllers.ExportController
+import com.nulabinc.backlog.r2b.mapping.controllers.MappingController
 import com.nulabinc.backlog.r2b.mapping.core._
 import com.nulabinc.backlog.r2b.mapping.domain.Mapping
-import com.nulabinc.r2b.controllers.MappingController
 import com.osinka.i18n.Messages
 
 import scala.util.Try

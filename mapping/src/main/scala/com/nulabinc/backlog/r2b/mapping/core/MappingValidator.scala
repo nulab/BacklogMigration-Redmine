@@ -8,7 +8,7 @@ import com.osinka.i18n.{Lang, Messages}
 /**
   * @author uchida
   */
-class MappingValidator(redmineMappings: Seq[MappingItem], backlogMappings: Seq[MappingItem], itemName: String, fileName: String) {
+private[mapping] class MappingValidator(redmineMappings: Seq[MappingItem], backlogMappings: Seq[MappingItem], itemName: String, fileName: String) {
 
   implicit val userLang = if (Locale.getDefault.equals(Locale.JAPAN)) Lang("ja") else Lang("en")
 

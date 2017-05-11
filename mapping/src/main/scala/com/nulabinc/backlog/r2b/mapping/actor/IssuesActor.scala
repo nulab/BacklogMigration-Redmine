@@ -19,7 +19,10 @@ import scala.concurrent.duration._
 /**
   * @author uchida
   */
-class IssuesActor @Inject()(@Named("projectId") projectId: Int, issueService: IssueService) extends Actor with BacklogConfiguration with Logging {
+private[mapping] class IssuesActor @Inject()(@Named("projectId") projectId: Int, issueService: IssueService)
+    extends Actor
+    with BacklogConfiguration
+    with Logging {
 
   private[this] val strategy = OneForOneStrategy(maxNrOfRetries = 10, withinTimeRange = 1 minute) {
     case _ => Restart
@@ -63,7 +66,7 @@ class IssuesActor @Inject()(@Named("projectId") projectId: Int, issueService: Is
 
 }
 
-object IssuesActor extends NamedActor {
+private[mapping] object IssuesActor extends NamedActor {
 
   override final val name = "IssuesActor"
 

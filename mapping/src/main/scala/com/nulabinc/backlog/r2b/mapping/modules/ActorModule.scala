@@ -12,7 +12,7 @@ import net.codingwell.scalaguice.ScalaModule
 /**
   * @author uchida
   */
-class ActorModule extends AbstractModule with ScalaModule with GuiceAkkaActorRefProvider {
+private[mapping] class ActorModule extends AbstractModule with ScalaModule with GuiceAkkaActorRefProvider {
 
   override def configure() {
     bind[Actor].annotatedWith(Names.named(ContentActor.name)).to[ContentActor]

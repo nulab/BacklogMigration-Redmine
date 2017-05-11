@@ -12,7 +12,9 @@ import com.taskadapter.redmineapi.bean.User
 /**
   * @author uchida
   */
-class ContentActor @Inject()(@Named(IssuesActor.name) issuesActor: ActorRef, @Named(WikisActor.name) wikisActor: ActorRef, userService: UserService)
+private[mapping] class ContentActor @Inject()(@Named(IssuesActor.name) issuesActor: ActorRef,
+                                              @Named(WikisActor.name) wikisActor: ActorRef,
+                                              userService: UserService)
     extends Actor
     with Logging {
 
@@ -28,7 +30,7 @@ class ContentActor @Inject()(@Named(IssuesActor.name) issuesActor: ActorRef, @Na
 
 }
 
-object ContentActor extends NamedActor {
+private[mapping] object ContentActor extends NamedActor {
 
   override final val name = "ContentActor"
 

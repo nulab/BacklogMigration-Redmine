@@ -18,7 +18,7 @@ import scala.concurrent.duration._
 /**
   * @author uchida
   */
-class WikisActor @Inject()(wikiService: WikiService) extends Actor with BacklogConfiguration with Logging {
+private[mapping] class WikisActor @Inject()(wikiService: WikiService) extends Actor with BacklogConfiguration with Logging {
 
   private[this] val strategy = OneForOneStrategy(maxNrOfRetries = 10, withinTimeRange = 1 minute) {
     case _ => Restart
@@ -41,7 +41,7 @@ class WikisActor @Inject()(wikiService: WikiService) extends Actor with BacklogC
 
 }
 
-object WikisActor extends NamedActor {
+private[mapping] object WikisActor extends NamedActor {
 
   override final val name = "WikisActor"
 

@@ -6,4 +6,4 @@ import com.nulabinc.backlog.r2b.redmine.modules.RedmineDefaultModule
 /**
   * @author uchida
   */
-class RedmineModule(apiConfig: RedmineApiConfiguration) extends RedmineDefaultModule(apiConfig) {}
+private[mapping] class RedmineModule(apiConfig: RedmineApiConfiguration) extends RedmineDefaultModule(apiConfig) {}

@@ -20,7 +20,8 @@ import scala.concurrent.duration.Duration
 /**
   * @author uchida
   */
-class ProjectApplicationService @Inject()(membershipService: MembershipService, userService: UserService, newsService: NewsService) extends Logging {
+private[mapping] class ProjectApplicationService @Inject()(membershipService: MembershipService, userService: UserService, newsService: NewsService)
+    extends Logging {
 
   def execute(injector: Injector, mappingData: MappingData) = {
     val system       = injector.instance[ActorSystem]

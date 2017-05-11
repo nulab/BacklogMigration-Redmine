@@ -18,7 +18,7 @@ import scala.concurrent.duration._
 /**
   * @author uchida
   */
-class IssueActor(issueService: IssueService, mappingData: MappingData, allUsers: Seq[User]) extends Actor with Logging {
+private[mapping] class IssueActor(issueService: IssueService, mappingData: MappingData, allUsers: Seq[User]) extends Actor with Logging {
 
   override def preRestart(reason: Throwable, message: Option[Any]) = {
     logger.debug(s"preRestart: reason: ${reason}, message: ${message}")
@@ -71,7 +71,7 @@ class IssueActor(issueService: IssueService, mappingData: MappingData, allUsers:
 
 }
 
-object IssueActor {
+private[mapping] object IssueActor {
 
   case class Do(issueId: Int, completion: CountDownLatch, allCount: Int, console: ((Int, Int) => Unit))
 

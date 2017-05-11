@@ -1,4 +1,4 @@
-package com.nulabinc.r2b.controllers
+package com.nulabinc.backlog.r2b.mapping.controllers
 
 import com.google.inject.Guice
 import com.nulabinc.backlog.migration.common.modules.{AkkaModule, ConfigModule}

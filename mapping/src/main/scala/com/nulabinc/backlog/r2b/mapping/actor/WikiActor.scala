@@ -15,7 +15,7 @@ import scala.concurrent.duration._
 /**
   * @author uchida
   */
-class WikiActor(wikiService: WikiService, mappingData: MappingData) extends Actor with Logging {
+private[mapping] class WikiActor(wikiService: WikiService, mappingData: MappingData) extends Actor with Logging {
 
   override def preRestart(reason: Throwable, message: Option[Any]) = {
     logger.debug(s"preRestart: reason: ${reason}, message: ${message}")
@@ -41,7 +41,7 @@ class WikiActor(wikiService: WikiService, mappingData: MappingData) extends Acto
 
 }
 
-object WikiActor {
+private[mapping] object WikiActor {
 
   case class Do(wiki: WikiPage, completion: CountDownLatch, allCount: Int, console: ((Int, Int) => Unit))
 
