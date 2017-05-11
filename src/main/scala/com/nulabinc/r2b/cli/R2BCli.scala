@@ -1,16 +1,16 @@
 package com.nulabinc.r2b.cli
 
 import com.google.inject.Injector
-import com.nulabinc.backlog.importer.controllers.ImportController
-import com.nulabinc.backlog.migration.conf.{BacklogConfiguration, BacklogPaths}
-import com.nulabinc.backlog.migration.modules.{ServiceInjector => BacklogInjector}
-import com.nulabinc.backlog.migration.service.{ProjectService, SpaceService, UserService}
-import com.nulabinc.backlog.migration.utils.{ConsoleOut, Logging, MixpanelUtil, TrackingData}
-import com.nulabinc.r2b.conf.AppConfiguration
-import com.nulabinc.r2b.controllers.MappingController
-import com.nulabinc.r2b.exporter.controllers.ExportController
-import com.nulabinc.r2b.mapping.core._
-import com.nulabinc.r2b.mapping.domain.Mapping
+import com.nulabinc.backlog.migration.common.conf.{BacklogConfiguration, BacklogPaths}
+import com.nulabinc.backlog.migration.common.modules.{ServiceInjector => BacklogInjector}
+import com.nulabinc.backlog.migration.common.service.{ProjectService, SpaceService, UserService}
+import com.nulabinc.backlog.migration.common.utils.{ConsoleOut, Logging, MixpanelUtil, TrackingData}
+import com.nulabinc.backlog.migration.importer.controllers.ImportController
+import com.nulabinc.backlog.r2b.conf.AppConfiguration
+import com.nulabinc.backlog.r2b.exporter.controllers.ExportController
+import com.nulabinc.backlog.r2b.mapping.controllers.MappingController
+import com.nulabinc.backlog.r2b.mapping.core._
+import com.nulabinc.backlog.r2b.mapping.domain.Mapping
 import com.osinka.i18n.Messages
 
 import scala.util.Try

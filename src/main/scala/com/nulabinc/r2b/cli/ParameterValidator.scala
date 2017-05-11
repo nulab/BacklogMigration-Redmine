@@ -1,12 +1,12 @@
 package com.nulabinc.r2b.cli
 
-import com.nulabinc.backlog.migration.modules.{ServiceInjector => BacklogInjector}
-import com.nulabinc.backlog.migration.service.SpaceService
-import com.nulabinc.backlog.migration.utils.{ConsoleOut, Logging}
+import com.nulabinc.backlog.migration.common.modules.{ServiceInjector => BacklogInjector}
+import com.nulabinc.backlog.migration.common.service.SpaceService
+import com.nulabinc.backlog.migration.common.utils.{ConsoleOut, Logging}
+import com.nulabinc.backlog.r2b.redmine.modules.{ServiceInjector => RedmineInjector}
+import com.nulabinc.backlog.r2b.redmine.service.{ProjectService, UserService => RedmineUserService}
 import com.nulabinc.backlog4j.BacklogAPIException
-import com.nulabinc.r2b.conf.AppConfiguration
-import com.nulabinc.r2b.redmine.modules.{ServiceInjector => RedmineInjector}
-import com.nulabinc.r2b.redmine.service.{ProjectService, UserService => RedmineUserService}
+import com.nulabinc.backlog.r2b.conf.AppConfiguration
 import com.osinka.i18n.Messages
 import com.taskadapter.redmineapi.bean.Project
 import com.taskadapter.redmineapi.{NotAuthorizedException, RedmineAuthenticationException, RedmineTransportException}
