@@ -5,11 +5,10 @@ import com.nulabinc.backlog.migration.common.conf.{BacklogConfiguration, Backlog
 import com.nulabinc.backlog.migration.common.modules.{ServiceInjector => BacklogInjector}
 import com.nulabinc.backlog.migration.common.service.{ProjectService, SpaceService, UserService}
 import com.nulabinc.backlog.migration.common.utils.{ConsoleOut, Logging, MixpanelUtil, TrackingData}
-import com.nulabinc.backlog.migration.importer.controllers.ImportController
+import com.nulabinc.backlog.migration.importer.core.{Boot => BootImporter}
 import com.nulabinc.backlog.r2b.conf.AppConfiguration
-import com.nulabinc.backlog.r2b.exporter.controllers.ExportController
-import com.nulabinc.backlog.r2b.mapping.controllers.MappingController
-import com.nulabinc.backlog.r2b.mapping.core._
+import com.nulabinc.backlog.r2b.exporter.core.{Boot => BootExporter}
+import com.nulabinc.backlog.r2b.mapping.core.{Boot => BootMapping, _}
 import com.nulabinc.backlog.r2b.mapping.domain.Mapping
 import com.osinka.i18n.Messages
 
@@ -30,7 +29,7 @@ object R2BCli extends BacklogConfiguration with Logging {
 
   def migrate(config: AppConfiguration): Unit =
     if (validateParam(config)) {
-      if (config.importOnly) ImportController.execute(config.backlogConfig, false)
+      if (config.importOnly) BootImporter.execute(config.backlogConfig, false)
       else {
         val propertyMappingFiles = createMapping(config)
         if (validateMapping(propertyMappingFiles.user) &&
@@ -42,8 +41,8 @@ object R2BCli extends BacklogConfiguration with Logging {
             val backlogPaths    = backlogInjector.getInstance(classOf[BacklogPaths])
             backlogPaths.outputPath.deleteRecursively(force = true, continueOnFailure = true)
 
-            ExportController.execute(config.redmineConfig, config.backlogConfig.projectKey)
-            ImportController.execute(config.backlogConfig, false)
+            BootExporter.execute(config.redmineConfig, config.backlogConfig.projectKey)
+            BootImporter.execute(config.backlogConfig, false)
 
             if (!config.optOut) {
               tracking(config, backlogInjector)
@@ -56,7 +55,7 @@ object R2BCli extends BacklogConfiguration with Logging {
 
   def doImport(config: AppConfiguration): Unit =
     if (validateParam(config)) {
-      ImportController.execute(config.backlogConfig, false)
+      BootImporter.execute(config.backlogConfig, false)
       if (!config.optOut) {
         val backlogInjector = BacklogInjector.createInjector(config.backlogConfig)
         tracking(config, backlogInjector)
@@ -203,7 +202,7 @@ object R2BCli extends BacklogConfiguration with Logging {
   }
 
   private[this] def createMapping(config: AppConfiguration): PropertyMappingFiles = {
-    val mappingData     = MappingController.execute(config.redmineConfig)
+    val mappingData     = BootMapping.execute(config.redmineConfig)
     val userMapping     = new UserMappingFile(config.redmineConfig, config.backlogConfig, mappingData)
     val statusMapping   = new StatusMappingFile(config.redmineConfig, config.backlogConfig, mappingData)
     val priorityMapping = new PriorityMappingFile(config.redmineConfig, config.backlogConfig)

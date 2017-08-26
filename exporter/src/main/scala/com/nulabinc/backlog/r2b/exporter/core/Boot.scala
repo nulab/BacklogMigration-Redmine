@@ -1,4 +1,4 @@
-package com.nulabinc.backlog.r2b.exporter.controllers
+package com.nulabinc.backlog.r2b.exporter.core
 
 import com.google.inject.Guice
 import com.nulabinc.backlog.migration.common.modules.{AkkaModule, ConfigModule}
@@ -11,7 +11,7 @@ import com.osinka.i18n.Messages
 /**
   * @author uchida
   */
-object ExportController extends Logging {
+object Boot extends Logging {
 
   def execute(apiConfig: RedmineApiConfiguration, backlogProjectKey: String) = {
 
