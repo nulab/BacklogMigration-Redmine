@@ -96,6 +96,18 @@ object R2B extends BacklogConfiguration with Logging {
     val redmine: String     = keys(0)
     val backlog: String     = if (keys.length == 2) keys(1) else keys(0).toUpperCase.replaceAll("-", "_")
 
+    ConsoleOut.info(s"""--------------------------------------------------
+     |${Messages("common.redmine")} ${Messages("common.url")}[${cli.execute.redmineUrl()}]
+     |${Messages("common.redmine")} ${Messages("common.access_key")}[${cli.execute.redmineKey()}]
+     |${Messages("common.redmine")} ${Messages("common.project_key")}[${redmine}]
+     |${Messages("common.backlog")} ${Messages("common.url")}[${cli.execute.backlogUrl()}]
+     |${Messages("common.backlog")} ${Messages("common.access_key")}[${cli.execute.backlogKey()}]
+     |${Messages("common.backlog")} ${Messages("common.project_key")}[${backlog}]
+     |${Messages("common.importOnly")}[${cli.execute.importOnly()}]
+     |${Messages("common.optOut")}[${cli.execute.optOut.toOption.getOrElse(false)}]
+     |--------------------------------------------------
+     |""".stripMargin)
+
     AppConfiguration(
       redmineConfig = new RedmineApiConfiguration(url = cli.execute.redmineUrl(), key = cli.execute.redmineKey(), projectKey = redmine),
       backlogConfig = new BacklogApiConfiguration(url = cli.execute.backlogUrl(), key = cli.execute.backlogKey(), projectKey = backlog),

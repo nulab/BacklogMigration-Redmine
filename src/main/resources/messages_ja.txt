@@ -32,6 +32,11 @@ common.private=プライベート
 common.change_comment={0}: {1} -> {2}
 common.anonymous=匿名ユーザー
 common.link=リンク
+common.access_key=アクセスキー
+common.project_key=プロジェクトキー
+common.importOnly=インポートのみ実行
+common.optOut=オプトアウト
+common.url=URL
 
 
 # Message
