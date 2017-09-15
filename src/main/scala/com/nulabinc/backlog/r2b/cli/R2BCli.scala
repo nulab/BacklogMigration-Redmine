@@ -1,4 +1,4 @@
-package com.nulabinc.r2b.cli
+package com.nulabinc.backlog.r2b.cli
 
 import com.google.inject.Injector
 import com.nulabinc.backlog.migration.common.conf.{BacklogConfiguration, BacklogPaths}

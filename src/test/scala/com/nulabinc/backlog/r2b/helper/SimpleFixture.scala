@@ -1,4 +1,4 @@
-package com.nulabinc.r2b.helper
+package com.nulabinc.backlog.r2b.helper
 
 import java.io.{File, FileInputStream}
 import java.util.{Date, Locale, Properties}
