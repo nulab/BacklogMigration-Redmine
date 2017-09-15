@@ -99,6 +99,20 @@ object R2BCli extends BacklogConfiguration with Logging {
     }
   }
 
+  private[this] def confirmProject(config: AppConfiguration): Option[(String, String)] = {
+    val injector       = BacklogInjector.createInjector(config.backlogConfig)
+    val projectService = injector.getInstance(classOf[ProjectService])
+    val optProject     = projectService.optProject(config.backlogConfig.projectKey)
+    optProject match {
+      case Some(_) =>
+        val input: String = scala.io.StdIn.readLine(Messages("cli.backlog_project_already_exist", config.backlogConfig.projectKey))
+        if (input == "y" || input == "Y") Some((config.redmineConfig.projectKey, config.backlogConfig.projectKey))
+        else None
+      case None =>
+        Some((config.redmineConfig.projectKey, config.backlogConfig.projectKey))
+    }
+  }
+
   private[this] def validateMapping(mappingFile: MappingFile): Boolean = {
     if (!mappingFile.isExists) {
       ConsoleOut.error(s"""
@@ -187,24 +201,10 @@ object R2BCli extends BacklogConfiguration with Logging {
       case _ => throw new RuntimeException
     }
 
-  private[this] def confirmProject(config: AppConfiguration): Option[(String, String)] = {
-    val injector       = BacklogInjector.createInjector(config.backlogConfig)
-    val projectService = injector.getInstance(classOf[ProjectService])
-    val optProject     = projectService.optProject(config.backlogConfig.projectKey)
-    optProject match {
-      case Some(_) =>
-        val input: String = scala.io.StdIn.readLine(Messages("cli.backlog_project_already_exist", config.backlogConfig.projectKey))
-        if (input == "y" || input == "Y") Some((config.redmineConfig.projectKey, config.backlogConfig.projectKey))
-        else None
-      case None =>
-        Some((config.redmineConfig.projectKey, config.backlogConfig.projectKey))
-    }
-  }
-
   private[this] def createMapping(config: AppConfiguration): PropertyMappingFiles = {
     val mappingData     = BootMapping.execute(config.redmineConfig)
-    val userMapping     = new UserMappingFile(config.redmineConfig, config.backlogConfig, mappingData)
-    val statusMapping   = new StatusMappingFile(config.redmineConfig, config.backlogConfig, mappingData)
+    val userMapping     = new UserMappingFile(config.redmineConfig, config.backlogConfig, mappingData.users.toSeq)
+    val statusMapping   = new StatusMappingFile(config.redmineConfig, config.backlogConfig, mappingData.statuses.toSeq)
     val priorityMapping = new PriorityMappingFile(config.redmineConfig, config.backlogConfig)
     PropertyMappingFiles(user = userMapping, status = statusMapping, priority = priorityMapping)
   }

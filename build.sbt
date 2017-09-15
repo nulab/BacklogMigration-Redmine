@@ -41,13 +41,12 @@ lazy val common = (project in file("common"))
   .settings(commonSettings: _*)
   .settings(
     name := "backlog-migration-common",
-    libraryDependencies ++= Seq(
-      "org.scalatest" %% "scalatest" % "3.0.1" % "test"
-    ),
+    libraryDependencies ++= Seq("org.scalatest" %% "scalatest" % "3.0.1" % "test"),
     unmanagedBase := baseDirectory.value / "libs",
     scapegoatVersion := "1.1.0",
     scapegoatDisabledInspections := Seq("NullParameter", "CatchThrowable", "NoOpOverride")
   )
+
 lazy val importer = (project in file("importer"))
   .settings(commonSettings: _*)
   .settings(
@@ -57,13 +56,12 @@ lazy val importer = (project in file("importer"))
   )
   .dependsOn(common % "test->test;compile->compile")
   .aggregate(common)
+
 lazy val redmine = (project in file("redmine"))
   .settings(commonSettings: _*)
   .settings(
     name := "redmine",
-    libraryDependencies ++= Seq(
-      "com.taskadapter" % "redmine-java-api" % "2.4.0"
-    ),
+    libraryDependencies ++= Seq("com.taskadapter" % "redmine-java-api" % "2.4.0"),
     scapegoatVersion := "1.1.0",
     scapegoatDisabledInspections := Seq(
       "NullParameter",
@@ -73,6 +71,7 @@ lazy val redmine = (project in file("redmine"))
   )
   .dependsOn(common % "test->test;compile->compile")
   .aggregate(common)
+
 lazy val exporter = (project in file("exporter"))
   .settings(commonSettings: _*)
   .settings(
@@ -84,15 +83,13 @@ lazy val exporter = (project in file("exporter"))
       "NoOpOverride"
     )
   )
-  .dependsOn(common % "test->test;compile->compile", redmine, mapping)
-  .aggregate(common, redmine, mapping)
-lazy val mapping = (project in file("mapping"))
+  .dependsOn(common % "test->test;compile->compile", redmine, mappingConverter)
+  .aggregate(common, redmine)
+
+lazy val mappingBase = (project in file("mapping-base"))
   .settings(commonSettings: _*)
   .settings(
-    name := "backlog-redmine-mapping",
-    libraryDependencies ++= Seq(
-      "org.apache.lucene" % "lucene-spellchecker" % "3.6.2"
-    ),
+    name := "backlog-redmine-mapping-data",
     scapegoatVersion := "1.1.0",
     scapegoatDisabledInspections := Seq(
       "NullParameter",
@@ -101,7 +98,47 @@ lazy val mapping = (project in file("mapping"))
     )
   )
   .dependsOn(common % "test->test;compile->compile", redmine)
-  .aggregate(common, redmine)
+
+
+lazy val mappingConverter = (project in file("mapping-converter"))
+  .settings(commonSettings: _*)
+  .settings(
+    name := "backlog-redmine-mapping-converter",
+    scapegoatVersion := "1.1.0",
+    scapegoatDisabledInspections := Seq(
+      "NullParameter",
+      "CatchThrowable",
+      "NoOpOverride"
+    )
+  )
+  .dependsOn(mappingBase)
+
+lazy val mappingCollector = (project in file("mapping-collector"))
+  .settings(commonSettings: _*)
+  .settings(
+    name := "backlog-redmine-mapping-collector",
+    scapegoatVersion := "1.1.0",
+    scapegoatDisabledInspections := Seq(
+      "NullParameter",
+      "CatchThrowable",
+      "NoOpOverride"
+    )
+  )
+  .dependsOn(mappingBase)
+
+lazy val mappingFileManager = (project in file("mapping-file-manager"))
+  .settings(commonSettings: _*)
+  .settings(
+    name := "backlog-redmine-mapping-file-manager",
+    scapegoatVersion := "1.1.0",
+    scapegoatDisabledInspections := Seq(
+      "NullParameter",
+      "CatchThrowable",
+      "NoOpOverride"
+    )
+  )
+  .dependsOn(mappingBase)
+
 lazy val root = (project in file("."))
   .settings(commonSettings: _*)
   .settings(
@@ -122,5 +159,5 @@ lazy val root = (project in file("."))
     scapegoatVersion := "1.1.0",
     scapegoatDisabledInspections := Seq("NullParameter", "CatchThrowable", "NoOpOverride")
   )
-  .dependsOn(common % "test->test;compile->compile", importer, exporter, mapping)
-  .aggregate(common, importer, exporter, mapping)
+  .dependsOn(common % "test->test;compile->compile", importer, exporter, mappingFileManager, mappingCollector)
+  .aggregate(common, importer, exporter)

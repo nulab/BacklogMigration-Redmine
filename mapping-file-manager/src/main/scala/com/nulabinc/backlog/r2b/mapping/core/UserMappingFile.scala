@@ -15,7 +15,7 @@ import com.taskadapter.redmineapi.bean.{User => RedmineUser}
 /**
   * @author uchida
   */
-class UserMappingFile(redmineApiConfig: RedmineApiConfiguration, backlogApiConfig: BacklogApiConfiguration, mappingData: MappingData)
+class UserMappingFile(redmineApiConfig: RedmineApiConfiguration, backlogApiConfig: BacklogApiConfiguration, users: Seq[RedmineUser])
     extends MappingFile {
 
   private[this] val redmineDatas = loadRedmine()
@@ -40,7 +40,7 @@ class UserMappingFile(redmineApiConfig: RedmineApiConfiguration, backlogApiConfi
       MappingItem(user.getLogin, user.getFullName)
     }
 
-    val redmineUsers = mappingData.users.toSeq.flatMap(resolve).filter(condition)
+    val redmineUsers = users.toSeq.flatMap(resolve).filter(condition)
     redmineUsers.map(createItem)
   }
 

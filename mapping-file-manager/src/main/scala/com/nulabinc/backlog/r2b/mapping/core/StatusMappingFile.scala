@@ -15,7 +15,7 @@ import com.taskadapter.redmineapi.bean.IssueStatus
 /**
   * @author uchida
   */
-class StatusMappingFile(redmineApiConfig: RedmineApiConfiguration, backlogApiConfig: BacklogApiConfiguration, mappingData: MappingData)
+class StatusMappingFile(redmineApiConfig: RedmineApiConfiguration, backlogApiConfig: BacklogApiConfiguration, statuses: Seq[String])
     extends MappingFile {
 
   private[this] val redmineDatas = loadRedmine()
@@ -41,7 +41,7 @@ class StatusMappingFile(redmineApiConfig: RedmineApiConfiguration, backlogApiCon
     }
 
     val redmines    = redmineStatuses.map(createItem)
-    val deleteItems = mappingData.statuses.foldLeft(Seq.empty[MappingItem])(collectItems)
+    val deleteItems = statuses.foldLeft(Seq.empty[MappingItem])(collectItems)
     redmines union deleteItems
   }
 
