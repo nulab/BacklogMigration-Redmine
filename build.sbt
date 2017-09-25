@@ -126,10 +126,10 @@ lazy val mappingCollector = (project in file("mapping-collector"))
   )
   .dependsOn(mappingBase)
 
-lazy val mappingFileManager = (project in file("mapping-file-manager"))
+lazy val mappingFile = (project in file("mapping-file"))
   .settings(commonSettings: _*)
   .settings(
-    name := "backlog-redmine-mapping-file-manager",
+    name := "backlog-redmine-mapping-file",
     scapegoatVersion := "1.1.0",
     scapegoatDisabledInspections := Seq(
       "NullParameter",
@@ -159,5 +159,5 @@ lazy val root = (project in file("."))
     scapegoatVersion := "1.1.0",
     scapegoatDisabledInspections := Seq("NullParameter", "CatchThrowable", "NoOpOverride")
   )
-  .dependsOn(common % "test->test;compile->compile", importer, exporter, mappingFileManager, mappingCollector)
+  .dependsOn(common % "test->test;compile->compile", importer, exporter, mappingFile, mappingCollector)
   .aggregate(common, importer, exporter)

@@ -13,9 +13,6 @@ import scalax.file.Path
   */
 trait MappingFile extends Logging {
 
-  val OTHER_MAPPING: Boolean  = true
-  val COMMAND_FINISH: Boolean = false
-
   def findMatchItem(redmine: MappingItem): String
 
   def backlogs: Seq[MappingItem]
