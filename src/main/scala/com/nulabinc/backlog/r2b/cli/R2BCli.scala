@@ -153,7 +153,7 @@ object R2BCli extends BacklogConfiguration with Logging {
     } else true
   }
 
-  private[this] def confirmImport(config: AppConfiguration, propertyMappingFiles: PropertyMappingFiles): Boolean = {
+  private[this] def confirmImport(config: AppConfiguration, propertyMappingFiles: MappingFileContainer): Boolean = {
     confirmProject(config) match {
       case Some(projectKeys) =>
         val (redmine, backlog): (String, String) = projectKeys
@@ -204,12 +204,12 @@ object R2BCli extends BacklogConfiguration with Logging {
       case _ => throw new RuntimeException
     }
 
-  private[this] def createMapping(config: AppConfiguration): PropertyMappingFiles = {
+  private[this] def createMapping(config: AppConfiguration): MappingFileContainer = {
     val mappingData     = BootMapping.execute(config.redmineConfig)
     val userMapping     = new UserMappingFile(config.redmineConfig, config.backlogConfig, mappingData.users.toSeq)
     val statusMapping   = new StatusMappingFile(config.redmineConfig, config.backlogConfig, mappingData.statuses.toSeq)
     val priorityMapping = new PriorityMappingFile(config.redmineConfig, config.backlogConfig)
-    PropertyMappingFiles(user = userMapping, status = statusMapping, priority = priorityMapping)
+    MappingFileContainer(user = userMapping, status = statusMapping, priority = priorityMapping)
   }
 
   private[this] def output(mappingFile: MappingFile) = {
