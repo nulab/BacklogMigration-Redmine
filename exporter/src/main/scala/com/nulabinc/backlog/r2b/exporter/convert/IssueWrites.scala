@@ -5,7 +5,7 @@ import javax.inject.Inject
 import com.nulabinc.backlog.migration.common.convert.{Convert, Writes}
 import com.nulabinc.backlog.migration.common.domain._
 import com.nulabinc.backlog.migration.common.utils.DateUtil
-import com.nulabinc.backlog.r2b.mapping.core.{ConvertPriorityMapping, ConvertStatusMapping}
+import com.nulabinc.backlog.r2b.mapping.service.{MappingPriorityService, MappingStatusService}
 import com.taskadapter.redmineapi.bean.Issue
 
 import scala.collection.JavaConverters._
@@ -15,11 +15,10 @@ import scala.collection.JavaConverters._
   */
 private[exporter] class IssueWrites @Inject()(implicit val attachmentWrites: AttachmentWrites,
                                               implicit val userWrites: UserWrites,
-                                              implicit val customFieldWrites: CustomFieldWrites)
+                                              implicit val customFieldWrites: CustomFieldWrites,
+                                              mappingPriorityService: MappingPriorityService,
+                                              mappingStatusService: MappingStatusService)
     extends Writes[Issue, BacklogIssue] {
-
-  val statusMapping   = new ConvertStatusMapping()
-  val priorityMapping = new ConvertPriorityMapping()
 
   override def writes(issue: Issue): BacklogIssue = {
     BacklogIssue(
@@ -34,11 +33,11 @@ private[exporter] class IssueWrites @Inject()(implicit val attachmentWrites: Att
       optEstimatedHours = Option(issue.getEstimatedHours).map(_.floatValue()),
       optActualHours = Option(issue.getSpentHours).map(_.floatValue()),
       optIssueTypeName = Option(issue.getTracker).map(_.getName),
-      statusName = statusMapping.convert(issue.getStatusName),
+      statusName = mappingStatusService.convert(issue.getStatusName),
       categoryNames = Option(issue.getCategory).map(_.getName).toSeq,
       versionNames = Seq.empty[String],
       milestoneNames = Option(issue.getTargetVersion).map(_.getName).toSeq,
-      priorityName = priorityMapping.convert(issue.getPriorityText),
+      priorityName = mappingPriorityService.convert(issue.getPriorityText),
       optAssignee = Option(issue.getAssignee).map(Convert.toBacklog(_)),
       attachments = Seq.empty[BacklogAttachment],
       sharedFiles = Seq.empty[BacklogSharedFile],

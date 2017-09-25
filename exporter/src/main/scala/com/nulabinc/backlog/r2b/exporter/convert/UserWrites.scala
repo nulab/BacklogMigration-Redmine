@@ -6,7 +6,7 @@ import com.nulabinc.backlog.migration.common.conf.BacklogConstantValue
 import com.nulabinc.backlog.migration.common.convert.Writes
 import com.nulabinc.backlog.migration.common.domain.BacklogUser
 import com.nulabinc.backlog.migration.common.utils.Logging
-import com.nulabinc.backlog.r2b.mapping.core.ConvertUserMapping
+import com.nulabinc.backlog.r2b.mapping.service.MappingUserService
 import com.nulabinc.backlog.r2b.redmine.domain.PropertyValue
 import com.osinka.i18n.Messages
 import com.taskadapter.redmineapi.bean.User
@@ -14,9 +14,9 @@ import com.taskadapter.redmineapi.bean.User
 /**
   * @author uchida
   */
-private[exporter] class UserWrites @Inject()(propertyValue: PropertyValue) extends Writes[User, BacklogUser] with Logging {
-
-  val userMapping = new ConvertUserMapping()
+private[exporter] class UserWrites @Inject()(propertyValue: PropertyValue, mappingUserService: MappingUserService)
+    extends Writes[User, BacklogUser]
+    with Logging {
 
   override def writes(user: User): BacklogUser = {
     (Option(user.getLogin), Option(user.getFullName)) match {
@@ -31,7 +31,7 @@ private[exporter] class UserWrites @Inject()(propertyValue: PropertyValue) exten
 
   private[this] def toBacklog(user: User): BacklogUser = {
     BacklogUser(optId = Option(user.getId.intValue()),
-                optUserId = Option(user.getLogin).map(userMapping.convert),
+                optUserId = Option(user.getLogin).map(mappingUserService.convert),
                 optPassword = Option(user.getPassword),
                 name = user.getFullName,
                 optMailAddress = Option(user.getMail),

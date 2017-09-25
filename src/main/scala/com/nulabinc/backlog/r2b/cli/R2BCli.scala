@@ -40,8 +40,11 @@ object R2BCli extends BacklogConfiguration with Logging {
             val backlogInjector = BacklogInjector.createInjector(config.backlogConfig)
             val backlogPaths    = backlogInjector.getInstance(classOf[BacklogPaths])
             backlogPaths.outputPath.deleteRecursively(force = true, continueOnFailure = true)
+            val mappingContainer = MappingContainer(propertyMappingFiles.user.tryUnmarshal(),
+                                                    propertyMappingFiles.status.tryUnmarshal(),
+                                                    propertyMappingFiles.priority.tryUnmarshal())
 
-            BootExporter.execute(config.redmineConfig, config.backlogConfig.projectKey)
+            BootExporter.execute(config.redmineConfig, mappingContainer, config.backlogConfig.projectKey)
             BootImporter.execute(config.backlogConfig, false)
 
             if (!config.optOut) {

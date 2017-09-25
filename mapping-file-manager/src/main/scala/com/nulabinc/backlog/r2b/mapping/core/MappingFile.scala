@@ -76,6 +76,12 @@ trait MappingFile extends Logging {
     }
   }
 
+  def tryUnmarshal(): Seq[Mapping] = {
+    val path = Path.fromString(filePath)
+    val json = path.lines().mkString
+    JsonParser(json).convertTo[MappingsWrapper].mappings
+  }
+
   def errors: Seq[String] = {
     val fileName  = Path.fromString(filePath).name
     val validator = new MappingValidator(redmines, backlogs, itemName, fileName)

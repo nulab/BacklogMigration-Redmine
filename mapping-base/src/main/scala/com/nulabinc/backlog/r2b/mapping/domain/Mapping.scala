@@ -5,7 +5,7 @@ import spray.json.DefaultJsonProtocol
 /**
   * @author uchida
   */
-private[mapping] case class MappingsWrapper(description: String, mappings: Seq[Mapping])
+case class MappingsWrapper(description: String, mappings: Seq[Mapping])
 
 case class Mapping(redmine: String, backlog: String)
 

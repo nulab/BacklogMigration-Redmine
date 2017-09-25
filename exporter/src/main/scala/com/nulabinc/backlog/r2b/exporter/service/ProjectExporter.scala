@@ -13,6 +13,7 @@ import com.nulabinc.backlog.migration.common.utils.{ConsoleOut, IOUtil, Logging,
 import com.nulabinc.backlog.r2b.exporter.actor.ContentActor
 import com.nulabinc.backlog.r2b.exporter.convert._
 import com.nulabinc.backlog.r2b.exporter.core.{ExportContext, ExportContextProvider}
+import com.nulabinc.backlog.r2b.mapping.core.MappingContainer
 import com.nulabinc.backlog.r2b.redmine.service.{MembershipService, _}
 import com.osinka.i18n.Messages
 import com.taskadapter.redmineapi.bean._
@@ -31,6 +32,7 @@ private[exporter] class ProjectExporter @Inject()(implicit val projectWrites: Pr
                                                   implicit val issueTypesWrites: IssueTypesWrites,
                                                   implicit val issueCategoriesWrites: IssueCategoriesWrites,
                                                   implicit val newsWrites: NewsWrites,
+                                                  implicit val mappingUserWrites: MappingUserWrites,
                                                   membershipWrites: MembershipWrites,
                                                   groupsWrites: GroupsWrites,
                                                   backlogPaths: BacklogPaths,
@@ -44,7 +46,7 @@ private[exporter] class ProjectExporter @Inject()(implicit val projectWrites: Pr
                                                   exportContextProvider: ExportContextProvider)
     extends Logging {
 
-  def boot(injector: Injector) = {
+  def boot(injector: Injector, mappingContainer: MappingContainer) = {
     val exportContext = exportContextProvider.get()
     val system        = injector.instance[ActorSystem]
 
@@ -52,10 +54,10 @@ private[exporter] class ProjectExporter @Inject()(implicit val projectWrites: Pr
     contentActor ! ContentActor.Do(exportContext)
 
     system.awaitTermination(Duration.Inf)
-    property(exportContext)
+    property(exportContext, mappingContainer)
   }
 
-  private[this] def property(exportContext: ExportContext) = {
+  private[this] def property(exportContext: ExportContext, mappingContainer: MappingContainer) = {
     val allMemberships: Seq[Membership] = membershipService.allMemberships()
 
     //project
@@ -68,7 +70,7 @@ private[exporter] class ProjectExporter @Inject()(implicit val projectWrites: Pr
     val allProjectUser = mutable.Set.empty[BacklogUser]
     val projectUsers   = Convert.toBacklog(allMemberships)(membershipWrites)
     projectUsers.foreach(projectUser => allProjectUser += projectUser)
-    exportContext.userMapping.projectUsers().foreach(projectUser => allProjectUser += projectUser)
+    mappingContainer.user.map(mapping => Convert.toBacklog(mapping)).foreach(projectUser => allProjectUser += projectUser)
     IOUtil.output(backlogPaths.projectUsersJson, BacklogProjectUsersWrapper(allProjectUser.toSeq).toJson.prettyPrint)
     ConsoleOut.boldln(Messages("message.executed", Messages("common.project_user"), Messages("message.exported")), 1)
 

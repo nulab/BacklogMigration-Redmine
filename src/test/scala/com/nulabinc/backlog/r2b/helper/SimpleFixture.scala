@@ -6,6 +6,8 @@ import java.util.{Date, Locale, Properties}
 import com.nulabinc.backlog.migration.common.conf.BacklogApiConfiguration
 import com.nulabinc.backlog.r2b.conf.AppConfiguration
 import com.nulabinc.backlog.r2b.mapping.core._
+import com.nulabinc.backlog.r2b.mapping.domain.{Mapping, MappingsWrapper}
+import com.nulabinc.backlog.r2b.mapping.service.{MappingPriorityServiceImpl, MappingStatusServiceImpl, MappingUserServiceImpl}
 import com.nulabinc.backlog.r2b.redmine.conf.RedmineApiConfiguration
 import com.nulabinc.backlog4j.conf.{BacklogConfigure, BacklogPackageConfigure}
 import com.nulabinc.backlog4j.{BacklogClient, BacklogClientFactory}
@@ -13,8 +15,10 @@ import com.osinka.i18n.Lang
 import com.taskadapter.redmineapi.RedmineManagerFactory
 import org.joda.time.DateTime
 import spray.json.{JsNumber, JsonParser}
+import com.nulabinc.backlog.r2b.mapping.domain.MappingJsonProtocol._
 
 import scala.collection.JavaConverters._
+import scalax.file.Path
 
 /**
   * @author uchida
@@ -26,7 +30,10 @@ trait SimpleFixture {
   val dateFormat              = "yyyy-MM-dd"
   val timestampFormat: String = "yyyy-MM-dd'T'HH:mm:ssZ"
 
-  val optAppConfiguration: Option[AppConfiguration] = getAppConfiguration
+  val optAppConfiguration    = getAppConfiguration
+  val mappingUserService     = new MappingUserServiceImpl(unmarshal(MappingDirectory.USER_MAPPING_FILE))
+  val mappingPriorityService = new MappingPriorityServiceImpl(unmarshal(MappingDirectory.PRIORITY_MAPPING_FILE))
+  val mappingStatusService   = new MappingStatusServiceImpl(unmarshal(MappingDirectory.STATUS_MAPPING_FILE))
 
   def redmine() = {
     optAppConfiguration match {
@@ -50,27 +57,21 @@ trait SimpleFixture {
   }
 
   def convertUser(target: String): String = {
-    val file = new File(MappingDirectory.USER_MAPPING_FILE)
-    if (file.exists()) {
-      val userMapping = new ConvertUserMapping()
-      userMapping.convert(target)
-    } else target
+    mappingUserService.convert(target)
   }
 
   def convertStatus(target: String): String = {
-    val file = new File(MappingDirectory.STATUS_MAPPING_FILE)
-    if (file.exists()) {
-      val statusMapping = new ConvertStatusMapping()
-      statusMapping.convert(target)
-    } else target
+    mappingStatusService.convert(target)
   }
 
   def convertPriority(target: String): String = {
-    val file = new File(MappingDirectory.PRIORITY_MAPPING_FILE)
-    if (file.exists()) {
-      val priorityMapping = new ConvertPriorityMapping()
-      priorityMapping.convert(target)
-    } else target
+    mappingPriorityService.convert(target)
+  }
+
+  private[this] def unmarshal(strPath: String): Seq[Mapping] = {
+    val path = Path.fromString(strPath)
+    val json = path.lines().mkString
+    JsonParser(json).convertTo[MappingsWrapper].mappings
   }
 
   private[this] def getAppConfiguration: Option[AppConfiguration] = {

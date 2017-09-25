@@ -146,8 +146,12 @@ private[exporter] class IssueInitializer(exportContext: ExportContext, issueDirP
     val issueInitialValue = new IssueInitialValue(RedmineConstantValue.ATTR, RedmineConstantValue.Attr.PRIORITY)
     issueInitialValue.findJournalDetail(journals) match {
       case Some(detail) =>
-        exportContext.propertyValue.priorityOfId(Option(detail.getOldValue)).map(_.getName).map(exportContext.priorityMapping.convert).getOrElse("")
-      case None => exportContext.priorityMapping.convert(issue.getPriorityText)
+        exportContext.propertyValue
+          .priorityOfId(Option(detail.getOldValue))
+          .map(_.getName)
+          .map(exportContext.mappingPriorityService.convert)
+          .getOrElse("")
+      case None => exportContext.mappingPriorityService.convert(issue.getPriorityText)
     }
   }
 
