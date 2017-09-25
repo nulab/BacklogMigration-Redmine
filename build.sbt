@@ -89,7 +89,7 @@ lazy val exporter = (project in file("exporter"))
 lazy val mappingBase = (project in file("mapping-base"))
   .settings(commonSettings: _*)
   .settings(
-    name := "backlog-redmine-mapping-data",
+    name := "backlog-redmine-mapping-base",
     scapegoatVersion := "1.1.0",
     scapegoatDisabledInspections := Seq(
       "NullParameter",

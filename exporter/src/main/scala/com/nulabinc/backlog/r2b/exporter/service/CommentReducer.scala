@@ -4,10 +4,10 @@ import java.io.{FileOutputStream, InputStream}
 import java.net.URL
 import java.nio.channels.Channels
 
-import com.nulabinc.backlog.migration.common.conf.{BacklogConstantValue, BacklogPaths}
+import com.nulabinc.backlog.migration.common.conf.BacklogConstantValue
 import com.nulabinc.backlog.migration.common.domain.{BacklogChangeLog, BacklogComment, BacklogIssue}
 import com.nulabinc.backlog.migration.common.utils.{FileUtil, IOUtil, Logging, StringUtil}
-import com.nulabinc.backlog.r2b.redmine.conf.RedmineApiConfiguration
+import com.nulabinc.backlog.r2b.exporter.core.ExportContext
 import com.nulabinc.backlog.r2b.redmine.service.ProjectService
 import com.osinka.i18n.Messages
 import com.taskadapter.redmineapi.bean.Attachment
@@ -17,13 +17,12 @@ import scalax.file.Path
 /**
   * @author uchida
   */
-private[exporter] class CommentReducer(apiConfig: RedmineApiConfiguration,
+private[exporter] class CommentReducer(exportContext: ExportContext,
                                        projectService: ProjectService,
-                                       backlogPaths: BacklogPaths,
+                                       issueDirPath: Path,
                                        issue: BacklogIssue,
                                        comments: Seq[BacklogComment],
-                                       attachments: Seq[Attachment],
-                                       issueDirPath: Path)
+                                       attachments: Seq[Attachment])
     extends Logging {
 
   private[this] val changeLogContent = new StringBuilder()
@@ -106,7 +105,7 @@ private[exporter] class CommentReducer(apiConfig: RedmineApiConfiguration,
         val optAttachment = attachments.find(attachment => FileUtil.normalize(attachment.getFileName) == attachmentInfo.name)
         optAttachment match {
           case Some(attachment) =>
-            val url: URL = new URL(s"${attachment.getContentURL}?key=${apiConfig.key}")
+            val url: URL = new URL(s"${attachment.getContentURL}?key=${exportContext.apiConfig.key}")
             download(attachmentInfo.name, url.openStream())
             Some(changeLog)
           case _ => None
@@ -116,8 +115,8 @@ private[exporter] class CommentReducer(apiConfig: RedmineApiConfiguration,
   }
 
   private[this] def download(name: String, content: InputStream) = {
-    val dir  = backlogPaths.issueAttachmentDirectoryPath(issueDirPath)
-    val path = backlogPaths.issueAttachmentPath(dir, name)
+    val dir  = exportContext.backlogPaths.issueAttachmentDirectoryPath(issueDirPath)
+    val path = exportContext.backlogPaths.issueAttachmentPath(dir, name)
     IOUtil.createDirectory(dir)
     val rbc = Channels.newChannel(content)
     val fos = new FileOutputStream(path.path)

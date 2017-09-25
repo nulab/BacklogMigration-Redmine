@@ -4,15 +4,12 @@ import java.io.{FileOutputStream, InputStream}
 import java.net.URL
 import java.nio.channels.Channels
 
-import com.nulabinc.backlog.migration.common.conf.BacklogPaths
 import com.nulabinc.backlog.migration.common.convert.Convert
 import com.nulabinc.backlog.migration.common.domain._
 import com.nulabinc.backlog.migration.common.utils.{DateUtil, IOUtil, Logging, StringUtil}
-import com.nulabinc.backlog.r2b.exporter.convert._
-import com.nulabinc.backlog.r2b.mapping.core.{ConvertPriorityMapping, ConvertUserMapping}
+import com.nulabinc.backlog.r2b.exporter.core.ExportContext
 import com.nulabinc.backlog.r2b.redmine.conf.RedmineConstantValue
-import com.nulabinc.backlog.r2b.redmine.conf.RedmineApiConfiguration
-import com.nulabinc.backlog.r2b.redmine.domain.{PropertyValue, RedmineCustomFieldDefinition}
+import com.nulabinc.backlog.r2b.redmine.domain.RedmineCustomFieldDefinition
 import com.taskadapter.redmineapi.bean._
 
 import scala.collection.JavaConverters._
@@ -21,30 +18,23 @@ import scalax.file.Path
 /**
   * @author uchida
   */
-private[exporter] class IssueInitializer(apiConfig: RedmineApiConfiguration,
-                                         backlogPaths: BacklogPaths,
-                                         propertyValue: PropertyValue,
-                                         issueDirPath: Path,
-                                         journals: Seq[Journal],
-                                         attachments: Seq[Attachment],
-                                         issueWrites: IssueWrites,
-                                         userWrites: UserWrites,
-                                         customFieldWrites: CustomFieldWrites,
-                                         customFieldValueWrites: CustomFieldValueWrites,
-                                         attachmentWrites: AttachmentWrites)
+private[exporter] class IssueInitializer(exportContext: ExportContext, issueDirPath: Path, journals: Seq[Journal], attachments: Seq[Attachment])
     extends Logging {
 
-  val userMapping     = new ConvertUserMapping()
-  val priorityMapping = new ConvertPriorityMapping()
+  implicit val issueWrites            = exportContext.issueWrites
+  implicit val attachmentWrites       = exportContext.attachmentWrites
+  implicit val userWrites             = exportContext.userWrites
+  implicit val customFieldWrites      = exportContext.customFieldWrites
+  implicit val customFieldValueWrites = exportContext.customFieldValueWrites
 
   def initialize(issue: Issue): BacklogIssue = {
     //attachments
     val attachmentFilter    = new AttachmentFilter(journals)
     val filteredAttachments = attachmentFilter.filter(attachments)
-    val backlogAttachments  = filteredAttachments.map(Convert.toBacklog(_)(attachmentWrites))
+    val backlogAttachments  = filteredAttachments.map(Convert.toBacklog(_))
     filteredAttachments.foreach(attachment)
 
-    val backlogIssue: BacklogIssue = Convert.toBacklog(issue)(issueWrites)
+    val backlogIssue: BacklogIssue = Convert.toBacklog(issue)
     backlogIssue.copy(
       summary = summary(issue),
       optParentIssueId = parentIssueId(issue),
@@ -123,7 +113,7 @@ private[exporter] class IssueInitializer(apiConfig: RedmineApiConfiguration,
     val issueInitialValue = new IssueInitialValue(RedmineConstantValue.ATTR, RedmineConstantValue.Attr.TRACKER)
     issueInitialValue.findJournalDetail(journals) match {
       case Some(detail) =>
-        propertyValue.trackerOfId(Option(detail.getOldValue)).map(_.getName)
+        exportContext.propertyValue.trackerOfId(Option(detail.getOldValue)).map(_.getName)
       case None => Option(issue.getTracker).map(_.getName)
     }
   }
@@ -134,7 +124,7 @@ private[exporter] class IssueInitializer(apiConfig: RedmineApiConfiguration,
     optDetails match {
       case Some(details) =>
         details.flatMap { detail =>
-          propertyValue.categoryOfId(Option(detail.getOldValue)).map(_.getName)
+          exportContext.propertyValue.categoryOfId(Option(detail.getOldValue)).map(_.getName)
         }
       case _ => Option(issue.getCategory).map(_.getName).toSeq
     }
@@ -146,7 +136,7 @@ private[exporter] class IssueInitializer(apiConfig: RedmineApiConfiguration,
     optDetails match {
       case Some(details) =>
         details.flatMap { detail =>
-          propertyValue.versionOfId(Option(detail.getOldValue)).map(_.getName)
+          exportContext.propertyValue.versionOfId(Option(detail.getOldValue)).map(_.getName)
         }
       case _ => Option(issue.getTargetVersion).map(_.getName).toSeq
     }
@@ -156,8 +146,8 @@ private[exporter] class IssueInitializer(apiConfig: RedmineApiConfiguration,
     val issueInitialValue = new IssueInitialValue(RedmineConstantValue.ATTR, RedmineConstantValue.Attr.PRIORITY)
     issueInitialValue.findJournalDetail(journals) match {
       case Some(detail) =>
-        propertyValue.priorityOfId(Option(detail.getOldValue)).map(_.getName).map(priorityMapping.convert).getOrElse("")
-      case None => priorityMapping.convert(issue.getPriorityText)
+        exportContext.propertyValue.priorityOfId(Option(detail.getOldValue)).map(_.getName).map(exportContext.priorityMapping.convert).getOrElse("")
+      case None => exportContext.priorityMapping.convert(issue.getPriorityText)
     }
   }
 
@@ -165,13 +155,13 @@ private[exporter] class IssueInitializer(apiConfig: RedmineApiConfiguration,
     val issueInitialValue = new IssueInitialValue(RedmineConstantValue.ATTR, RedmineConstantValue.Attr.ASSIGNED)
     issueInitialValue.findJournalDetail(journals) match {
       case Some(detail) =>
-        propertyValue.userOfId(Option(detail.getOldValue)).map(Convert.toBacklog(_)(userWrites))
-      case None => Option(issue.getAssignee).map(Convert.toBacklog(_)(userWrites))
+        exportContext.propertyValue.userOfId(Option(detail.getOldValue)).map(Convert.toBacklog(_))
+      case None => Option(issue.getAssignee).map(Convert.toBacklog(_))
     }
   }
 
   private[this] def customField(customField: CustomField): Option[BacklogCustomField] = {
-    val optCustomFieldDefinition = propertyValue.customFieldDefinitionOfName(customField.getName)
+    val optCustomFieldDefinition = exportContext.propertyValue.customFieldDefinitionOfName(customField.getName)
     optCustomFieldDefinition match {
       case Some(customFieldDefinition) =>
         if (customFieldDefinition.isMultiple) multipleCustomField(customField, customFieldDefinition)
@@ -186,10 +176,10 @@ private[exporter] class IssueInitializer(apiConfig: RedmineApiConfiguration,
     val initialValues: Seq[String] =
       optDetails match {
         case Some(details) =>
-          details.flatMap(detail => Convert.toBacklog((customField.getId.toString, Option(detail.getOldValue)))(customFieldValueWrites))
+          details.flatMap(detail => Convert.toBacklog((customField.getId.toString, Option(detail.getOldValue))))
         case _ => customField.getValues.asScala
       }
-    Convert.toBacklog(customField)(customFieldWrites) match {
+    Convert.toBacklog(customField) match {
       case Some(backlogCustomField) => Some(backlogCustomField.copy(values = initialValues))
       case _                        => None
     }
@@ -199,23 +189,23 @@ private[exporter] class IssueInitializer(apiConfig: RedmineApiConfiguration,
     val issueInitialValue = new IssueInitialValue(RedmineConstantValue.CUSTOM_FIELD, customFieldDefinition.id.toString)
     val initialValue: Option[String] =
       issueInitialValue.findJournalDetail(journals) match {
-        case Some(detail) => Convert.toBacklog((customField.getId.toString, Option(detail.getOldValue)))(customFieldValueWrites)
-        case _            => Convert.toBacklog((customField.getId.toString, Option(customField.getValue)))(customFieldValueWrites)
+        case Some(detail) => Convert.toBacklog((customField.getId.toString, Option(detail.getOldValue)))
+        case _            => Convert.toBacklog((customField.getId.toString, Option(customField.getValue)))
       }
-    Convert.toBacklog(customField)(customFieldWrites) match {
+    Convert.toBacklog(customField) match {
       case Some(backlogCustomField) => Some(backlogCustomField.copy(optValue = initialValue))
       case _                        => None
     }
   }
 
   private[this] def attachment(attachment: Attachment) = {
-    val url: URL = new URL(s"${attachment.getContentURL}?key=${apiConfig.key}")
+    val url: URL = new URL(s"${attachment.getContentURL}?key=${exportContext.apiConfig.key}")
     download(attachment.getFileName, url.openStream())
   }
 
   private[this] def download(name: String, content: InputStream) = {
-    val dir  = backlogPaths.issueAttachmentDirectoryPath(issueDirPath)
-    val path = backlogPaths.issueAttachmentPath(dir, name)
+    val dir  = exportContext.backlogPaths.issueAttachmentDirectoryPath(issueDirPath)
+    val path = exportContext.backlogPaths.issueAttachmentPath(dir, name)
     IOUtil.createDirectory(dir)
     val rbc = Channels.newChannel(content)
     val fos = new FileOutputStream(path.path)

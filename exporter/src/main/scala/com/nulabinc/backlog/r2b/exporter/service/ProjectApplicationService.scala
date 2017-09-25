@@ -12,7 +12,7 @@ import com.nulabinc.backlog.migration.common.modules.akkaguice.GuiceAkkaExtensio
 import com.nulabinc.backlog.migration.common.utils.{ConsoleOut, IOUtil, Logging, ProgressBar}
 import com.nulabinc.backlog.r2b.exporter.actor.ContentActor
 import com.nulabinc.backlog.r2b.exporter.convert._
-import com.nulabinc.backlog.r2b.mapping.core.ConvertUserMapping
+import com.nulabinc.backlog.r2b.exporter.core.{ExportContext, ExportContextProvider}
 import com.nulabinc.backlog.r2b.redmine.service.{MembershipService, _}
 import com.osinka.i18n.Messages
 import com.taskadapter.redmineapi.bean._
@@ -40,26 +40,26 @@ private[exporter] class ProjectApplicationService @Inject()(implicit val project
                                                             membershipService: MembershipService,
                                                             issueCategoryService: IssueCategoryService,
                                                             versionService: VersionService,
-                                                            newsService: NewsService)
+                                                            newsService: NewsService,
+                                                            exportContextProvider: ExportContextProvider)
     extends Logging {
 
-  val userMapping = new ConvertUserMapping()
-
   def execute(injector: Injector) = {
-    val system = injector.instance[ActorSystem]
+    val exportContext = exportContextProvider.get()
+    val system        = injector.instance[ActorSystem]
 
     val contentActor = system.actorOf(GuiceAkkaExtension(system).props(ContentActor.name))
-    contentActor ! ContentActor.Do
+    contentActor ! ContentActor.Do(exportContext)
 
     system.awaitTermination(Duration.Inf)
-    property()
+    property(exportContext)
   }
 
-  private[this] def property() = {
+  private[this] def property(exportContext: ExportContext) = {
+    val allMemberships: Seq[Membership] = membershipService.allMemberships()
+
     //project
     IOUtil.output(backlogPaths.projectJson, BacklogProjectWrapper(Convert.toBacklog(project)).toJson.prettyPrint)
-
-    val allMemberships: Seq[Membership] = membershipService.allMemberships()
 
     //group
     IOUtil.output(backlogPaths.groupsJson, BacklogGroupsWrapper(Convert.toBacklog(allMemberships)(groupsWrites)).toJson.prettyPrint)
@@ -68,7 +68,7 @@ private[exporter] class ProjectApplicationService @Inject()(implicit val project
     val allProjectUser = mutable.Set.empty[BacklogUser]
     val projectUsers   = Convert.toBacklog(allMemberships)(membershipWrites)
     projectUsers.foreach(projectUser => allProjectUser += projectUser)
-    userMapping.projectUsers().foreach(projectUser => allProjectUser += projectUser)
+    exportContext.userMapping.projectUsers().foreach(projectUser => allProjectUser += projectUser)
     IOUtil.output(backlogPaths.projectUsersJson, BacklogProjectUsersWrapper(allProjectUser.toSeq).toJson.prettyPrint)
     ConsoleOut.boldln(Messages("message.executed", Messages("common.project_user"), Messages("message.exported")), 1)
 

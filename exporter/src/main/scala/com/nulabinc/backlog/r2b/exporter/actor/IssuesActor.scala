@@ -9,11 +9,10 @@ import akka.routing.SmallestMailboxPool
 import com.nulabinc.backlog.migration.common.conf.{BacklogConfiguration, BacklogPaths}
 import com.nulabinc.backlog.migration.common.modules.akkaguice.NamedActor
 import com.nulabinc.backlog.migration.common.utils.{Logging, ProgressBar}
-import com.nulabinc.backlog.r2b.exporter.convert._
+import com.nulabinc.backlog.r2b.exporter.core.ExportContext
 import com.nulabinc.backlog.r2b.redmine.conf.RedmineApiConfiguration
-import com.nulabinc.backlog.r2b.redmine.service.IssueService
 import com.nulabinc.backlog.r2b.redmine.domain.PropertyValue
-import com.nulabinc.backlog.r2b.redmine.service.ProjectService
+import com.nulabinc.backlog.r2b.redmine.service.{IssueService, ProjectService}
 import com.osinka.i18n.Messages
 
 import scala.concurrent.duration._
@@ -24,12 +23,6 @@ import scala.concurrent.duration._
 private[exporter] class IssuesActor @Inject()(@Named("projectId") projectId: Int,
                                               apiConfig: RedmineApiConfiguration,
                                               backlogPaths: BacklogPaths,
-                                              issueWrites: IssueWrites,
-                                              journalWrites: JournalWrites,
-                                              userWrites: UserWrites,
-                                              customFieldWrites: CustomFieldWrites,
-                                              customFieldValueWrites: CustomFieldValueWrites,
-                                              attachmentWrites: AttachmentWrites,
                                               issueService: IssueService,
                                               projectService: ProjectService,
                                               propertyValue: PropertyValue)
@@ -51,23 +44,9 @@ private[exporter] class IssuesActor @Inject()(@Named("projectId") projectId: Int
     (ProgressBar.progress _)(Messages("common.issues_info"), Messages("message.collecting"), Messages("message.collected"))
 
   def receive: Receive = {
-    case IssuesActor.Do =>
-      val router = SmallestMailboxPool(akkaMailBoxPool, supervisorStrategy = strategy)
-      val issueActor =
-        context.actorOf(
-          router.props(
-            Props(
-              new IssueActor(apiConfig,
-                             backlogPaths,
-                             issueService,
-                             projectService,
-                             propertyValue,
-                             issueWrites,
-                             journalWrites,
-                             userWrites,
-                             customFieldWrites,
-                             customFieldValueWrites,
-                             attachmentWrites))))
+    case IssuesActor.Do(exportContext) =>
+      val router     = SmallestMailboxPool(akkaMailBoxPool, supervisorStrategy = strategy)
+      val issueActor = context.actorOf(router.props(Props(new IssueActor(exportContext, issueService, projectService))))
 
       (0 until (allCount, limit))
         .foldLeft(Seq.empty[Int]) { (acc, offset) =>
@@ -98,7 +77,7 @@ private[exporter] object IssuesActor extends NamedActor {
 
   override final val name = "IssuesActor"
 
-  case object Do
+  case class Do(exportContext: ExportContext)
 
   case object Done
 
