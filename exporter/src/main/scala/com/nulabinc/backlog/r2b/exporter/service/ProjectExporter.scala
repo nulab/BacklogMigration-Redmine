@@ -25,26 +25,26 @@ import scala.concurrent.duration.Duration
 /**
   * @author uchida
   */
-private[exporter] class ProjectApplicationService @Inject()(implicit val projectWrites: ProjectWrites,
-                                                            implicit val customFieldDefinitionsWrites: CustomFieldDefinitionsWrites,
-                                                            implicit val versionsWrites: VersionsWrites,
-                                                            implicit val issueTypesWrites: IssueTypesWrites,
-                                                            implicit val issueCategoriesWrites: IssueCategoriesWrites,
-                                                            implicit val newsWrites: NewsWrites,
-                                                            membershipWrites: MembershipWrites,
-                                                            groupsWrites: GroupsWrites,
-                                                            backlogPaths: BacklogPaths,
-                                                            project: Project,
-                                                            customFieldService: CustomFieldService,
-                                                            trackerService: TrackerService,
-                                                            membershipService: MembershipService,
-                                                            issueCategoryService: IssueCategoryService,
-                                                            versionService: VersionService,
-                                                            newsService: NewsService,
-                                                            exportContextProvider: ExportContextProvider)
+private[exporter] class ProjectExporter @Inject()(implicit val projectWrites: ProjectWrites,
+                                                  implicit val customFieldDefinitionsWrites: CustomFieldDefinitionsWrites,
+                                                  implicit val versionsWrites: VersionsWrites,
+                                                  implicit val issueTypesWrites: IssueTypesWrites,
+                                                  implicit val issueCategoriesWrites: IssueCategoriesWrites,
+                                                  implicit val newsWrites: NewsWrites,
+                                                  membershipWrites: MembershipWrites,
+                                                  groupsWrites: GroupsWrites,
+                                                  backlogPaths: BacklogPaths,
+                                                  project: Project,
+                                                  customFieldService: CustomFieldService,
+                                                  trackerService: TrackerService,
+                                                  membershipService: MembershipService,
+                                                  issueCategoryService: IssueCategoryService,
+                                                  versionService: VersionService,
+                                                  newsService: NewsService,
+                                                  exportContextProvider: ExportContextProvider)
     extends Logging {
 
-  def execute(injector: Injector) = {
+  def boot(injector: Injector) = {
     val exportContext = exportContextProvider.get()
     val system        = injector.instance[ActorSystem]
 
