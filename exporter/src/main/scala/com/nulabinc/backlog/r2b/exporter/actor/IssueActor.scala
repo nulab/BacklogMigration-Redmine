@@ -8,7 +8,7 @@ import com.nulabinc.backlog.migration.common.domain.BacklogJsonProtocol._
 import com.nulabinc.backlog.migration.common.domain.{BacklogComment, BacklogIssue}
 import com.nulabinc.backlog.migration.common.utils.{DateUtil, IOUtil, Logging}
 import com.nulabinc.backlog.r2b.exporter.core.ExportContext
-import com.nulabinc.backlog.r2b.exporter.service.{CommentReducer, IssueInitializer}
+import com.nulabinc.backlog.r2b.exporter.service.{ChangeLogReducer, CommentReducer, IssueInitializer}
 import com.nulabinc.backlog.r2b.redmine.service.{IssueService, ProjectService}
 import com.taskadapter.redmineapi.Include
 import com.taskadapter.redmineapi.bean.{Attachment, _}
@@ -70,10 +70,11 @@ private[exporter] class IssueActor(exportContext: ExportContext, issueService: I
                                   comments: Seq[BacklogComment],
                                   attachments: Seq[Attachment],
                                   index: Int) = {
-    val commentCreated = DateUtil.tryIsoParse(comment.optCreated)
-    val issueDirPath   = exportContext.backlogPaths.issueDirectoryPath("comment", issue.id, commentCreated, index)
-    val commentReducer = new CommentReducer(exportContext, projectService, issueDirPath, issue, comments, attachments)
-    val reduced        = commentReducer.reduce(comment)
+    val commentCreated   = DateUtil.tryIsoParse(comment.optCreated)
+    val issueDirPath     = exportContext.backlogPaths.issueDirectoryPath("comment", issue.id, commentCreated, index)
+    val changeLogReducer = new ChangeLogReducer(exportContext, projectService, issueDirPath, issue, comments, attachments)
+    val commentReducer   = new CommentReducer(issue.id, changeLogReducer)
+    val reduced          = commentReducer.reduce(comment)
 
     IOUtil.output(exportContext.backlogPaths.issueJson(issueDirPath), reduced.toJson.prettyPrint)
   }
