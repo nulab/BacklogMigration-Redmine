@@ -32,7 +32,7 @@ private[file] class MappingValidator(redmineMappings: Seq[MappingItem], backlogM
 
   private[this] def redmineItemExists(mapping: Mapping, mappingItems: Seq[MappingItem]): Option[String] = {
     if (!mappingItems.exists(mappingItem => mappingItem.name == mapping.redmine)) {
-      Some(s"- ${Messages("cli.mapping.error.not_defined.item", itemName, mapping.redmine, Messages("common.redmine"))}")
+      Some(s"- ${Messages("cli.mapping.error.not_exist.item", itemName, mapping.redmine, Messages("common.redmine"))}")
     } else None
   }
 
