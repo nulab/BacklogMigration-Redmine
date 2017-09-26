@@ -21,28 +21,28 @@ object R2BCli extends BacklogConfiguration with Logging {
 
   def init(config: AppConfiguration): Unit =
     if (validateParam(config)) {
-      val propertyMappingFiles = createMapping(config)
-      output(propertyMappingFiles.user)
-      output(propertyMappingFiles.status)
-      output(propertyMappingFiles.priority)
+      val mappingFileContainer = createMapping(config)
+      output(mappingFileContainer.user)
+      output(mappingFileContainer.status)
+      output(mappingFileContainer.priority)
     }
 
-  def migrate(config: AppConfiguration): Unit =
+  def migrate(config: AppConfiguration): Unit = {
     if (validateParam(config)) {
       if (config.importOnly) BootImporter.execute(config.backlogConfig, false)
       else {
-        val propertyMappingFiles = createMapping(config)
-        if (validateMapping(propertyMappingFiles.user) &&
-            validateMapping(propertyMappingFiles.status) &&
-            validateMapping(propertyMappingFiles.priority)) {
-          if (confirmImport(config, propertyMappingFiles)) {
+        val mappingFileContainer = createMapping(config)
+        if (validateMapping(mappingFileContainer.user) &&
+            validateMapping(mappingFileContainer.status) &&
+            validateMapping(mappingFileContainer.priority)) {
+          if (confirmImport(config, mappingFileContainer)) {
 
             val backlogInjector = BacklogInjector.createInjector(config.backlogConfig)
             val backlogPaths    = backlogInjector.getInstance(classOf[BacklogPaths])
             backlogPaths.outputPath.deleteRecursively(force = true, continueOnFailure = true)
-            val mappingContainer = MappingContainer(user = propertyMappingFiles.user.tryUnmarshal(),
-                                                    status = propertyMappingFiles.status.tryUnmarshal(),
-                                                    priority = propertyMappingFiles.priority.tryUnmarshal())
+            val mappingContainer = MappingContainer(user = mappingFileContainer.user.tryUnmarshal(),
+                                                    status = mappingFileContainer.status.tryUnmarshal(),
+                                                    priority = mappingFileContainer.priority.tryUnmarshal())
 
             BootExporter.execute(config.redmineConfig, mappingContainer, config.backlogConfig.projectKey)
             BootImporter.execute(config.backlogConfig, false)
@@ -55,8 +55,9 @@ object R2BCli extends BacklogConfiguration with Logging {
         }
       }
     }
+  }
 
-  def doImport(config: AppConfiguration): Unit =
+  def doImport(config: AppConfiguration): Unit = {
     if (validateParam(config)) {
       BootImporter.execute(config.backlogConfig, false)
       if (!config.optOut) {
@@ -64,6 +65,7 @@ object R2BCli extends BacklogConfiguration with Logging {
         tracking(config, backlogInjector)
       }
     }
+  }
 
   private[this] def tracking(config: AppConfiguration, backlogInjector: Injector) = {
     Try {
@@ -153,7 +155,7 @@ object R2BCli extends BacklogConfiguration with Logging {
     } else true
   }
 
-  private[this] def confirmImport(config: AppConfiguration, propertyMappingFiles: MappingFileContainer): Boolean = {
+  private[this] def confirmImport(config: AppConfiguration, mappingFileContainer: MappingFileContainer): Boolean = {
     confirmProject(config) match {
       case Some(projectKeys) =>
         val (redmine, backlog): (String, String) = projectKeys
@@ -163,19 +165,19 @@ object R2BCli extends BacklogConfiguration with Logging {
                               |- ${redmine} => ${backlog}
                               |--------------------------------------------------
                               |
-         |${Messages("cli.mapping.show", propertyMappingFiles.user.itemName)}
+         |${Messages("cli.mapping.show", mappingFileContainer.user.itemName)}
                               |--------------------------------------------------
-                              |${mappingString(propertyMappingFiles.user)}
-                              |--------------------------------------------------
-                              |
-         |${Messages("cli.mapping.show", propertyMappingFiles.priority.itemName)}
-                              |--------------------------------------------------
-                              |${mappingString(propertyMappingFiles.priority)}
+                              |${mappingString(mappingFileContainer.user)}
                               |--------------------------------------------------
                               |
-         |${Messages("cli.mapping.show", propertyMappingFiles.status.itemName)}
+         |${Messages("cli.mapping.show", mappingFileContainer.priority.itemName)}
                               |--------------------------------------------------
-                              |${mappingString(propertyMappingFiles.status)}
+                              |${mappingString(mappingFileContainer.priority)}
+                              |--------------------------------------------------
+                              |
+         |${Messages("cli.mapping.show", mappingFileContainer.status.itemName)}
+                              |--------------------------------------------------
+                              |${mappingString(mappingFileContainer.status)}
                               |--------------------------------------------------
                               |""".stripMargin)
         val input: String = scala.io.StdIn.readLine(Messages("cli.confirm"))
@@ -194,7 +196,7 @@ object R2BCli extends BacklogConfiguration with Logging {
     }
   }
 
-  private[this] def mappingString(mappingFile: MappingFile): String =
+  private[this] def mappingString(mappingFile: MappingFile): String = {
     mappingFile.unmarshal() match {
       case Some(mappings) =>
         mappings
@@ -203,6 +205,7 @@ object R2BCli extends BacklogConfiguration with Logging {
           .mkString("\n")
       case _ => throw new RuntimeException
     }
+  }
 
   private[this] def createMapping(config: AppConfiguration): MappingFileContainer = {
     val mappingData     = BootMapping.execute(config.redmineConfig)
