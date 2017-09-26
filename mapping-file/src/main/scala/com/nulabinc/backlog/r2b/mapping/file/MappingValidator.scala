@@ -23,16 +23,16 @@ private[file] class MappingValidator(redmineMappings: Seq[MappingItem], backlogM
   }
 
   private[this] def redmineItemsExists(mappings: Seq[Mapping]): Seq[String] = {
-    redmineMappings.foldLeft(Seq.empty[String])((errors: Seq[String], mappingItem: MappingItem) =>
-      redmineItemExists(mappingItem, mappings) match {
+    mappings.foldLeft(Seq.empty[String])((errors: Seq[String], mapping: Mapping) =>
+      redmineItemExists(mapping, redmineMappings) match {
         case Some(error) => errors :+ error
         case None        => errors
     })
   }
 
-  private[this] def redmineItemExists(mappingItem: MappingItem, mappings: Seq[Mapping]): Option[String] = {
-    if (!mappings.exists(mapping => mapping.redmine == mappingItem.name)) {
-      Some("- " + Messages("cli.mapping.error.not_defined.item", itemName, mappingItem.name, fileName))
+  private[this] def redmineItemExists(mapping: Mapping, mappingItems: Seq[MappingItem]): Option[String] = {
+    if (!mappingItems.exists(mappingItem => mappingItem.name == mapping.redmine)) {
+      Some(s"- ${Messages("cli.mapping.error.not_defined.item", itemName, mapping.redmine, Messages("common.redmine"))}")
     } else None
   }
 
