@@ -4,6 +4,7 @@ import com.nulabinc.backlog.migration.common.conf.BacklogApiConfiguration
 import com.nulabinc.backlog.migration.common.modules.{ServiceInjector => BacklogInjector}
 import com.nulabinc.backlog.migration.common.service.{StatusService => BacklogStatusService}
 import com.nulabinc.backlog.migration.common.utils.StringUtil
+import com.nulabinc.backlog.r2b.mapping.core.MappingDirectory
 import com.nulabinc.backlog4j.Status
 import com.nulabinc.backlog.r2b.mapping.domain.MappingItem
 import com.nulabinc.backlog.r2b.redmine.conf.RedmineApiConfiguration

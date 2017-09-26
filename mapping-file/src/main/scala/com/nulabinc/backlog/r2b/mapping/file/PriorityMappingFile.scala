@@ -3,6 +3,7 @@ package com.nulabinc.backlog.r2b.mapping.file
 import com.nulabinc.backlog.migration.common.conf.BacklogApiConfiguration
 import com.nulabinc.backlog.migration.common.modules.{ServiceInjector => BacklogInjector}
 import com.nulabinc.backlog.migration.common.service.{PriorityService => BacklogPriorityService}
+import com.nulabinc.backlog.r2b.mapping.core.MappingDirectory
 import com.nulabinc.backlog4j.Priority
 import com.nulabinc.backlog.r2b.mapping.domain.MappingItem
 import com.nulabinc.backlog.r2b.redmine.conf.RedmineApiConfiguration

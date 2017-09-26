@@ -5,6 +5,7 @@ import com.nulabinc.backlog.migration.common.domain.BacklogUser
 import com.nulabinc.backlog.migration.common.modules.{ServiceInjector => BacklogInjector}
 import com.nulabinc.backlog.migration.common.service.{UserService => BacklogUserService}
 import com.nulabinc.backlog.migration.common.utils.StringUtil
+import com.nulabinc.backlog.r2b.mapping.core.MappingDirectory
 import com.nulabinc.backlog.r2b.mapping.domain.MappingItem
 import com.nulabinc.backlog.r2b.redmine.conf.RedmineApiConfiguration
 import com.nulabinc.backlog.r2b.redmine.modules.{ServiceInjector => RedmineInjector}

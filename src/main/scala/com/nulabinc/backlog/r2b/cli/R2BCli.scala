@@ -10,6 +10,7 @@ import com.nulabinc.backlog.r2b.conf.AppConfiguration
 import com.nulabinc.backlog.r2b.exporter.core.{Boot => BootExporter}
 import com.nulabinc.backlog.r2b.mapping.core.{Boot => BootMapping, _}
 import com.nulabinc.backlog.r2b.mapping.domain.Mapping
+import com.nulabinc.backlog.r2b.mapping.file._
 import com.osinka.i18n.Messages
 
 import scala.util.Try
@@ -19,13 +20,14 @@ import scala.util.Try
   */
 object R2BCli extends BacklogConfiguration with Logging {
 
-  def init(config: AppConfiguration): Unit =
+  def init(config: AppConfiguration): Unit = {
     if (validateParam(config)) {
       val mappingFileContainer = createMapping(config)
       output(mappingFileContainer.user)
       output(mappingFileContainer.status)
       output(mappingFileContainer.priority)
     }
+  }
 
   def migrate(config: AppConfiguration): Unit = {
     if (validateParam(config)) {
