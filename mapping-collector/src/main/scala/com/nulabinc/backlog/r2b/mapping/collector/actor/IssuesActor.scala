@@ -1,4 +1,4 @@
-package com.nulabinc.backlog.r2b.mapping.actor
+package com.nulabinc.backlog.r2b.mapping.collector.actor
 
 import java.util.concurrent.CountDownLatch
 import javax.inject.{Inject, Named}
@@ -9,7 +9,7 @@ import akka.routing.SmallestMailboxPool
 import com.nulabinc.backlog.migration.common.conf.BacklogConfiguration
 import com.nulabinc.backlog.migration.common.modules.akkaguice.NamedActor
 import com.nulabinc.backlog.migration.common.utils.{Logging, ProgressBar}
-import com.nulabinc.backlog.r2b.mapping.core.MappingData
+import com.nulabinc.backlog.r2b.mapping.collector.core.MappingData
 import com.nulabinc.backlog.r2b.redmine.service.IssueService
 import com.osinka.i18n.Messages
 import com.taskadapter.redmineapi.bean.User
@@ -19,7 +19,7 @@ import scala.concurrent.duration._
 /**
   * @author uchida
   */
-private[mapping] class IssuesActor @Inject()(@Named("projectId") projectId: Int, issueService: IssueService)
+private[collector] class IssuesActor @Inject()(@Named("projectId") projectId: Int, issueService: IssueService)
     extends Actor
     with BacklogConfiguration
     with Logging {
@@ -66,7 +66,7 @@ private[mapping] class IssuesActor @Inject()(@Named("projectId") projectId: Int,
 
 }
 
-private[mapping] object IssuesActor extends NamedActor {
+private[collector] object IssuesActor extends NamedActor {
 
   override final val name = "IssuesActor"
 

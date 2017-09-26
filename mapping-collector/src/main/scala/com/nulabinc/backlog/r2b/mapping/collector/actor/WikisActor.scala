@@ -1,4 +1,4 @@
-package com.nulabinc.backlog.r2b.mapping.actor
+package com.nulabinc.backlog.r2b.mapping.collector.actor
 
 import java.util.concurrent.CountDownLatch
 import javax.inject.Inject
@@ -9,7 +9,7 @@ import akka.routing.SmallestMailboxPool
 import com.nulabinc.backlog.migration.common.conf.BacklogConfiguration
 import com.nulabinc.backlog.migration.common.modules.akkaguice.NamedActor
 import com.nulabinc.backlog.migration.common.utils.{Logging, ProgressBar}
-import com.nulabinc.backlog.r2b.mapping.core.MappingData
+import com.nulabinc.backlog.r2b.mapping.collector.core.MappingData
 import com.nulabinc.backlog.r2b.redmine.service.WikiService
 import com.osinka.i18n.Messages
 
@@ -18,7 +18,7 @@ import scala.concurrent.duration._
 /**
   * @author uchida
   */
-private[mapping] class WikisActor @Inject()(wikiService: WikiService) extends Actor with BacklogConfiguration with Logging {
+private[collector] class WikisActor @Inject()(wikiService: WikiService) extends Actor with BacklogConfiguration with Logging {
 
   private[this] val strategy = OneForOneStrategy(maxNrOfRetries = 10, withinTimeRange = 1 minute) {
     case _ => Restart
@@ -41,7 +41,7 @@ private[mapping] class WikisActor @Inject()(wikiService: WikiService) extends Ac
 
 }
 
-private[mapping] object WikisActor extends NamedActor {
+private[collector] object WikisActor extends NamedActor {
 
   override final val name = "WikisActor"
 

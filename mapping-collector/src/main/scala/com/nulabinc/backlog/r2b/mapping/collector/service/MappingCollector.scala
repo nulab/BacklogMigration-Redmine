@@ -1,4 +1,4 @@
-package com.nulabinc.backlog.r2b.mapping.service
+package com.nulabinc.backlog.r2b.mapping.collector.service
 
 import javax.inject.Inject
 
@@ -6,10 +6,9 @@ import akka.actor.ActorSystem
 import com.google.inject.Injector
 import com.nulabinc.backlog.migration.common.modules.akkaguice.GuiceAkkaExtension
 import com.nulabinc.backlog.migration.common.utils.{Logging, ProgressBar}
-import com.nulabinc.backlog.r2b.mapping.actor.ContentActor
-import com.nulabinc.backlog.r2b.mapping.core.MappingData
-import com.nulabinc.backlog.r2b.redmine.service.MembershipService
-import com.nulabinc.backlog.r2b.redmine.service.{NewsService, UserService}
+import com.nulabinc.backlog.r2b.mapping.collector.actor.ContentActor
+import com.nulabinc.backlog.r2b.mapping.collector.core.MappingData
+import com.nulabinc.backlog.r2b.redmine.service.{MembershipService, NewsService, UserService}
 import com.osinka.i18n.Messages
 import com.taskadapter.redmineapi.bean.{Group, Membership, User}
 import net.codingwell.scalaguice.InjectorExtensions._
@@ -20,7 +19,7 @@ import scala.concurrent.duration.Duration
 /**
   * @author uchida
   */
-private[mapping] class ProjectApplicationService @Inject()(membershipService: MembershipService, userService: UserService, newsService: NewsService)
+private[collector] class MappingCollector @Inject()(membershipService: MembershipService, userService: UserService, newsService: NewsService)
     extends Logging {
 
   def execute(injector: Injector, mappingData: MappingData) = {

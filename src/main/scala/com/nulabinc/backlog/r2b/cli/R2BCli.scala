@@ -8,7 +8,8 @@ import com.nulabinc.backlog.migration.common.utils.{ConsoleOut, Logging, Mixpane
 import com.nulabinc.backlog.migration.importer.core.{Boot => BootImporter}
 import com.nulabinc.backlog.r2b.conf.AppConfiguration
 import com.nulabinc.backlog.r2b.exporter.core.{Boot => BootExporter}
-import com.nulabinc.backlog.r2b.mapping.core.{Boot => BootMapping, _}
+import com.nulabinc.backlog.r2b.mapping.collector.core.{Boot => BootMapping}
+import com.nulabinc.backlog.r2b.mapping.core.MappingContainer
 import com.nulabinc.backlog.r2b.mapping.domain.Mapping
 import com.nulabinc.backlog.r2b.mapping.file._
 import com.osinka.i18n.Messages

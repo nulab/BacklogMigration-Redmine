@@ -1,4 +1,4 @@
-package com.nulabinc.backlog.r2b.mapping.modules
+package com.nulabinc.backlog.r2b.mapping.collector.modules
 
 import javax.inject.Inject
 
@@ -6,13 +6,13 @@ import akka.actor.{Actor, ActorRef, ActorSystem}
 import com.google.inject.name.{Named, Names}
 import com.google.inject.{AbstractModule, Provides}
 import com.nulabinc.backlog.migration.common.modules.akkaguice.GuiceAkkaActorRefProvider
-import com.nulabinc.backlog.r2b.mapping.actor.{ContentActor, IssuesActor, WikisActor}
+import com.nulabinc.backlog.r2b.mapping.collector.actor.{ContentActor, IssuesActor, WikisActor}
 import net.codingwell.scalaguice.ScalaModule
 
 /**
   * @author uchida
   */
-private[mapping] class ActorModule extends AbstractModule with ScalaModule with GuiceAkkaActorRefProvider {
+private[collector] class ActorModule extends AbstractModule with ScalaModule with GuiceAkkaActorRefProvider {
 
   override def configure() {
     bind[Actor].annotatedWith(Names.named(ContentActor.name)).to[ContentActor]

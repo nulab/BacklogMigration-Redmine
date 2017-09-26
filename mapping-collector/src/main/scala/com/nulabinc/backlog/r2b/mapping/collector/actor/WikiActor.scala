@@ -1,10 +1,10 @@
-package com.nulabinc.backlog.r2b.mapping.actor
+package com.nulabinc.backlog.r2b.mapping.collector.actor
 
 import java.util.concurrent.CountDownLatch
 
 import akka.actor.Actor
 import com.nulabinc.backlog.migration.common.utils.Logging
-import com.nulabinc.backlog.r2b.mapping.core.MappingData
+import com.nulabinc.backlog.r2b.mapping.collector.core.MappingData
 import com.nulabinc.backlog.r2b.redmine.service.WikiService
 import com.taskadapter.redmineapi.bean.{User, WikiPage, WikiPageDetail}
 
@@ -15,7 +15,7 @@ import scala.concurrent.duration._
 /**
   * @author uchida
   */
-private[mapping] class WikiActor(wikiService: WikiService, mappingData: MappingData) extends Actor with Logging {
+private[collector] class WikiActor(wikiService: WikiService, mappingData: MappingData) extends Actor with Logging {
 
   override def preRestart(reason: Throwable, message: Option[Any]) = {
     logger.debug(s"preRestart: reason: ${reason}, message: ${message}")
@@ -41,7 +41,7 @@ private[mapping] class WikiActor(wikiService: WikiService, mappingData: MappingD
 
 }
 
-private[mapping] object WikiActor {
+private[collector] object WikiActor {
 
   case class Do(wiki: WikiPage, completion: CountDownLatch, allCount: Int, console: ((Int, Int) => Unit))
 

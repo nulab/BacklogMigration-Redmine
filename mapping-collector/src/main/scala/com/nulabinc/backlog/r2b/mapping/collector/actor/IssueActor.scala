@@ -1,10 +1,10 @@
-package com.nulabinc.backlog.r2b.mapping.actor
+package com.nulabinc.backlog.r2b.mapping.collector.actor
 
 import java.util.concurrent.CountDownLatch
 
 import akka.actor.Actor
 import com.nulabinc.backlog.migration.common.utils.Logging
-import com.nulabinc.backlog.r2b.mapping.core.MappingData
+import com.nulabinc.backlog.r2b.mapping.collector.core.MappingData
 import com.nulabinc.backlog.r2b.redmine.conf.RedmineConstantValue
 import com.nulabinc.backlog.r2b.redmine.service.IssueService
 import com.taskadapter.redmineapi.Include
@@ -18,7 +18,7 @@ import scala.concurrent.duration._
 /**
   * @author uchida
   */
-private[mapping] class IssueActor(issueService: IssueService, mappingData: MappingData, allUsers: Seq[User]) extends Actor with Logging {
+private[collector] class IssueActor(issueService: IssueService, mappingData: MappingData, allUsers: Seq[User]) extends Actor with Logging {
 
   override def preRestart(reason: Throwable, message: Option[Any]) = {
     logger.debug(s"preRestart: reason: ${reason}, message: ${message}")
@@ -71,7 +71,7 @@ private[mapping] class IssueActor(issueService: IssueService, mappingData: Mappi
 
 }
 
-private[mapping] object IssueActor {
+private[collector] object IssueActor {
 
   case class Do(issueId: Int, completion: CountDownLatch, allCount: Int, console: ((Int, Int) => Unit))
 

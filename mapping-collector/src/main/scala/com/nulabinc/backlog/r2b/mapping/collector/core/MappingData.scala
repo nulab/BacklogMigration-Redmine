@@ -1,4 +1,4 @@
-package com.nulabinc.backlog.r2b.mapping.core
+package com.nulabinc.backlog.r2b.mapping.collector.core
 
 import com.taskadapter.redmineapi.bean.User
 

@@ -1,20 +1,20 @@
-package com.nulabinc.backlog.r2b.mapping.actor
+package com.nulabinc.backlog.r2b.mapping.collector.actor
 
 import javax.inject.{Inject, Named}
 
 import akka.actor.{Actor, ActorRef}
 import com.nulabinc.backlog.migration.common.modules.akkaguice.NamedActor
 import com.nulabinc.backlog.migration.common.utils.Logging
-import com.nulabinc.backlog.r2b.mapping.core.MappingData
+import com.nulabinc.backlog.r2b.mapping.collector.core.MappingData
 import com.nulabinc.backlog.r2b.redmine.service.UserService
 import com.taskadapter.redmineapi.bean.User
 
 /**
   * @author uchida
   */
-private[mapping] class ContentActor @Inject()(@Named(IssuesActor.name) issuesActor: ActorRef,
-                                              @Named(WikisActor.name) wikisActor: ActorRef,
-                                              userService: UserService)
+private[collector] class ContentActor @Inject()(@Named(IssuesActor.name) issuesActor: ActorRef,
+                                                @Named(WikisActor.name) wikisActor: ActorRef,
+                                                userService: UserService)
     extends Actor
     with Logging {
 
@@ -30,7 +30,7 @@ private[mapping] class ContentActor @Inject()(@Named(IssuesActor.name) issuesAct
 
 }
 
-private[mapping] object ContentActor extends NamedActor {
+private[collector] object ContentActor extends NamedActor {
 
   override final val name = "ContentActor"
 

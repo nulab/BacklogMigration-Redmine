@@ -3,4 +3,4 @@ package com.nulabinc.backlog.r2b
 /**
   * @author uchida
   */
-package object mapping {}
+package object collector {}

@@ -1,10 +1,10 @@
-package com.nulabinc.backlog.r2b.mapping.core
+package com.nulabinc.backlog.r2b.mapping.collector.core
 
 import com.google.inject.Guice
 import com.nulabinc.backlog.migration.common.modules.{AkkaModule, ConfigModule}
 import com.nulabinc.backlog.migration.common.utils.{ConsoleOut, Logging}
-import com.nulabinc.backlog.r2b.mapping.modules.{ActorModule, RedmineModule}
-import com.nulabinc.backlog.r2b.mapping.service.ProjectApplicationService
+import com.nulabinc.backlog.r2b.mapping.collector.modules.{ActorModule, RedmineModule}
+import com.nulabinc.backlog.r2b.mapping.collector.service.MappingCollector
 import com.nulabinc.backlog.r2b.redmine.conf.RedmineApiConfiguration
 import com.osinka.i18n.Messages
 import com.taskadapter.redmineapi.bean.User
@@ -29,9 +29,9 @@ object Boot extends Logging {
                           |${Messages("cli.project_info.start")}
                           |--------------------------------------------------""".stripMargin)
 
-    val mappingData = MappingData(mutable.Set.empty[User], mutable.Set.empty[String])
-    val service     = injector.getInstance(classOf[ProjectApplicationService])
-    service.execute(injector, mappingData)
+    val mappingData      = MappingData(mutable.Set.empty[User], mutable.Set.empty[String])
+    val mappingCollector = injector.getInstance(classOf[MappingCollector])
+    mappingCollector.execute(injector, mappingData)
 
     ConsoleOut.println(s"""|--------------------------------------------------
                            |${Messages("cli.project_info.finish")}""".stripMargin)
