@@ -1,4 +1,4 @@
-package com.nulabinc.backlog.r2b.mapping.core
+package com.nulabinc.backlog.r2b.mapping.file
 
 import com.nulabinc.backlog.migration.common.utils.{IOUtil, Logging}
 import com.nulabinc.backlog.r2b.mapping.domain.MappingJsonProtocol._
