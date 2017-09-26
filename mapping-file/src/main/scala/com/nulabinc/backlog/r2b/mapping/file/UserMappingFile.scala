@@ -1,6 +1,6 @@
 package com.nulabinc.backlog.r2b.mapping.file
 
-import com.nulabinc.backlog.migration.common.conf.BacklogApiConfiguration
+import com.nulabinc.backlog.migration.common.conf.{BacklogApiConfiguration, BacklogConfiguration}
 import com.nulabinc.backlog.migration.common.domain.BacklogUser
 import com.nulabinc.backlog.migration.common.modules.{ServiceInjector => BacklogInjector}
 import com.nulabinc.backlog.migration.common.service.{UserService => BacklogUserService}
@@ -16,7 +16,8 @@ import com.taskadapter.redmineapi.bean.{User => RedmineUser}
   * @author uchida
   */
 class UserMappingFile(redmineApiConfig: RedmineApiConfiguration, backlogApiConfig: BacklogApiConfiguration, users: Seq[RedmineUser])
-    extends MappingFile {
+    extends MappingFile
+    with BacklogConfiguration {
 
   private[this] val redmineItems = getRedmineItems()
   private[this] val backlogItems = getBacklogItems()
@@ -46,9 +47,12 @@ class UserMappingFile(redmineApiConfig: RedmineApiConfiguration, backlogApiConfi
 
   private[this] def getBacklogItems(): Seq[MappingItem] = {
     def createItem(user: BacklogUser): MappingItem = {
-      MappingItem(user.optUserId.getOrElse(""), user.name)
+      if (backlogApiConfig.url.contains(NaiSpaceDomain)) {
+        MappingItem(user.optMailAddress.getOrElse(""), user.name)
+      } else {
+        MappingItem(user.optUserId.getOrElse(""), user.name)
+      }
     }
-
     val injector     = BacklogInjector.createInjector(backlogApiConfig)
     val userService  = injector.getInstance(classOf[BacklogUserService])
     val backlogUsers = userService.allUsers()
