@@ -18,10 +18,10 @@ import com.taskadapter.redmineapi.bean.IssueStatus
 class StatusMappingFile(redmineApiConfig: RedmineApiConfiguration, backlogApiConfig: BacklogApiConfiguration, statuses: Seq[String])
     extends MappingFile {
 
-  private[this] val redmineDatas = loadRedmine()
-  private[this] val backlogDatas = loadBacklog()
+  private[this] val redmineItems = getRedmineItems()
+  private[this] val backlogItems = getBacklogItems()
 
-  private[this] def loadRedmine(): Seq[MappingItem] = {
+  private[this] def getRedmineItems(): Seq[MappingItem] = {
 
     val injector        = RedmineInjector.createInjector(redmineApiConfig)
     val statusService   = injector.getInstance(classOf[RedmineStatusService])
@@ -45,7 +45,7 @@ class StatusMappingFile(redmineApiConfig: RedmineApiConfiguration, backlogApiCon
     redmines union deleteItems
   }
 
-  private[this] def loadBacklog(): Seq[MappingItem] = {
+  private[this] def getBacklogItems(): Seq[MappingItem] = {
     def createItem(status: Status): MappingItem = {
       MappingItem(status.getName, status.getName)
     }
@@ -90,7 +90,7 @@ class StatusMappingFile(redmineApiConfig: RedmineApiConfiguration, backlogApiCon
     val REJECTED_EN: String    = Messages("mapping.status.redmine.rejected")(Lang("en"))
   }
 
-  override def findMatchItem(redmine: MappingItem): String =
+  override def matchItem(redmine: MappingItem): String =
     backlogs.map(_.name).find(_ == redmine.name) match {
       case Some(backlog) => backlog
       case None =>
@@ -105,9 +105,9 @@ class StatusMappingFile(redmineApiConfig: RedmineApiConfiguration, backlogApiCon
         }
     }
 
-  override def backlogs: Seq[MappingItem] = backlogDatas
+  override def redmines: Seq[MappingItem] = redmineItems
 
-  override def redmines: Seq[MappingItem] = redmineDatas
+  override def backlogs: Seq[MappingItem] = backlogItems
 
   override def filePath: String = MappingDirectory.STATUS_MAPPING_FILE
 

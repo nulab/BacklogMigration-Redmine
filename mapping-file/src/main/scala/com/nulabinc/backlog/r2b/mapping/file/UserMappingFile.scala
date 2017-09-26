@@ -18,10 +18,10 @@ import com.taskadapter.redmineapi.bean.{User => RedmineUser}
 class UserMappingFile(redmineApiConfig: RedmineApiConfiguration, backlogApiConfig: BacklogApiConfiguration, users: Seq[RedmineUser])
     extends MappingFile {
 
-  private[this] val redmineDatas = loadRedmine()
-  private[this] val backlogDatas = loadBacklog()
+  private[this] val redmineItems = getRedmineItems()
+  private[this] val backlogItems = getBacklogItems()
 
-  private[this] def loadRedmine(): Seq[MappingItem] = {
+  private[this] def getRedmineItems(): Seq[MappingItem] = {
     val injector    = RedmineInjector.createInjector(redmineApiConfig)
     val userService = injector.getInstance(classOf[RedmineUserService])
 
@@ -40,11 +40,11 @@ class UserMappingFile(redmineApiConfig: RedmineApiConfiguration, backlogApiConfi
       MappingItem(user.getLogin, user.getFullName)
     }
 
-    val redmineUsers = users.toSeq.flatMap(resolve).filter(condition)
+    val redmineUsers = users.flatMap(resolve).filter(condition)
     redmineUsers.map(createItem)
   }
 
-  private[this] def loadBacklog(): Seq[MappingItem] = {
+  private[this] def getBacklogItems(): Seq[MappingItem] = {
     def createItem(user: BacklogUser): MappingItem = {
       MappingItem(user.optUserId.getOrElse(""), user.name)
     }
@@ -55,12 +55,12 @@ class UserMappingFile(redmineApiConfig: RedmineApiConfiguration, backlogApiConfi
     backlogUsers.map(createItem)
   }
 
-  override def findMatchItem(redmine: MappingItem): String =
+  override def matchItem(redmine: MappingItem): String =
     backlogs.map(_.name).find(_ == redmine.name).getOrElse("")
 
-  override def backlogs: Seq[MappingItem] = backlogDatas
+  override def redmines: Seq[MappingItem] = redmineItems
 
-  override def redmines: Seq[MappingItem] = redmineDatas
+  override def backlogs: Seq[MappingItem] = backlogItems
 
   override def filePath: String = MappingDirectory.USER_MAPPING_FILE
 

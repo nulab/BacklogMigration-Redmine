@@ -16,10 +16,10 @@ import com.taskadapter.redmineapi.bean.IssuePriority
   */
 class PriorityMappingFile(redmineApiConfig: RedmineApiConfiguration, backlogApiConfig: BacklogApiConfiguration) extends MappingFile {
 
-  private[this] val redmineDatas = loadRedmine()
-  private[this] val backlogDatas = loadBacklog()
+  private[this] val redmineItems = getRedmineItems()
+  private[this] val backlogItems = getBacklogItems()
 
-  private[this] def loadRedmine(): Seq[MappingItem] = {
+  private[this] def getRedmineItems(): Seq[MappingItem] = {
     def createItem(priority: IssuePriority): MappingItem = {
       MappingItem(priority.getName, priority.getName)
     }
@@ -30,7 +30,7 @@ class PriorityMappingFile(redmineApiConfig: RedmineApiConfiguration, backlogApiC
     redminePriorities.map(createItem)
   }
 
-  private[this] def loadBacklog(): Seq[MappingItem] = {
+  private[this] def getBacklogItems(): Seq[MappingItem] = {
     def createItem(priority: Priority): MappingItem = {
       MappingItem(priority.getName, priority.getName)
     }
@@ -68,7 +68,7 @@ class PriorityMappingFile(redmineApiConfig: RedmineApiConfiguration, backlogApiC
     val IMMEDIATE_EN: String = Messages("mapping.priority.redmine.immediate")(Lang("en"))
   }
 
-  override def findMatchItem(redmine: MappingItem): String =
+  override def matchItem(redmine: MappingItem): String =
     backlogs.map(_.name).find(_ == redmine.name) match {
       case Some(backlog) => backlog
       case None =>
@@ -82,9 +82,9 @@ class PriorityMappingFile(redmineApiConfig: RedmineApiConfiguration, backlogApiC
         }
     }
 
-  override def backlogs: Seq[MappingItem] = backlogDatas
+  override def redmines: Seq[MappingItem] = redmineItems
 
-  override def redmines: Seq[MappingItem] = redmineDatas
+  override def backlogs: Seq[MappingItem] = backlogItems
 
   override def filePath: String = MappingDirectory.PRIORITY_MAPPING_FILE
 

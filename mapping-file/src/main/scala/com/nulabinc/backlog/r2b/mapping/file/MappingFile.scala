@@ -13,7 +13,7 @@ import scalax.file.Path
   */
 trait MappingFile extends Logging {
 
-  def findMatchItem(redmine: MappingItem): String
+  def matchItem(redmine: MappingItem): String
 
   def backlogs: Seq[MappingItem]
 
@@ -93,6 +93,6 @@ trait MappingFile extends Logging {
       case _ => name
     }
 
-  private[this] def convert(redmine: MappingItem): Mapping = Mapping(redmine.name, findMatchItem(redmine))
+  private[this] def convert(redmine: MappingItem): Mapping = Mapping(redmine.name, matchItem(redmine))
 
 }
