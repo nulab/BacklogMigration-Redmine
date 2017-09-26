@@ -2,7 +2,7 @@ package com.nulabinc.backlog.r2b.mapping.file
 
 import java.util.Locale
 
-import com.nulabinc.backlog.r2b.mapping.domain.{Mapping, MappingItem}
+import com.nulabinc.backlog.r2b.mapping.domain.Mapping
 import com.osinka.i18n.{Lang, Messages}
 
 /**
