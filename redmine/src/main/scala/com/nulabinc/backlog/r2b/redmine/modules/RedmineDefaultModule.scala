@@ -1,9 +1,8 @@
 package com.nulabinc.backlog.r2b.redmine.modules
 
 import com.google.inject.AbstractModule
-import com.google.inject.name.Names
 import com.nulabinc.backlog.r2b.redmine.conf.RedmineApiConfiguration
-import com.nulabinc.backlog.r2b.redmine.domain.PropertyValue
+import com.nulabinc.backlog.r2b.redmine.domain.{PropertyValue, RedmineProjectId}
 import com.nulabinc.backlog.r2b.redmine.service._
 import com.taskadapter.redmineapi.bean.Project
 import com.taskadapter.redmineapi.{RedmineManager, RedmineManagerFactory}
@@ -24,7 +23,7 @@ class RedmineDefaultModule(apiConfig: RedmineApiConfiguration) extends AbstractM
     bind(classOf[Project]).toInstance(project)
     bind(classOf[RedmineApiConfiguration]).toInstance(apiConfig)
     bind(classOf[PropertyValue]).toInstance(createPropertyValue(redmine, project))
-    bind(classOf[Int]).annotatedWith(Names.named("projectId")).toInstance(project.getId)
+    bind(classOf[RedmineProjectId]).toInstance(RedmineProjectId(project.getId))
 
     //service
     bind(classOf[IssueService]).to(classOf[IssueServiceImpl])

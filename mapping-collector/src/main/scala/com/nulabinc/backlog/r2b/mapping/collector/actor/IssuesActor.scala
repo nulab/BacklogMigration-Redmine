@@ -1,7 +1,7 @@
 package com.nulabinc.backlog.r2b.mapping.collector.actor
 
 import java.util.concurrent.CountDownLatch
-import javax.inject.{Inject, Named}
+import javax.inject.Inject
 
 import akka.actor.SupervisorStrategy.Restart
 import akka.actor.{Actor, ActorRef, OneForOneStrategy, Props}
@@ -10,6 +10,7 @@ import com.nulabinc.backlog.migration.common.conf.BacklogConfiguration
 import com.nulabinc.backlog.migration.common.modules.akkaguice.NamedActor
 import com.nulabinc.backlog.migration.common.utils.{Logging, ProgressBar}
 import com.nulabinc.backlog.r2b.mapping.collector.core.MappingData
+import com.nulabinc.backlog.r2b.redmine.domain.RedmineProjectId
 import com.nulabinc.backlog.r2b.redmine.service.IssueService
 import com.osinka.i18n.Messages
 import com.taskadapter.redmineapi.bean.User
@@ -19,7 +20,7 @@ import scala.concurrent.duration._
 /**
   * @author uchida
   */
-private[collector] class IssuesActor @Inject()(@Named("projectId") projectId: Int, issueService: IssueService)
+private[collector] class IssuesActor @Inject()(projectId: RedmineProjectId, issueService: IssueService)
     extends Actor
     with BacklogConfiguration
     with Logging {
@@ -54,7 +55,11 @@ private[collector] class IssuesActor @Inject()(@Named("projectId") projectId: In
 
   private[this] def issueIds(offset: Int): Seq[Int] = {
     val params =
-      Map("offset" -> offset.toString, "limit" -> limit.toString, "project_id" -> projectId.toString, "status_id" -> "*", "subproject_id" -> "!*")
+      Map("offset"        -> offset.toString,
+          "limit"         -> limit.toString,
+          "project_id"    -> projectId.value.toString,
+          "status_id"     -> "*",
+          "subproject_id" -> "!*")
     val ids = issueService.allIssues(params).map(_.getId.intValue())
     issuesInfoProgress(((offset / limit) + 1), ((allCount / limit) + 1))
     ids

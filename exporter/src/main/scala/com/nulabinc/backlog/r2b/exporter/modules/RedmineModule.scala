@@ -1,7 +1,7 @@
 package com.nulabinc.backlog.r2b.exporter.modules
 
-import com.google.inject.name.Names
 import com.nulabinc.backlog.migration.common.conf.BacklogPaths
+import com.nulabinc.backlog.migration.common.domain.BacklogProjectKey
 import com.nulabinc.backlog.r2b.mapping.core.MappingContainer
 import com.nulabinc.backlog.r2b.mapping.service.{MappingStatusService, _}
 import com.nulabinc.backlog.r2b.redmine.conf.RedmineApiConfiguration
@@ -16,7 +16,7 @@ private[exporter] class RedmineModule(apiConfig: RedmineApiConfiguration, mappin
   override def configure() = {
     super.configure()
     bind(classOf[BacklogPaths]).toInstance(new BacklogPaths(backlogProjectKey))
-    bind(classOf[String]).annotatedWith(Names.named("backlogProjectKey")).toInstance(backlogProjectKey)
+    bind(classOf[BacklogProjectKey]).toInstance(BacklogProjectKey(backlogProjectKey))
 
     //mapping service
     bind(classOf[MappingUserService]).toInstance(new MappingUserServiceImpl(mappingContainer.user))
