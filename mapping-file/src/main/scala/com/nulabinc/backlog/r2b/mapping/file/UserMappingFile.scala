@@ -6,11 +6,16 @@ import com.nulabinc.backlog.migration.common.modules.{ServiceInjector => Backlog
 import com.nulabinc.backlog.migration.common.service.{UserService => BacklogUserService}
 import com.nulabinc.backlog.migration.common.utils.StringUtil
 import com.nulabinc.backlog.r2b.mapping.core.MappingDirectory
+import com.nulabinc.backlog.r2b.mapping.domain.MappingJsonProtocol._
+import com.nulabinc.backlog.r2b.mapping.domain.{Mapping, MappingsWrapper}
 import com.nulabinc.backlog.r2b.redmine.conf.RedmineApiConfiguration
 import com.nulabinc.backlog.r2b.redmine.modules.{ServiceInjector => RedmineInjector}
 import com.nulabinc.backlog.r2b.redmine.service.{UserService => RedmineUserService}
 import com.osinka.i18n.Messages
 import com.taskadapter.redmineapi.bean.{User => RedmineUser}
+import spray.json.JsonParser
+
+import scalax.file.Path
 
 /**
   * @author uchida
@@ -53,10 +58,30 @@ class UserMappingFile(redmineApiConfig: RedmineApiConfiguration, backlogApiConfi
         MappingItem(user.optUserId.getOrElse(""), user.name)
       }
     }
-    val injector     = BacklogInjector.createInjector(backlogApiConfig)
-    val userService  = injector.getInstance(classOf[BacklogUserService])
-    val backlogUsers = userService.allUsers()
+    val backlogUsers = allUsers()
     backlogUsers.map(createItem)
+  }
+
+  private[this] def allUsers(): Seq[BacklogUser] = {
+    val injector    = BacklogInjector.createInjector(backlogApiConfig)
+    val userService = injector.getInstance(classOf[BacklogUserService])
+    userService.allUsers()
+  }
+
+  private[this] def convertForNAI(backlogUsers: Seq[BacklogUser])(mapping: Mapping) = {
+    if (backlogApiConfig.url.contains(NaiSpaceDomain)) {
+      val targetBacklogUser = backlogUsers
+        .find(backlogUser => backlogUser.optMailAddress.getOrElse("") == mapping.backlog)
+        .getOrElse(throw new NoSuchElementException(s"User ${mapping.backlog} not found"))
+      mapping.copy(backlog = targetBacklogUser.optUserId.getOrElse(s"UserId ${mapping.backlog} not found"))
+    } else mapping
+  }
+
+  override def tryUnmarshal(): Seq[Mapping] = {
+    val path    = Path.fromString(filePath)
+    val json    = path.lines().mkString
+    val convert = convertForNAI(allUsers()) _
+    JsonParser(json).convertTo[MappingsWrapper].mappings.map(convert)
   }
 
   override def matchItem(redmine: MappingItem): String =
