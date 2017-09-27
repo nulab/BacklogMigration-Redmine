@@ -3,17 +3,13 @@ package com.nulabinc.backlog.r2b.exporter.actor
 import java.util.concurrent.CountDownLatch
 
 import akka.actor.Actor
-import com.nulabinc.backlog.migration.common.conf.BacklogPaths
 import com.nulabinc.backlog.migration.common.convert.Convert
 import com.nulabinc.backlog.migration.common.domain.BacklogJsonProtocol._
 import com.nulabinc.backlog.migration.common.domain.{BacklogComment, BacklogIssue}
 import com.nulabinc.backlog.migration.common.utils.{DateUtil, IOUtil, Logging}
-import com.nulabinc.backlog.r2b.exporter.convert._
-import com.nulabinc.backlog.r2b.exporter.service.{CommentReducer, IssueInitializer}
-import com.nulabinc.backlog.r2b.redmine.conf.RedmineApiConfiguration
-import com.nulabinc.backlog.r2b.redmine.service.IssueService
-import com.nulabinc.backlog.r2b.redmine.domain.PropertyValue
-import com.nulabinc.backlog.r2b.redmine.service.ProjectService
+import com.nulabinc.backlog.r2b.exporter.core.ExportContext
+import com.nulabinc.backlog.r2b.exporter.service.{ChangeLogReducer, CommentReducer, IssueInitializer}
+import com.nulabinc.backlog.r2b.redmine.service.{IssueService, ProjectService}
 import com.taskadapter.redmineapi.Include
 import com.taskadapter.redmineapi.bean.{Attachment, _}
 import spray.json._
@@ -25,17 +21,7 @@ import scala.concurrent.duration._
 /**
   * @author uchida
   */
-private[exporter] class IssueActor(apiConfig: RedmineApiConfiguration,
-                                   backlogPaths: BacklogPaths,
-                                   issueService: IssueService,
-                                   projectService: ProjectService,
-                                   propertyValue: PropertyValue,
-                                   issueWrites: IssueWrites,
-                                   journalWrites: JournalWrites,
-                                   userWrites: UserWrites,
-                                   customFieldWrites: CustomFieldWrites,
-                                   customFieldValueWrites: CustomFieldValueWrites,
-                                   attachmentWrites: AttachmentWrites)
+private[exporter] class IssueActor(exportContext: ExportContext, issueService: IssueService, projectService: ProjectService)
     extends Actor
     with Logging {
 
@@ -62,27 +48,17 @@ private[exporter] class IssueActor(apiConfig: RedmineApiConfiguration,
   }
 
   private[this] def exportIssue(issue: Issue, journals: Seq[Journal], attachments: Seq[Attachment]) = {
-    val issueCreated = DateUtil.tryIsoParse(Option(issue.getCreatedOn).map(DateUtil.isoFormat))
-    val issueDirPath = backlogPaths.issueDirectoryPath("issue", issue.getId.intValue(), issueCreated, 0)
-    val issueInitializer = new IssueInitializer(apiConfig,
-                                                backlogPaths,
-                                                propertyValue,
-                                                issueDirPath,
-                                                journals,
-                                                attachments,
-                                                issueWrites,
-                                                userWrites,
-                                                customFieldWrites,
-                                                customFieldValueWrites,
-                                                attachmentWrites)
-    val backlogIssue = issueInitializer.initialize(issue)
+    val issueCreated     = DateUtil.tryIsoParse(Option(issue.getCreatedOn).map(DateUtil.isoFormat))
+    val issueDirPath     = exportContext.backlogPaths.issueDirectoryPath("issue", issue.getId.intValue(), issueCreated, 0)
+    val issueInitializer = new IssueInitializer(exportContext, issueDirPath, journals, attachments)
+    val backlogIssue     = issueInitializer.initialize(issue)
 
-    IOUtil.output(backlogPaths.issueJson(issueDirPath), backlogIssue.toJson.prettyPrint)
+    IOUtil.output(exportContext.backlogPaths.issueJson(issueDirPath), backlogIssue.toJson.prettyPrint)
   }
 
   private[this] def exportComments(issue: Issue, journals: Seq[Journal], attachments: Seq[Attachment]) = {
-    val backlogIssue    = Convert.toBacklog(issue)(issueWrites)
-    val backlogComments = journals.map(Convert.toBacklog(_)(journalWrites))
+    val backlogIssue    = Convert.toBacklog(issue)(exportContext.issueWrites)
+    val backlogComments = journals.map(Convert.toBacklog(_)(exportContext.journalWrites))
     backlogComments.zipWithIndex.foreach {
       case (comment, index) =>
         exportComment(comment, backlogIssue, backlogComments, attachments, index)
@@ -94,12 +70,13 @@ private[exporter] class IssueActor(apiConfig: RedmineApiConfiguration,
                                   comments: Seq[BacklogComment],
                                   attachments: Seq[Attachment],
                                   index: Int) = {
-    val commentCreated = DateUtil.tryIsoParse(comment.optCreated)
-    val issueDirPath   = backlogPaths.issueDirectoryPath("comment", issue.id, commentCreated, index)
-    val commentReducer = new CommentReducer(apiConfig, projectService, backlogPaths, issue, comments, attachments, issueDirPath)
-    val reduced        = commentReducer.reduce(comment)
+    val commentCreated   = DateUtil.tryIsoParse(comment.optCreated)
+    val issueDirPath     = exportContext.backlogPaths.issueDirectoryPath("comment", issue.id, commentCreated, index)
+    val changeLogReducer = new ChangeLogReducer(exportContext, projectService, issueDirPath, issue, comments, attachments)
+    val commentReducer   = new CommentReducer(issue.id, changeLogReducer)
+    val reduced          = commentReducer.reduce(comment)
 
-    IOUtil.output(backlogPaths.issueJson(issueDirPath), reduced.toJson.prettyPrint)
+    IOUtil.output(exportContext.backlogPaths.issueJson(issueDirPath), reduced.toJson.prettyPrint)
   }
 
 }

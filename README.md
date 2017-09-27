@@ -19,49 +19,14 @@ Migrate your projects from Redmine to [Backlog].
 * **Java 8**
 * The Backlog Space's **administrator** roles.
 
-## Update
-* 2017/08/26 0.10.0b12 released
-* 2017/05/12 0.10.0b11 released
-* 2017/05/04 0.10.0b10 released
-* 2017/04/28 0.10.0b9 released
-* 2017/04/26 0.10.0b8 released
-* 2017/04/25 0.10.0b7 released
-* 2017/04/22 0.10.0b6 released
-* 2017/04/21 0.10.0b5 released
-* 2017/04/18 0.10.0b4 released
-* 2017/04/17 0.10.0b3 released
-* 2017/04/11 0.10.0b2 released
-* 2016/11/15 0.9.0b35 released
-* 2016/11/07 0.9.0b34 released
-* 2016/11/06 0.9.0b33 released
-* 2016/09/30 0.9.0b32 released
-* 2016/09/30 0.9.0b31 released
-* 2016/09/21 0.9.0b30 released
-* 2016/09/20 0.9.0b29 released
-* 2016/05/26 0.9.0b28 released
-* 2016/04/20 0.9.0b27 released
-* 2016/03/08 0.9.0b26 released
-* 2016/02/24 0.9.0b25 released
-* 2016/02/19 0.9.0b24 released
-* 2016/02/18 0.9.0b23 released
-* 2016/02/17 0.9.0b22 released
-* 2016/02/15 0.9.0b21 released
-* 2016/02/10 0.9.0b20 released
-* 2016/02/09 0.9.0b19 released
-* 2016/02/03 0.9.0b18 released
-* 2016/02/02 0.9.0b17 released
-* 2015/12/21 0.9.0b16 released
-* 2015/11/25 0.9.0b15 released
-* 2015/10/28 0.9.0b14 released
-* 2015/10/27 0.9.0b13 released
-* 2015/10/10 0.9.0b12 released
-
 https://github.com/nulab/BacklogMigration-Redmine/releases
 
 Download
 ------------
 
-Download the [jar], and run from the command line as follows.
+Please download the jar file from this link, and run from the command line as follows.
+
+https://github.com/nulab/BacklogMigration-Redmine/releases/download/v0.10.0b12/backlog-migration-redmine-0.10.0b12.jar
 
     java -jar backlog-migration-redmine-[latest version].jar
 
@@ -324,49 +289,14 @@ Redmineのプロジェクトを[Backlog]に移行するためのツールです�
 * **Java 8**
 * Backlogの **管理者権限**
 
-## 更新履歴
-* 2017/08/26 0.10.0b12 リリース
-* 2017/05/12 0.10.0b11 リリース
-* 2017/05/04 0.10.0b10 リリース
-* 2017/04/28 0.10.0b9 リリース
-* 2017/04/26 0.10.0b8 リリース
-* 2017/04/25 0.10.0b7 リリース
-* 2017/04/22 0.10.0b6 リリース
-* 2017/04/21 0.10.0b5 リリース
-* 2017/04/18 0.10.0b4 リリース
-* 2017/04/17 0.10.0b3 リリース
-* 2017/04/11 0.10.0b2 リリース
-* 2016/11/15 0.9.0b35 リリース
-* 2016/11/07 0.9.0b34 リリース
-* 2016/11/06 0.9.0b33 リリース
-* 2016/09/30 0.9.0b32 リリース
-* 2016/09/30 0.9.0b31 リリース
-* 2016/09/21 0.9.0b30 リリース
-* 2016/09/20 0.9.0b29 リリース
-* 2016/05/26 0.9.0b28 リリース
-* 2016/04/20 0.9.0b27 リリース
-* 2016/03/08 0.9.0b26 リリース
-* 2016/02/24 0.9.0b25 リリース
-* 2016/02/19 0.9.0b24 リリース
-* 2016/02/18 0.9.0b23 リリース
-* 2016/02/17 0.9.0b22 リリース
-* 2016/02/15 0.9.0b21 リリース
-* 2016/02/10 0.9.0b20 リリース
-* 2016/02/09 0.9.0b19 リリース
-* 2016/02/03 0.9.0b18 リリース
-* 2016/02/02 0.9.0b17 リリース
-* 2015/12/21 0.9.0b16 リリース
-* 2015/11/25 0.9.0b15 リリース
-* 2015/10/28 0.9.0b14 リリース
-* 2015/10/27 0.9.0b13 リリース
-* 2015/10/10 0.9.0b12 リリース
-
 https://github.com/nulab/BacklogMigration-Redmine/releases
 
 ダウンロード
 ------------
 
-[jar]をダウンロードし、以下のようにコマンドラインから実行します。
+こちらのリンクからjarファイルをダウンロードし、以下のようにコマンドラインから実行します。
+
+https://github.com/nulab/BacklogMigration-Redmine/releases/download/v0.10.0b12/backlog-migration-redmine-0.10.0b12.jar
 
     java -jar backlog-migration-redmine-[最新バージョン].jar
 
@@ -618,4 +548,4 @@ https://www.backlog.jp/contact/
 
 [Backlog]: http://www.backlog.jp/
 
-[Jar]: https://github.com/nulab/BacklogMigration-Redmine/releases/download/v0.10.0b12/backlog-migration-redmine-0.10.0b12.jar
+[Jar]: https://github.com/nulab/BacklogMigration-Redmine/releases/download/v0.10.0b13/backlog-migration-redmine-0.10.0b13.jar

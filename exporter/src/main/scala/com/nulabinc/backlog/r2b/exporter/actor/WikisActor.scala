@@ -10,6 +10,7 @@ import com.nulabinc.backlog.migration.common.conf.{BacklogConfiguration, Backlog
 import com.nulabinc.backlog.migration.common.modules.akkaguice.NamedActor
 import com.nulabinc.backlog.migration.common.utils.{Logging, ProgressBar}
 import com.nulabinc.backlog.r2b.exporter.convert.WikiWrites
+import com.nulabinc.backlog.r2b.exporter.core.ExportContext
 import com.nulabinc.backlog.r2b.redmine.conf.RedmineApiConfiguration
 import com.nulabinc.backlog.r2b.redmine.service.WikiService
 import com.osinka.i18n.Messages
@@ -37,14 +38,14 @@ private[exporter] class WikisActor @Inject()(apiConfig: RedmineApiConfiguration,
   private[this] val console              = (ProgressBar.progress _)(Messages("common.wikis"), Messages("message.exporting"), Messages("message.exported"))
 
   def receive: Receive = {
-    case WikisActor.Do =>
+    case WikisActor.Do(exportContext) =>
       val router    = SmallestMailboxPool(akkaMailBoxPool, supervisorStrategy = strategy)
       val wikiActor = context.actorOf(router.props(Props(new WikiActor(apiConfig, backlogPaths, wikiWrites, wikiService))))
 
       wikis.foreach(wiki => wikiActor ! WikiActor.Do(wiki, completion, wikis.size, console))
 
       completion.await
-      sender() ! WikisActor.Done
+      sender() ! WikisActor.Done(exportContext)
   }
 
 }
@@ -53,8 +54,8 @@ private[exporter] object WikisActor extends NamedActor {
 
   override final val name = "WikisActor"
 
-  case object Do
+  case class Do(exportContext: ExportContext)
 
-  case object Done
+  case class Done(exportContext: ExportContext)
 
 }

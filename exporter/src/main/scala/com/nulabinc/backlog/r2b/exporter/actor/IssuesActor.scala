@@ -1,7 +1,7 @@
 package com.nulabinc.backlog.r2b.exporter.actor
 
 import java.util.concurrent.CountDownLatch
-import javax.inject.{Inject, Named}
+import javax.inject.Inject
 
 import akka.actor.SupervisorStrategy.Restart
 import akka.actor.{Actor, ActorRef, OneForOneStrategy, Props}
@@ -9,11 +9,10 @@ import akka.routing.SmallestMailboxPool
 import com.nulabinc.backlog.migration.common.conf.{BacklogConfiguration, BacklogPaths}
 import com.nulabinc.backlog.migration.common.modules.akkaguice.NamedActor
 import com.nulabinc.backlog.migration.common.utils.{Logging, ProgressBar}
-import com.nulabinc.backlog.r2b.exporter.convert._
+import com.nulabinc.backlog.r2b.exporter.core.ExportContext
 import com.nulabinc.backlog.r2b.redmine.conf.RedmineApiConfiguration
-import com.nulabinc.backlog.r2b.redmine.service.IssueService
-import com.nulabinc.backlog.r2b.redmine.domain.PropertyValue
-import com.nulabinc.backlog.r2b.redmine.service.ProjectService
+import com.nulabinc.backlog.r2b.redmine.domain.{PropertyValue, RedmineProjectId}
+import com.nulabinc.backlog.r2b.redmine.service.{IssueService, ProjectService}
 import com.osinka.i18n.Messages
 
 import scala.concurrent.duration._
@@ -21,15 +20,9 @@ import scala.concurrent.duration._
 /**
   * @author uchida
   */
-private[exporter] class IssuesActor @Inject()(@Named("projectId") projectId: Int,
+private[exporter] class IssuesActor @Inject()(projectId: RedmineProjectId,
                                               apiConfig: RedmineApiConfiguration,
                                               backlogPaths: BacklogPaths,
-                                              issueWrites: IssueWrites,
-                                              journalWrites: JournalWrites,
-                                              userWrites: UserWrites,
-                                              customFieldWrites: CustomFieldWrites,
-                                              customFieldValueWrites: CustomFieldValueWrites,
-                                              attachmentWrites: AttachmentWrites,
                                               issueService: IssueService,
                                               projectService: ProjectService,
                                               propertyValue: PropertyValue)
@@ -51,23 +44,9 @@ private[exporter] class IssuesActor @Inject()(@Named("projectId") projectId: Int
     (ProgressBar.progress _)(Messages("common.issues_info"), Messages("message.collecting"), Messages("message.collected"))
 
   def receive: Receive = {
-    case IssuesActor.Do =>
-      val router = SmallestMailboxPool(akkaMailBoxPool, supervisorStrategy = strategy)
-      val issueActor =
-        context.actorOf(
-          router.props(
-            Props(
-              new IssueActor(apiConfig,
-                             backlogPaths,
-                             issueService,
-                             projectService,
-                             propertyValue,
-                             issueWrites,
-                             journalWrites,
-                             userWrites,
-                             customFieldWrites,
-                             customFieldValueWrites,
-                             attachmentWrites))))
+    case IssuesActor.Do(exportContext) =>
+      val router     = SmallestMailboxPool(akkaMailBoxPool, supervisorStrategy = strategy)
+      val issueActor = context.actorOf(router.props(Props(new IssueActor(exportContext, issueService, projectService))))
 
       (0 until (allCount, limit))
         .foldLeft(Seq.empty[Int]) { (acc, offset) =>
@@ -82,7 +61,11 @@ private[exporter] class IssuesActor @Inject()(@Named("projectId") projectId: Int
 
   private[this] def issueIds(offset: Int): Seq[Int] = {
     val params =
-      Map("offset" -> offset.toString, "limit" -> limit.toString, "project_id" -> projectId.toString, "status_id" -> "*", "subproject_id" -> "!*")
+      Map("offset"        -> offset.toString,
+          "limit"         -> limit.toString,
+          "project_id"    -> projectId.value.toString,
+          "status_id"     -> "*",
+          "subproject_id" -> "!*")
     val ids = issueService.allIssues(params).map(_.getId.intValue())
     issuesInfoProgress(((offset / limit) + 1), ((allCount / limit) + 1))
     ids
@@ -98,7 +81,7 @@ private[exporter] object IssuesActor extends NamedActor {
 
   override final val name = "IssuesActor"
 
-  case object Do
+  case class Do(exportContext: ExportContext)
 
   case object Done
 

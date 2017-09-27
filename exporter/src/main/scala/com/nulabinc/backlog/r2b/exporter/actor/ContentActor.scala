@@ -5,6 +5,7 @@ import com.google.inject.Inject
 import com.google.inject.name.Named
 import com.nulabinc.backlog.migration.common.modules.akkaguice.NamedActor
 import com.nulabinc.backlog.migration.common.utils.Logging
+import com.nulabinc.backlog.r2b.exporter.core.ExportContext
 
 /**
   * @author uchida
@@ -14,10 +15,10 @@ private[exporter] class ContentActor @Inject()(@Named(IssuesActor.name) issuesAc
     with Logging {
 
   def receive: Receive = {
-    case ContentActor.Do =>
-      wikisActor ! WikisActor.Do
-    case WikisActor.Done =>
-      issuesActor ! IssuesActor.Do
+    case ContentActor.Do(exportContext) =>
+      wikisActor ! WikisActor.Do(exportContext)
+    case WikisActor.Done(exportContext) =>
+      issuesActor ! IssuesActor.Do(exportContext)
     case IssuesActor.Done =>
       context.system.shutdown()
   }
@@ -28,6 +29,6 @@ private[exporter] object ContentActor extends NamedActor {
 
   override final val name = "ContentActor"
 
-  case object Do
+  case class Do(exportContext: ExportContext)
 
 }

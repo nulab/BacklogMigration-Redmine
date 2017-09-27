@@ -32,6 +32,11 @@ common.private=Private
 common.change_comment={0}: {1} -> {2}
 common.anonymous=Anonymous
 common.link=Link
+common.access_key=Access Key
+common.project_key=Project Key
+common.importOnly=Only Import
+common.optOut=Opt Out
+common.url=URL
 
 
 # Message
@@ -116,9 +121,9 @@ cli.mapping.fix_file="{0}" needs to be fixed.\nTo recreate, run the sub-command 
 cli.mapping.show=The mapping {0} is as follows.
 cli.mapping.error=The mapping of {0} has the following error.
 cli.mapping.configurable=The values accepted for {0} in Backlog are "{1}".
-cli.mapping.error.not_exist.item=The {0}[{1}] is not registered in destination backlog.
+cli.mapping.error.not_exist.item=The {0}[{1}] is not registered in destination {2}.
 cli.mapping.error.not_defined.item={0} [{1}] required for migration is not defined in mapping file [{2}].
-cli.mapping.error.empty.item=Corresponding item for {0} "{1}" in Redmine is not specified.
+cli.mapping.error.empty.item=Corresponding item for {0} "{1}" in {2} is not specified.
 cli.mapping.output_file=The mapping file about {0} is created. Check the mapping file and fix it if necessary.
 cli.mapping.merge_file=The following {0} was added to the mapping file of {0}. Check the mapping file and fix it if necessary.
 cli.mapping.no_change=There was no change in the mapping file of {0}.

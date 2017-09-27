@@ -1,9 +1,10 @@
 package com.nulabinc.backlog.r2b.redmine.service
 
-import javax.inject.{Inject, Named}
+import javax.inject.Inject
 
 import com.nulabinc.backlog.migration.common.utils.Logging
 import com.nulabinc.backlog.r2b.redmine.conf.RedmineApiConfiguration
+import com.nulabinc.backlog.r2b.redmine.domain.RedmineProjectId
 import com.taskadapter.redmineapi.bean.Issue
 import com.taskadapter.redmineapi.{Include, RedmineManager}
 import spray.json.{JsNumber, JsonParser}
@@ -13,13 +14,13 @@ import scala.collection.JavaConverters._
 /**
   * @author uchida
   */
-class IssueServiceImpl @Inject()(apiConfig: RedmineApiConfiguration, @Named("projectId") projectId: Int, redmine: RedmineManager)
+class IssueServiceImpl @Inject()(apiConfig: RedmineApiConfiguration, projectId: RedmineProjectId, redmine: RedmineManager)
     extends IssueService
     with Logging {
 
   override def countIssues(): Int = {
     val string = scala.io.Source
-      .fromURL(s"${apiConfig.url}/issues.json?limit=1&subproject_id=!*&project_id=${projectId}&key=${apiConfig.key}&status_id=*")
+      .fromURL(s"${apiConfig.url}/issues.json?limit=1&subproject_id=!*&project_id=${projectId.value}&key=${apiConfig.key}&status_id=*")
       .mkString
     JsonParser(string).asJsObject.getFields("total_count") match {
       case Seq(JsNumber(totalCount)) => totalCount.intValue()

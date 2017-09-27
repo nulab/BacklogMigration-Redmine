@@ -6,7 +6,7 @@ import com.nulabinc.backlog.migration.common.conf.BacklogConstantValue
 import com.nulabinc.backlog.migration.common.convert.{Convert, Writes}
 import com.nulabinc.backlog.migration.common.domain.{BacklogAttachment, BacklogAttributeInfo, BacklogChangeLog}
 import com.nulabinc.backlog.migration.common.utils.{DateUtil, FileUtil, Logging, StringUtil}
-import com.nulabinc.backlog.r2b.mapping.core.{ConvertPriorityMapping, ConvertStatusMapping, ConvertUserMapping}
+import com.nulabinc.backlog.r2b.mapping.service.{MappingPriorityService, MappingStatusService, MappingUserService}
 import com.nulabinc.backlog.r2b.redmine.conf.RedmineConstantValue
 import com.nulabinc.backlog.r2b.redmine.domain.PropertyValue
 import com.nulabinc.backlog4j.CustomField.FieldType
@@ -15,13 +15,13 @@ import com.taskadapter.redmineapi.bean.JournalDetail
 /**
   * @author uchida
   */
-private[exporter] class JournalDetailWrites @Inject()(propertyValue: PropertyValue, customFieldValueWrites: CustomFieldValueWrites)
+private[exporter] class JournalDetailWrites @Inject()(propertyValue: PropertyValue,
+                                                      customFieldValueWrites: CustomFieldValueWrites,
+                                                      mappingPriorityService: MappingPriorityService,
+                                                      mappingStatusService: MappingStatusService,
+                                                      mappingUserService: MappingUserService)
     extends Writes[JournalDetail, BacklogChangeLog]
     with Logging {
-
-  val userMapping     = new ConvertUserMapping()
-  val statusMapping   = new ConvertStatusMapping()
-  val priorityMapping = new ConvertPriorityMapping()
 
   override def writes(detail: JournalDetail): BacklogChangeLog = {
     BacklogChangeLog(
@@ -79,14 +79,14 @@ private[exporter] class JournalDetailWrites @Inject()(propertyValue: PropertyVal
   private[this] def attr(detail: JournalDetail, value: String): Option[String] =
     detail.getName match {
       case RedmineConstantValue.Attr.STATUS =>
-        propertyValue.statuses.find(status => StringUtil.safeEquals(status.getId.intValue(), value)).map(_.getName).map(statusMapping.convert)
+        propertyValue.statuses.find(status => StringUtil.safeEquals(status.getId.intValue(), value)).map(_.getName).map(mappingStatusService.convert)
       case RedmineConstantValue.Attr.PRIORITY =>
         propertyValue.priorities
           .find(priority => StringUtil.safeEquals(priority.getId.intValue(), value))
           .map(_.getName)
-          .map(priorityMapping.convert)
+          .map(mappingPriorityService.convert)
       case RedmineConstantValue.Attr.ASSIGNED =>
-        propertyValue.optUserOfId(Some(value)).map(_.getLogin).map(userMapping.convert)
+        propertyValue.optUserOfId(Some(value)).map(_.getLogin).map(mappingUserService.convert)
       case RedmineConstantValue.Attr.VERSION =>
         propertyValue.versions.find(version => StringUtil.safeEquals(version.getId.intValue(), value)).map(_.getName)
       case RedmineConstantValue.Attr.TRACKER =>
