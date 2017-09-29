@@ -26,7 +26,7 @@ Download
 
 Please download the jar file from this link, and run from the command line as follows.
 
-https://github.com/nulab/BacklogMigration-Redmine/releases/download/v0.10.0b12/backlog-migration-redmine-0.10.0b12.jar
+https://github.com/nulab/BacklogMigration-Redmine/releases/download/v0.10.0b14/backlog-migration-redmine-0.10.0b14.jar
 
     java -jar backlog-migration-redmine-[latest version].jar
 
@@ -296,7 +296,7 @@ https://github.com/nulab/BacklogMigration-Redmine/releases
 
 こちらのリンクからjarファイルをダウンロードし、以下のようにコマンドラインから実行します。
 
-https://github.com/nulab/BacklogMigration-Redmine/releases/download/v0.10.0b12/backlog-migration-redmine-0.10.0b12.jar
+https://github.com/nulab/BacklogMigration-Redmine/releases/download/v0.10.0b14/backlog-migration-redmine-0.10.0b14.jar
 
     java -jar backlog-migration-redmine-[最新バージョン].jar
 
@@ -548,4 +548,4 @@ https://www.backlog.jp/contact/
 
 [Backlog]: http://www.backlog.jp/
 
-[Jar]: https://github.com/nulab/BacklogMigration-Redmine/releases/download/v0.10.0b13/backlog-migration-redmine-0.10.0b13.jar
+[Jar]: https://github.com/nulab/BacklogMigration-Redmine/releases/download/v0.10.0b14/backlog-migration-redmine-0.10.0b14.jar

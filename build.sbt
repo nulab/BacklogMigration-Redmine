@@ -2,7 +2,7 @@ import sbt.Keys._
 
 lazy val commonSettings = Seq(
   organization := "com.nulabinc",
-  version := "0.10.0b13",
+  version := "0.10.0b14",
   scalaVersion := "2.11.6",
   scalacOptions ++= Seq(
     "-language:reflectiveCalls",
@@ -29,7 +29,6 @@ lazy val commonSettings = Seq(
     "joda-time"                     % "joda-time"          % "2.3",
     "org.joda"                      % "joda-convert"       % "1.6",
     "com.google.inject"             % "guice"              % "4.1.0",
-    "net.codingwell"                % "scala-guice_2.11"   % "4.1.0",
     "com.netaporter"                %% "scala-uri"         % "0.4.16",
     "org.fusesource.jansi"          % "jansi"              % "1.11",
     "com.mixpanel"                  % "mixpanel-java"      % "1.4.4"

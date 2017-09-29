@@ -95,7 +95,7 @@ object R2B extends BacklogConfiguration with Logging {
     val redmine: String     = keys(0)
     val backlog: String     = if (keys.length == 2) keys(1) else keys(0).toUpperCase.replaceAll("-", "_")
 
-    ConsoleOut.info(s"""--------------------------------------------------
+    ConsoleOut.println(s"""--------------------------------------------------
      |${Messages("common.redmine")} ${Messages("common.url")}[${cli.execute.redmineUrl()}]
      |${Messages("common.redmine")} ${Messages("common.access_key")}[${cli.execute.redmineKey()}]
      |${Messages("common.redmine")} ${Messages("common.project_key")}[${redmine}]
@@ -124,7 +124,8 @@ object R2B extends BacklogConfiguration with Logging {
 
   private[this] def checkRelease() = {
     try {
-      val string = scala.io.Source.fromURL("https://api.github.com/repos/nulab/BacklogMigration-Redmine/releases").mkString
+      val url    = "https://api.github.com/repos/nulab/BacklogMigration-Redmine/releases"
+      val string = scala.io.Source.fromURL(url, "UTF-8").mkString
       val latest = string.parseJson match {
         case JsArray(releases) if (releases.nonEmpty) =>
           releases(0).asJsObject.fields.apply("tag_name").toString().replace("\"", "").replace("v", "")

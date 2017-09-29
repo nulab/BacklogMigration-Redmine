@@ -241,7 +241,7 @@ object R2BCli extends BacklogConfiguration with Logging {
            |${Messages("cli.mapping.no_change", mappingFile.itemName)}
            |--------------------------------------------------""".stripMargin
       }
-      ConsoleOut.info(message)
+      ConsoleOut.println(message)
     } else {
       mappingFile.create()
       val message =
@@ -250,7 +250,7 @@ object R2BCli extends BacklogConfiguration with Logging {
           |${Messages("cli.mapping.output_file", mappingFile.itemName)}
           |[${mappingFile.filePath}]
           |--------------------------------------------------""".stripMargin
-      ConsoleOut.info(message)
+      ConsoleOut.println(message)
     }
   }
 

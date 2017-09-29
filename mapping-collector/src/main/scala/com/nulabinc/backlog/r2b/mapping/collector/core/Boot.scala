@@ -1,9 +1,8 @@
 package com.nulabinc.backlog.r2b.mapping.collector.core
 
 import com.google.inject.Guice
-import com.nulabinc.backlog.migration.common.modules.{AkkaModule, ConfigModule}
 import com.nulabinc.backlog.migration.common.utils.{ConsoleOut, Logging}
-import com.nulabinc.backlog.r2b.mapping.collector.modules.{ActorModule, RedmineModule}
+import com.nulabinc.backlog.r2b.mapping.collector.modules.RedmineModule
 import com.nulabinc.backlog.r2b.mapping.collector.service.MappingCollector
 import com.nulabinc.backlog.r2b.redmine.conf.RedmineApiConfiguration
 import com.osinka.i18n.Messages
@@ -18,12 +17,7 @@ object Boot extends Logging {
 
   def execute(apiConfig: RedmineApiConfiguration): MappingData = {
 
-    val injector = Guice.createInjector(
-      new RedmineModule(apiConfig),
-      new ConfigModule(),
-      new AkkaModule(),
-      new ActorModule()
-    )
+    val injector = Guice.createInjector(new RedmineModule(apiConfig))
 
     ConsoleOut.println(s"""
                           |${Messages("cli.project_info.start")}
@@ -31,7 +25,7 @@ object Boot extends Logging {
 
     val mappingData      = MappingData(mutable.Set.empty[User], mutable.Set.empty[String])
     val mappingCollector = injector.getInstance(classOf[MappingCollector])
-    mappingCollector.execute(injector, mappingData)
+    mappingCollector.boot(injector, mappingData)
 
     ConsoleOut.println(s"""|--------------------------------------------------
                            |${Messages("cli.project_info.finish")}""".stripMargin)
