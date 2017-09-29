@@ -19,7 +19,7 @@ class ParameterValidator(config: AppConfiguration) extends Logging {
   def validate(): Seq[String] = {
     val validateRedmine = validateConfigRedmine()
     val validateBacklog = validateConfigBacklog()
-    ConsoleOut.info(Messages("cli.param.get.project", Messages("common.redmine")))
+    ConsoleOut.println(Messages("cli.param.get.project", Messages("common.redmine")))
     val optRedmineProject = optProject()
 
     val messages = Seq(validateBacklog, validProjectKey(config.backlogConfig.projectKey), validateAuthBacklog(validateBacklog)).flatten
@@ -39,7 +39,7 @@ class ParameterValidator(config: AppConfiguration) extends Logging {
   }
 
   private[this] def validateConfigBacklog(): Option[String] = {
-    ConsoleOut.info(Messages("cli.param.check.access", Messages("common.backlog")))
+    ConsoleOut.println(Messages("cli.param.check.access", Messages("common.backlog")))
     val messages = try {
       val injector     = BacklogInjector.createInjector(config.backlogConfig)
       val spaceService = injector.getInstance(classOf[SpaceService])
@@ -58,7 +58,7 @@ class ParameterValidator(config: AppConfiguration) extends Logging {
 
   private[this] def validateAuthBacklog(resultValidateConfig: Option[String]): Option[String] = {
     if (resultValidateConfig.isEmpty) {
-      ConsoleOut.info(Messages("cli.param.check.admin"))
+      ConsoleOut.println(Messages("cli.param.check.admin"))
       val injector     = BacklogInjector.createInjector(config.backlogConfig)
       val spaceService = injector.getInstance(classOf[SpaceService])
       if (spaceService.hasAdmin()) None
@@ -67,7 +67,7 @@ class ParameterValidator(config: AppConfiguration) extends Logging {
   }
 
   private[this] def validateConfigRedmine(): Option[String] = {
-    ConsoleOut.info(Messages("cli.param.check.access", Messages("common.redmine")))
+    ConsoleOut.println(Messages("cli.param.check.access", Messages("common.redmine")))
     try {
       val injector    = RedmineInjector.createInjector(config.redmineConfig)
       val userService = injector.getInstance(classOf[RedmineUserService])
