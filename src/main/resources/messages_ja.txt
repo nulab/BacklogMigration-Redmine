@@ -103,7 +103,9 @@ cli.help.optOut=このオプションを設定した場合、トラッキング�
 # CLI Validate Param
 cli.param.error=パラメーターに以下の誤りがあります。
 cli.param.check.access={0}にアクセス可能かチェックしています...
+cli.param.ok.access={0}にアクセス可能です。
 cli.param.check.admin=管理者権限の有無をチェックしています...
+cli.param.ok.admin=管理者権限があります。
 cli.param.get.project={0}のプロジェクトを取得しています...
 cli.param.error.auth.not.auth=Redmineの移行に必要な権限がありません。システム管理者権限が必要です。:[{0}]
 cli.param.error.auth={0}にアクセスできませんでした。認証エラーが発生しました。\n  有効なAPIアクセスキーになっていることと、REST APIサービスがサーバー上で有効になっていることを確認してください。

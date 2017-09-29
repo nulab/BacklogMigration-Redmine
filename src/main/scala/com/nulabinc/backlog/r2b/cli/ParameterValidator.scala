@@ -44,6 +44,7 @@ class ParameterValidator(config: AppConfiguration) extends Logging {
       val injector     = BacklogInjector.createInjector(config.backlogConfig)
       val spaceService = injector.getInstance(classOf[SpaceService])
       spaceService.space()
+      ConsoleOut.println(Messages("cli.param.ok.access", Messages("common.backlog")))
       None
     } catch {
       case unknown: BacklogAPIException if unknown.getStatusCode == 404 =>
@@ -61,8 +62,10 @@ class ParameterValidator(config: AppConfiguration) extends Logging {
       ConsoleOut.println(Messages("cli.param.check.admin"))
       val injector     = BacklogInjector.createInjector(config.backlogConfig)
       val spaceService = injector.getInstance(classOf[SpaceService])
-      if (spaceService.hasAdmin()) None
-      else Some(s"- ${Messages("cli.param.error.auth.backlog")}")
+      if (spaceService.hasAdmin()) {
+        ConsoleOut.println(Messages("cli.param.ok.admin"))
+        None
+      } else Some(s"- ${Messages("cli.param.error.auth.backlog")}")
     } else None
   }
 
@@ -72,6 +75,7 @@ class ParameterValidator(config: AppConfiguration) extends Logging {
       val injector    = RedmineInjector.createInjector(config.redmineConfig)
       val userService = injector.getInstance(classOf[RedmineUserService])
       userService.allUsers()
+      ConsoleOut.println(Messages("cli.param.ok.access", Messages("common.redmine")))
       None
     } catch {
       case auth: RedmineAuthenticationException =>
