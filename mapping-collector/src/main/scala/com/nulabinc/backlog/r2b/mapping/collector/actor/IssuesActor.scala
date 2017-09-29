@@ -6,7 +6,6 @@ import akka.actor.SupervisorStrategy.Restart
 import akka.actor.{Actor, ActorRef, OneForOneStrategy, Props}
 import akka.routing.SmallestMailboxPool
 import com.nulabinc.backlog.migration.common.conf.BacklogConfiguration
-import com.nulabinc.backlog.migration.common.modules.akkaguice.NamedActor
 import com.nulabinc.backlog.migration.common.utils.{Logging, ProgressBar}
 import com.nulabinc.backlog.r2b.mapping.collector.core.{MappingContext, MappingData}
 import com.osinka.i18n.Messages
@@ -65,9 +64,7 @@ private[collector] class IssuesActor(mappingContext: MappingContext) extends Act
 
 }
 
-private[collector] object IssuesActor extends NamedActor {
-
-  override final val name = "IssuesActor"
+private[collector] object IssuesActor {
 
   case class Do(mappingData: MappingData, allUsers: Seq[User])
 

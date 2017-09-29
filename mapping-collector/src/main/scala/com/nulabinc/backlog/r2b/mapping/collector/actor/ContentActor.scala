@@ -1,7 +1,6 @@
 package com.nulabinc.backlog.r2b.mapping.collector.actor
 
 import akka.actor.{Actor, Props}
-import com.nulabinc.backlog.migration.common.modules.akkaguice.NamedActor
 import com.nulabinc.backlog.migration.common.utils.Logging
 import com.nulabinc.backlog.r2b.mapping.collector.core.{MappingContext, MappingData}
 import com.taskadapter.redmineapi.bean.User
@@ -26,9 +25,9 @@ private[collector] class ContentActor(mappingContext: MappingContext) extends Ac
 
 }
 
-private[collector] object ContentActor extends NamedActor {
+private[collector] object ContentActor {
 
-  override final val name = "ContentActor"
+  val name = "ContentActor"
 
   case class Do(mappingData: MappingData)
 

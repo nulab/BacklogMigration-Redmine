@@ -1,9 +1,8 @@
 package com.nulabinc.backlog.r2b.exporter.core
 
 import com.google.inject.Guice
-import com.nulabinc.backlog.migration.common.modules.{AkkaModule, ConfigModule}
 import com.nulabinc.backlog.migration.common.utils.{ConsoleOut, Logging}
-import com.nulabinc.backlog.r2b.exporter.modules.{ActorModule, RedmineModule}
+import com.nulabinc.backlog.r2b.exporter.modules.RedmineModule
 import com.nulabinc.backlog.r2b.exporter.service.ProjectExporter
 import com.nulabinc.backlog.r2b.mapping.core.MappingContainer
 import com.nulabinc.backlog.r2b.redmine.conf.RedmineApiConfiguration
@@ -16,12 +15,7 @@ object Boot extends Logging {
 
   def execute(apiConfig: RedmineApiConfiguration, mappingContainer: MappingContainer, backlogProjectKey: String) = {
 
-    val injector = Guice.createInjector(
-      new RedmineModule(apiConfig, mappingContainer, backlogProjectKey),
-      new ConfigModule(),
-      new AkkaModule(),
-      new ActorModule()
-    )
+    val injector = Guice.createInjector(new RedmineModule(apiConfig, mappingContainer, backlogProjectKey))
 
     ConsoleOut.println(s"""
                           |${Messages("export.start")}
