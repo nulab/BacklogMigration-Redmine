@@ -21,7 +21,8 @@ class CustomFieldServiceImpl @Inject()(apiConfig: RedmineApiConfiguration, redmi
       redmine.getCustomFieldManager.getCustomFieldDefinitions.asScala.map(toCustomFields)
     } catch {
       case _: RedmineFormatException =>
-        val json = scala.io.Source.fromURL(s"${apiConfig.url}/custom_fields.json?key=${apiConfig.key}").mkString
+        val url  = s"${apiConfig.url}/custom_fields.json?key=${apiConfig.key}"
+        val json = scala.io.Source.fromURL(url, "UTF-8").mkString
         toCustomFields(json)
       case e: Throwable =>
         logger.error(e.getMessage, e)
