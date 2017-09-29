@@ -3,13 +3,12 @@ package com.nulabinc.backlog.r2b.exporter.actor
 import java.util.concurrent.CountDownLatch
 
 import akka.actor.Actor
-import com.nulabinc.backlog.migration.common.convert.Convert
 import com.nulabinc.backlog.migration.common.domain.BacklogJsonProtocol._
+import com.nulabinc.backlog.migration.common.convert.Convert
 import com.nulabinc.backlog.migration.common.domain.{BacklogComment, BacklogIssue}
 import com.nulabinc.backlog.migration.common.utils.{DateUtil, IOUtil, Logging}
 import com.nulabinc.backlog.r2b.exporter.core.ExportContext
 import com.nulabinc.backlog.r2b.exporter.service.{ChangeLogReducer, CommentReducer, IssueInitializer}
-import com.nulabinc.backlog.r2b.redmine.service.{IssueService, ProjectService}
 import com.taskadapter.redmineapi.Include
 import com.taskadapter.redmineapi.bean.{Attachment, _}
 import spray.json._
@@ -21,9 +20,10 @@ import scala.concurrent.duration._
 /**
   * @author uchida
   */
-private[exporter] class IssueActor(exportContext: ExportContext, issueService: IssueService, projectService: ProjectService)
-    extends Actor
-    with Logging {
+private[exporter] class IssueActor(exportContext: ExportContext) extends Actor with Logging {
+
+  implicit val issueWrites   = exportContext.issueWrites
+  implicit val journalWrites = exportContext.journalWrites
 
   override def preRestart(reason: Throwable, message: Option[Any]) = {
     logger.debug(s"preRestart: reason: ${reason}, message: ${message}")
@@ -36,7 +36,7 @@ private[exporter] class IssueActor(exportContext: ExportContext, issueService: I
     case IssueActor.Do(issueId: Int, completion: CountDownLatch, allCount: Int, console: ((Int, Int) => Unit)) =>
       logger.debug(s"[START ISSUE]${issueId} thread numbers:${java.lang.Thread.activeCount()}")
 
-      val issue                        = issueService.issueOfId(issueId, Include.attachments, Include.journals)
+      val issue                        = exportContext.issueService.issueOfId(issueId, Include.attachments, Include.journals)
       val journals                     = issue.getJournals.asScala.toSeq.sortWith((c1, c2) => c1.getCreatedOn.before(c2.getCreatedOn))
       val attachments: Seq[Attachment] = issue.getAttachments.asScala.toSeq
 
@@ -57,8 +57,8 @@ private[exporter] class IssueActor(exportContext: ExportContext, issueService: I
   }
 
   private[this] def exportComments(issue: Issue, journals: Seq[Journal], attachments: Seq[Attachment]) = {
-    val backlogIssue    = Convert.toBacklog(issue)(exportContext.issueWrites)
-    val backlogComments = journals.map(Convert.toBacklog(_)(exportContext.journalWrites))
+    val backlogIssue    = Convert.toBacklog(issue)
+    val backlogComments = journals.map(Convert.toBacklog(_))
     backlogComments.zipWithIndex.foreach {
       case (comment, index) =>
         exportComment(comment, backlogIssue, backlogComments, attachments, index)
@@ -72,7 +72,7 @@ private[exporter] class IssueActor(exportContext: ExportContext, issueService: I
                                   index: Int) = {
     val commentCreated   = DateUtil.tryIsoParse(comment.optCreated)
     val issueDirPath     = exportContext.backlogPaths.issueDirectoryPath("comment", issue.id, commentCreated, index)
-    val changeLogReducer = new ChangeLogReducer(exportContext, projectService, issueDirPath, issue, comments, attachments)
+    val changeLogReducer = new ChangeLogReducer(exportContext, issueDirPath, issue, comments, attachments)
     val commentReducer   = new CommentReducer(issue.id, changeLogReducer)
     val reduced          = commentReducer.reduce(comment)
 

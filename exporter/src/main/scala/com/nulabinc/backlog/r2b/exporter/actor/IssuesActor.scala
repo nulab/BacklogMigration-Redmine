@@ -7,7 +7,6 @@ import akka.actor.SupervisorStrategy.Restart
 import akka.actor.{Actor, ActorRef, OneForOneStrategy, Props}
 import akka.routing.SmallestMailboxPool
 import com.nulabinc.backlog.migration.common.conf.{BacklogConfiguration, BacklogPaths}
-import com.nulabinc.backlog.migration.common.modules.akkaguice.NamedActor
 import com.nulabinc.backlog.migration.common.utils.{Logging, ProgressBar}
 import com.nulabinc.backlog.r2b.exporter.core.ExportContext
 import com.nulabinc.backlog.r2b.redmine.conf.RedmineApiConfiguration
@@ -20,22 +19,14 @@ import scala.concurrent.duration._
 /**
   * @author uchida
   */
-private[exporter] class IssuesActor @Inject()(projectId: RedmineProjectId,
-                                              apiConfig: RedmineApiConfiguration,
-                                              backlogPaths: BacklogPaths,
-                                              issueService: IssueService,
-                                              projectService: ProjectService,
-                                              propertyValue: PropertyValue)
-    extends Actor
-    with BacklogConfiguration
-    with Logging {
+private[exporter] class IssuesActor @Inject()(exportContext: ExportContext) extends Actor with BacklogConfiguration with Logging {
 
   private[this] val strategy = OneForOneStrategy(maxNrOfRetries = 10, withinTimeRange = 1 minute) {
     case _ => Restart
   }
 
   private[this] val limit      = exportLimitAtOnce
-  private[this] val allCount   = issueService.countIssues()
+  private[this] val allCount   = exportContext.issueService.countIssues()
   private[this] val completion = new CountDownLatch(allCount)
 
   private[this] val console =
@@ -44,9 +35,9 @@ private[exporter] class IssuesActor @Inject()(projectId: RedmineProjectId,
     (ProgressBar.progress _)(Messages("common.issues_info"), Messages("message.collecting"), Messages("message.collected"))
 
   def receive: Receive = {
-    case IssuesActor.Do(exportContext) =>
+    case IssuesActor.Do =>
       val router     = SmallestMailboxPool(akkaMailBoxPool, supervisorStrategy = strategy)
-      val issueActor = context.actorOf(router.props(Props(new IssueActor(exportContext, issueService, projectService))))
+      val issueActor = context.actorOf(router.props(Props(new IssueActor(exportContext))))
 
       (0 until (allCount, limit))
         .foldLeft(Seq.empty[Int]) { (acc, offset) =>
@@ -63,10 +54,10 @@ private[exporter] class IssuesActor @Inject()(projectId: RedmineProjectId,
     val params =
       Map("offset"        -> offset.toString,
           "limit"         -> limit.toString,
-          "project_id"    -> projectId.value.toString,
+          "project_id"    -> exportContext.projectId.value.toString,
           "status_id"     -> "*",
           "subproject_id" -> "!*")
-    val ids = issueService.allIssues(params).map(_.getId.intValue())
+    val ids = exportContext.issueService.allIssues(params).map(_.getId.intValue())
     issuesInfoProgress(((offset / limit) + 1), ((allCount / limit) + 1))
     ids
   }
@@ -77,11 +68,11 @@ private[exporter] class IssuesActor @Inject()(projectId: RedmineProjectId,
 
 }
 
-private[exporter] object IssuesActor extends NamedActor {
+private[exporter] object IssuesActor {
 
-  override final val name = "IssuesActor"
+  val name = "IssuesActor"
 
-  case class Do(exportContext: ExportContext)
+  case object Do
 
   case object Done
 

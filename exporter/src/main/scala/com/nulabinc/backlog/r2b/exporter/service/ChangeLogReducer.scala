@@ -8,7 +8,6 @@ import com.nulabinc.backlog.migration.common.conf.BacklogConstantValue
 import com.nulabinc.backlog.migration.common.domain.{BacklogChangeLog, BacklogComment, BacklogIssue}
 import com.nulabinc.backlog.migration.common.utils.{FileUtil, IOUtil, Logging, StringUtil}
 import com.nulabinc.backlog.r2b.exporter.core.ExportContext
-import com.nulabinc.backlog.r2b.redmine.service.ProjectService
 import com.osinka.i18n.Messages
 import com.taskadapter.redmineapi.bean.Attachment
 
@@ -18,7 +17,6 @@ import scalax.file.Path
   * @author uchida
   */
 private[exporter] class ChangeLogReducer(exportContext: ExportContext,
-                                         projectService: ProjectService,
                                          issueDirPath: Path,
                                          issue: BacklogIssue,
                                          comments: Seq[BacklogComment],
@@ -61,7 +59,7 @@ private[exporter] class ChangeLogReducer(exportContext: ExportContext,
     optValue match {
       case Some(value) =>
         StringUtil.safeStringToInt(value) match {
-          case Some(intValue) => projectService.optProjectOfId(intValue).map(_.getName).getOrElse(Messages("common.empty"))
+          case Some(intValue) => exportContext.projectService.optProjectOfId(intValue).map(_.getName).getOrElse(Messages("common.empty"))
           case _              => Messages("common.empty")
         }
       case _ => Messages("common.empty")

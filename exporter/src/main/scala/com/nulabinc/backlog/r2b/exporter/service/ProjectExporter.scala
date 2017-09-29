@@ -2,13 +2,12 @@ package com.nulabinc.backlog.r2b.exporter.service
 
 import javax.inject.Inject
 
-import akka.actor.ActorSystem
+import akka.actor.{ActorSystem, Props}
 import com.google.inject.Injector
 import com.nulabinc.backlog.migration.common.conf.BacklogPaths
 import com.nulabinc.backlog.migration.common.convert.Convert
 import com.nulabinc.backlog.migration.common.domain.BacklogJsonProtocol._
 import com.nulabinc.backlog.migration.common.domain._
-import com.nulabinc.backlog.migration.common.modules.akkaguice.GuiceAkkaExtension
 import com.nulabinc.backlog.migration.common.utils.{ConsoleOut, IOUtil, Logging, ProgressBar}
 import com.nulabinc.backlog.r2b.exporter.actor.ContentActor
 import com.nulabinc.backlog.r2b.exporter.convert._
@@ -17,7 +16,6 @@ import com.nulabinc.backlog.r2b.mapping.core.MappingContainer
 import com.nulabinc.backlog.r2b.redmine.service.{MembershipService, _}
 import com.osinka.i18n.Messages
 import com.taskadapter.redmineapi.bean._
-import net.codingwell.scalaguice.InjectorExtensions._
 import spray.json._
 
 import scala.collection.mutable
@@ -48,11 +46,9 @@ private[exporter] class ProjectExporter @Inject()(implicit val projectWrites: Pr
 
   def boot(injector: Injector, mappingContainer: MappingContainer) = {
     val exportContext = exportContextProvider.get()
-    val system        = injector.instance[ActorSystem]
-
-    val contentActor = system.actorOf(GuiceAkkaExtension(system).props(ContentActor.name))
-    contentActor ! ContentActor.Do(exportContext)
-
+    val system        = ActorSystem.apply("main-actor-system")
+    val contentActor  = system.actorOf(Props(new ContentActor(exportContext)))
+    contentActor ! ContentActor.Do
     system.awaitTermination(Duration.Inf)
     property(exportContext, mappingContainer)
   }
