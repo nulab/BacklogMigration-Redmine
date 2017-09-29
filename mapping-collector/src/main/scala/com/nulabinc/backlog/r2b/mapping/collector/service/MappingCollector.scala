@@ -2,16 +2,14 @@ package com.nulabinc.backlog.r2b.mapping.collector.service
 
 import javax.inject.Inject
 
-import akka.actor.ActorSystem
+import akka.actor.{ActorSystem, Props}
 import com.google.inject.Injector
-import com.nulabinc.backlog.migration.common.modules.akkaguice.GuiceAkkaExtension
 import com.nulabinc.backlog.migration.common.utils.{Logging, ProgressBar}
 import com.nulabinc.backlog.r2b.mapping.collector.actor.ContentActor
-import com.nulabinc.backlog.r2b.mapping.collector.core.MappingData
+import com.nulabinc.backlog.r2b.mapping.collector.core.{MappingContextProvider, MappingData}
 import com.nulabinc.backlog.r2b.redmine.service.{MembershipService, NewsService, UserService}
 import com.osinka.i18n.Messages
 import com.taskadapter.redmineapi.bean.{Group, Membership, User}
-import net.codingwell.scalaguice.InjectorExtensions._
 
 import scala.collection.JavaConverters._
 import scala.concurrent.duration.Duration
@@ -19,12 +17,16 @@ import scala.concurrent.duration.Duration
 /**
   * @author uchida
   */
-private[collector] class MappingCollector @Inject()(membershipService: MembershipService, userService: UserService, newsService: NewsService)
+private[collector] class MappingCollector @Inject()(mappingContextProvider: MappingContextProvider,
+                                                    membershipService: MembershipService,
+                                                    userService: UserService,
+                                                    newsService: NewsService)
     extends Logging {
 
-  def execute(injector: Injector, mappingData: MappingData) = {
-    val system       = injector.instance[ActorSystem]
-    val contentActor = system.actorOf(GuiceAkkaExtension(system).props(ContentActor.name))
+  def boot(injector: Injector, mappingData: MappingData) = {
+    val mappingContext = mappingContextProvider.get()
+    val system         = ActorSystem.apply("main-actor-system")
+    val contentActor   = system.actorOf(Props(new ContentActor(mappingContext)))
     contentActor ! ContentActor.Do(mappingData)
 
     system.awaitTermination(Duration.Inf)
