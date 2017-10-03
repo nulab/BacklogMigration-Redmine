@@ -1,17 +1,13 @@
 package com.nulabinc.backlog.r2b.exporter.actor
 
 import java.util.concurrent.CountDownLatch
-import javax.inject.Inject
 
 import akka.actor.SupervisorStrategy.Restart
 import akka.actor.{Actor, ActorRef, OneForOneStrategy, Props}
 import akka.routing.SmallestMailboxPool
-import com.nulabinc.backlog.migration.common.conf.{BacklogConfiguration, BacklogPaths}
+import com.nulabinc.backlog.migration.common.conf.BacklogConfiguration
 import com.nulabinc.backlog.migration.common.utils.{Logging, ProgressBar}
 import com.nulabinc.backlog.r2b.exporter.core.ExportContext
-import com.nulabinc.backlog.r2b.redmine.conf.RedmineApiConfiguration
-import com.nulabinc.backlog.r2b.redmine.domain.{PropertyValue, RedmineProjectId}
-import com.nulabinc.backlog.r2b.redmine.service.{IssueService, ProjectService}
 import com.osinka.i18n.Messages
 
 import scala.concurrent.duration._
@@ -19,7 +15,7 @@ import scala.concurrent.duration._
 /**
   * @author uchida
   */
-private[exporter] class IssuesActor @Inject()(exportContext: ExportContext) extends Actor with BacklogConfiguration with Logging {
+private[exporter] class IssuesActor(exportContext: ExportContext) extends Actor with BacklogConfiguration with Logging {
 
   private[this] val strategy = OneForOneStrategy(maxNrOfRetries = 10, withinTimeRange = 1 minute) {
     case _ => Restart
