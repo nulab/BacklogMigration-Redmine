@@ -37,8 +37,8 @@ trait MappingFile extends Logging {
   def isParsed: Boolean = unmarshal().isDefined
 
   def create(afterMessage: () => Unit) = {
+    IOUtil.output(Path.fromString(filePath), MappingsWrapper(description, redmines.map(convert)).toJson.prettyPrint)
     if (redmines.nonEmpty) {
-      IOUtil.output(Path.fromString(filePath), MappingsWrapper(description, redmines.map(convert)).toJson.prettyPrint)
       afterMessage()
     }
   }
