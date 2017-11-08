@@ -243,14 +243,17 @@ object R2BCli extends BacklogConfiguration with Logging {
       }
       ConsoleOut.println(message)
     } else {
-      mappingFile.create()
-      val message =
-        s"""
-          |--------------------------------------------------
-          |${Messages("cli.mapping.output_file", mappingFile.itemName)}
-          |[${mappingFile.filePath}]
-          |--------------------------------------------------""".stripMargin
-      ConsoleOut.println(message)
+      def afterMessage(): Unit = {
+        val message =
+          s"""
+             |--------------------------------------------------
+             |${Messages("cli.mapping.output_file", mappingFile.itemName)}
+             |[${mappingFile.filePath}]
+             |--------------------------------------------------""".stripMargin
+        ConsoleOut.println(message)
+        ()
+      }
+      mappingFile.create(afterMessage _)
     }
   }
 
