@@ -1,18 +1,19 @@
 package com.nulabinc.backlog.r2b.redmine.modules
 
 import com.google.inject.AbstractModule
+import com.nulabinc.backlog.migration.common.utils.Logging
 import com.nulabinc.backlog.r2b.redmine.conf.RedmineApiConfiguration
 import com.nulabinc.backlog.r2b.redmine.domain.{PropertyValue, RedmineProjectId}
 import com.nulabinc.backlog.r2b.redmine.service._
-import com.taskadapter.redmineapi.bean.Project
-import com.taskadapter.redmineapi.{RedmineManager, RedmineManagerFactory}
+import com.taskadapter.redmineapi.bean._
+import com.taskadapter.redmineapi.{RedmineFormatException, RedmineManager, RedmineManagerFactory}
 
 import scala.collection.JavaConverters._
 
 /**
   * @author uchida
   */
-class RedmineDefaultModule(apiConfig: RedmineApiConfiguration) extends AbstractModule {
+class RedmineDefaultModule(apiConfig: RedmineApiConfiguration) extends AbstractModule with Logging {
 
   override def configure() = {
 
@@ -47,13 +48,49 @@ class RedmineDefaultModule(apiConfig: RedmineApiConfiguration) extends AbstractM
   }
 
   private[this] def createPropertyValue(redmine: RedmineManager, project: Project): PropertyValue = {
-    val versions    = redmine.getProjectManager.getVersions(project.getId).asScala
-    val categories  = redmine.getIssueManager.getCategories(project.getId).asScala
-    val users       = redmine.getUserManager.getUsers.asScala
-    val priorities  = redmine.getIssueManager.getIssuePriorities.asScala
-    val trackers    = redmine.getIssueManager.getTrackers.asScala
-    val memberships = redmine.getMembershipManager.getMemberships(apiConfig.projectKey).asScala
-    val statuses    = redmine.getIssueManager.getStatuses.asScala
+    val versions = try {
+      redmine.getProjectManager.getVersions(project.getId).asScala
+    } catch {
+      case e: Exception =>
+        logger.warn(e.getMessage, e)
+        Seq.empty[Version]
+    }
+    val categories = try {
+      redmine.getIssueManager.getCategories(project.getId).asScala
+    } catch {
+      case e: Exception =>
+        logger.warn(e.getMessage, e)
+        Seq.empty[IssueCategory]
+    }
+    val priorities = try {
+      redmine.getIssueManager.getIssuePriorities.asScala
+    } catch {
+      case e: Exception =>
+        logger.warn(e.getMessage, e)
+        Seq.empty[IssuePriority]
+    }
+    val trackers = try {
+      redmine.getIssueManager.getTrackers.asScala
+    } catch {
+      case e: Exception =>
+        logger.warn(e.getMessage, e)
+        Seq.empty[Tracker]
+    }
+    val memberships = try {
+      redmine.getMembershipManager.getMemberships(apiConfig.projectKey).asScala
+    } catch {
+      case e: Exception =>
+        logger.warn(e.getMessage, e)
+        Seq.empty[Membership]
+    }
+    val statuses = try {
+      redmine.getIssueManager.getStatuses.asScala
+    } catch {
+      case e: Exception =>
+        logger.warn(e.getMessage, e)
+        Seq.empty[IssueStatus]
+    }
+    val users = redmine.getUserManager.getUsers.asScala
 
     val customFieldServiceImpl = new CustomFieldServiceImpl(apiConfig, redmine)
     val customFieldDefinitions = customFieldServiceImpl.allCustomFieldDefinitions()

@@ -19,7 +19,7 @@ class VersionServiceImpl @Inject()(projectId: RedmineProjectId, redmine: Redmine
       redmine.getProjectManager.getVersions(projectId.value).asScala
     } catch {
       case e: Throwable =>
-        logger.error(e.getMessage, e)
+        logger.warn(e.getMessage, e)
         Seq.empty[Version]
     }
 

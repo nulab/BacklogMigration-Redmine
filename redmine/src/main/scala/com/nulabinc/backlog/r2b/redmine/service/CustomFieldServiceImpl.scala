@@ -25,7 +25,7 @@ class CustomFieldServiceImpl @Inject()(apiConfig: RedmineApiConfiguration, redmi
         val json = scala.io.Source.fromURL(url, "UTF-8").mkString
         toCustomFields(json)
       case e: Throwable =>
-        logger.error(e.getMessage, e)
+        logger.warn(e.getMessage, e)
         Seq.empty[RedmineCustomFieldDefinition]
     }
 

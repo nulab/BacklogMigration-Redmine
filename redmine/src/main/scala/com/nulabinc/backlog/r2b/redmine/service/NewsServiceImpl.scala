@@ -19,7 +19,7 @@ class NewsServiceImpl @Inject()(apiConfig: RedmineApiConfiguration, redmine: Red
       redmine.getProjectManager.getNews(apiConfig.projectKey).asScala
     } catch {
       case e: Throwable =>
-        logger.error(e.getMessage, e)
+        logger.warn(e.getMessage, e)
         Seq.empty[News]
     }
 

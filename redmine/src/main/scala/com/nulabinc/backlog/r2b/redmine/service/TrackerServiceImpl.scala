@@ -18,7 +18,7 @@ class TrackerServiceImpl @Inject()(redmine: RedmineManager) extends TrackerServi
       redmine.getIssueManager.getTrackers.asScala
     } catch {
       case e: Throwable =>
-        logger.error(e.getMessage, e)
+        logger.warn(e.getMessage, e)
         Seq.empty[Tracker]
     }
   }

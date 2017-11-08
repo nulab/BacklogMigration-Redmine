@@ -19,7 +19,7 @@ class IssueServiceImpl @Inject()(apiConfig: RedmineApiConfiguration, projectId: 
     with Logging {
 
   override def countIssues(): Int = {
-    val url    = s"${apiConfig.url}/issues.json?limit=1&subproject_id=!*&project_id=${projectId.value}&key=${apiConfig.key}&status_id=*"
+    val url    = s"${apiConfig.url}issues.json?limit=1&subproject_id=!*&project_id=${projectId.value}&key=${apiConfig.key}&status_id=*"
     val string = scala.io.Source.fromURL(url, "UTF-8").mkString
     JsonParser(string).asJsObject.getFields("total_count") match {
       case Seq(JsNumber(totalCount)) => totalCount.intValue()
@@ -38,7 +38,7 @@ class IssueServiceImpl @Inject()(apiConfig: RedmineApiConfiguration, projectId: 
       Right(redmine.getIssueManager.getIssueById(id, include: _*))
     } catch {
       case e: Throwable =>
-        logger.error(e.getMessage, e)
+        logger.warn(e.getMessage, e)
         Left(e)
     }
 

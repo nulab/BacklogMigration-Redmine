@@ -36,6 +36,7 @@ private[collector] class IssueActor(issueService: IssueService, mappingData: Map
       val issue = issueService.issueOfId(issueId, Include.journals)
       parse(issue)
       mappingData.users ++= users.flatten
+      mappingData.statuses ++= statuses.flatten
 
       completion.countDown()
       console((allCount - completion.getCount).toInt, allCount)

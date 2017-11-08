@@ -36,8 +36,19 @@ trait MappingFile extends Logging {
 
   def isParsed: Boolean = unmarshal().isDefined
 
-  def create() =
+  def create(afterMessage: () => Unit) = {
     IOUtil.output(Path.fromString(filePath), MappingsWrapper(description, redmines.map(convert)).toJson.prettyPrint)
+    if (redmines.nonEmpty) {
+      afterMessage()
+    }
+  }
+
+  def nonEmpty(): Boolean = {
+    unmarshal() match {
+      case Some(mappings) => mappings.nonEmpty
+      case _              => false
+    }
+  }
 
   def merge(): Seq[Mapping] = {
     unmarshal() match {

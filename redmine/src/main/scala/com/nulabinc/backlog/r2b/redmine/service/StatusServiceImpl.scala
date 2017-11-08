@@ -18,7 +18,7 @@ class StatusServiceImpl @Inject()(redmine: RedmineManager) extends StatusService
       redmine.getIssueManager.getStatuses.asScala
     } catch {
       case e: Throwable =>
-        logger.error(e.getMessage, e)
+        logger.warn(e.getMessage, e)
         Seq.empty[IssueStatus]
     }
   }

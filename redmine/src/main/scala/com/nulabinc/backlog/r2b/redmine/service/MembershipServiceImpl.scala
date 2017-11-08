@@ -19,7 +19,7 @@ class MembershipServiceImpl @Inject()(apiConfig: RedmineApiConfiguration, redmin
       redmine.getMembershipManager.getMemberships(apiConfig.projectKey).asScala
     } catch {
       case e: Throwable =>
-        logger.error(e.getMessage, e)
+        logger.warn(e.getMessage, e)
         Seq.empty[Membership]
     }
 

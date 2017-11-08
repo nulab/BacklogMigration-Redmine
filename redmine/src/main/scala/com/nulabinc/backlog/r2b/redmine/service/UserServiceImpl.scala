@@ -33,7 +33,7 @@ class UserServiceImpl @Inject()(redmine: RedmineManager) extends UserService wit
       Some(redmine.getUserManager.getUserById(id))
     } catch {
       case e: Throwable =>
-        logger.error(e.getMessage, e)
+        logger.warn(e.getMessage, e)
         None
     }
   }
