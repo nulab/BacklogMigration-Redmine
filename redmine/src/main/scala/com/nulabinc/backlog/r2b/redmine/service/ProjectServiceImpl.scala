@@ -19,7 +19,7 @@ class ProjectServiceImpl @Inject()(redmine: RedmineManager) extends ProjectServi
       Some(redmine.getProjectManager.getProjectById(id))
     } catch {
       case e: Throwable =>
-        logger.error(e.getMessage, e)
+        logger.warn(e.getMessage, e)
         None
     }
   }
@@ -29,7 +29,7 @@ class ProjectServiceImpl @Inject()(redmine: RedmineManager) extends ProjectServi
       Some(redmine.getProjectManager.getProjectByKey(projectKey))
     } catch {
       case e: Throwable =>
-        logger.error(e.getMessage, e)
+        logger.warn(e.getMessage, e)
         None
     }
 

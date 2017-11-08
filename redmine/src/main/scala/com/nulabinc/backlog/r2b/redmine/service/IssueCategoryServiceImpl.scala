@@ -19,7 +19,7 @@ class IssueCategoryServiceImpl @Inject()(projectId: RedmineProjectId, redmine: R
       redmine.getIssueManager.getCategories(projectId.value).asScala
     } catch {
       case e: Throwable =>
-        logger.error(e.getMessage, e)
+        logger.warn(e.getMessage, e)
         Seq.empty[IssueCategory]
     }
 
