@@ -16,21 +16,26 @@ import scala.collection.mutable
 object Boot extends Logging {
 
   def execute(apiConfig: RedmineApiConfiguration): MappingData = {
+    try {
+      val injector = Guice.createInjector(new RedmineModule(apiConfig))
 
-    val injector = Guice.createInjector(new RedmineModule(apiConfig))
+      ConsoleOut.println(s"""
+                            |${Messages("cli.project_info.start")}
+                            |--------------------------------------------------""".stripMargin)
 
-    ConsoleOut.println(s"""
-                          |${Messages("cli.project_info.start")}
-                          |--------------------------------------------------""".stripMargin)
+      val mappingData      = MappingData(mutable.Set.empty[User], mutable.Set.empty[String])
+      val mappingCollector = injector.getInstance(classOf[MappingCollector])
+      mappingCollector.boot(injector, mappingData)
 
-    val mappingData      = MappingData(mutable.Set.empty[User], mutable.Set.empty[String])
-    val mappingCollector = injector.getInstance(classOf[MappingCollector])
-    mappingCollector.boot(injector, mappingData)
+      ConsoleOut.println(s"""|--------------------------------------------------
+                             |${Messages("cli.project_info.finish")}""".stripMargin)
 
-    ConsoleOut.println(s"""|--------------------------------------------------
-                           |${Messages("cli.project_info.finish")}""".stripMargin)
-
-    mappingData
+      mappingData
+    } catch {
+      case e: Throwable =>
+        ConsoleOut.error(s"${Messages("cli.error.unknown")}:${e.getMessage}")
+        throw e
+    }
   }
 
 }

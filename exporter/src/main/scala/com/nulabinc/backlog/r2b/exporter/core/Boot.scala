@@ -14,19 +14,23 @@ import com.osinka.i18n.Messages
 object Boot extends Logging {
 
   def execute(apiConfig: RedmineApiConfiguration, mappingContainer: MappingContainer, backlogProjectKey: String) = {
+    try {
+      val injector = Guice.createInjector(new RedmineModule(apiConfig, mappingContainer, backlogProjectKey))
 
-    val injector = Guice.createInjector(new RedmineModule(apiConfig, mappingContainer, backlogProjectKey))
+      ConsoleOut.println(s"""
+                            |${Messages("export.start")}
+                            |--------------------------------------------------""".stripMargin)
 
-    ConsoleOut.println(s"""
-                          |${Messages("export.start")}
-                          |--------------------------------------------------""".stripMargin)
+      val projectExporter = injector.getInstance(classOf[ProjectExporter])
+      projectExporter.boot(injector, mappingContainer)
 
-    val projectExporter = injector.getInstance(classOf[ProjectExporter])
-    projectExporter.boot(injector, mappingContainer)
-
-    ConsoleOut.println(s"""--------------------------------------------------
-                          |${Messages("export.finish")}""".stripMargin)
-
+      ConsoleOut.println(s"""--------------------------------------------------
+                            |${Messages("export.finish")}""".stripMargin)
+    } catch {
+      case e: Throwable =>
+        ConsoleOut.error(s"${Messages("cli.error.unknown")}:${e.getMessage}")
+        throw e
+    }
   }
 
 }
