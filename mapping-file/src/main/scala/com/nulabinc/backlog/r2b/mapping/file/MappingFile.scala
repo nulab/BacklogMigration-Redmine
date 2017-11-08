@@ -43,6 +43,13 @@ trait MappingFile extends Logging {
     }
   }
 
+  def nonEmpty(): Boolean = {
+    unmarshal() match {
+      case Some(mappings) => mappings.nonEmpty
+      case _              => false
+    }
+  }
+
   def merge(): Seq[Mapping] = {
     unmarshal() match {
       case Some(currentItems) =>

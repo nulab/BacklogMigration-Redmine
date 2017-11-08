@@ -168,21 +168,23 @@ object R2BCli extends BacklogConfiguration with Logging {
                               |- ${redmine} => ${backlog}
                               |--------------------------------------------------
                               |
-         |${Messages("cli.mapping.show", mappingFileContainer.user.itemName)}
+                              |${Messages("cli.mapping.show", mappingFileContainer.user.itemName)}
                               |--------------------------------------------------
                               |${mappingString(mappingFileContainer.user)}
                               |--------------------------------------------------
-                              |
-         |${Messages("cli.mapping.show", mappingFileContainer.priority.itemName)}
-                              |--------------------------------------------------
-                              |${mappingString(mappingFileContainer.priority)}
-                              |--------------------------------------------------
-                              |
-         |${Messages("cli.mapping.show", mappingFileContainer.status.itemName)}
-                              |--------------------------------------------------
-                              |${mappingString(mappingFileContainer.status)}
-                              |--------------------------------------------------
                               |""".stripMargin)
+        if (mappingFileContainer.priority.nonEmpty) {
+          ConsoleOut.println(s"""${Messages("cli.mapping.show", mappingFileContainer.priority.itemName)}
+                                |--------------------------------------------------
+                                |${mappingString(mappingFileContainer.priority)}
+                                |--------------------------------------------------""".stripMargin)
+        }
+        if (mappingFileContainer.status.nonEmpty) {
+          ConsoleOut.println(s"""${Messages("cli.mapping.show", mappingFileContainer.status.itemName)}
+                                |--------------------------------------------------
+                                |${mappingString(mappingFileContainer.status)}
+                                |--------------------------------------------------""".stripMargin)
+        }
         val input: String = scala.io.StdIn.readLine(Messages("cli.confirm"))
         if (input == "y" || input == "Y") true
         else {
