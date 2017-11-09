@@ -547,5 +547,3 @@ MIT License
 https://www.backlog.jp/contact/
 
 [Backlog]: http://www.backlog.jp/
-
-[Jar]: https://github.com/nulab/BacklogMigration-Redmine/releases/download/0.10.0b16/backlog-migration-redmine-0.10.0b16.jar
