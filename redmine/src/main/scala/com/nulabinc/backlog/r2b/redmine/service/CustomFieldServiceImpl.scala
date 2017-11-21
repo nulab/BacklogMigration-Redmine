@@ -66,20 +66,37 @@ class CustomFieldServiceImpl @Inject()(apiConfig: RedmineApiConfiguration, redmi
                                  isMultiple = jsValue.asJsObject.fields.get("multiple").map(_.convertTo[Boolean]).getOrElse(false),
                                  optDefaultValue = jsValue.asJsObject.fields.get("default_value").map(_.convertTo[String]),
                                  trackers = toTrackers(jsValue.asJsObject.fields.get("trackers")),
-                                 possibleValues = jsValue.asJsObject.fields.get("possible_values").map(_.convertTo[String]).toSeq)
+                                 possibleValues = toPossibleValues(jsValue.asJsObject.fields.get("possible_values")))
   }
 
-  private[this] def toTrackers(optJsValue: Option[JsValue]): Seq[RedmineTracker] =
+  private[this] def toPossibleValues(optJsValue: Option[JsValue]): Seq[String] = {
     optJsValue match {
       case Some(jsValue) =>
-        jsValue.asJsObject.getFields("tracker") match {
-          case Seq(JsArray(trackers)) => trackers.map(toTracker)
-          case _                      => Seq.empty[RedmineTracker]
+        jsValue match {
+          case JsArray(possibleValues) => possibleValues.map(toPossibleValue)
+          case _                       => Seq.empty[String]
+        }
+      case _ => Seq.empty[String]
+    }
+  }
+
+  private[this] def toPossibleValue(jsValue: JsValue): String = {
+    jsValue.asJsObject.fields.apply("value").convertTo[String]
+  }
+
+  private[this] def toTrackers(optJsValue: Option[JsValue]): Seq[RedmineTracker] = {
+    optJsValue match {
+      case Some(jsValue) =>
+        jsValue.asJsObject.fields.get("tracker") match {
+          case Some(tracker) => Seq(toTracker(tracker))
+          case _             => Seq.empty[RedmineTracker]
         }
       case _ => Seq.empty[RedmineTracker]
     }
+  }
 
-  private[this] def toTracker(jsValue: JsValue): RedmineTracker =
+  private[this] def toTracker(jsValue: JsValue): RedmineTracker = {
     RedmineTracker(id = jsValue.asJsObject.fields.apply("id").convertTo[Int], name = jsValue.asJsObject.fields.apply("name").convertTo[String])
+  }
 
 }
