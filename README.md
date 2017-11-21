@@ -9,7 +9,7 @@ Migrate your projects from Redmine to [Backlog].
 
 * Backlog
     * [http://backlog.jp](http://backlog.jp)
-    * [http://backlogtool.com](http:///backlogtool.com)
+    * [http://backlogtool.com](http://backlogtool.com)
 
 ## DEMO
 
@@ -26,7 +26,7 @@ Download
 
 Please download the jar file from this link, and run from the command line as follows.
 
-https://github.com/nulab/BacklogMigration-Redmine/releases/download/0.10.0b17-SNAPSHOT/backlog-migration-redmine-0.10.0b17-SNAPSHOT.jar
+https://github.com/nulab/BacklogMigration-Redmine/releases/download/0.10.0b17/backlog-migration-redmine-0.10.0b17.jar
 
     java -jar backlog-migration-redmine-[latest version].jar
 
@@ -283,7 +283,7 @@ Redmineのプロジェクトを[Backlog]に移行するためのツールです�
 
 * Backlog
     * [http://backlog.jp](http://backlog.jp)
-    * [http://backlogtool.com](http:///backlogtool.com)
+    * [http://backlogtool.com](http://backlogtool.com)
 
 ## 必須要件
 * **Java 8**
@@ -296,7 +296,7 @@ https://github.com/nulab/BacklogMigration-Redmine/releases
 
 こちらのリンクからjarファイルをダウンロードし、以下のようにコマンドラインから実行します。
 
-https://github.com/nulab/BacklogMigration-Redmine/releases/download/0.10.0b17-SNAPSHOT/backlog-migration-redmine-0.10.0b17-SNAPSHOT.jar
+https://github.com/nulab/BacklogMigration-Redmine/releases/download/0.10.0b17/backlog-migration-redmine-0.10.0b17.jar
 
     java -jar backlog-migration-redmine-[最新バージョン].jar
 
