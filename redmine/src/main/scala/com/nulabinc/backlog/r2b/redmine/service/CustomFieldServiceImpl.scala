@@ -7,6 +7,7 @@ import com.nulabinc.backlog.r2b.redmine.conf.RedmineApiConfiguration
 import com.nulabinc.backlog.r2b.redmine.domain.{RedmineCustomFieldDefinition, RedmineTracker}
 import com.taskadapter.redmineapi.bean.{CustomFieldDefinition, Tracker}
 import com.taskadapter.redmineapi.{RedmineFormatException, RedmineManager}
+import spray.json.DefaultJsonProtocol._
 import spray.json.{JsArray, JsValue, JsonParser}
 
 import scala.collection.JavaConverters._
@@ -54,18 +55,18 @@ class CustomFieldServiceImpl @Inject()(apiConfig: RedmineApiConfiguration, redmi
   }
 
   private[this] def toCustomField(jsValue: JsValue): RedmineCustomFieldDefinition = {
-    RedmineCustomFieldDefinition(id = jsValue.asJsObject.fields.apply("id").toString().toInt,
-                                 name = jsValue.asJsObject.fields.apply("name").toString(),
-                                 customizedType = jsValue.asJsObject.fields.apply("customized_type").toString(),
-                                 fieldFormat = jsValue.asJsObject.fields.apply("field_format").toString(),
-                                 optRegexp = jsValue.asJsObject.fields.get("regexp").map(_.toString()),
-                                 optMinLength = jsValue.asJsObject.fields.get("min_length").map(_.toString().toInt),
-                                 optMaxLength = jsValue.asJsObject.fields.get("max_length").map(_.toString().toInt),
-                                 isRequired = jsValue.asJsObject.fields.get("is_required").map(_.toString().toBoolean).getOrElse(false),
-                                 isMultiple = jsValue.asJsObject.fields.get("multiple").map(_.toString().toBoolean).getOrElse(false),
-                                 optDefaultValue = jsValue.asJsObject.fields.get("default_value").map(_.toString()),
+    RedmineCustomFieldDefinition(id = jsValue.asJsObject.fields.apply("id").convertTo[Int],
+                                 name = jsValue.asJsObject.fields.apply("name").convertTo[String],
+                                 customizedType = jsValue.asJsObject.fields.apply("customized_type").convertTo[String],
+                                 fieldFormat = jsValue.asJsObject.fields.apply("field_format").convertTo[String],
+                                 optRegexp = jsValue.asJsObject.fields.get("regexp").map(_.convertTo[String]),
+                                 optMinLength = jsValue.asJsObject.fields.get("min_length").map(_.convertTo[Int]),
+                                 optMaxLength = jsValue.asJsObject.fields.get("max_length").map(_.convertTo[Int]),
+                                 isRequired = jsValue.asJsObject.fields.get("is_required").map(_.convertTo[Boolean]).getOrElse(false),
+                                 isMultiple = jsValue.asJsObject.fields.get("multiple").map(_.convertTo[Boolean]).getOrElse(false),
+                                 optDefaultValue = jsValue.asJsObject.fields.get("default_value").map(_.convertTo[String]),
                                  trackers = toTrackers(jsValue.asJsObject.fields.get("trackers")),
-                                 possibleValues = jsValue.asJsObject.fields.get("possible_values").map(_.toString()).toSeq)
+                                 possibleValues = jsValue.asJsObject.fields.get("possible_values").map(_.convertTo[String]).toSeq)
   }
 
   private[this] def toTrackers(optJsValue: Option[JsValue]): Seq[RedmineTracker] =
@@ -79,6 +80,6 @@ class CustomFieldServiceImpl @Inject()(apiConfig: RedmineApiConfiguration, redmi
     }
 
   private[this] def toTracker(jsValue: JsValue): RedmineTracker =
-    RedmineTracker(id = jsValue.asJsObject.fields.apply("id").toString().toInt, name = jsValue.asJsObject.fields.apply("name").toString())
+    RedmineTracker(id = jsValue.asJsObject.fields.apply("id").convertTo[Int], name = jsValue.asJsObject.fields.apply("name").convertTo[String])
 
 }

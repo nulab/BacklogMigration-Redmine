@@ -12,6 +12,7 @@ import com.osinka.i18n.Messages
 import org.fusesource.jansi.AnsiConsole
 import org.rogach.scallop._
 import spray.json._
+import spray.json.DefaultJsonProtocol._
 
 class CommandLineInterface(arguments: Seq[String]) extends ScallopConf(arguments) with BacklogConfiguration with Logging {
 
@@ -128,7 +129,7 @@ object R2B extends BacklogConfiguration with Logging {
       val string = scala.io.Source.fromURL(url, "UTF-8").mkString
       val latest = string.parseJson match {
         case JsArray(releases) if (releases.nonEmpty) =>
-          releases(0).asJsObject.fields.apply("tag_name").toString().replace("\"", "").replace("v", "")
+          releases(0).asJsObject.fields.apply("tag_name").convertTo[String].replace("v", "")
         case _ => ""
       }
       if (latest != versionName) {
