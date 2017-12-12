@@ -123,7 +123,7 @@ Sample commands:
       --redmine.url https: //my.redmine \
       --backlog.key XXXXXXXXXXXXX \
       --backlog.url https://nulab.backlog.jp \
-      --projects redmine_project:BACKLOG_PROJECT
+      --projectKey redmine_project:BACKLOG_PROJECT
     
 When import has been completed, the directory will be created and data file that has been used for importing will be produced.
 
