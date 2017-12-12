@@ -21,8 +21,6 @@ import scala.util.Try
   */
 object R2BCli extends BacklogConfiguration with Logging {
 
-  private val backlogToolEnvName = "backlogtool"
-
   def init(config: AppConfiguration): Unit = {
     if (validateParam(config)) {
       val mappingFileContainer = createMapping(config)
@@ -73,6 +71,11 @@ object R2BCli extends BacklogConfiguration with Logging {
   }
 
   private[this] def tracking(config: AppConfiguration, backlogInjector: Injector) = {
+    val backlogToolEnvNames = Seq(
+      "backlogtool",
+      "us6"
+    )
+
     Try {
       val space       = backlogInjector.getInstance(classOf[SpaceService]).space()
       val myself      = backlogInjector.getInstance(classOf[UserService]).myself()
@@ -87,7 +90,7 @@ object R2BCli extends BacklogConfiguration with Logging {
                               dstProjectKey = config.backlogConfig.projectKey,
                               srcSpaceCreated = "",
                               dstSpaceCreated = space.created)
-      val token = if (environment.name == backlogToolEnvName) mixpanelBacklogtoolToken else mixpanelToken
+      val token = if (backlogToolEnvNames.contains(environment.name)) mixpanelBacklogtoolToken else mixpanelToken
       MixpanelUtil.track(token = token, data = data)
     }
   }
