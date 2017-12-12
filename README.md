@@ -26,7 +26,7 @@ Download
 
 Please download the jar file from this link, and run from the command line as follows.
 
-https://github.com/nulab/BacklogMigration-Redmine/releases/download/0.10.0b18/backlog-migration-redmine-0.10.0b18.jar
+https://github.com/nulab/BacklogMigration-Redmine/releases/download/0.10.0b19/backlog-migration-redmine-0.10.0b19.jar
 
     java -jar backlog-migration-redmine-[latest version].jar
 
@@ -123,7 +123,7 @@ Sample commands:
       --redmine.url https: //my.redmine \
       --backlog.key XXXXXXXXXXXXX \
       --backlog.url https://nulab.backlog.jp \
-      --projects redmine_project:BACKLOG_PROJECT
+      --projectKey redmine_project:BACKLOG_PROJECT
     
 When import has been completed, the directory will be created and data file that has been used for importing will be produced.
 
@@ -296,7 +296,7 @@ https://github.com/nulab/BacklogMigration-Redmine/releases
 
 こちらのリンクからjarファイルをダウンロードし、以下のようにコマンドラインから実行します。
 
-https://github.com/nulab/BacklogMigration-Redmine/releases/download/0.10.0b18/backlog-migration-redmine-0.10.0b18.jar
+https://github.com/nulab/BacklogMigration-Redmine/releases/download/0.10.0b19/backlog-migration-redmine-0.10.0b19.jar
 
     java -jar backlog-migration-redmine-[最新バージョン].jar
 
