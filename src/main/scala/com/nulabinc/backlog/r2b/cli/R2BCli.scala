@@ -73,7 +73,7 @@ object R2BCli extends BacklogConfiguration with Logging {
   private[this] def tracking(config: AppConfiguration, backlogInjector: Injector) = {
     val backlogToolEnvNames = Seq(
       "backlogtool",
-      "us6"
+      "us-6"
     )
 
     Try {
