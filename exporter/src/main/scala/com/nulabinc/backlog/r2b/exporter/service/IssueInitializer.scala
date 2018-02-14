@@ -1,7 +1,7 @@
 package com.nulabinc.backlog.r2b.exporter.service
 
 import java.io.{FileOutputStream, InputStream}
-import java.net.URL
+import java.net.{SocketException, URL}
 import java.nio.channels.Channels
 
 import com.nulabinc.backlog.migration.common.convert.Convert
@@ -204,14 +204,20 @@ private[exporter] class IssueInitializer(exportContext: ExportContext, issueDirP
 
   private[this] def attachment(attachment: Attachment) = {
     val url: URL = new URL(s"${attachment.getContentURL}?key=${exportContext.apiConfig.key}")
-    download(attachment.getFileName, url.openStream())
+
+    try {
+      download(attachment.getFileName, url)
+    } catch {
+      case e: SocketException => logger.warn("Download attachment failed: " + e.getMessage)
+      case e: Throwable => throw e
+    }
   }
 
-  private[this] def download(name: String, content: InputStream) = {
+  private[this] def download(name: String, url: URL) = {
     val dir  = exportContext.backlogPaths.issueAttachmentDirectoryPath(issueDirPath)
     val path = exportContext.backlogPaths.issueAttachmentPath(dir, name)
     IOUtil.createDirectory(dir)
-    val rbc = Channels.newChannel(content)
+    val rbc = Channels.newChannel(url.openStream())
     val fos = new FileOutputStream(path.path)
     fos.getChannel.transferFrom(rbc, 0, java.lang.Long.MAX_VALUE)
 
