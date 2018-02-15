@@ -14,13 +14,26 @@ private[exporter] class ContentActor(exportContext: ExportContext) extends Actor
 
   def receive: Receive = {
     case ContentActor.Do =>
-      wikisActor ! WikisActor.Do
+      if (isMigrate(exportContext.exportConfig.exclude, "wiki")) {
+        wikisActor ! WikisActor.Do
+      } else {
+        self ! WikisActor.Done
+      }
     case WikisActor.Done =>
-      issuesActor ! IssuesActor.Do
+      if (isMigrate(exportContext.exportConfig.exclude, "issue")) {
+        issuesActor ! IssuesActor.Do
+      } else {
+        self ! IssuesActor.Done
+      }
     case IssuesActor.Done =>
       context.system.shutdown()
   }
 
+  private[this] def isMigrate(exclude: Option[List[String]], item: String): Boolean =
+    exclude match {
+      case Some(excludes) => !excludes.contains(item)
+      case _              => true
+    }
 }
 
 private[exporter] object ContentActor {
