@@ -47,7 +47,7 @@ object R2BCli extends BacklogConfiguration with Logging {
                                                     status = mappingFileContainer.status.tryUnmarshal(),
                                                     priority = mappingFileContainer.priority.tryUnmarshal())
 
-            BootExporter.execute(config.redmineConfig, mappingContainer, config.backlogConfig.projectKey)
+            BootExporter.execute(config.redmineConfig, mappingContainer, config.backlogConfig.projectKey, config.exclude)
             BootImporter.execute(config.backlogConfig, false)
 
             if (!config.optOut) {
