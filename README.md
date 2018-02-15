@@ -147,6 +147,17 @@ When import has been completed, the directory will be created and data file that
       --backlog.url [URL of Backlog] \
       --projects [Redmine project identifier]: [Backlog project key] \
       --importOnly
+      
+[**--exclude**] If you set this property, specified import will **not** be run by the program.
+
+    java -jar backlog-migration-redmine-[latest version].jar \
+      execute \
+      --redmine.key [Redmine API key] \
+      --redmine.url [Redmine of URL] \
+      --backlog.key [Backlog of API key] \
+      --backlog.url [URL of Backlog] \
+      --projects [Redmine project identifier]: [Backlog project key] \
+      --exclude [issue or wiki]
         
 ## Limitation
 
@@ -420,6 +431,19 @@ descriptionにある項目を使い、空白を埋める必要が有ります。
       --projectKey [Redmineプロジェクト識別子]:[Backlogプロジェクトキー] \
       --importOnly
 
+#### 課題またはWikiのみ実行
+
+[**--exclude**]オプションを利用すると指定された項目を**除外**してインポートを実行します。
+
+    java -jar backlog-migration-redmine-[最新バージョン].jar \
+      execute \
+      --redmine.key [RedmineのAPIキー] \
+      --redmine.url [RedmineのURL] \
+      --backlog.key [BacklogのAPIキー] \
+      --backlog.url [BacklogのURL] \
+      --projectKey [Redmineプロジェクト識別子]:[Backlogプロジェクトキー] \
+      --exclude [issue または wiki]
+      
 ## 制限事項
 
 ### Redmineの対応バージョン

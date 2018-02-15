@@ -6,4 +6,10 @@ import com.nulabinc.backlog.r2b.redmine.conf.RedmineApiConfiguration
 /**
   * @author uchida
   */
-case class AppConfiguration(redmineConfig: RedmineApiConfiguration, backlogConfig: BacklogApiConfiguration, importOnly: Boolean, optOut: Boolean)
+case class AppConfiguration(
+  redmineConfig: RedmineApiConfiguration,
+  backlogConfig: BacklogApiConfiguration,
+  exclude: Option[List[String]],
+  importOnly: Boolean,
+  optOut: Boolean
+)

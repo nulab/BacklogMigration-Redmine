@@ -92,6 +92,7 @@ trait SimpleFixture {
       Some(
         AppConfiguration(redmineConfig = new RedmineApiConfiguration(url = redmineUrl, key = redmineKey, projectKey = redmine),
                          backlogConfig = new BacklogApiConfiguration(url = backlogUrl, key = backlogKey, projectKey = backlog),
+                         exclude = None,
                          importOnly = false,
                          optOut = true))
     } else None
