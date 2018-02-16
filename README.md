@@ -26,7 +26,7 @@ Download
 
 Please download the jar file from this link, and run from the command line as follows.
 
-https://github.com/nulab/BacklogMigration-Redmine/releases/download/0.10.0b20/backlog-migration-redmine-0.10.0b20.jar
+https://github.com/nulab/BacklogMigration-Redmine/releases/download/0.11.0b1/backlog-migration-redmine-0.11.0b1.jar
 
     java -jar backlog-migration-redmine-[latest version].jar
 
@@ -147,6 +147,17 @@ When import has been completed, the directory will be created and data file that
       --backlog.url [URL of Backlog] \
       --projects [Redmine project identifier]: [Backlog project key] \
       --importOnly
+      
+[**--exclude**] If you set this property, specified import will **not** be run by the program.
+
+    java -jar backlog-migration-redmine-[latest version].jar \
+      execute \
+      --redmine.key [Redmine API key] \
+      --redmine.url [Redmine of URL] \
+      --backlog.key [Backlog of API key] \
+      --backlog.url [URL of Backlog] \
+      --projects [Redmine project identifier]: [Backlog project key] \
+      --exclude [issue or wiki]
         
 ## Limitation
 
@@ -296,7 +307,7 @@ https://github.com/nulab/BacklogMigration-Redmine/releases
 
 こちらのリンクからjarファイルをダウンロードし、以下のようにコマンドラインから実行します。
 
-https://github.com/nulab/BacklogMigration-Redmine/releases/download/0.10.0b20/backlog-migration-redmine-0.10.0b20.jar
+https://github.com/nulab/BacklogMigration-Redmine/releases/download/0.11.0b1/backlog-migration-redmine-0.11.0b1.jar
 
     java -jar backlog-migration-redmine-[最新バージョン].jar
 
@@ -420,6 +431,19 @@ descriptionにある項目を使い、空白を埋める必要が有ります。
       --projectKey [Redmineプロジェクト識別子]:[Backlogプロジェクトキー] \
       --importOnly
 
+#### 課題またはWikiのみ実行
+
+[**--exclude**]オプションを利用すると指定された項目を**除外**してインポートを実行します。
+
+    java -jar backlog-migration-redmine-[最新バージョン].jar \
+      execute \
+      --redmine.key [RedmineのAPIキー] \
+      --redmine.url [RedmineのURL] \
+      --backlog.key [BacklogのAPIキー] \
+      --backlog.url [BacklogのURL] \
+      --projectKey [Redmineプロジェクト識別子]:[Backlogプロジェクトキー] \
+      --exclude [issue または wiki]
+      
 ## 制限事項
 
 ### Redmineの対応バージョン
