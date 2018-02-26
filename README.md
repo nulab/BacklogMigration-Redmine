@@ -168,7 +168,7 @@ Redmine **1.1.1 or later** are supported.
 This program is for the users with the Space's **administrator** roles.
 
 ### Migration project with custom fields
-Only applied to **max** or **platina** plan.
+Only applied to **Premium** or **Platina** plan.
 
 ### Resources that cannot be migrated
 * Shared files
@@ -453,7 +453,7 @@ Redmineの対応バージョンは **1.1.1以降** になります。
 Backlogの **管理者権限** が必要になります。
 
 ### カスタムフィールドを使用しているプロジェクトの移行
-Backlogで **マックスプラン以上** のプランを契約している必要があります。
+Backlogで **プレミアムプラン以上** のプランを契約している必要があります。
 
 ### 移行できないリソース
 * 共有ファイル
