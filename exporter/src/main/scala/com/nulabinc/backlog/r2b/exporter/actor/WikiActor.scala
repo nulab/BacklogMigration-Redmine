@@ -37,28 +37,31 @@ private[exporter] class WikiActor(exportContext: ExportContext) extends Actor wi
       val wikiDetail: WikiPageDetail = exportContext.wikiService.wikiDetail(wiki.getTitle)
 
       val backlogWiki = Convert.toBacklog(wikiDetail)
-      IOUtil.output(exportContext.backlogPaths.wikiJson(wiki.getTitle), backlogWiki.toJson.prettyPrint)
+      IOUtil.output(exportContext.backlogPaths.wikiJson(backlogWiki.name), backlogWiki.toJson.prettyPrint)
 
       wikiDetail.getAttachments.asScala.foreach { attachment =>
+
+        val dir  = exportContext.backlogPaths.wikiAttachmentDirectoryPath(backlogWiki.name)
+        val path = exportContext.backlogPaths.wikiAttachmentPath(backlogWiki.name, attachment.getFileName)
+
+        IOUtil.createDirectory(dir)
+
         val url: URL = new URL(s"${attachment.getContentURL}?key=${exportContext.apiConfig.key}")
-        download(backlogWiki, attachment.getFileName, url.openStream())
+
+        try {
+          val rbc = Channels.newChannel(url.openStream())
+          val fos = new FileOutputStream(path.path)
+          fos.getChannel.transferFrom(rbc, 0, java.lang.Long.MAX_VALUE)
+
+          rbc.close()
+          fos.close()
+        } catch {
+          case e: Throwable => logger.warn("Download wiki attachment failed: " + e.getMessage)
+        }
       }
 
       completion.countDown()
       console((allCount - completion.getCount).toInt, allCount)
-  }
-
-  private[this] def download(wiki: BacklogWiki, name: String, content: InputStream) = {
-    val dir  = exportContext.backlogPaths.wikiAttachmentDirectoryPath(wiki.name)
-    val path = exportContext.backlogPaths.wikiAttachmentPath(wiki.name, name)
-    IOUtil.createDirectory(dir)
-
-    val rbc = Channels.newChannel(content)
-    val fos = new FileOutputStream(path.path)
-    fos.getChannel.transferFrom(rbc, 0, java.lang.Long.MAX_VALUE)
-
-    rbc.close()
-    fos.close()
   }
 
 }

@@ -202,27 +202,24 @@ private[exporter] class IssueInitializer(exportContext: ExportContext, issueDirP
     }
   }
 
-  private[this] def attachment(attachment: Attachment) = {
+  private[this] def attachment(attachment: Attachment): Unit = {
+
+    val dir  = exportContext.backlogPaths.issueAttachmentDirectoryPath(issueDirPath)
+    val path = exportContext.backlogPaths.issueAttachmentPath(dir, attachment.getFileName)
+    IOUtil.createDirectory(dir)
+
     val url: URL = new URL(s"${attachment.getContentURL}?key=${exportContext.apiConfig.key}")
 
     try {
-      download(attachment.getFileName, url)
+      val rbc = Channels.newChannel(url.openStream())
+      val fos = new FileOutputStream(path.path)
+      fos.getChannel.transferFrom(rbc, 0, java.lang.Long.MAX_VALUE)
+
+      rbc.close()
+      fos.close()
     } catch {
-      case e: SocketException => logger.warn("Download attachment failed: " + e.getMessage)
-      case e: Throwable => throw e
+      case e: Throwable => logger.warn("Download issue attachment failed: " + e.getMessage)
     }
-  }
-
-  private[this] def download(name: String, url: URL) = {
-    val dir  = exportContext.backlogPaths.issueAttachmentDirectoryPath(issueDirPath)
-    val path = exportContext.backlogPaths.issueAttachmentPath(dir, name)
-    IOUtil.createDirectory(dir)
-    val rbc = Channels.newChannel(url.openStream())
-    val fos = new FileOutputStream(path.path)
-    fos.getChannel.transferFrom(rbc, 0, java.lang.Long.MAX_VALUE)
-
-    rbc.close()
-    fos.close()
   }
 
 }
