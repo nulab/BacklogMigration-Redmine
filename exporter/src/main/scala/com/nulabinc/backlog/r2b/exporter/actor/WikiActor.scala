@@ -37,7 +37,7 @@ private[exporter] class WikiActor(exportContext: ExportContext) extends Actor wi
       val wikiDetail: WikiPageDetail = exportContext.wikiService.wikiDetail(wiki.getTitle)
 
       val backlogWiki = Convert.toBacklog(wikiDetail)
-      IOUtil.output(exportContext.backlogPaths.wikiJson(wiki.getTitle), backlogWiki.toJson.prettyPrint)
+      IOUtil.output(exportContext.backlogPaths.wikiJson(backlogWiki.name), backlogWiki.toJson.prettyPrint)
 
       wikiDetail.getAttachments.asScala.foreach { attachment =>
         val url: URL = new URL(s"${attachment.getContentURL}?key=${exportContext.apiConfig.key}")
