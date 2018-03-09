@@ -202,14 +202,13 @@ private[exporter] class IssueInitializer(exportContext: ExportContext, issueDirP
     }
   }
 
-  private[this] def attachment(attachment: Attachment) = {
+  private[this] def attachment(attachment: Attachment): Unit = {
     val url: URL = new URL(s"${attachment.getContentURL}?key=${exportContext.apiConfig.key}")
 
     try {
       download(attachment.getFileName, url)
     } catch {
-      case e: SocketException => logger.warn("Download attachment failed: " + e.getMessage)
-      case e: Throwable => throw e
+      case e: Throwable => logger.warn("Download attachment failed: " + e.getMessage)
     }
   }
 
