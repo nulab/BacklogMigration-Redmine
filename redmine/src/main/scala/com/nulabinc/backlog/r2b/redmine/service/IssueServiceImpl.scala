@@ -30,8 +30,10 @@ class IssueServiceImpl @Inject()(apiConfig: RedmineApiConfiguration, projectId: 
   override def allIssues(params: Map[String, String]): Seq[Issue] =
     redmine.getIssueManager.getIssues(params.asJava).asScala
 
-  override def issueOfId(id: Integer, include: Include*): Issue =
+  override def issueOfId(id: Integer, include: Include*): Issue = {
+    logger.debug("Get an issue ID: " + id)
     redmine.getIssueManager.getIssueById(id, include: _*)
+  }
 
   override def tryIssueOfId(id: Integer, include: Include*): Either[Throwable, Issue] =
     try {
