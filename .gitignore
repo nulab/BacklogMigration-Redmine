@@ -18,3 +18,6 @@ project/plugins/project/
 .worksheet
 
 .idea
+backlog/*.json
+backlog/project
+mapping
