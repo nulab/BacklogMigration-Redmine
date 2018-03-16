@@ -143,9 +143,11 @@ lazy val root = (project in file("."))
   .settings(
     name := "backlog-migration-redmine",
     libraryDependencies ++= Seq(
-      "com.taskadapter" % "redmine-java-api" % "2.4.0",
-      "org.scalatest"   %% "scalatest"       % "3.0.1" % "test",
-      "org.rogach"      % "scallop_2.11"     % "2.0.5"
+      "org.typelevel"   %% "cats-core"        % "1.0.1",
+      "org.typelevel"   %% "cats-free"        % "1.0.1",
+      "com.taskadapter" %  "redmine-java-api" % "2.4.0",
+      "org.scalatest"   %% "scalatest"        % "3.0.1" % "test",
+      "org.rogach"      %  "scallop_2.11"     % "2.0.5"
     ),
     assemblyJarName in assembly := {
       s"${name.value}-${version.value}.jar"
