@@ -27,8 +27,6 @@ lazy val commonSettings = Seq(
     "com.typesafe.akka"             %% "akka-slf4j"        % "2.5.9",
     "io.spray"                      %% "spray-json"        % "1.3.2",
     "com.typesafe"                  % "config"             % "1.3.0",
-    "joda-time"                     % "joda-time"          % "2.3",
-    "org.joda"                      % "joda-convert"       % "1.6",
     "com.google.inject"             % "guice"              % "4.1.0",
     "com.netaporter"                %% "scala-uri"         % "0.4.16",
     "org.fusesource.jansi"          % "jansi"              % "1.11",
@@ -139,10 +137,10 @@ lazy val mappingFile = (project in file("mapping-file"))
   )
   .dependsOn(mappingBase)
 
-lazy val backlog4s_core = (project in file("modules/backlog4s/backlog4s-core"))
+lazy val backlog4s_core = (project in file("backlog4s/backlog4s-core"))
   .settings(commonSettings)
 
-lazy val backlog4s_akka = (project in file("modules/backlog4s/backlog4s-akka"))
+lazy val backlog4s_akka = (project in file("backlog4s/backlog4s-akka"))
   .settings(commonSettings)
   .dependsOn(backlog4s_core)
 
@@ -154,6 +152,8 @@ lazy val root = (project in file("."))
       "org.typelevel"   %% "cats-core"        % "1.0.1",
       "org.typelevel"   %% "cats-free"        % "1.0.1",
       "com.taskadapter" %  "redmine-java-api" % "2.4.0",
+      "joda-time"       % "joda-time"         % "2.3",
+      "org.joda"        % "joda-convert"      % "1.6",
       "org.scalatest"   %% "scalatest"        % "3.0.1" % "test",
       "org.rogach"      %  "scallop_2.11"     % "2.0.5"
     ),
