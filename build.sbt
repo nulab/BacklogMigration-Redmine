@@ -139,6 +139,13 @@ lazy val mappingFile = (project in file("mapping-file"))
   )
   .dependsOn(mappingBase)
 
+lazy val backlog4s_core = (project in file("modules/backlog4s/backlog4s-core"))
+  .settings(commonSettings)
+
+lazy val backlog4s_akka = (project in file("modules/backlog4s/backlog4s-akka"))
+  .settings(commonSettings)
+  .dependsOn(backlog4s_core)
+
 lazy val root = (project in file("."))
   .settings(commonSettings: _*)
   .settings(
@@ -162,4 +169,5 @@ lazy val root = (project in file("."))
     scapegoatDisabledInspections := Seq("NullParameter", "CatchThrowable", "NoOpOverride")
   )
   .dependsOn(common % "test->test;compile->compile", importer, exporter, mappingFile, mappingCollector)
+  .dependsOn(backlog4s_core, backlog4s_akka)
   .aggregate(common, importer, exporter)
