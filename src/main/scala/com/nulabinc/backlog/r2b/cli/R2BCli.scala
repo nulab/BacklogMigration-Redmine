@@ -1,7 +1,7 @@
 package com.nulabinc.backlog.r2b.cli
 
 import com.google.inject.Injector
-import com.nulabinc.backlog.migration.common.conf.{BacklogConfiguration, BacklogPaths}
+import com.nulabinc.backlog.migration.common.conf.{BacklogApiConfiguration, BacklogConfiguration, BacklogPaths}
 import com.nulabinc.backlog.migration.common.modules.{ServiceInjector => BacklogInjector}
 import com.nulabinc.backlog.migration.common.service.{ProjectService, SpaceService, UserService}
 import com.nulabinc.backlog.migration.common.utils.{ConsoleOut, Logging, MixpanelUtil, TrackingData}
@@ -68,6 +68,10 @@ object R2BCli extends BacklogConfiguration with Logging {
         tracking(config, backlogInjector)
       }
     }
+  }
+
+  def destroy(apiConfig: BacklogApiConfiguration): Unit = {
+
   }
 
   private[this] def tracking(config: AppConfiguration, backlogInjector: Injector) = {
