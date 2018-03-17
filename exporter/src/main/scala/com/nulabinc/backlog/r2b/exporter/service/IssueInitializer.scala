@@ -13,7 +13,7 @@ import com.nulabinc.backlog.r2b.redmine.domain.RedmineCustomFieldDefinition
 import com.taskadapter.redmineapi.bean._
 
 import scala.collection.JavaConverters._
-import scalax.file.Path
+import better.files.{File => Path}
 
 /**
   * @author uchida
@@ -212,7 +212,7 @@ private[exporter] class IssueInitializer(exportContext: ExportContext, issueDirP
 
     try {
       val rbc = Channels.newChannel(url.openStream())
-      val fos = new FileOutputStream(path.path)
+      val fos = new FileOutputStream(path.path.toFile)
       fos.getChannel.transferFrom(rbc, 0, java.lang.Long.MAX_VALUE)
 
       rbc.close()

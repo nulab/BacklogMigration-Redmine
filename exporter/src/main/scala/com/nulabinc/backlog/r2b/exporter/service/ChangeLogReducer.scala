@@ -11,7 +11,7 @@ import com.nulabinc.backlog.r2b.exporter.core.ExportContext
 import com.osinka.i18n.Messages
 import com.taskadapter.redmineapi.bean.Attachment
 
-import scalax.file.Path
+import better.files.{File => Path}
 
 /**
   * @author uchida
@@ -95,7 +95,7 @@ private[exporter] class ChangeLogReducer(exportContext: ExportContext,
       val path = exportContext.backlogPaths.issueAttachmentPath(dir, name)
       IOUtil.createDirectory(dir)
       val rbc = Channels.newChannel(content)
-      val fos = new FileOutputStream(path.path)
+      val fos = new FileOutputStream(path.path.toFile)
       fos.getChannel.transferFrom(rbc, 0, java.lang.Long.MAX_VALUE)
 
       rbc.close()
