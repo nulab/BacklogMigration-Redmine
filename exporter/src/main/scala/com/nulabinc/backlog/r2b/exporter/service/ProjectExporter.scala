@@ -19,6 +19,7 @@ import com.taskadapter.redmineapi.bean._
 import spray.json._
 
 import scala.collection.mutable
+import scala.concurrent.Await
 import scala.concurrent.duration.Duration
 
 /**
@@ -49,7 +50,9 @@ private[exporter] class ProjectExporter @Inject()(implicit val projectWrites: Pr
     val system        = ActorSystem.apply("main-actor-system")
     val contentActor  = system.actorOf(Props(new ContentActor(exportContext)))
     contentActor ! ContentActor.Do
-    system.awaitTermination(Duration.Inf)
+
+    Await.result(system.whenTerminated, Duration.Inf)
+
     property(exportContext, mappingContainer)
   }
 

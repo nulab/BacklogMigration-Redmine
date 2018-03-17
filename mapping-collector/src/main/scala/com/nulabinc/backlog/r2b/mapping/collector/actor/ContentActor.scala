@@ -20,7 +20,7 @@ private[collector] class ContentActor(mappingContext: MappingContext) extends Ac
       val allUsers: Seq[User] = mappingContext.userService.allUsers()
       issuesActor ! IssuesActor.Do(mappingData, allUsers)
     case IssuesActor.Done =>
-      context.system.shutdown()
+      context.system.terminate()
   }
 
 }

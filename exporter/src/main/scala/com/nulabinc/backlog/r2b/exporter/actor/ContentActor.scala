@@ -26,7 +26,7 @@ private[exporter] class ContentActor(exportContext: ExportContext) extends Actor
         self ! IssuesActor.Done
       }
     case IssuesActor.Done =>
-      context.system.shutdown()
+      context.system.terminate()
   }
 
   private[this] def isMigrate(exclude: Option[List[String]], item: String): Boolean =

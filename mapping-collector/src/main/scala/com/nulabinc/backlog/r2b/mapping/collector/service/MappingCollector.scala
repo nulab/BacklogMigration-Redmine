@@ -12,6 +12,7 @@ import com.osinka.i18n.Messages
 import com.taskadapter.redmineapi.bean.{Group, Membership, User}
 
 import scala.collection.JavaConverters._
+import scala.concurrent.Await
 import scala.concurrent.duration.Duration
 
 /**
@@ -29,7 +30,7 @@ private[collector] class MappingCollector @Inject()(mappingContextProvider: Mapp
     val contentActor   = system.actorOf(Props(new ContentActor(mappingContext)))
     contentActor ! ContentActor.Do(mappingData)
 
-    system.awaitTermination(Duration.Inf)
+    Await.result(system.whenTerminated, Duration.Inf)
 
     val memberships = membershipService.allMemberships()
     memberships.foreach(membership => parse(membership, mappingData))
