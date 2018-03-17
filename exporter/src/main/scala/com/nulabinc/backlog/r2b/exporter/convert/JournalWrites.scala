@@ -22,7 +22,6 @@ private[exporter] class JournalWrites @Inject()(implicit val userWrites: UserWri
       optContent = StringUtil.notEmpty(journal.getNotes),
       changeLogs = journal.getDetails.asScala.map(Convert.toBacklog(_)),
       notifications = Seq.empty[BacklogNotification],
-      isCreateIssue = false,
       optCreatedUser = Option(journal.getUser).map(Convert.toBacklog(_)),
       optCreated = Option(journal.getCreatedOn).map(DateUtil.isoFormat)
     )

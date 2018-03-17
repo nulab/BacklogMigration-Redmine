@@ -22,7 +22,7 @@ private[exporter] class CommentReducer(issueId: Long, changeLogReducer: ChangeLo
       case None =>
         StringUtil.notEmpty(changeLogContent.result().trim)
     }
-    comment.copy(optIssueId = Some(issueId), optContent = optNewContent, isCreateIssue = false, changeLogs = newChangeLogs)
+    comment.copy(optIssueId = Some(issueId), optContent = optNewContent, changeLogs = newChangeLogs)
   }
 
 }

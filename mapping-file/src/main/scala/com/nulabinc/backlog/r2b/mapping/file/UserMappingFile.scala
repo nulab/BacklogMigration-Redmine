@@ -1,10 +1,12 @@
 package com.nulabinc.backlog.r2b.mapping.file
 
+import java.nio.charset.Charset
+
 import com.nulabinc.backlog.migration.common.conf.{BacklogApiConfiguration, BacklogConfiguration}
 import com.nulabinc.backlog.migration.common.domain.BacklogUser
 import com.nulabinc.backlog.migration.common.modules.{ServiceInjector => BacklogInjector}
 import com.nulabinc.backlog.migration.common.service.{UserService => BacklogUserService}
-import com.nulabinc.backlog.migration.common.utils.StringUtil
+import com.nulabinc.backlog.migration.common.utils.{IOUtil, StringUtil}
 import com.nulabinc.backlog.r2b.mapping.core.MappingDirectory
 import com.nulabinc.backlog.r2b.mapping.domain.MappingJsonProtocol._
 import com.nulabinc.backlog.r2b.mapping.domain.{Mapping, MappingsWrapper}
@@ -14,8 +16,7 @@ import com.nulabinc.backlog.r2b.redmine.service.{UserService => RedmineUserServi
 import com.osinka.i18n.Messages
 import com.taskadapter.redmineapi.bean.{User => RedmineUser}
 import spray.json.JsonParser
-
-import scalax.file.Path
+import better.files.File
 
 /**
   * @author uchida
@@ -78,8 +79,8 @@ class UserMappingFile(redmineApiConfig: RedmineApiConfiguration, backlogApiConfi
   }
 
   override def tryUnmarshal(): Seq[Mapping] = {
-    val path    = Path.fromString(filePath)
-    val json    = path.lines().mkString
+    val path    = File(filePath).path.toAbsolutePath
+    val json    = IOUtil.input(path).getOrElse("")
     val convert = convertForNAI(allUsers()) _
     JsonParser(json).convertTo[MappingsWrapper].mappings.map(convert)
   }

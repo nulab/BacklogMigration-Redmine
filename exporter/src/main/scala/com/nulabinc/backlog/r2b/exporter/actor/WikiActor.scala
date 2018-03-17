@@ -50,7 +50,7 @@ private[exporter] class WikiActor(exportContext: ExportContext) extends Actor wi
 
         try {
           val rbc = Channels.newChannel(url.openStream())
-          val fos = new FileOutputStream(path.path)
+          val fos = new FileOutputStream(path.path.toFile)
           fos.getChannel.transferFrom(rbc, 0, java.lang.Long.MAX_VALUE)
 
           rbc.close()

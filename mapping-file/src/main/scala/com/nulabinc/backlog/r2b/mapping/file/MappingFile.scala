@@ -6,7 +6,7 @@ import com.nulabinc.backlog.r2b.mapping.domain.{Mapping, MappingsWrapper}
 import spray.json.{JsonParser, _}
 
 import scala.collection.mutable.ArrayBuffer
-import scalax.file.Path
+import better.files.File
 
 /**
   * @author uchida
@@ -30,14 +30,14 @@ trait MappingFile extends Logging {
   def isValid: Boolean = errors.isEmpty
 
   def isExists: Boolean = {
-    val path: Path = Path.fromString(filePath)
-    path.isFile
+    val path: File = File(filePath).path.toAbsolutePath
+    !path.isDirectory && path.exists
   }
 
   def isParsed: Boolean = unmarshal().isDefined
 
   def create(afterMessage: () => Unit) = {
-    IOUtil.output(Path.fromString(filePath), MappingsWrapper(description, redmines.map(convert)).toJson.prettyPrint)
+    IOUtil.output(File(filePath).path.toAbsolutePath, MappingsWrapper(description, redmines.map(convert)).toJson.prettyPrint)
     if (redmines.nonEmpty) {
       afterMessage()
     }
@@ -64,7 +64,7 @@ trait MappingFile extends Logging {
               addedList += convert(redmineItem)
           }
         }
-        IOUtil.output(Path.fromString(filePath), MappingsWrapper(description, mergeList).toJson.prettyPrint)
+        IOUtil.output(File(filePath).path.toAbsolutePath, MappingsWrapper(description, mergeList).toJson.prettyPrint)
         addedList
       case _ =>
         Seq.empty[Mapping]
@@ -72,8 +72,8 @@ trait MappingFile extends Logging {
   }
 
   def unmarshal(): Option[Seq[Mapping]] = {
-    val path: Path = Path.fromString(filePath)
-    val json       = path.lines().mkString
+    val path = File(filePath).path.toAbsolutePath
+    val json = IOUtil.input(path).getOrElse("")
     try {
       val wrapper: MappingsWrapper = JsonParser(json).convertTo[MappingsWrapper]
       Some(wrapper.mappings)
@@ -85,13 +85,13 @@ trait MappingFile extends Logging {
   }
 
   def tryUnmarshal(): Seq[Mapping] = {
-    val path = Path.fromString(filePath)
-    val json = path.lines().mkString
+    val path = File(filePath).path.toAbsolutePath
+    val json = IOUtil.input(path).getOrElse("")
     JsonParser(json).convertTo[MappingsWrapper].mappings
   }
 
   def errors: Seq[String] = {
-    val fileName  = Path.fromString(filePath).name
+    val fileName  = File(filePath).path.toAbsolutePath.getFileName.toString
     val validator = new MappingValidator(redmines, backlogs, itemName, fileName)
     validator.validate(unmarshal())
   }
