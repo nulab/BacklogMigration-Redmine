@@ -25,7 +25,7 @@ lazy val commonSettings = Seq(
     "com.github.pathikrit"          %% "better-files"      % "3.4.0",
     "com.typesafe.akka"             %% "akka-actor"        % "2.5.9",
     "com.typesafe.akka"             %% "akka-slf4j"        % "2.5.9",
-    "io.spray"                      %% "spray-json"        % "1.3.2",
+    "io.spray"                      %% "spray-json"        % "1.3.3",
     "com.typesafe"                  % "config"             % "1.3.3",
     "com.google.inject"             % "guice"              % "4.1.0",
     "com.netaporter"                %% "scala-uri"         % "0.4.16",
@@ -154,10 +154,10 @@ lazy val root = (project in file("."))
         "org.typelevel"   %% "cats-core"        % catsVersion,
         "org.typelevel"   %% "cats-free"        % catsVersion,
         "com.taskadapter" %  "redmine-java-api" % "2.4.0",
-        "joda-time"       % "joda-time"         % "2.3",
-        "org.joda"        % "joda-convert"      % "1.6",
-        "org.scalatest"   %% "scalatest"        % "3.0.1" % "test",
-        "org.rogach"      %  "scallop_2.11"     % "2.0.5"
+        "joda-time"       %  "joda-time"        % "2.3",
+        "org.joda"        %  "joda-convert"     % "1.6",
+        "org.rogach"      %% "scallop"          % "3.1.2",
+        "org.scalatest"   %% "scalatest"        % "3.0.1" % "test"
       )
     },
     assemblyJarName in assembly := {

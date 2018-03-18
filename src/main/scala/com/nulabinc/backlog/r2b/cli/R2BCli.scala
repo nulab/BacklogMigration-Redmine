@@ -92,7 +92,7 @@ object R2BCli extends BacklogConfiguration with Logging {
 
     val stream = ApiStream.sequential(10000)(
       (index, count) => backlogApi.issueApi.search(IssueSearch(offset = index, count = count))
-    ).map { issues => issues}
+    )
 
     val program = for {
       issue <- backlogStream(stream)
