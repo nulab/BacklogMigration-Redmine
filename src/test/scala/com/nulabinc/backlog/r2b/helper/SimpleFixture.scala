@@ -1,9 +1,11 @@
 package com.nulabinc.backlog.r2b.helper
 
-import java.io.{File, FileInputStream}
+import java.io.{FileInputStream}
 import java.util.{Date, Locale, Properties}
 
+import better.files.File
 import com.nulabinc.backlog.migration.common.conf.BacklogApiConfiguration
+import com.nulabinc.backlog.migration.common.utils.IOUtil
 import com.nulabinc.backlog.r2b.conf.AppConfiguration
 import com.nulabinc.backlog.r2b.mapping.core._
 import com.nulabinc.backlog.r2b.mapping.domain.{Mapping, MappingsWrapper}
@@ -18,7 +20,6 @@ import spray.json.{JsNumber, JsonParser}
 import com.nulabinc.backlog.r2b.mapping.domain.MappingJsonProtocol._
 
 import scala.collection.JavaConverters._
-import scalax.file.Path
 
 /**
   * @author uchida
@@ -69,16 +70,16 @@ trait SimpleFixture {
   }
 
   private[this] def unmarshal(strPath: String): Seq[Mapping] = {
-    val path = Path.fromString(strPath)
-    val json = path.lines().mkString
+    val path = File(strPath).path.toAbsolutePath
+    val json = IOUtil.input(path).getOrElse("")
     JsonParser(json).convertTo[MappingsWrapper].mappings
   }
 
   private[this] def getAppConfiguration: Option[AppConfiguration] = {
-    val file = new File("app.properties")
+    val file = File("app.properties")
     if (file.exists()) {
       val prop: Properties = new Properties()
-      prop.load(new FileInputStream(file))
+      prop.load(new FileInputStream(file.path.toFile))
       val redmineKey: String = prop.getProperty("redmine.key")
       val redmineUrl: String = prop.getProperty("redmine.url")
       val backlogKey: String = prop.getProperty("backlog.key")
