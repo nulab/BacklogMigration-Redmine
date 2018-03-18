@@ -1,5 +1,11 @@
 package com.nulabinc.backlog.r2b.cli
 
+import akka.actor.ActorSystem
+import akka.stream.ActorMaterializer
+import backlog4s.apis.AllApi
+import backlog4s.datas.IssueSearch
+import backlog4s.interpreters.AkkaHttpInterpret
+import backlog4s.streaming.ApiStream
 import com.google.inject.Injector
 import com.nulabinc.backlog.migration.common.conf.{BacklogApiConfiguration, BacklogConfiguration, BacklogPaths}
 import com.nulabinc.backlog.migration.common.modules.{ServiceInjector => BacklogInjector}
@@ -8,12 +14,15 @@ import com.nulabinc.backlog.migration.common.utils.{ConsoleOut, Logging, Mixpane
 import com.nulabinc.backlog.migration.importer.core.{Boot => BootImporter}
 import com.nulabinc.backlog.r2b.conf.AppConfiguration
 import com.nulabinc.backlog.r2b.exporter.core.{Boot => BootExporter}
+import com.nulabinc.backlog.r2b.interpreters.{AppInterpreter, ConsoleDSL, ConsoleInterpreter}
 import com.nulabinc.backlog.r2b.mapping.collector.core.{Boot => BootMapping}
 import com.nulabinc.backlog.r2b.mapping.core.MappingContainer
 import com.nulabinc.backlog.r2b.mapping.domain.Mapping
 import com.nulabinc.backlog.r2b.mapping.file._
 import com.osinka.i18n.Messages
 
+import scala.concurrent.Await
+import scala.concurrent.duration.Duration
 import scala.util.Try
 
 /**
@@ -71,6 +80,28 @@ object R2BCli extends BacklogConfiguration with Logging {
   }
 
   def destroy(apiConfig: BacklogApiConfiguration): Unit = {
+
+    import com.nulabinc.backlog.r2b.interpreters.AppDSL._
+
+    implicit val system = ActorSystem("destroy")
+    implicit val mat = ActorMaterializer()
+    implicit val exc = system.dispatcher
+
+    val interpreter = AppInterpreter(new AkkaHttpInterpret, new ConsoleInterpreter)
+    val backlogApi = AllApi.accessKey(s"${apiConfig.url}/api/v2/", apiConfig.key)
+
+    val stream = ApiStream.sequential(10000)(
+      (index, count) => backlogApi.issueApi.search(IssueSearch(offset = index, count = count))
+    ).map { issues => issues}
+
+    val program = for {
+      issue <- backlogStream(stream)
+      a <- console(ConsoleDSL.print("issue: " + issue))
+    } yield issue
+
+    val f = interpreter.run(program)
+
+    Await.result(f, Duration.Inf)
 
   }
 
