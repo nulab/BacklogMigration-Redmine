@@ -149,7 +149,7 @@ lazy val root = (project in file("."))
   .settings(
     name := "backlog-migration-redmine",
     libraryDependencies ++= {
-      val catsVersion = "1.0.1"
+      val catsVersion = "1.1.0"
       Seq(
         "org.typelevel"   %% "cats-core"        % catsVersion,
         "org.typelevel"   %% "cats-free"        % catsVersion,
