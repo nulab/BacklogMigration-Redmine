@@ -23,7 +23,8 @@ class WikiServiceImpl @Inject()(apiConfig: RedmineApiConfiguration, redmine: Red
         Seq.empty[WikiPage]
     }
 
-  override def wikiDetail(pageTitle: String): WikiPageDetail =
+  override def wikiDetail(pageTitle: String): WikiPageDetail = {
+    logger.debug("Get a wiki Title: " + pageTitle)
     redmine.getWikiManager.getWikiPageDetailByProjectAndTitle(apiConfig.projectKey, pageTitle)
-
+  }
 }
