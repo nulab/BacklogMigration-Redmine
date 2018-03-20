@@ -137,15 +137,23 @@ lazy val mappingFile = (project in file("mapping-file"))
   )
   .dependsOn(mappingBase)
 
+lazy val backlog4s_core = (project in file("backlog4s/backlog4s-core"))
+  .settings(commonSettings)
+
+lazy val backlog4s_akka = (project in file("backlog4s/backlog4s-akka"))
+  .settings(commonSettings)
+  .dependsOn(backlog4s_core)
+
 lazy val root = (project in file("."))
   .settings(commonSettings: _*)
   .settings(
     name := "backlog-migration-redmine",
     libraryDependencies ++= {
-      val catsVersion = "1.0.1"
+      val catsVersion = "1.1.0"
       Seq(
         "org.typelevel"   %% "cats-core"        % catsVersion,
         "org.typelevel"   %% "cats-free"        % catsVersion,
+        "io.monix"        %% "monix-reactive"   % "3.0.0-RC1",
         "com.taskadapter" %  "redmine-java-api" % "2.4.0",
         "joda-time"       %  "joda-time"        % "2.3",
         "org.joda"        %  "joda-convert"     % "1.6",
@@ -165,4 +173,5 @@ lazy val root = (project in file("."))
     scapegoatDisabledInspections := Seq("NullParameter", "CatchThrowable", "NoOpOverride")
   )
   .dependsOn(common % "test->test;compile->compile", importer, exporter, mappingFile, mappingCollector)
+  .dependsOn(backlog4s_core, backlog4s_akka)
   .aggregate(common, importer, exporter)
