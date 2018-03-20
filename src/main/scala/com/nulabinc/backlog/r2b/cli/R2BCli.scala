@@ -134,7 +134,7 @@ object R2BCli extends BacklogConfiguration with Logging {
 //      }
     } yield ()
 
-    val f = interpreter.run(validationProgram)
+    val f = interpreter.run(program)
 
     Await.result(f, Duration.Inf)
 
