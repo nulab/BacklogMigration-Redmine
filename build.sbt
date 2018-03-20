@@ -153,6 +153,7 @@ lazy val root = (project in file("."))
       Seq(
         "org.typelevel"   %% "cats-core"        % catsVersion,
         "org.typelevel"   %% "cats-free"        % catsVersion,
+        "io.monix"        %% "monix-reactive"   % "3.0.0-M1",
         "com.taskadapter" %  "redmine-java-api" % "2.4.0",
         "joda-time"       %  "joda-time"        % "2.3",
         "org.joda"        %  "joda-convert"     % "1.6",
