@@ -4,8 +4,6 @@ import akka.actor.ActorSystem
 import akka.stream.ActorMaterializer
 import backlog4s.apis.AllApi
 import backlog4s.datas._
-import backlog4s.dsl.BacklogHttpOp.pure
-import backlog4s.exceptions.BacklogApiException
 import backlog4s.interpreters.AkkaHttpInterpret
 import backlog4s.streaming.ApiStream
 import com.google.inject.Injector
@@ -14,6 +12,7 @@ import com.nulabinc.backlog.migration.common.modules.{ServiceInjector => Backlog
 import com.nulabinc.backlog.migration.common.service.{ProjectService, SpaceService, UserService}
 import com.nulabinc.backlog.migration.common.utils.{ConsoleOut, Logging, MixpanelUtil, TrackingData}
 import com.nulabinc.backlog.migration.importer.core.{Boot => BootImporter}
+import com.nulabinc.backlog.r2b.cli.FutureUtils.Suspend
 import com.nulabinc.backlog.r2b.conf.AppConfiguration
 import com.nulabinc.backlog.r2b.exporter.core.{Boot => BootExporter}
 import com.nulabinc.backlog.r2b.interpreters.{AppDSL, AppInterpreter, ConsoleDSL, ConsoleInterpreter}
@@ -22,10 +21,23 @@ import com.nulabinc.backlog.r2b.mapping.core.MappingContainer
 import com.nulabinc.backlog.r2b.mapping.domain.Mapping
 import com.nulabinc.backlog.r2b.mapping.file._
 import com.osinka.i18n.Messages
+import monix.execution.Scheduler
 
-import scala.concurrent.{Await, ExecutionContextExecutor}
+import scala.concurrent.{Await, ExecutionContext, Future}
 import scala.concurrent.duration.Duration
 import scala.util.Try
+
+object FutureUtils {
+  case class Suspend[A](eval: () => Future[A])
+
+  def sequential[A](prgs: Seq[Suspend[A]])(implicit exc: ExecutionContext): Future[Seq[A]] = {
+    prgs.foldLeft(Future.successful(Seq.empty[A])) {
+      case (acc, future) =>
+        acc.flatMap(res => future.eval().map(res2 => res :+ res2))
+    }
+  }
+
+}
 
 /**
   * @author uchida
@@ -88,53 +100,73 @@ object R2BCli extends BacklogConfiguration with Logging {
 
     implicit val system: ActorSystem = ActorSystem("destroy")
     implicit val mat: ActorMaterializer = ActorMaterializer()
-    implicit val exc: ExecutionContextExecutor = system.dispatcher
+    implicit val exc: Scheduler = monix.execution.Scheduler.Implicits.global
 
     val interpreter = AppInterpreter(new AkkaHttpInterpret, new ConsoleInterpreter)
     val backlogApi = AllApi.accessKey(s"${apiConfig.url}/api/v2/", apiConfig.key)
 
-    val stream = ApiStream.sequential(10000)(
-      (index, count) => backlogApi.issueApi.search(IssueSearch(offset = index, count = count))
-    )
-
     val validationProgram = for {
-      accessCheck <- backlog(backlogApi.projectApi.byIdOrKey(KeyParam(Key[Project](apiConfig.projectKey))))
-      _ = accessCheck match {
-        case Right(_) => Seq(
-          console(ConsoleDSL.print(Messages("cli.param.ok.access", Messages("common.backlog"))))
+      accessCheck <- backlog(
+        backlogApi.projectApi.byIdOrKey(
+          KeyParam(Key[Project](apiConfig.projectKey))
         )
-        case Left(error) => Seq(
-          console(ConsoleDSL.print(error.toString)), // TODO: of course not work
-          exit(1)
-        )
+      )
+      _ <- {
+        accessCheck match {
+          case Right(_) => console(ConsoleDSL.print(Messages("cli.param.ok.access", Messages("common.backlog"))))
+          case Left(error) => exit(error.toString, 1)
+        }
+
       }
     } yield ()
 
     val confirmProgram = for {
-      projectKey <- console(ConsoleDSL.read())
-      isValid <- AppDSL.pure(projectKey == apiConfig.projectKey)
+      projectKey <- console(ConsoleDSL.read(Messages("destroy.confirm")))
+      isValid = projectKey == apiConfig.projectKey
       _ <- if (isValid) {
-        console(ConsoleDSL.print("valid project key"))
+        AppDSL.pure(())
       } else {
-        console(ConsoleDSL.print("Project key is wrong")) // TODO: of course not work
-        exit(1)
+        exit(Messages("destroy.confirm.fail"), 1)
       }
     } yield isValid
 
-    val program = for {
-      _ <- validationProgram
-      isValid <- confirmProgram
-//      streamIssues <- backlogStream(stream) // Observable[Seq[Issue]]
-//      a <- streamIssues.map { issues =>
-//        issues.map { issue =>
-//          backlog(backlogApi.issueApi.remove(IdParam(issue.id)).orFail)
-//          console(ConsoleDSL.print("issue: " + issue.summary))
-//        }
-//        // Observable[Seq[AppProgram[Unit]]] => AppProgram
-//      }
-    } yield ()
+    val stream = ApiStream.sequential(Int.MaxValue)(
+      (index, count) => backlogApi.issueApi.search(IssueSearch(offset = index, count = count))
+    )
 
-    val f = interpreter.run(program)
+    val program = for {
+      _ <- console(ConsoleDSL.print(s"""--------------------------------------------------
+                                       |${Messages("common.backlog")} ${Messages("common.url")}[${apiConfig.url}]
+                                       |${Messages("common.backlog")} ${Messages("common.access_key")}[${apiConfig.key}]
+                                       |${Messages("common.backlog")} ${Messages("common.project_key")}[${apiConfig.projectKey}]
+                                       |--------------------------------------------------""".stripMargin))
+      _ <- console(ConsoleDSL.print(Messages("destroy.start")))
+      _ <- validationProgram
+      _ <- confirmProgram
+      _ <- console(ConsoleDSL.print(Messages("destroy.start")))
+      streamIssues <- backlogStream(stream)
+      stream = {
+        streamIssues.map { issues =>
+          issues.map { issue =>
+            for {
+              _ <- backlog(backlogApi.issueApi.remove(IdParam(issue.id)).orFail)
+              _ <- console(ConsoleDSL.print(Messages("destroy.issue.deleted", issue.summary)))
+            } yield ()
+          }
+        }
+      }
+      _ <- console(ConsoleDSL.print(Messages("destroy.finish")))
+    } yield stream
+
+    val f = interpreter.run(program).flatMap { stream =>
+      stream.mapFuture { prgs =>
+        FutureUtils.sequential(
+          prgs.map { prg =>
+            Suspend(() => interpreter.run(prg))
+          }
+        )
+      }.runAsyncGetFirst
+    }
 
     Await.result(f, Duration.Inf)
 

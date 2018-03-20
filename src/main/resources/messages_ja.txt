@@ -158,3 +158,10 @@ import.error.issue.attachment=添付ファイル[{0}]をアップロードでき
 import.error.attachment.too_large=添付ファイル[{0}]をアップロードできませんでした。添付ファイルのサイズが大きすぎます。
 import.error.failed.import=プロジェクト[{0}]を登録できませんでした。:{1}
 import.error.failed.comment=コメントを課題[{0}]に登録できませんでした。:{1}
+
+# Destroy
+destroy.start=全ての課題を削除します。
+destroy.confirm=削除するプロジェクトキーを入力してください:
+destroy.confirm.fail=入力されたプロジェクトキーが間違っています。
+destroy.issue.deleted=課題削除: {0}
+destroy.finish=全ての課題を削除しました。

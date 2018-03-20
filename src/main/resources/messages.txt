@@ -158,3 +158,10 @@ import.error.issue.attachment=Attachment file [{0}] upload failed. :{1}
 import.error.attachment.too_large=Attachment file upload failed. The size of attached file is too large.:{0}
 import.error.failed.import=Could not register project [{0}]. : {1}
 import.error.failed.comment=Could not register comment on issue [{0}]. : {1}
+
+# Destroy
+destroy.start=Start destroy all issues.
+destroy.confirm=Please enter project key:
+destroy.confirm.fail=Input project key is wrong.
+destroy.issue.deleted=Deleted issue: {0}
+destroy.finish=Destroy completed.
