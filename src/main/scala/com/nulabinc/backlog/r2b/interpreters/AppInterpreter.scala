@@ -1,6 +1,6 @@
 package com.nulabinc.backlog.r2b.interpreters
 
-import backlog4s.dsl.ApiDsl.{ApiADT, ApiPrg}
+import backlog4s.dsl.ApiDsl.ApiPrg
 import backlog4s.interpreters.AkkaHttpInterpret
 import backlog4s.streaming.ApiStream.ApiStream
 import cats.free.Free
@@ -9,9 +9,11 @@ import cats.implicits._
 import com.nulabinc.backlog.r2b.interpreters.AppDSL.AppProgram
 import com.nulabinc.backlog.r2b.interpreters.ConsoleDSL.ConsoleProgram
 import monix.reactive.Observable
-import org.reactivestreams.{Publisher, Subscriber}
+import org.reactivestreams.Subscriber
 
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.duration.Duration
+import scala.concurrent.{Await, ExecutionContext, Future}
+import scala.util.control.NonFatal
 import scala.util.{Failure, Success}
 
 sealed trait AppADT[+A]
@@ -19,6 +21,8 @@ case class Pure[A](a: A) extends AppADT[A]
 case class Backlog[A](prg: ApiPrg[A]) extends AppADT[A]
 case class BacklogStream[A](prg: ApiStream[A]) extends AppADT[Observable[Seq[A]]]
 case class Console[A](prg: ConsoleProgram[A]) extends AppADT[A]
+case class Exit(exitCode: Int) extends AppADT[Unit]
+//case class RunSeq[A](prgs: Seq[AppProgram[A]]) extends AppADT[Seq[A]]
 
 object AppDSL {
 
@@ -36,6 +40,8 @@ object AppDSL {
   def console[A](prg: ConsoleProgram[A]): AppProgram[A] =
     Free.liftF(Console(prg))
 
+  def exit(exitCode: Int): AppProgram[Unit] =
+    Free.liftF(Exit(exitCode))
 }
 
 case class AppInterpreter(backlogInterpreter: AkkaHttpInterpret,
@@ -47,6 +53,18 @@ case class AppInterpreter(backlogInterpreter: AkkaHttpInterpret,
 
   override def apply[A](fa: AppADT[A]): Future[A] = fa match {
     case Pure(a) => Future.successful(a)
+//    case RunSeq(prgs) => Future.sequence {
+//      prgs.map { prg =>
+//        val f = run(prg)
+//          .map(Success(_))
+//          .recover {
+//            case NonFatal(ex) =>
+//              Failure(ex)
+//          }
+//
+//        Await.result(f, Duration.Inf)
+//      }
+//    }
     case Backlog(prg) => backlogInterpreter.run(prg)
     case BacklogStream(stream) => Future.successful {
       Observable.fromReactivePublisher[Seq[A]](
@@ -65,5 +83,8 @@ case class AppInterpreter(backlogInterpreter: AkkaHttpInterpret,
       )
     }
     case Console(prg) => prg.foldMap(consoleInterpreter)
+    case Exit(statusCode) => Future.successful {
+      sys.exit(statusCode)
+    }
   }
 }

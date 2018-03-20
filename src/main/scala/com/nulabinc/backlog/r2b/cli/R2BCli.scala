@@ -3,7 +3,9 @@ package com.nulabinc.backlog.r2b.cli
 import akka.actor.ActorSystem
 import akka.stream.ActorMaterializer
 import backlog4s.apis.AllApi
-import backlog4s.datas.IssueSearch
+import backlog4s.datas._
+import backlog4s.dsl.BacklogHttpOp.pure
+import backlog4s.exceptions.BacklogApiException
 import backlog4s.interpreters.AkkaHttpInterpret
 import backlog4s.streaming.ApiStream
 import com.google.inject.Injector
@@ -14,14 +16,14 @@ import com.nulabinc.backlog.migration.common.utils.{ConsoleOut, Logging, Mixpane
 import com.nulabinc.backlog.migration.importer.core.{Boot => BootImporter}
 import com.nulabinc.backlog.r2b.conf.AppConfiguration
 import com.nulabinc.backlog.r2b.exporter.core.{Boot => BootExporter}
-import com.nulabinc.backlog.r2b.interpreters.{AppInterpreter, ConsoleDSL, ConsoleInterpreter}
+import com.nulabinc.backlog.r2b.interpreters.{AppDSL, AppInterpreter, ConsoleDSL, ConsoleInterpreter}
 import com.nulabinc.backlog.r2b.mapping.collector.core.{Boot => BootMapping}
 import com.nulabinc.backlog.r2b.mapping.core.MappingContainer
 import com.nulabinc.backlog.r2b.mapping.domain.Mapping
 import com.nulabinc.backlog.r2b.mapping.file._
 import com.osinka.i18n.Messages
 
-import scala.concurrent.Await
+import scala.concurrent.{Await, ExecutionContextExecutor}
 import scala.concurrent.duration.Duration
 import scala.util.Try
 
@@ -81,11 +83,12 @@ object R2BCli extends BacklogConfiguration with Logging {
 
   def destroy(apiConfig: BacklogApiConfiguration): Unit = {
 
+    import backlog4s.dsl.syntax._
     import com.nulabinc.backlog.r2b.interpreters.AppDSL._
 
-    implicit val system = ActorSystem("destroy")
-    implicit val mat = ActorMaterializer()
-    implicit val exc = system.dispatcher
+    implicit val system: ActorSystem = ActorSystem("destroy")
+    implicit val mat: ActorMaterializer = ActorMaterializer()
+    implicit val exc: ExecutionContextExecutor = system.dispatcher
 
     val interpreter = AppInterpreter(new AkkaHttpInterpret, new ConsoleInterpreter)
     val backlogApi = AllApi.accessKey(s"${apiConfig.url}/api/v2/", apiConfig.key)
@@ -94,15 +97,48 @@ object R2BCli extends BacklogConfiguration with Logging {
       (index, count) => backlogApi.issueApi.search(IssueSearch(offset = index, count = count))
     )
 
-    val program = for {
-      issue <- backlogStream(stream)
-      a <- console(ConsoleDSL.print("issue: " + issue))
-    } yield issue
+    val validationProgram = for {
+      accessCheck <- backlog(backlogApi.projectApi.byIdOrKey(KeyParam(Key[Project](apiConfig.projectKey))))
+      _ = accessCheck match {
+        case Right(_) => Seq(
+          console(ConsoleDSL.print(Messages("cli.param.ok.access", Messages("common.backlog"))))
+        )
+        case Left(error) => Seq(
+          console(ConsoleDSL.print(error.toString)), // TODO: of course not work
+          exit(1)
+        )
+      }
+    } yield ()
 
-    val f = interpreter.run(program)
+    val confirmProgram = for {
+      projectKey <- console(ConsoleDSL.read())
+      isValid <- AppDSL.pure(projectKey == apiConfig.projectKey)
+      _ <- if (isValid) {
+        console(ConsoleDSL.print("valid project key"))
+      } else {
+        console(ConsoleDSL.print("Project key is wrong")) // TODO: of course not work
+        exit(1)
+      }
+    } yield isValid
+
+    val program = for {
+      _ <- validationProgram
+      isValid <- confirmProgram
+//      streamIssues <- backlogStream(stream) // Observable[Seq[Issue]]
+//      a <- streamIssues.map { issues =>
+//        issues.map { issue =>
+//          backlog(backlogApi.issueApi.remove(IdParam(issue.id)).orFail)
+//          console(ConsoleDSL.print("issue: " + issue.summary))
+//        }
+//        // Observable[Seq[AppProgram[Unit]]] => AppProgram
+//      }
+    } yield ()
+
+    val f = interpreter.run(validationProgram)
 
     Await.result(f, Duration.Inf)
 
+    system.terminate()
   }
 
   private[this] def tracking(config: AppConfiguration, backlogInjector: Injector) = {
