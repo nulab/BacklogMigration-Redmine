@@ -70,7 +70,11 @@ object R2BCli extends BacklogConfiguration with Logging {
 
             val backlogInjector = BacklogInjector.createInjector(config.backlogConfig)
             val backlogPaths    = backlogInjector.getInstance(classOf[BacklogPaths])
-            backlogPaths.outputPath.listRecursively.foreach(_.delete(false))
+            
+            if (backlogPaths.outputPath.exists) {
+              backlogPaths.outputPath.listRecursively.foreach(_.delete(false))
+            }
+
             val mappingContainer = MappingContainer(user = mappingFileContainer.user.tryUnmarshal(),
                                                     status = mappingFileContainer.status.tryUnmarshal(),
                                                     priority = mappingFileContainer.priority.tryUnmarshal())
