@@ -1,6 +1,11 @@
 package com.nulabinc.backlog.r2b.cli
 
+import java.net.InetSocketAddress
+
 import akka.actor.ActorSystem
+import akka.http.scaladsl.ClientTransport
+import akka.http.scaladsl.model.headers
+import akka.http.scaladsl.model.headers.HttpCredentials
 import akka.stream.ActorMaterializer
 import backlog4s.apis.AllApi
 import backlog4s.datas._
@@ -95,14 +100,50 @@ object R2BCli extends BacklogConfiguration with Logging {
 
   def destroy(apiConfig: BacklogApiConfiguration): Unit = {
 
-    import backlog4s.dsl.syntax._
     import com.nulabinc.backlog.r2b.interpreters.AppDSL._
 
     implicit val system: ActorSystem = ActorSystem("destroy")
     implicit val mat: ActorMaterializer = ActorMaterializer()
     implicit val exc: Scheduler = monix.execution.Scheduler.Implicits.global
 
-    val interpreter = AppInterpreter(new AkkaHttpInterpret, new ConsoleInterpreter)
+    def createProxyTransport(host: String, port: String, optProxyCredentials: Option[HttpCredentials]): Option[ClientTransport] = {
+      (host, port) match {
+        case (h, p) =>
+          try {
+            Some(
+              optProxyCredentials match {
+                case Some(credentials) =>
+                  ClientTransport.httpsProxy(
+                    InetSocketAddress.createUnresolved(h, p.toInt),
+                    credentials
+                  )
+                case None =>
+                  ClientTransport.httpsProxy(InetSocketAddress.createUnresolved(h, p.toInt))
+              }
+
+            )
+          } catch {
+            case _: Throwable => None
+          }
+        case _ => None
+      }
+    }
+
+    val optAuth = (System.getProperty("http.proxyUser"), System.getProperty("http.proxyPassword")) match {
+      case (user, password) => Some(headers.BasicHttpCredentials(user, password))
+      case _ => None
+    }
+
+    val httpsProxyTransport = createProxyTransport(System.getProperty("https.proxyHost"), System.getProperty("https.proxyPort"), optAuth)
+    val httpProxyTransport = createProxyTransport(System.getProperty("http.proxyHost"), System.getProperty("http.proxyPort"), optAuth)
+
+    val transport = (httpsProxyTransport, httpProxyTransport) match {
+      case (Some(https), _) => Some(https)
+      case (None, Some(http)) => Some(http)
+      case _ => None
+    }
+
+    val interpreter = AppInterpreter(new AkkaHttpInterpret(transport), new ConsoleInterpreter)
     val backlogApi = AllApi.accessKey(s"${apiConfig.url}/api/v2/", apiConfig.key)
 
     val validationProgram = for {
@@ -111,6 +152,7 @@ object R2BCli extends BacklogConfiguration with Logging {
           KeyParam(Key[Project](apiConfig.projectKey))
         )
       )
+
       _ <- {
         accessCheck match {
           case Right(_) => console(ConsoleDSL.print(Messages("cli.param.ok.access", Messages("common.backlog"))))
@@ -130,9 +172,11 @@ object R2BCli extends BacklogConfiguration with Logging {
       }
     } yield isValid
 
-    val stream = ApiStream.sequential(Int.MaxValue)(
-      (index, count) => backlogApi.issueApi.search(IssueSearch(offset = index, count = count))
-    )
+    val stream = ApiStream.sequential(Int.MaxValue) {
+      (index, count) =>
+        logger.debug(s"Index: $index Count: $count")
+        backlogApi.issueApi.search(IssueSearch(offset = index))
+    }
 
     val program = for {
       _ <- console(ConsoleDSL.print(s"""--------------------------------------------------
@@ -140,7 +184,6 @@ object R2BCli extends BacklogConfiguration with Logging {
                                        |${Messages("common.backlog")} ${Messages("common.access_key")}[${apiConfig.key}]
                                        |${Messages("common.backlog")} ${Messages("common.project_key")}[${apiConfig.projectKey}]
                                        |--------------------------------------------------""".stripMargin))
-      _ <- console(ConsoleDSL.print(Messages("destroy.start")))
       _ <- validationProgram
       _ <- confirmProgram
       _ <- console(ConsoleDSL.print(Messages("destroy.start")))
@@ -149,8 +192,15 @@ object R2BCli extends BacklogConfiguration with Logging {
         streamIssues.map { issues =>
           issues.map { issue =>
             for {
-              _ <- backlog(backlogApi.issueApi.remove(IdParam(issue.id)).orFail)
-              _ <- console(ConsoleDSL.print(Messages("destroy.issue.deleted", issue.summary)))
+              _ <- pure(logger.debug("Issue Id: " + issue.id))
+              result <- backlog(backlogApi.issueApi.remove(IdParam(issue.id)))
+              _ <- result match {
+                case Right(_) =>
+                  console(ConsoleDSL.print(Messages("destroy.issue.deleted", issue.summary)))
+                case Left(error) =>
+                  logger.debug("ERROR: " + error.toString)
+                  console(ConsoleDSL.print(s"ERROR: ${issue.summary} Reason: ${error.toString}"))
+              }
             } yield ()
           }
         }
