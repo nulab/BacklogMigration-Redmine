@@ -4,7 +4,7 @@ scapegoatVersion in ThisBuild := "1.3.3"
 
 lazy val commonSettings = Seq(
   organization := "com.nulabinc",
-  version := "0.11.0b5-SNAPSHOT",
+  version := "0.12.0b1",
   scalaVersion := "2.12.4",
   scalacOptions ++= Seq(
     "-language:reflectiveCalls",
@@ -26,11 +26,11 @@ lazy val commonSettings = Seq(
     "com.typesafe.akka"             %% "akka-actor"        % "2.5.9",
     "com.typesafe.akka"             %% "akka-slf4j"        % "2.5.9",
     "io.spray"                      %% "spray-json"        % "1.3.3",
-    "com.typesafe"                  % "config"             % "1.3.3",
-    "com.google.inject"             % "guice"              % "4.1.0",
+    "com.typesafe"                  %  "config"            % "1.3.3",
+    "com.google.inject"             %  "guice"             % "4.1.0",
     "com.netaporter"                %% "scala-uri"         % "0.4.16",
-    "org.fusesource.jansi"          % "jansi"              % "1.11",
-    "com.mixpanel"                  % "mixpanel-java"      % "1.4.4"
+    "org.fusesource.jansi"          %  "jansi"             % "1.11",
+    "com.mixpanel"                  %  "mixpanel-java"     % "1.4.4"
   ),
   javacOptions ++= Seq("-encoding", "UTF-8")
 )
