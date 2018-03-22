@@ -1,4 +1,5 @@
 ## Update
+* 2018/03/23 0.12.0b2 released
 * 2018/03/22 0.12.0b1 released
 * 2018/03/19 0.11.0b4 released
 * 2018/03/15 0.11.0b3 released
