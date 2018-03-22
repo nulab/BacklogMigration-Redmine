@@ -155,7 +155,6 @@ object R2BCli extends BacklogConfiguration with Logging {
           }
         }
       }
-      _ <- console(ConsoleDSL.print(Messages("destroy.finish")))
     } yield stream
 
     val f = interpreter.run(program).flatMap { stream =>
@@ -171,6 +170,8 @@ object R2BCli extends BacklogConfiguration with Logging {
     Await.result(f, Duration.Inf)
 
     system.terminate()
+
+    ConsoleOut.println(Messages("destroy.finish"))
   }
 
   private[this] def tracking(config: AppConfiguration, backlogInjector: Injector) = {
