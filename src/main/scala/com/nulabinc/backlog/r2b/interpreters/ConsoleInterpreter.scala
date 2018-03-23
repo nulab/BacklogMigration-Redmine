@@ -5,8 +5,6 @@ import cats.~>
 import com.nulabinc.backlog.migration.common.utils.ConsoleOut
 import monix.eval.Task
 
-import scala.concurrent.Future
-
 sealed trait ConsoleADT[A]
 case class Print(str: String) extends ConsoleADT[Unit]
 case class Read(printMessage: String) extends ConsoleADT[String]

@@ -2,9 +2,10 @@ package com.nulabinc.backlog.r2b.interpreters
 
 import cats.free.Free
 import cats.~>
+import com.nulabinc.backlog.r2b.dsl.BacklogDSL.BacklogProgram
 import com.nulabinc.backlog.r2b.interpreters.AppDSL.AppProgram
-import com.nulabinc.backlog.r2b.interpreters.BacklogDSL.BacklogProgram
 import com.nulabinc.backlog.r2b.interpreters.ConsoleDSL.ConsoleProgram
+import com.nulabinc.backlog.r2b.interpreters.backlog.Backlog4jInterpreter
 import monix.eval.Task
 
 sealed trait AppADT[+A]
@@ -35,7 +36,7 @@ object AppDSL {
 
 }
 
-case class AppInterpreter(backlogInterpreter: BacklogInterpreter,
+case class AppInterpreter(backlogInterpreter: Backlog4jInterpreter,
                           consoleInterpreter: ConsoleInterpreter) extends (AppADT ~> Task) {
 
   def run[A](prg: AppProgram[A]): Task[A] =

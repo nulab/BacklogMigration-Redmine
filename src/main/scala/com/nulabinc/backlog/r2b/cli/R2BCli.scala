@@ -1,30 +1,22 @@
 package com.nulabinc.backlog.r2b.cli
 
-import java.net.InetSocketAddress
-
-import akka.actor.ActorSystem
-import akka.http.scaladsl.ClientTransport
-import akka.http.scaladsl.model.headers
-import akka.http.scaladsl.model.headers.HttpCredentials
-import akka.stream.ActorMaterializer
-import backlog4s.apis.AllApi
-import backlog4s.datas._
-import backlog4s.interpreters.AkkaHttpInterpret
-import backlog4s.streaming.ApiStream
 import com.google.inject.Injector
 import com.nulabinc.backlog.migration.common.conf.{BacklogApiConfiguration, BacklogConfiguration, BacklogPaths}
 import com.nulabinc.backlog.migration.common.modules.{ServiceInjector => BacklogInjector}
 import com.nulabinc.backlog.migration.common.service.{ProjectService, SpaceService, UserService}
 import com.nulabinc.backlog.migration.common.utils.{ConsoleOut, Logging, MixpanelUtil, TrackingData}
 import com.nulabinc.backlog.migration.importer.core.{Boot => BootImporter}
-import com.nulabinc.backlog.r2b.cli.FutureUtils.Suspend
 import com.nulabinc.backlog.r2b.conf.AppConfiguration
+import com.nulabinc.backlog.r2b.dsl.BacklogDSL
+import com.nulabinc.backlog.r2b.dsl.BacklogDSL.BacklogProgram
 import com.nulabinc.backlog.r2b.exporter.core.{Boot => BootExporter}
-import com.nulabinc.backlog.r2b.interpreters.{AppDSL, AppInterpreter, ConsoleDSL, ConsoleInterpreter}
+import com.nulabinc.backlog.r2b.interpreters._
+import com.nulabinc.backlog.r2b.interpreters.backlog.Backlog4jInterpreter
 import com.nulabinc.backlog.r2b.mapping.collector.core.{Boot => BootMapping}
 import com.nulabinc.backlog.r2b.mapping.core.MappingContainer
 import com.nulabinc.backlog.r2b.mapping.domain.Mapping
 import com.nulabinc.backlog.r2b.mapping.file._
+import com.nulabinc.backlog4j.Issue
 import com.osinka.i18n.Messages
 import monix.execution.Scheduler
 
@@ -106,63 +98,17 @@ object R2BCli extends BacklogConfiguration with Logging {
 
     import com.nulabinc.backlog.r2b.interpreters.AppDSL._
 
-    implicit val system: ActorSystem = ActorSystem("destroy")
-    implicit val mat: ActorMaterializer = ActorMaterializer()
     implicit val exc: Scheduler = monix.execution.Scheduler.Implicits.global
 
-    def createProxyTransport(host: String, port: String, optProxyCredentials: Option[HttpCredentials]): Option[ClientTransport] = {
-      (host, port) match {
-        case (h, p) =>
-          try {
-            Some(
-              optProxyCredentials match {
-                case Some(credentials) =>
-                  ClientTransport.httpsProxy(
-                    InetSocketAddress.createUnresolved(h, p.toInt),
-                    credentials
-                  )
-                case None =>
-                  ClientTransport.httpsProxy(InetSocketAddress.createUnresolved(h, p.toInt))
-              }
-
-            )
-          } catch {
-            case _: Throwable => None
-          }
-        case _ => None
-      }
-    }
-
-    val optAuth = (System.getProperty("http.proxyUser"), System.getProperty("http.proxyPassword")) match {
-      case (user, password) => Some(headers.BasicHttpCredentials(user, password))
-      case _ => None
-    }
-
-    val httpsProxyTransport = createProxyTransport(System.getProperty("https.proxyHost"), System.getProperty("https.proxyPort"), optAuth)
-    val httpProxyTransport = createProxyTransport(System.getProperty("http.proxyHost"), System.getProperty("http.proxyPort"), optAuth)
-
-    val transport = (httpsProxyTransport, httpProxyTransport) match {
-      case (Some(https), _) => Some(https)
-      case (None, Some(http)) => Some(http)
-      case _ => None
-    }
-
-    val interpreter = AppInterpreter(new AkkaHttpInterpret(transport), new ConsoleInterpreter)
-    val backlogApi = AllApi.accessKey(s"${apiConfig.url}/api/v2/", apiConfig.key)
+    val interpreter = AppInterpreter(new Backlog4jInterpreter(apiConfig.url, apiConfig.key), new ConsoleInterpreter)
 
     val validationProgram = for {
-      accessCheck <- backlog(
-        backlogApi.projectApi.byIdOrKey(
-          KeyParam(Key[Project](apiConfig.projectKey))
-        )
-      )
-
+      accessCheck <- backlog(BacklogDSL.getProject(apiConfig.projectKey))
       _ <- {
         accessCheck match {
           case Right(_) => console(ConsoleDSL.print(Messages("cli.param.ok.access", Messages("common.backlog"))))
           case Left(error) => exit(error.toString, 1)
         }
-
       }
     } yield ()
 
@@ -176,10 +122,20 @@ object R2BCli extends BacklogConfiguration with Logging {
       }
     } yield isValid
 
-    val stream = ApiStream.sequential(Int.MaxValue) {
-      (index, count) =>
-        logger.debug(s"Index: $index Count: $count")
-        backlogApi.issueApi.search(IssueSearch(offset = index))
+    type IssueStreamF[A] = (Seq[Issue], Int, Int) => BacklogProgram[A]
+
+    def streamIssue[A](projectKey: String, offset: Int, limit: Int)(f: IssueStreamF[A]): AppProgram[A] = {
+      def go(current: Int): BacklogProgram[A] = {
+        BacklogDSL.getProjectIssues(projectKey, offset, limit).flatMap {
+          case Right(issues) =>
+            if (issues.isEmpty)
+              f(issues, current, limit)
+            else
+              f(issues, current, limit).flatMap(_ => go(current + limit))
+          case Left(error) => throw new RuntimeException(error.toString)
+        }
+      }
+      backlog(go(0))
     }
 
     val program = for {
@@ -191,39 +147,36 @@ object R2BCli extends BacklogConfiguration with Logging {
       _ <- validationProgram
       _ <- confirmProgram
       _ <- console(ConsoleDSL.print(Messages("destroy.start")))
-      streamIssues <- backlogStream(stream)
-      stream = {
-        streamIssues.map { issues =>
-          issues.map { issue =>
-            for {
-              _ <- pure(logger.debug("Issue Id: " + issue.id))
-              result <- backlog(backlogApi.issueApi.remove(IdParam(issue.id)))
-              _ <- result match {
-                case Right(_) =>
-                  console(ConsoleDSL.print(Messages("destroy.issue.deleted", issue.summary)))
-                case Left(error) =>
-                  logger.debug("ERROR: " + error.toString)
-                  console(ConsoleDSL.print(s"ERROR: ${issue.summary} Reason: ${error.toString}"))
-              }
-            } yield ()
-          }
+      stream <- streamIssue(apiConfig.projectKey, 0, 2) { (issues, _, _) =>
+        val r = issues.map { issue =>
+          for {
+            _ <- pure(logger.debug("Issue Id: " + issue.getId))
+            result <- backlog(BacklogDSL.deleteIssue(issue))
+            _ <- result match {
+              case Right(_) => console(ConsoleDSL.print("Delete issue: " + issue.getSummary))
+              case Left(error) => exit(error.toString, 0)
+            }
+          } yield ()
         }
+
+        val v = BacklogDSL.pure(Seq.empty[Issue])
+//        backlog(v)
+        v
+//        r.foldLeft(BacklogDSL.pure(Seq.empty[Unit])) {
+//          case (newPrg, prg) =>
+//            newPrg.flatMap { results =>
+//              prg.map { result =>
+//                results :+ result
+//              }
+//            }
+//        }
+
       }
     } yield stream
 
-    val f = interpreter.run(program).flatMap { stream =>
-      stream.mapFuture { prgs =>
-        FutureUtils.sequential(
-          prgs.map { prg =>
-            Suspend(() => interpreter.run(prg))
-          }
-        )
-      }.runAsyncGetFirst
-    }
+    val f = interpreter.run(program).runAsync
 
     Await.result(f, Duration.Inf)
-
-    system.terminate()
 
     ConsoleOut.println(Messages("destroy.finish"))
   }
