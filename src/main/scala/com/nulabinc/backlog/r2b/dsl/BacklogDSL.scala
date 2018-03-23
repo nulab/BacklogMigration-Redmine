@@ -18,8 +18,8 @@ object BacklogDSL {
   def getProject(projectKey: String): BacklogProgram[BacklogResponse[Project]] =
     Free.liftF(GetProject(projectKey))
 
-  def getProjectIssues(projectKey: String, offset: Int, count: Int): BacklogProgram[BacklogResponse[Seq[Issue]]] =
-    Free.liftF(GetProjectIssues(projectKey, offset, count))
+  def getProjectIssues(projectId: Long, offset: Int, count: Int): BacklogProgram[BacklogResponse[Seq[Issue]]] =
+    Free.liftF(GetProjectIssues(projectId, offset, count))
 
   def deleteIssue(issue: Issue): BacklogProgram[BacklogResponse[Unit]] =
     Free.liftF(DeleteIssue(issue))

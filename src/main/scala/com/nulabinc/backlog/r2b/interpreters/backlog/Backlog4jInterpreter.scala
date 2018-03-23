@@ -21,8 +21,8 @@ class Backlog4jInterpreter(url: String, key: String)
   def run[A](program: BacklogProgram[A]): Task[A] =
     program.foldMap(this)
 
-  def getProjectIssues(projectKey: String, offset: Int, count: Int): Seq[Issue] = {
-    val params: GetIssuesParams = new GetIssuesParams(List(projectKey).asJava)
+  def getProjectIssues(projectId: Long, offset: Int, count: Int): Seq[Issue] = {
+    val params: GetIssuesParams = new GetIssuesParams(List(projectId).asJava)
     params.offset(offset.toLong)
     params.count(count)
     params.sort(GetIssuesParams.SortKey.Created)
@@ -34,8 +34,8 @@ class Backlog4jInterpreter(url: String, key: String)
     case Pure(a) => Task(a)
     case GetProject(projectKey) =>
       runRequest()(client.getProject(projectKey))
-    case GetProjectIssues(projectKey, offset, count) =>
-      runRequest()(getProjectIssues(projectKey, offset, count))
+    case GetProjectIssues(projectId, offset, count) =>
+      runRequest()(getProjectIssues(projectId, offset, count))
     case DeleteIssue(issue) =>
       runRequest()(client.deleteIssue(issue.getId))
   }
