@@ -30,14 +30,21 @@ class Backlog4jInterpreter(url: String, key: String)
     client.getIssues(params).asScala
   }
 
+  def deleteIssue(issue: Issue): Task[BacklogResponse[Unit]] = Task {
+    try {
+      Right(client.deleteIssue(issue.getId))
+    } catch {
+      case ex: Throwable => Left(ResponseError(ex))
+    }
+  }
+
   override def apply[A](fa: BacklogADT[A]): Task[A] = fa match {
     case Pure(a) => Task(a)
     case GetProject(projectKey) =>
       runRequest()(client.getProject(projectKey))
     case GetProjectIssues(projectId, offset, count) =>
       runRequest()(getProjectIssues(projectId, offset, count))
-    case DeleteIssue(issue) =>
-      runRequest()(client.deleteIssue(issue.getId))
+    case DeleteIssue(issue) => deleteIssue(issue)
   }
 
   private def runRequest[A]()(f: A): Task[BacklogResponse[A]] = Task {
