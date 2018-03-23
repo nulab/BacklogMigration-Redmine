@@ -113,27 +113,9 @@ object R2BCli extends BacklogConfiguration with Logging {
 
     implicit val exc: Scheduler = monix.execution.Scheduler.Implicits.global
 
+    val CHUNK_ISSUE_COUNT = 10
+
     val interpreter = AppInterpreter(new Backlog4jInterpreter(apiConfig.url, apiConfig.key), new ConsoleInterpreter)
-
-    val validationProgram = for {
-      accessCheck <- backlog(BacklogDSL.getProject(apiConfig.projectKey))
-      _ <- {
-        accessCheck match {
-          case Right(_) => console(ConsoleDSL.print(Messages("cli.param.ok.access", Messages("common.backlog"))))
-          case Left(error) => exit(error.toString, 1)
-        }
-      }
-    } yield accessCheck
-
-    val confirmProgram = for {
-      projectKey <- console(ConsoleDSL.read(Messages("destroy.confirm")))
-      isValid = projectKey == apiConfig.projectKey
-      _ <- if (isValid) {
-        AppDSL.pure(())
-      } else {
-        exit(Messages("destroy.confirm.fail"), 1)
-      }
-    } yield isValid
 
     type IssueStreamF[A] = (Seq[Issue], Int, Int) => AppProgram[A]
 
@@ -158,10 +140,27 @@ object R2BCli extends BacklogConfiguration with Logging {
                                        |${Messages("common.backlog")} ${Messages("common.access_key")}[${apiConfig.key}]
                                        |${Messages("common.backlog")} ${Messages("common.project_key")}[${apiConfig.projectKey}]
                                        |--------------------------------------------------""".stripMargin))
-      projectResult <- validationProgram
-      _ <- confirmProgram
+      // access check
+      projectResult <- for {
+        accessCheck <- backlog(BacklogDSL.getProject(apiConfig.projectKey))
+        _ <- accessCheck match {
+            case Right(_) => console(ConsoleDSL.print(Messages("cli.param.ok.access", Messages("common.backlog"))))
+            case Left(error) => exit(error.toString, 1)
+        }
+      } yield accessCheck
+      // confirm
+      _ <- for {
+        projectKey <- console(ConsoleDSL.read(Messages("destroy.confirm")))
+        isValid = projectKey == apiConfig.projectKey
+        _ <- if (isValid) {
+          AppDSL.pure(())
+        } else {
+          exit(Messages("destroy.confirm.fail"), 1)
+        }
+      } yield isValid
+      // start
       _ <- console(ConsoleDSL.print(Messages("destroy.start")))
-      stream <- streamIssue(projectResult.right.get.getId, 2) { (issues, _, _) =>
+      stream <- streamIssue(projectResult.right.get.getId, CHUNK_ISSUE_COUNT) { (issues, _, _) =>
         val r = issues.map { issue =>
           for {
             _ <- pure(logger.debug("Issue Id: " + issue.getId))
