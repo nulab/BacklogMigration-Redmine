@@ -8,8 +8,8 @@ import com.nulabinc.backlog.migration.common.utils.{ConsoleOut, Logging, Mixpane
 import com.nulabinc.backlog.migration.importer.core.{Boot => BootImporter}
 import com.nulabinc.backlog.r2b.conf.AppConfiguration
 import com.nulabinc.backlog.r2b.dsl.BacklogDSL
-import com.nulabinc.backlog.r2b.dsl.BacklogDSL.BacklogProgram
 import com.nulabinc.backlog.r2b.exporter.core.{Boot => BootExporter}
+import com.nulabinc.backlog.r2b.interpreters.AppDSL.AppProgram
 import com.nulabinc.backlog.r2b.interpreters._
 import com.nulabinc.backlog.r2b.interpreters.backlog.Backlog4jInterpreter
 import com.nulabinc.backlog.r2b.mapping.collector.core.{Boot => BootMapping}
@@ -22,7 +22,7 @@ import monix.execution.Scheduler
 
 import scala.concurrent.{Await, ExecutionContext, Future}
 import scala.concurrent.duration.Duration
-import scala.util.Try
+import scala.util.{Failure, Success, Try}
 
 object FutureUtils {
   case class Suspend[A](eval: () => Future[A])
@@ -56,20 +56,20 @@ object R2BCli extends BacklogConfiguration with Logging {
       else {
         val mappingFileContainer = createMapping(config)
         if (validateMapping(mappingFileContainer.user) &&
-            validateMapping(mappingFileContainer.status) &&
-            validateMapping(mappingFileContainer.priority)) {
+          validateMapping(mappingFileContainer.status) &&
+          validateMapping(mappingFileContainer.priority)) {
           if (confirmImport(config, mappingFileContainer)) {
 
             val backlogInjector = BacklogInjector.createInjector(config.backlogConfig)
             val backlogPaths    = backlogInjector.getInstance(classOf[BacklogPaths])
-            
+
             if (backlogPaths.outputPath.exists) {
               backlogPaths.outputPath.listRecursively.foreach(_.delete(false))
             }
 
             val mappingContainer = MappingContainer(user = mappingFileContainer.user.tryUnmarshal(),
-                                                    status = mappingFileContainer.status.tryUnmarshal(),
-                                                    priority = mappingFileContainer.priority.tryUnmarshal())
+              status = mappingFileContainer.status.tryUnmarshal(),
+              priority = mappingFileContainer.priority.tryUnmarshal())
 
             BootExporter.execute(config.redmineConfig, mappingContainer, config.backlogConfig.projectKey, config.exclude)
             BootImporter.execute(config.backlogConfig, false)
@@ -94,6 +94,19 @@ object R2BCli extends BacklogConfiguration with Logging {
     }
   }
 
+  def sequence[A](prgs: Seq[AppProgram[A]]): AppProgram[Seq[A]] = {
+    import com.nulabinc.backlog.r2b.interpreters.AppDSL._
+
+    prgs.foldLeft(pure(Seq.empty[A])) {
+      case (newPrg, prg) =>
+        newPrg.flatMap { results =>
+          prg.map { result =>
+            results :+ result
+          }
+        }
+    }
+  }
+
   def destroy(apiConfig: BacklogApiConfiguration): Unit = {
 
     import com.nulabinc.backlog.r2b.interpreters.AppDSL._
@@ -110,7 +123,7 @@ object R2BCli extends BacklogConfiguration with Logging {
           case Left(error) => exit(error.toString, 1)
         }
       }
-    } yield ()
+    } yield accessCheck
 
     val confirmProgram = for {
       projectKey <- console(ConsoleDSL.read(Messages("destroy.confirm")))
@@ -122,20 +135,21 @@ object R2BCli extends BacklogConfiguration with Logging {
       }
     } yield isValid
 
-    type IssueStreamF[A] = (Seq[Issue], Int, Int) => BacklogProgram[A]
+    type IssueStreamF[A] = (Seq[Issue], Int, Int) => AppProgram[A]
 
-    def streamIssue[A](projectKey: String, offset: Int, limit: Int)(f: IssueStreamF[A]): AppProgram[A] = {
-      def go(current: Int): BacklogProgram[A] = {
-        BacklogDSL.getProjectIssues(projectKey, offset, limit).flatMap {
+    def streamIssue[A](projectId: Long, offset: Int, limit: Int)(f: IssueStreamF[A]): AppProgram[A] = {
+      def go(current: Int): AppProgram[A] = {
+        backlog(BacklogDSL.getProjectIssues(projectId, current, limit)).flatMap {
           case Right(issues) =>
             if (issues.isEmpty)
               f(issues, current, limit)
             else
-              f(issues, current, limit).flatMap(_ => go(current + limit))
-          case Left(error) => throw new RuntimeException(error.toString)
+              f(issues, current, limit).flatMap(_ => go(0))
+          case Left(error) =>
+            throw new RuntimeException(error.toString)
         }
       }
-      backlog(go(0))
+      go(0)
     }
 
     val program = for {
@@ -144,33 +158,21 @@ object R2BCli extends BacklogConfiguration with Logging {
                                        |${Messages("common.backlog")} ${Messages("common.access_key")}[${apiConfig.key}]
                                        |${Messages("common.backlog")} ${Messages("common.project_key")}[${apiConfig.projectKey}]
                                        |--------------------------------------------------""".stripMargin))
-      _ <- validationProgram
+      projectResult <- validationProgram
       _ <- confirmProgram
       _ <- console(ConsoleDSL.print(Messages("destroy.start")))
-      stream <- streamIssue(apiConfig.projectKey, 0, 2) { (issues, _, _) =>
+      stream <- streamIssue(projectResult.right.get.getId, 0, 2) { (issues, _, _) =>
         val r = issues.map { issue =>
           for {
             _ <- pure(logger.debug("Issue Id: " + issue.getId))
             result <- backlog(BacklogDSL.deleteIssue(issue))
             _ <- result match {
-              case Right(_) => console(ConsoleDSL.print("Delete issue: " + issue.getSummary))
-              case Left(error) => exit(error.toString, 0)
+              case Right(_) => console(ConsoleDSL.print(Messages("destroy.issue.deleted", issue.getSummary)))
+              case Left(error) => exit(error.toString, 1)
             }
           } yield ()
         }
-
-        val v = BacklogDSL.pure(Seq.empty[Issue])
-//        backlog(v)
-        v
-//        r.foldLeft(BacklogDSL.pure(Seq.empty[Unit])) {
-//          case (newPrg, prg) =>
-//            newPrg.flatMap { results =>
-//              prg.map { result =>
-//                results :+ result
-//              }
-//            }
-//        }
-
+        sequence(r)
       }
     } yield stream
 
@@ -192,15 +194,15 @@ object R2BCli extends BacklogConfiguration with Logging {
       val myself      = backlogInjector.getInstance(classOf[UserService]).myself()
       val environment = backlogInjector.getInstance(classOf[SpaceService]).environment()
       val data = TrackingData(product = mixpanelProduct,
-                              envname = environment.name,
-                              spaceId = environment.spaceId,
-                              userId = myself.id,
-                              srcUrl = config.redmineConfig.url,
-                              dstUrl = config.backlogConfig.url,
-                              srcProjectKey = config.redmineConfig.projectKey,
-                              dstProjectKey = config.backlogConfig.projectKey,
-                              srcSpaceCreated = "",
-                              dstSpaceCreated = space.created)
+        envname = environment.name,
+        spaceId = environment.spaceId,
+        userId = myself.id,
+        srcUrl = config.redmineConfig.url,
+        dstUrl = config.backlogConfig.url,
+        srcProjectKey = config.redmineConfig.projectKey,
+        dstProjectKey = config.backlogConfig.projectKey,
+        srcSpaceCreated = "",
+        dstSpaceCreated = space.created)
       val token = if (backlogToolEnvNames.contains(environment.name)) mixpanelBacklogtoolToken else mixpanelToken
       MixpanelUtil.track(token = token, data = data)
     }
@@ -241,8 +243,8 @@ object R2BCli extends BacklogConfiguration with Logging {
   private[this] def validateMapping(mappingFile: MappingFile): Boolean = {
     if (!mappingFile.isExists) {
       ConsoleOut.error(s"""
-           |--------------------------------------------------
-           |${Messages("cli.invalid_setup")}""".stripMargin)
+                          |--------------------------------------------------
+                          |${Messages("cli.invalid_setup")}""".stripMargin)
       false
     } else if (!mappingFile.isParsed) {
       val error =
