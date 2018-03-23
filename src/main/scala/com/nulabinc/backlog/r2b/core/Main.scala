@@ -49,8 +49,8 @@ class CommandLineInterface(arguments: Seq[String]) extends ScallopConf(arguments
   val destroy = new Subcommand("destroy") {
     val backlogKey: ScallopOption[String] = opt[String]("backlog.key", descr = Messages("cli.help.backlog.key"), required = true, noshort = true)
     val backlogUrl: ScallopOption[String] = opt[String]("backlog.url", descr = Messages("cli.help.backlog.url"), required = true, noshort = true)
-
     val projectKey: ScallopOption[String] = opt[String]("projectKey", descr = Messages("cli.help.projectKey"), required = true)
+    val dryRun: ScallopOption[Boolean]    = opt[Boolean]("dryRun", descr = Messages("destroy.help.dryRun"), required = false)
     val help: ScallopOption[String]       = opt[String]("help", descr = Messages("cli.help.show_help"))
   }
 
@@ -97,12 +97,15 @@ object R2B extends BacklogConfiguration with Logging {
       case Some(cli.init) =>
         R2BCli.init(getConfiguration(cli))
       case Some(cli.destroy) =>
-        val backlogConfiguration = BacklogApiConfiguration(
-          projectKey = cli.destroy.projectKey().split(":").last.toUpperCase.replaceAll("-", "_"),
-          url = cli.destroy.backlogUrl(),
-          key = cli.destroy.backlogKey()
+        val config = DestroyConfiguration(
+          backlogConfig = BacklogApiConfiguration(
+            projectKey = cli.destroy.projectKey().split(":").last.toUpperCase.replaceAll("-", "_"),
+            url = cli.destroy.backlogUrl(),
+            key = cli.destroy.backlogKey()
+          ),
+          dryRun = cli.destroy.dryRun.getOrElse(false)
         )
-        R2BCli.destroy(backlogConfiguration)
+        R2BCli.destroy(config)
       case _ =>
         R2BCli.help()
     }

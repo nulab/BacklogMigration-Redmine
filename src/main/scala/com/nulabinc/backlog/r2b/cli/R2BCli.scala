@@ -1,12 +1,12 @@
 package com.nulabinc.backlog.r2b.cli
 
 import com.google.inject.Injector
-import com.nulabinc.backlog.migration.common.conf.{BacklogApiConfiguration, BacklogConfiguration, BacklogPaths}
+import com.nulabinc.backlog.migration.common.conf.{BacklogConfiguration, BacklogPaths}
 import com.nulabinc.backlog.migration.common.modules.{ServiceInjector => BacklogInjector}
 import com.nulabinc.backlog.migration.common.service.{ProjectService, SpaceService, UserService}
 import com.nulabinc.backlog.migration.common.utils.{ConsoleOut, Logging, MixpanelUtil, TrackingData}
 import com.nulabinc.backlog.migration.importer.core.{Boot => BootImporter}
-import com.nulabinc.backlog.r2b.conf.AppConfiguration
+import com.nulabinc.backlog.r2b.conf.{AppConfiguration, DestroyConfiguration}
 import com.nulabinc.backlog.r2b.dsl.BacklogDSL
 import com.nulabinc.backlog.r2b.exporter.core.{Boot => BootExporter}
 import com.nulabinc.backlog.r2b.interpreters.AppDSL.AppProgram
@@ -107,7 +107,7 @@ object R2BCli extends BacklogConfiguration with Logging {
     }
   }
 
-  def destroy(apiConfig: BacklogApiConfiguration): Unit = {
+  def destroy(config: DestroyConfiguration): Unit = {
 
     import com.nulabinc.backlog.r2b.interpreters.AppDSL._
 
@@ -115,18 +115,26 @@ object R2BCli extends BacklogConfiguration with Logging {
 
     val CHUNK_ISSUE_COUNT = 10
 
-    val interpreter = AppInterpreter(new Backlog4jInterpreter(apiConfig.url, apiConfig.key), new ConsoleInterpreter)
+    val interpreter = AppInterpreter(
+      new Backlog4jInterpreter(
+        config.backlogConfig.url,
+        config.backlogConfig.key
+      ),
+      new ConsoleInterpreter
+    )
 
     type IssueStreamF[A] = (Seq[Issue], Int, Int) => AppProgram[A]
 
-    def streamIssue[A](projectId: Long, limit: Int)(f: IssueStreamF[A]): AppProgram[A] = {
+    def streamIssue[A](projectId: Long, limit: Int, druRun: Boolean)(f: IssueStreamF[A]): AppProgram[A] = {
       def go(current: Int): AppProgram[A] = {
         backlog(BacklogDSL.getProjectIssues(projectId, current, limit)).flatMap {
           case Right(issues) =>
             if (issues.isEmpty)
               f(issues, current, limit)
-            else
-              f(issues, current, limit).flatMap(_ => go(0))
+            else {
+              val nextCurrent = if (druRun) current + limit else 0
+              f(issues, current, limit).flatMap(_ => go(nextCurrent))
+            }
           case Left(error) =>
             throw new RuntimeException(error.toString)
         }
@@ -136,13 +144,14 @@ object R2BCli extends BacklogConfiguration with Logging {
 
     val program = for {
       _ <- console(ConsoleDSL.print(s"""--------------------------------------------------
-                                       |${Messages("common.backlog")} ${Messages("common.url")}[${apiConfig.url}]
-                                       |${Messages("common.backlog")} ${Messages("common.access_key")}[${apiConfig.key}]
-                                       |${Messages("common.backlog")} ${Messages("common.project_key")}[${apiConfig.projectKey}]
+                                       |${Messages("common.backlog")} ${Messages("common.url")}[${config.backlogConfig.url}]
+                                       |${Messages("common.backlog")} ${Messages("common.access_key")}[${config.backlogConfig.key}]
+                                       |${Messages("common.backlog")} ${Messages("common.project_key")}[${config.backlogConfig.projectKey}]
+                                       |Dry run mode [${config.dryRun}]
                                        |--------------------------------------------------""".stripMargin))
       // access check
       projectResult <- for {
-        accessCheck <- backlog(BacklogDSL.getProject(apiConfig.projectKey))
+        accessCheck <- backlog(BacklogDSL.getProject(config.backlogConfig.projectKey))
         _ <- accessCheck match {
             case Right(_) => console(ConsoleDSL.print(Messages("cli.param.ok.access", Messages("common.backlog"))))
             case Left(error) => exit(error.toString, 1)
@@ -151,7 +160,7 @@ object R2BCli extends BacklogConfiguration with Logging {
       // confirm
       _ <- for {
         projectKey <- console(ConsoleDSL.read(Messages("destroy.confirm")))
-        isValid = projectKey == apiConfig.projectKey
+        isValid = projectKey == config.backlogConfig.projectKey
         _ <- if (isValid) {
           AppDSL.pure(())
         } else {
@@ -160,11 +169,15 @@ object R2BCli extends BacklogConfiguration with Logging {
       } yield isValid
       // start
       _ <- console(ConsoleDSL.print(Messages("destroy.start")))
-      stream <- streamIssue(projectResult.right.get.getId, CHUNK_ISSUE_COUNT) { (issues, _, _) =>
+      stream <- streamIssue(projectResult.right.get.getId, CHUNK_ISSUE_COUNT, config.dryRun) { (issues, _, _) =>
         val r = issues.map { issue =>
           for {
             _ <- pure(logger.debug("Issue Id: " + issue.getId))
-            result <- backlog(BacklogDSL.deleteIssue(issue))
+            result <- if (config.dryRun) {
+              backlog(BacklogDSL.pure(Right(issue)))
+            } else {
+              backlog(BacklogDSL.deleteIssue(issue))
+            }
             _ <- result match {
               case Right(_) => console(ConsoleDSL.print(Messages("destroy.issue.deleted", issue.getSummary)))
               case Left(error) => exit(error.toString, 1)

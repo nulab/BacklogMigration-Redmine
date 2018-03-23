@@ -160,6 +160,7 @@ import.error.failed.import=プロジェクト[{0}]を登録できませんでし
 import.error.failed.comment=コメントを課題[{0}]に登録できませんでした。:{1}
 
 # Destroy
+destroy.help.dryRun=実際には課題を削除せず、テストのみ行います。
 destroy.start=全ての課題を削除します。
 destroy.confirm=削除するプロジェクトキーを入力してください:
 destroy.confirm.fail=入力されたプロジェクトキーが間違っています。
