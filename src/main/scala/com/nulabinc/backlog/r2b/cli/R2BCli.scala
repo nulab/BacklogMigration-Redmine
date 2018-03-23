@@ -22,7 +22,7 @@ import monix.execution.Scheduler
 
 import scala.concurrent.{Await, ExecutionContext, Future}
 import scala.concurrent.duration.Duration
-import scala.util.{Failure, Success, Try}
+import scala.util.Try
 
 object FutureUtils {
   case class Suspend[A](eval: () => Future[A])
@@ -137,7 +137,7 @@ object R2BCli extends BacklogConfiguration with Logging {
 
     type IssueStreamF[A] = (Seq[Issue], Int, Int) => AppProgram[A]
 
-    def streamIssue[A](projectId: Long, offset: Int, limit: Int)(f: IssueStreamF[A]): AppProgram[A] = {
+    def streamIssue[A](projectId: Long, limit: Int)(f: IssueStreamF[A]): AppProgram[A] = {
       def go(current: Int): AppProgram[A] = {
         backlog(BacklogDSL.getProjectIssues(projectId, current, limit)).flatMap {
           case Right(issues) =>
@@ -161,7 +161,7 @@ object R2BCli extends BacklogConfiguration with Logging {
       projectResult <- validationProgram
       _ <- confirmProgram
       _ <- console(ConsoleDSL.print(Messages("destroy.start")))
-      stream <- streamIssue(projectResult.right.get.getId, 0, 2) { (issues, _, _) =>
+      stream <- streamIssue(projectResult.right.get.getId, 2) { (issues, _, _) =>
         val r = issues.map { issue =>
           for {
             _ <- pure(logger.debug("Issue Id: " + issue.getId))
