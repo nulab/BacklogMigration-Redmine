@@ -184,7 +184,7 @@ object R2BCli extends BacklogConfiguration with Logging {
             }
             _ <- result match {
               case Right(_) => console(ConsoleDSL.print(Messages("destroy.issue.deleted", issue.getIssueKey, issue.getSummary)))
-              case Left(error) => exit(error.toString, 1)
+              case Left(error) => console(ConsoleDSL.print(s"ERROR: ${issue.getIssueKey} ${issue.getSummary} ${error.toString}"))
             }
           } yield ()
         }
