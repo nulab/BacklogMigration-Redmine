@@ -168,7 +168,11 @@ object R2BCli extends BacklogConfiguration with Logging {
         }
       } yield isValid
       // start
-      _ <- console(ConsoleDSL.print(Messages("destroy.start")))
+      _ <- if (config.dryRun) {
+        console(ConsoleDSL.print(Messages("destroy.start.dryRun")))
+      } else {
+        console(ConsoleDSL.print(Messages("destroy.start")))
+      }
       stream <- streamIssue(projectResult.right.get.getId, CHUNK_ISSUE_COUNT, config.dryRun) { (issues, _, _) =>
         val r = issues.map { issue =>
           for {
@@ -179,7 +183,7 @@ object R2BCli extends BacklogConfiguration with Logging {
               backlog(BacklogDSL.deleteIssue(issue))
             }
             _ <- result match {
-              case Right(_) => console(ConsoleDSL.print(Messages("destroy.issue.deleted", issue.getSummary)))
+              case Right(_) => console(ConsoleDSL.print(Messages("destroy.issue.deleted", issue.getIssueKey, issue.getSummary)))
               case Left(error) => exit(error.toString, 1)
             }
           } yield ()
@@ -192,7 +196,11 @@ object R2BCli extends BacklogConfiguration with Logging {
 
     Await.result(f, Duration.Inf)
 
-    ConsoleOut.println(Messages("destroy.finish"))
+    if (config.dryRun) {
+      ConsoleOut.println(Messages("destroy.finish.dryRun"))
+    } else {
+      ConsoleOut.println(Messages("destroy.finish"))
+    }
   }
 
   private[this] def tracking(config: AppConfiguration, backlogInjector: Injector) = {
