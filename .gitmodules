@@ -4,6 +4,3 @@
 [submodule "importer"]
 	path = importer
 	url = git@github.com:nulab/backlog-importer.git
-[submodule "backlog4s"]
-	path = backlog4s
-	url = git@github.com:chaabaj/backlog4s.git
