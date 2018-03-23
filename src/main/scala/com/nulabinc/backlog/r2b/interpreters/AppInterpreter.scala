@@ -1,26 +1,17 @@
 package com.nulabinc.backlog.r2b.interpreters
 
-import backlog4s.dsl.ApiDsl.ApiPrg
-import backlog4s.dsl.BacklogHttpInterpret
-import backlog4s.streaming.ApiStream.ApiStream
 import cats.free.Free
 import cats.~>
-import cats.implicits._
+import com.nulabinc.backlog.r2b.dsl.BacklogDSL.BacklogProgram
 import com.nulabinc.backlog.r2b.interpreters.AppDSL.AppProgram
 import com.nulabinc.backlog.r2b.interpreters.ConsoleDSL.ConsoleProgram
-import monix.execution.{CancelableFuture, Scheduler}
-import monix.reactive.Observable
-import org.reactivestreams.Subscriber
-
-import scala.concurrent.Future
-import scala.util.{Failure, Success}
+import com.nulabinc.backlog.r2b.interpreters.backlog.Backlog4jInterpreter
+import monix.eval.Task
 
 sealed trait AppADT[+A]
 case class Pure[A](a: A) extends AppADT[A]
-case class Backlog[A](prg: ApiPrg[A]) extends AppADT[A]
-case class BacklogStream[A](prg: ApiStream[A]) extends AppADT[Observable[Seq[A]]]
+case class Backlog[A](prg: BacklogProgram[A]) extends AppADT[A]
 case class Console[A](prg: ConsoleProgram[A]) extends AppADT[A]
-case class ConsumeStream[A](stream: Observable[A]) extends AppADT[CancelableFuture[Unit]]
 case class Exit(exitCode: Int) extends AppADT[Unit]
 
 object AppDSL {
@@ -30,14 +21,8 @@ object AppDSL {
   def pure[A](a: A): AppProgram[A] =
     Free.liftF(Pure(a))
 
-  def backlog[A](prg: ApiPrg[A]): AppProgram[A] =
-    Free.liftF(Backlog(prg))
-
-  def backlogStream[A](prg: ApiStream[A]): AppProgram[Observable[Seq[A]]] =
-    Free.liftF[AppADT, Observable[Seq[A]]](BacklogStream(prg))
-
-  def consumeStream[A](stream: Observable[A]): AppProgram[CancelableFuture[Unit]] =
-    Free.liftF[AppADT, CancelableFuture[Unit]](ConsumeStream(stream))
+  def backlog[A](prg: BacklogProgram[A]): AppProgram[A] =
+    Free.liftF[AppADT, A](Backlog(prg))
 
   def console[A](prg: ConsoleProgram[A]): AppProgram[A] =
     Free.liftF(Console(prg))
@@ -51,36 +36,17 @@ object AppDSL {
 
 }
 
-case class AppInterpreter(backlogInterpreter: BacklogHttpInterpret[Future],
-                          consoleInterpreter: ConsoleInterpreter)
-                         (implicit ec: Scheduler) extends (AppADT ~> Future) {
+case class AppInterpreter(backlogInterpreter: Backlog4jInterpreter,
+                          consoleInterpreter: ConsoleInterpreter) extends (AppADT ~> Task) {
 
-  def run[A](prg: AppProgram[A]): Future[A] =
+  def run[A](prg: AppProgram[A]): Task[A] =
     prg.foldMap(this)
 
-  override def apply[A](fa: AppADT[A]): Future[A] = fa match {
-    case Pure(a) => Future.successful(a)
+  override def apply[A](fa: AppADT[A]): Task[A] = fa match {
+    case Pure(a) => Task(a)
     case Backlog(prg) => backlogInterpreter.run(prg)
-    case BacklogStream(stream) => Future.successful {
-      Observable.fromReactivePublisher[Seq[A]](
-        (s: Subscriber[_ >: Seq[A]]) => {
-          backlogInterpreter.runStream(
-            stream.map { value =>
-              val a = value.asInstanceOf[Seq[A]]
-              s.onNext(a) // publish data
-              Seq(a)
-            }
-          ).onComplete {
-            case Success(_) => s.onComplete()
-            case Failure(ex) => s.onError(ex)
-          }
-        }
-      )
-    }
     case Console(prg) => prg.foldMap(consoleInterpreter)
     case Exit(statusCode) => sys.exit(statusCode)
-    case ConsumeStream(stream) =>
-      stream.runAsyncGetFirst.map(_ => ().asInstanceOf[A])
   }
 }
 

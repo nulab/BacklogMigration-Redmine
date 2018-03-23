@@ -13,3 +13,8 @@ case class AppConfiguration(
   importOnly: Boolean,
   optOut: Boolean
 )
+
+case class DestroyConfiguration(
+  backlogConfig: BacklogApiConfiguration,
+  dryRun: Boolean
+)

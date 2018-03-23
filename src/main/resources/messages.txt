@@ -160,8 +160,11 @@ import.error.failed.import=Could not register project [{0}]. : {1}
 import.error.failed.comment=Could not register comment on issue [{0}]. : {1}
 
 # Destroy
+destroy.help.dryRun=It doesn't delete the assignment, only the test.
 destroy.start=Start destroy all issues.
+destroy.start.dryRun=Start dry run.
 destroy.confirm=Please enter project key:
 destroy.confirm.fail=Input project key is wrong.
-destroy.issue.deleted=Deleted issue: {0}
+destroy.issue.deleted=Deleted issue: {0} {1}
 destroy.finish=Destroy completed.
+destroy.finish.dryRun=Dry run completed.
