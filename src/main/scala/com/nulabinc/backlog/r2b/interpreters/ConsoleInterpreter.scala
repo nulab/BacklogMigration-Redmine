@@ -3,8 +3,7 @@ package com.nulabinc.backlog.r2b.interpreters
 import cats.free.Free
 import cats.~>
 import com.nulabinc.backlog.migration.common.utils.ConsoleOut
-
-import scala.concurrent.Future
+import monix.eval.Task
 
 sealed trait ConsoleADT[A]
 case class Print(str: String) extends ConsoleADT[Unit]
@@ -22,14 +21,14 @@ object ConsoleDSL {
 
 }
 
-class ConsoleInterpreter extends (ConsoleADT ~> Future) {
+class ConsoleInterpreter extends (ConsoleADT ~> Task) {
 
-  def apply[A](fa: ConsoleADT[A]): Future[A] = fa match  {
-    case Print(str) => Future.successful {
+  def apply[A](fa: ConsoleADT[A]): Task[A] = fa match  {
+    case Print(str) => Task {
       ConsoleOut.println(str)
       ()
     }
-    case Read(printMessage) => Future.successful {
+    case Read(printMessage) => Task {
       scala.io.StdIn.readLine(printMessage)
     }
   }
