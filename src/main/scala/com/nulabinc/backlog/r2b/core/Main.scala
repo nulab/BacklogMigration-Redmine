@@ -125,6 +125,10 @@ object R2B extends BacklogConfiguration with Logging {
      |${Messages("common.backlog")} ${Messages("common.project_key")}[${backlog}]
      |${Messages("common.importOnly")}[${cli.execute.importOnly()}]
      |${Messages("common.optOut")}[${cli.execute.optOut.toOption.getOrElse(false)}]
+     |https.proxyHost[${Option(System.getProperty("https.proxyHost")).getOrElse("")}]
+     |https.proxyPort[${Option(System.getProperty("https.proxyPort")).getOrElse("")}]
+     |https.proxyUser[${Option(System.getProperty("https.proxyUser")).getOrElse("")}]
+     |https.proxyPassword[${Option(System.getProperty("https.proxyPassword")).getOrElse("")}]
      |--------------------------------------------------
      |""".stripMargin)
 
