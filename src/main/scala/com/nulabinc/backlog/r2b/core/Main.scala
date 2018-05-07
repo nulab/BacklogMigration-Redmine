@@ -125,6 +125,10 @@ object R2B extends BacklogConfiguration with Logging {
      |${Messages("common.backlog")} ${Messages("common.project_key")}[${backlog}]
      |${Messages("common.importOnly")}[${cli.execute.importOnly()}]
      |${Messages("common.optOut")}[${cli.execute.optOut.toOption.getOrElse(false)}]
+     |https.proxyHost[${Option(System.getProperty("https.proxyHost")).getOrElse("")}]
+     |https.proxyPort[${Option(System.getProperty("https.proxyPort")).getOrElse("")}]
+     |https.proxyUser[${Option(System.getProperty("https.proxyUser")).getOrElse("")}]
+     |https.proxyPassword[${Option(System.getProperty("https.proxyPassword")).getOrElse("")}]
      |--------------------------------------------------
      |""".stripMargin)
 
@@ -145,23 +149,56 @@ object R2B extends BacklogConfiguration with Logging {
   }
 
   private[this] def checkRelease() = {
+    import java.io._
+    import java.net._
+
+    val url = new URL("https://api.github.com/repos/nulab/BacklogMigration-Redmine/releases")
+    val http = url.openConnection().asInstanceOf[HttpURLConnection]
+    val optProxyUser = Option(System.getProperty("https.proxyUser"))
+    val optProxyPass = Option(System.getProperty("https.proxyPassword"))
+
+    (optProxyUser, optProxyPass) match {
+      case (Some(proxyUser), Some(proxyPass)) =>
+        Authenticator.setDefault(new Authenticator() {
+          override def getPasswordAuthentication: PasswordAuthentication = {
+            new PasswordAuthentication(proxyUser, proxyPass.toCharArray)
+          }
+        })
+      case _ => ()
+    }
+
     try {
-      val url    = "https://api.github.com/repos/nulab/BacklogMigration-Redmine/releases"
-      val string = scala.io.Source.fromURL(url, "UTF-8").mkString
-      val latest = string.parseJson match {
-        case JsArray(releases) if (releases.nonEmpty) =>
+      http.setRequestMethod("GET")
+      http.connect()
+
+      val reader = new BufferedReader(new InputStreamReader(http.getInputStream))
+      val output = new StringBuilder()
+      var line = ""
+
+      while (line != null) {
+        line = reader.readLine()
+        if (line != null)
+          output.append(line)
+      }
+      reader.close()
+
+      val latest = output.toString().parseJson match {
+        case JsArray(releases) if releases.nonEmpty =>
           releases(0).asJsObject.fields.apply("tag_name").convertTo[String].replace("v", "")
         case _ => ""
       }
+
       if (latest != versionName) {
-        ConsoleOut.warning(s"""
-            |--------------------------------------------------
-            |${Messages("cli.warn.not.latest", latest, versionName)}
-            |--------------------------------------------------
-          """.stripMargin)
+        ConsoleOut.warning(
+          s"""
+             |--------------------------------------------------
+             |${Messages("cli.warn.not.latest", latest, versionName)}
+             |--------------------------------------------------
+        """.stripMargin)
       }
     } catch {
-      case e: Throwable => logger.error(e.getMessage, e)
+      case ex: Throwable =>
+        logger.error(ex.getMessage, ex)
     }
   }
 
