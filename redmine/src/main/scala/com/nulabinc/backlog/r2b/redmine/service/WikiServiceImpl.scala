@@ -1,7 +1,5 @@
 package com.nulabinc.backlog.r2b.redmine.service
 
-import java.net.URISyntaxException
-
 import javax.inject.Inject
 import com.nulabinc.backlog.migration.common.utils.Logging
 import com.nulabinc.backlog.r2b.redmine.conf.RedmineApiConfiguration
