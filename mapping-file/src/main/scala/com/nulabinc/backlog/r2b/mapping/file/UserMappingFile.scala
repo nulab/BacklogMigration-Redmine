@@ -1,7 +1,5 @@
 package com.nulabinc.backlog.r2b.mapping.file
 
-import java.nio.charset.Charset
-
 import com.nulabinc.backlog.migration.common.conf.{BacklogApiConfiguration, BacklogConfiguration}
 import com.nulabinc.backlog.migration.common.domain.BacklogUser
 import com.nulabinc.backlog.migration.common.modules.{ServiceInjector => BacklogInjector}

@@ -6,7 +6,7 @@ import com.nulabinc.backlog.r2b.redmine.conf.RedmineApiConfiguration
 import com.nulabinc.backlog.r2b.redmine.domain.{PropertyValue, RedmineProjectId}
 import com.nulabinc.backlog.r2b.redmine.service._
 import com.taskadapter.redmineapi.bean._
-import com.taskadapter.redmineapi.{RedmineFormatException, RedmineManager, RedmineManagerFactory}
+import com.taskadapter.redmineapi.{RedmineManager, RedmineManagerFactory}
 
 import scala.collection.JavaConverters._
 
