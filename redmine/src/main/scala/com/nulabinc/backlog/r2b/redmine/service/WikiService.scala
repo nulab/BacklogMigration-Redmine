@@ -9,6 +9,6 @@ trait WikiService {
 
   def allWikis(): Seq[WikiPage]
 
-  def wikiDetail(pageTitle: String): WikiPageDetail
+  def optWikiDetail(pageTitle: String): Option[WikiPageDetail]
 
 }
