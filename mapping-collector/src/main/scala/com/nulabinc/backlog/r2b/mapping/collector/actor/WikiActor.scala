@@ -28,10 +28,10 @@ private[collector] class WikiActor(wikiService: WikiService, mappingData: Mappin
 
   def receive: Receive = {
     case WikiActor.Do(wiki: WikiPage, completion: CountDownLatch, allCount: Int, console: ((Int, Int) => Unit)) =>
-      val wikiDetail: WikiPageDetail = wikiService.wikiDetail(wiki.getTitle)
-      parse(wikiDetail)
-      mappingData.users ++= users.flatten
-
+      wikiService.optWikiDetail(wiki.getTitle).foreach { wikiDetail =>
+        parse(wikiDetail)
+        mappingData.users ++= users.flatten
+      }
       completion.countDown()
       console((allCount - completion.getCount).toInt, allCount)
   }
