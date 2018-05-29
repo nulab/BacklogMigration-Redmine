@@ -1,10 +1,9 @@
 package com.nulabinc.backlog.r2b.cli
 
-import com.google.inject.Injector
 import com.nulabinc.backlog.migration.common.conf.{BacklogConfiguration, BacklogPaths}
 import com.nulabinc.backlog.migration.common.modules.{ServiceInjector => BacklogInjector}
-import com.nulabinc.backlog.migration.common.service.{ProjectService, SpaceService, UserService}
-import com.nulabinc.backlog.migration.common.utils.{ConsoleOut, Logging, MixpanelUtil, TrackingData}
+import com.nulabinc.backlog.migration.common.service.ProjectService
+import com.nulabinc.backlog.migration.common.utils.{ConsoleOut, Logging}
 import com.nulabinc.backlog.migration.importer.core.{Boot => BootImporter}
 import com.nulabinc.backlog.r2b.conf.{AppConfiguration, DestroyConfiguration}
 import com.nulabinc.backlog.r2b.dsl.BacklogDSL
@@ -22,7 +21,6 @@ import monix.execution.Scheduler
 
 import scala.concurrent.{Await, ExecutionContext, Future}
 import scala.concurrent.duration.Duration
-import scala.util.Try
 
 object FutureUtils {
   case class Suspend[A](eval: () => Future[A])
@@ -73,11 +71,6 @@ object R2BCli extends BacklogConfiguration with Logging {
 
             BootExporter.execute(config.redmineConfig, mappingContainer, config.backlogConfig.projectKey, config.exclude)
             BootImporter.execute(config.backlogConfig, false)
-
-            if (!config.optOut) {
-              tracking(config, backlogInjector)
-            }
-
           }
         }
       }
@@ -87,10 +80,6 @@ object R2BCli extends BacklogConfiguration with Logging {
   def doImport(config: AppConfiguration): Unit = {
     if (validateParam(config)) {
       BootImporter.execute(config.backlogConfig, false)
-      if (!config.optOut) {
-        val backlogInjector = BacklogInjector.createInjector(config.backlogConfig)
-        tracking(config, backlogInjector)
-      }
     }
   }
 
@@ -200,31 +189,6 @@ object R2BCli extends BacklogConfiguration with Logging {
       ConsoleOut.println(Messages("destroy.finish.dryRun"))
     } else {
       ConsoleOut.println(Messages("destroy.finish"))
-    }
-  }
-
-  private[this] def tracking(config: AppConfiguration, backlogInjector: Injector) = {
-    val backlogToolEnvNames = Seq(
-      "backlogtool",
-      "us-6"
-    )
-
-    Try {
-      val space       = backlogInjector.getInstance(classOf[SpaceService]).space()
-      val myself      = backlogInjector.getInstance(classOf[UserService]).myself()
-      val environment = backlogInjector.getInstance(classOf[SpaceService]).environment()
-      val data = TrackingData(product = mixpanelProduct,
-        envname = environment.name,
-        spaceId = environment.spaceId,
-        userId = myself.id,
-        srcUrl = config.redmineConfig.url,
-        dstUrl = config.backlogConfig.url,
-        srcProjectKey = config.redmineConfig.projectKey,
-        dstProjectKey = config.backlogConfig.projectKey,
-        srcSpaceCreated = "",
-        dstSpaceCreated = space.created)
-      val token = if (backlogToolEnvNames.contains(environment.name)) mixpanelBacklogtoolToken else mixpanelToken
-      MixpanelUtil.track(token = token, data = data)
     }
   }
 
