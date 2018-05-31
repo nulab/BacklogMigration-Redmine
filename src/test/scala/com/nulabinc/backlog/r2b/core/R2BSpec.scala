@@ -10,7 +10,6 @@ import com.nulabinc.backlog4j.{IssueComment, Issue => BacklogIssue}
 import com.osinka.i18n.Messages
 import com.taskadapter.redmineapi.Include
 import com.taskadapter.redmineapi.bean.{User, Issue => RedmineIssue}
-import org.joda.time.DateTime
 import org.scalatest.{FlatSpec, Matchers}
 
 import scala.collection.JavaConverters._
@@ -263,9 +262,7 @@ class R2BSpec extends FlatSpec with Matchers with SimpleFixture {
     if (comments.isEmpty) issue.getUpdated
     else {
       val comment = comments.asScala.sortWith((c1, c2) => {
-        val dt1 = new DateTime(c1.getUpdated)
-        val dt2 = new DateTime(c2.getUpdated)
-        dt1.isBefore(dt2)
+        c1.getUpdated.before(c2.getUpdated)
       })(comments.size() - 1)
       comment.getCreated
     }
