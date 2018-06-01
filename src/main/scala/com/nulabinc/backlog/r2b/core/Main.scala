@@ -32,7 +32,6 @@ class CommandLineInterface(arguments: Seq[String]) extends ScallopConf(arguments
     val projectKey = opt[String]("projectKey", descr = Messages("cli.help.projectKey"), required = true)
     val importOnly = opt[Boolean]("importOnly", descr = Messages("cli.help.importOnly"), required = true)
     val exclude    = opt[List[String]]("exclude", descr = Messages("cli.help.exclude"), required = false)
-    val optOut     = opt[Boolean]("optOut", descr = Messages("cli.help.optOut"), required = false)
     val help       = opt[String]("help", descr = Messages("cli.help.show_help"))
   }
 
@@ -124,7 +123,6 @@ object R2B extends BacklogConfiguration with Logging {
      |${Messages("common.backlog")} ${Messages("common.access_key")}[${cli.execute.backlogKey()}]
      |${Messages("common.backlog")} ${Messages("common.project_key")}[${backlog}]
      |${Messages("common.importOnly")}[${cli.execute.importOnly()}]
-     |${Messages("common.optOut")}[${cli.execute.optOut.toOption.getOrElse(false)}]
      |https.proxyHost[${Option(System.getProperty("https.proxyHost")).getOrElse("")}]
      |https.proxyPort[${Option(System.getProperty("https.proxyPort")).getOrElse("")}]
      |https.proxyUser[${Option(System.getProperty("https.proxyUser")).getOrElse("")}]
@@ -133,11 +131,11 @@ object R2B extends BacklogConfiguration with Logging {
      |""".stripMargin)
 
     AppConfiguration(
-      redmineConfig = new RedmineApiConfiguration(url = cli.execute.redmineUrl(), key = cli.execute.redmineKey(), projectKey = redmine),
-      backlogConfig = new BacklogApiConfiguration(url = cli.execute.backlogUrl(), key = cli.execute.backlogKey(), projectKey = backlog),
+      redmineConfig = RedmineApiConfiguration(url = cli.execute.redmineUrl(), key = cli.execute.redmineKey(), projectKey = redmine),
+      backlogConfig = BacklogApiConfiguration(url = cli.execute.backlogUrl(), key = cli.execute.backlogKey(), projectKey = backlog),
       exclude = cli.execute.exclude.toOption,
-      importOnly = cli.execute.importOnly(),
-      optOut = cli.execute.optOut())
+      importOnly = cli.execute.importOnly()
+    )
   }
 
   private[this] def setLang() = {

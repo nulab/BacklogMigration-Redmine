@@ -1,6 +1,7 @@
 package com.nulabinc.backlog.r2b.helper
 
-import java.io.{FileInputStream}
+import java.io.FileInputStream
+import java.text.SimpleDateFormat
 import java.util.{Date, Locale, Properties}
 
 import better.files.File
@@ -15,7 +16,6 @@ import com.nulabinc.backlog4j.conf.{BacklogConfigure, BacklogPackageConfigure}
 import com.nulabinc.backlog4j.{BacklogClient, BacklogClientFactory}
 import com.osinka.i18n.Lang
 import com.taskadapter.redmineapi.RedmineManagerFactory
-import org.joda.time.DateTime
 import spray.json.{JsNumber, JsonParser}
 import com.nulabinc.backlog.r2b.mapping.domain.MappingJsonProtocol._
 
@@ -28,8 +28,8 @@ trait SimpleFixture {
 
   implicit val userLang = if (Locale.getDefault.equals(Locale.JAPAN)) Lang("ja") else Lang("en")
 
-  val dateFormat              = "yyyy-MM-dd"
-  val timestampFormat: String = "yyyy-MM-dd'T'HH:mm:ssZ"
+  val dateFormat = new SimpleDateFormat("yyyy-MM-dd")
+  val timestampFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ")
 
   val optAppConfiguration    = getAppConfiguration
   val mappingUserService     = new MappingUserServiceImpl(unmarshal(MappingDirectory.USER_MAPPING_FILE))
@@ -91,11 +91,13 @@ trait SimpleFixture {
       val backlog: String     = if (keys.length == 2) keys(1) else keys(0).toUpperCase.replaceAll("-", "_")
 
       Some(
-        AppConfiguration(redmineConfig = new RedmineApiConfiguration(url = redmineUrl, key = redmineKey, projectKey = redmine),
-                         backlogConfig = new BacklogApiConfiguration(url = backlogUrl, key = backlogKey, projectKey = backlog),
-                         exclude = None,
-                         importOnly = false,
-                         optOut = true))
+        AppConfiguration(
+          redmineConfig = new RedmineApiConfiguration(url = redmineUrl, key = redmineKey, projectKey = redmine),
+          backlogConfig = new BacklogApiConfiguration(url = backlogUrl, key = backlogKey, projectKey = backlog),
+          exclude = None,
+          importOnly = false
+        )
+      )
     } else None
   }
 
@@ -125,8 +127,8 @@ trait SimpleFixture {
     redmine.getIssueManager.getIssues(params.asJava).asScala
   }
 
-  def dateToString(date: Date) = new DateTime(date).toString(dateFormat)
+  def dateToString(date: Date) = dateFormat.format(date)
 
-  def timestampToString(date: Date) = new DateTime(date).toString(timestampFormat)
+  def timestampToString(date: Date) = timestampFormat.format(date)
 
 }
