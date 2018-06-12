@@ -216,9 +216,6 @@ Following items cannot be migrated
 * Searched
 * Display
 
-### About limitations in Backlog
-* Importing users will be terminated if the number of users will exceed the limit in Backlog.
-
 ### Resources that can be migrated by Redmine version
 
 | Resource | Availability |
@@ -480,9 +477,6 @@ Backlogで **プレミアムプラン以上** のプランを契約している�
 * フィルタとして使用
 * 検索対象
 * 表示
-
-### Backlog側の制限について
-* Backlogで登録可能なユーザー数を超えた場合、インポートは中断されます。
 
 ### Redmineバージョンによる移行可能なリソース
 
