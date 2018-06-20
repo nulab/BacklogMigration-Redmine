@@ -25,7 +25,7 @@ object Boot extends Logging {
 
       val mappingData      = MappingData(mutable.Set.empty[User], mutable.Set.empty[String])
       val mappingCollector = injector.getInstance(classOf[MappingCollector])
-      mappingCollector.boot(injector, mappingData)
+      mappingCollector.boot(mappingData)
 
       ConsoleOut.println(s"""|--------------------------------------------------
                              |${Messages("cli.project_info.finish")}""".stripMargin)

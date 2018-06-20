@@ -3,7 +3,6 @@ package com.nulabinc.backlog.r2b.mapping.collector.service
 import javax.inject.Inject
 
 import akka.actor.{ActorSystem, Props}
-import com.google.inject.Injector
 import com.nulabinc.backlog.migration.common.utils.{Logging, ProgressBar}
 import com.nulabinc.backlog.r2b.mapping.collector.actor.ContentActor
 import com.nulabinc.backlog.r2b.mapping.collector.core.{MappingContextProvider, MappingData}
@@ -21,10 +20,9 @@ import scala.concurrent.duration.Duration
 private[collector] class MappingCollector @Inject()(mappingContextProvider: MappingContextProvider,
                                                     membershipService: MembershipService,
                                                     userService: UserService,
-                                                    newsService: NewsService)
-    extends Logging {
+                                                    newsService: NewsService) extends Logging {
 
-  def boot(injector: Injector, mappingData: MappingData) = {
+  def boot(mappingData: MappingData) = {
     val mappingContext = mappingContextProvider.get()
     val system         = ActorSystem.apply("main-actor-system")
     val contentActor   = system.actorOf(Props(new ContentActor(mappingContext)))

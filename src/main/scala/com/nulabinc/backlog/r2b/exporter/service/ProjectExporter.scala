@@ -3,7 +3,6 @@ package com.nulabinc.backlog.r2b.exporter.service
 import javax.inject.Inject
 
 import akka.actor.{ActorSystem, Props}
-import com.google.inject.Injector
 import com.nulabinc.backlog.migration.common.conf.BacklogPaths
 import com.nulabinc.backlog.migration.common.convert.Convert
 import com.nulabinc.backlog.migration.common.domain.BacklogJsonProtocol._
@@ -11,7 +10,7 @@ import com.nulabinc.backlog.migration.common.domain._
 import com.nulabinc.backlog.migration.common.utils.{ConsoleOut, IOUtil, Logging, ProgressBar}
 import com.nulabinc.backlog.r2b.exporter.actor.ContentActor
 import com.nulabinc.backlog.r2b.exporter.convert._
-import com.nulabinc.backlog.r2b.exporter.core.{ExportContext, ExportContextProvider}
+import com.nulabinc.backlog.r2b.exporter.core.ExportContextProvider
 import com.nulabinc.backlog.r2b.mapping.core.MappingContainer
 import com.nulabinc.backlog.r2b.redmine.service.{MembershipService, _}
 import com.osinka.i18n.Messages
@@ -45,7 +44,7 @@ private[exporter] class ProjectExporter @Inject()(implicit val projectWrites: Pr
                                                   exportContextProvider: ExportContextProvider)
     extends Logging {
 
-  def boot(injector: Injector, mappingContainer: MappingContainer) = {
+  def boot(mappingContainer: MappingContainer): Unit = {
     val exportContext = exportContextProvider.get()
     val system        = ActorSystem.apply("main-actor-system")
     val contentActor  = system.actorOf(Props(new ContentActor(exportContext)))
@@ -53,10 +52,10 @@ private[exporter] class ProjectExporter @Inject()(implicit val projectWrites: Pr
 
     Await.result(system.whenTerminated, Duration.Inf)
 
-    property(exportContext, mappingContainer)
+    property(mappingContainer)
   }
 
-  private[this] def property(exportContext: ExportContext, mappingContainer: MappingContainer) = {
+  private[this] def property(mappingContainer: MappingContainer): Unit = {
     val allMemberships: Seq[Membership] = membershipService.allMemberships()
 
     //project

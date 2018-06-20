@@ -23,7 +23,7 @@ object Boot extends Logging {
                             |--------------------------------------------------""".stripMargin)
 
       val projectExporter = injector.getInstance(classOf[ProjectExporter])
-      projectExporter.boot(injector, mappingContainer)
+      projectExporter.boot(mappingContainer)
 
       ConsoleOut.println(s"""--------------------------------------------------
                             |${Messages("export.finish")}""".stripMargin)

@@ -1,7 +1,7 @@
 package com.nulabinc.backlog.r2b.exporter.service
 
-import java.io.{FileOutputStream, InputStream}
-import java.net.{SocketException, URL}
+import java.io.FileOutputStream
+import java.net.URL
 import java.nio.channels.Channels
 
 import com.nulabinc.backlog.migration.common.convert.Convert
