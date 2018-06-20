@@ -48,14 +48,8 @@ lazy val redmine = (project in file("redmine"))
     )
   )
   .dependsOn(common % "test->test;compile->compile")
-  .aggregate(common)
 
 lazy val exporter = (project in file("exporter"))
-  .settings(commonSettings: _*)
-  .dependsOn(common % "test->test;compile->compile", redmine, mappingBase)
-  .aggregate(common, redmine)
-
-lazy val mappingBase = (project in file("mapping-base"))
   .settings(commonSettings: _*)
   .dependsOn(common % "test->test;compile->compile", redmine)
 
@@ -82,5 +76,5 @@ lazy val root = (project in file("."))
     ),
     test in assembly := {}
   )
-  .dependsOn(common % "test->test;compile->compile", importer, exporter, mappingBase)
+  .dependsOn(common % "test->test;compile->compile", importer, exporter)
   .aggregate(common, importer, exporter)
