@@ -38,15 +38,9 @@ lazy val common = (project in file("common"))
 lazy val importer = (project in file("importer"))
   .settings(commonSettings: _*)
   .dependsOn(common % "test->test;compile->compile")
-  .aggregate(common)
 
 lazy val redmine = (project in file("redmine"))
   .settings(commonSettings: _*)
-  .settings(
-    libraryDependencies ++= Seq(
-      "com.taskadapter" % "redmine-java-api" % "2.4.0"
-    )
-  )
   .dependsOn(common % "test->test;compile->compile")
 
 lazy val root = (project in file("."))
@@ -56,11 +50,13 @@ lazy val root = (project in file("."))
     libraryDependencies ++= {
       val catsVersion = "1.1.0"
       Seq(
-        "org.typelevel"   %% "cats-core"      % catsVersion,
-        "org.typelevel"   %% "cats-free"      % catsVersion,
-        "io.monix"        %% "monix-reactive" % "3.0.0-RC1",
-        "org.rogach"      %% "scallop"        % "3.1.2",
-        "org.scalatest"   %% "scalatest"      % "3.0.1" % "test"
+        "org.typelevel"     %% "cats-core"      % catsVersion,
+        "org.typelevel"     %% "cats-free"      % catsVersion,
+        "io.monix"          %% "monix-reactive" % "3.0.0-RC1",
+        "com.typesafe.akka" %% "akka-actor"     % "2.5.9",
+        "com.typesafe.akka" %% "akka-slf4j"     % "2.5.9",
+        "org.rogach"        %% "scallop"        % "3.1.2",
+        "org.scalatest"     %% "scalatest"      % "3.0.1" % "test"
       )
     },
     assemblyJarName in assembly := {
@@ -72,4 +68,6 @@ lazy val root = (project in file("."))
     ),
     test in assembly := {}
   )
-  .dependsOn(common % "test->test;compile->compile", importer)
+  .dependsOn(common % "test->test;compile->compile")
+  .dependsOn(redmine)
+  .dependsOn(importer)
