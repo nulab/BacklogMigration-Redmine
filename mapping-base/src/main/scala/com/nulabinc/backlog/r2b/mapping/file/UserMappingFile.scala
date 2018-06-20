@@ -1,5 +1,6 @@
 package com.nulabinc.backlog.r2b.mapping.file
 
+import better.files.File
 import com.nulabinc.backlog.migration.common.conf.{BacklogApiConfiguration, BacklogConfiguration}
 import com.nulabinc.backlog.migration.common.domain.BacklogUser
 import com.nulabinc.backlog.migration.common.modules.{ServiceInjector => BacklogInjector}
@@ -14,7 +15,6 @@ import com.nulabinc.backlog.r2b.redmine.service.{UserService => RedmineUserServi
 import com.osinka.i18n.Messages
 import com.taskadapter.redmineapi.bean.{User => RedmineUser}
 import spray.json.JsonParser
-import better.files.File
 
 /**
   * @author uchida
