@@ -5,7 +5,7 @@ scapegoatVersion in ThisBuild := "1.3.3"
 lazy val commonSettings = Seq(
   organization := "com.nulabinc",
   version := "0.13.0b2-SNAPSHOT",
-  scalaVersion := "2.12.4",
+  scalaVersion := "2.12.6",
   scalacOptions ++= Seq(
     "-language:reflectiveCalls",
     "-language:postfixOps",
@@ -17,10 +17,6 @@ lazy val commonSettings = Seq(
     "-Ywarn-dead-code",
     "-Ywarn-unused",
     "-Ywarn-unused-import"
-  ),
-  libraryDependencies ++= Seq(
-    "com.typesafe.akka" %% "akka-actor" % "2.5.9",
-    "com.typesafe.akka" %% "akka-slf4j" % "2.5.9"
   ),
   scapegoatVersion := "1.3.4",
   scapegoatDisabledInspections := Seq(
