@@ -4,8 +4,8 @@ scapegoatVersion in ThisBuild := "1.3.3"
 
 lazy val commonSettings = Seq(
   organization := "com.nulabinc",
-  version := "0.13.0b1",
-  scalaVersion := "2.12.4",
+  version := "0.13.0b2",
+  scalaVersion := "2.12.6",
   scalacOptions ++= Seq(
     "-language:reflectiveCalls",
     "-language:postfixOps",
@@ -17,10 +17,6 @@ lazy val commonSettings = Seq(
     "-Ywarn-dead-code",
     "-Ywarn-unused",
     "-Ywarn-unused-import"
-  ),
-  libraryDependencies ++= Seq(
-    "com.typesafe.akka" %% "akka-actor" % "2.5.9",
-    "com.typesafe.akka" %% "akka-slf4j" % "2.5.9"
   ),
   scapegoatVersion := "1.3.4",
   scapegoatDisabledInspections := Seq(
@@ -38,38 +34,10 @@ lazy val common = (project in file("common"))
 lazy val importer = (project in file("importer"))
   .settings(commonSettings: _*)
   .dependsOn(common % "test->test;compile->compile")
-  .aggregate(common)
 
 lazy val redmine = (project in file("redmine"))
   .settings(commonSettings: _*)
-  .settings(
-    libraryDependencies ++= Seq(
-      "com.taskadapter" % "redmine-java-api" % "2.4.0"
-    )
-  )
   .dependsOn(common % "test->test;compile->compile")
-  .aggregate(common)
-
-lazy val exporter = (project in file("exporter"))
-  .settings(commonSettings: _*)
-  .dependsOn(common % "test->test;compile->compile", redmine, mappingConverter)
-  .aggregate(common, redmine)
-
-lazy val mappingBase = (project in file("mapping-base"))
-  .settings(commonSettings: _*)
-  .dependsOn(common % "test->test;compile->compile", redmine)
-
-lazy val mappingConverter = (project in file("mapping-converter"))
-  .settings(commonSettings: _*)
-  .dependsOn(mappingBase)
-
-lazy val mappingCollector = (project in file("mapping-collector"))
-  .settings(commonSettings: _*)
-  .dependsOn(mappingBase)
-
-lazy val mappingFile = (project in file("mapping-file"))
-  .settings(commonSettings: _*)
-  .dependsOn(mappingBase)
 
 lazy val root = (project in file("."))
   .settings(commonSettings: _*)
@@ -78,11 +46,13 @@ lazy val root = (project in file("."))
     libraryDependencies ++= {
       val catsVersion = "1.1.0"
       Seq(
-        "org.typelevel"   %% "cats-core"      % catsVersion,
-        "org.typelevel"   %% "cats-free"      % catsVersion,
-        "io.monix"        %% "monix-reactive" % "3.0.0-RC1",
-        "org.rogach"      %% "scallop"        % "3.1.2",
-        "org.scalatest"   %% "scalatest"      % "3.0.1" % "test"
+        "org.typelevel"     %% "cats-core"      % catsVersion,
+        "org.typelevel"     %% "cats-free"      % catsVersion,
+        "io.monix"          %% "monix-reactive" % "3.0.0-RC1",
+        "com.typesafe.akka" %% "akka-actor"     % "2.5.9",
+        "com.typesafe.akka" %% "akka-slf4j"     % "2.5.9",
+        "org.rogach"        %% "scallop"        % "3.1.2",
+        "org.scalatest"     %% "scalatest"      % "3.0.1" % "test"
       )
     },
     assemblyJarName in assembly := {
@@ -94,5 +64,6 @@ lazy val root = (project in file("."))
     ),
     test in assembly := {}
   )
-  .dependsOn(common % "test->test;compile->compile", importer, exporter, mappingFile, mappingCollector)
-  .aggregate(common, importer, exporter)
+  .dependsOn(common % "test->test;compile->compile")
+  .dependsOn(redmine)
+  .dependsOn(importer)
