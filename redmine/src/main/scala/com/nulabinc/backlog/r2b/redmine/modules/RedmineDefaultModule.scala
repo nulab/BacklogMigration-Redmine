@@ -90,12 +90,21 @@ class RedmineDefaultModule(apiConfig: RedmineApiConfiguration) extends AbstractM
         logger.warn(e.getMessage, e)
         Seq.empty[IssueStatus]
     }
-    val users = redmine.getUserManager.getUsers.asScala
+    /*
+    http://www.redmine.org/projects/redmine/wiki/Rest_Users
+    status: get only users with the given status. See app/models/principal.rb for a list of available statuses. Default is 1 (active users). Possible values are:
+      1: Active (User can login and use their account)
+      2: Registered (User has registered but not yet confirmed their email address or was not yet activated by an administrator. User can not login)
+      3: Locked (User was once active and is now locked, User can not login)
+     */
+    val activeUsers = redmine.getUserManager.getUsers.asScala
+    val lockedUsers = redmine.getUserManager.getUsers(Map("status" -> "3").asJava).asScala
+    val allUsers = activeUsers ++ lockedUsers
 
     val customFieldServiceImpl = new CustomFieldServiceImpl(apiConfig, redmine)
     val customFieldDefinitions = customFieldServiceImpl.allCustomFieldDefinitions()
 
-    PropertyValue(users, versions, categories, priorities, trackers, memberships, statuses, customFieldDefinitions)
+    PropertyValue(allUsers, versions, categories, priorities, trackers, memberships, statuses, customFieldDefinitions)
   }
 
 }
