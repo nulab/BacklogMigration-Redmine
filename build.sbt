@@ -44,7 +44,7 @@ lazy val root = (project in file("."))
   .settings(
     name := "backlog-migration-redmine",
     libraryDependencies ++= {
-      val catsVersion = "1.1.0"
+      val catsVersion = "1.2.0"
       Seq(
         "org.typelevel"     %% "cats-core"      % catsVersion,
         "org.typelevel"     %% "cats-free"      % catsVersion,
@@ -52,7 +52,7 @@ lazy val root = (project in file("."))
         "com.typesafe.akka" %% "akka-actor"     % "2.5.9",
         "com.typesafe.akka" %% "akka-slf4j"     % "2.5.9",
         "org.rogach"        %% "scallop"        % "3.1.2",
-        "org.scalatest"     %% "scalatest"      % "3.0.1" % "test"
+        "org.scalatest"     %% "scalatest"      % "3.0.5"       % "test"
       )
     },
     assemblyJarName in assembly := {
