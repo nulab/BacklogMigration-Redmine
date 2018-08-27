@@ -8,6 +8,7 @@ import com.nulabinc.backlog.r2b.redmine.service._
 import com.taskadapter.redmineapi.bean._
 import com.taskadapter.redmineapi.{RedmineManager, RedmineManagerFactory}
 
+import scala.annotation.tailrec
 import scala.collection.JavaConverters._
 
 /**
@@ -90,21 +91,40 @@ class RedmineDefaultModule(apiConfig: RedmineApiConfiguration) extends AbstractM
         logger.warn(e.getMessage, e)
         Seq.empty[IssueStatus]
     }
-    /*
-    http://www.redmine.org/projects/redmine/wiki/Rest_Users
-    status: get only users with the given status. See app/models/principal.rb for a list of available statuses. Default is 1 (active users). Possible values are:
-      1: Active (User can login and use their account)
-      2: Registered (User has registered but not yet confirmed their email address or was not yet activated by an administrator. User can not login)
-      3: Locked (User was once active and is now locked, User can not login)
-     */
     val activeUsers = redmine.getUserManager.getUsers.asScala
-    val lockedUsers = redmine.getUserManager.getUsers(Map("status" -> "3").asJava).asScala
+    val lockedUsers = getLockedUsers(redmine, Seq.empty, 25, 0)
     val allUsers = activeUsers ++ lockedUsers
 
     val customFieldServiceImpl = new CustomFieldServiceImpl(apiConfig, redmine)
     val customFieldDefinitions = customFieldServiceImpl.allCustomFieldDefinitions()
 
     PropertyValue(allUsers, versions, categories, priorities, trackers, memberships, statuses, customFieldDefinitions)
+  }
+
+  @tailrec
+  private[this] def getLockedUsers(redmine: RedmineManager, beforeUsers: Seq[User], limit: Int, offset: Int): Seq[User] = {
+    /*
+      http://www.redmine.org/projects/redmine/wiki/Rest_Users
+      status: get only users with the given status. See app/models/principal.rb for a list of available statuses. Default is 1 (active users). Possible values are:
+        1: Active (User can login and use their account)
+        2: Registered (User has registered but not yet confirmed their email address or was not yet activated by an administrator. User can not login)
+        3: Locked (User was once active and is now locked, User can not login)
+     */
+    val users = redmine
+      .getUserManager
+      .getUsers(
+        Map(
+          "status" -> "3", // Locked
+          "offset" -> offset.toString,
+          "limit"  -> limit.toString
+        ).asJava
+      )
+      .asScala
+
+    if (users.isEmpty)
+      beforeUsers
+    else
+      getLockedUsers(redmine, beforeUsers ++ users, limit, offset + limit)
   }
 
 }
