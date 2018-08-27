@@ -8,6 +8,7 @@ import com.nulabinc.backlog.r2b.redmine.service._
 import com.taskadapter.redmineapi.bean._
 import com.taskadapter.redmineapi.{RedmineManager, RedmineManagerFactory}
 
+import scala.annotation.tailrec
 import scala.collection.JavaConverters._
 
 /**
@@ -98,13 +99,32 @@ class RedmineDefaultModule(apiConfig: RedmineApiConfiguration) extends AbstractM
       3: Locked (User was once active and is now locked, User can not login)
      */
     val activeUsers = redmine.getUserManager.getUsers.asScala
-    val lockedUsers = redmine.getUserManager.getUsers(Map("status" -> "3").asJava).asScala
+    val lockedUsers = getLockedUsers(redmine, Seq.empty, 25, 0)
     val allUsers = activeUsers ++ lockedUsers
 
     val customFieldServiceImpl = new CustomFieldServiceImpl(apiConfig, redmine)
     val customFieldDefinitions = customFieldServiceImpl.allCustomFieldDefinitions()
 
     PropertyValue(allUsers, versions, categories, priorities, trackers, memberships, statuses, customFieldDefinitions)
+  }
+
+  @tailrec
+  private[this] def getLockedUsers(redmine: RedmineManager, beforeUsers: Seq[User], limit: Int, offset: Int): Seq[User] = {
+    val users = redmine
+      .getUserManager
+      .getUsers(
+        Map(
+          "status" -> "3",
+          "offset" -> offset.toString,
+          "limit"  -> limit.toString
+        ).asJava
+      )
+      .asScala
+    
+    if (users.isEmpty)
+      beforeUsers
+    else
+      getLockedUsers(redmine, beforeUsers ++ users, limit, offset + limit)
   }
 
 }
