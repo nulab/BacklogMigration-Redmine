@@ -1,6 +1,8 @@
 package com.nulabinc.backlog.r2b.cli
 
-import com.nulabinc.backlog.migration.common.conf.{BacklogConfiguration, BacklogPaths}
+import java.net.{HttpURLConnection, URL}
+
+import com.nulabinc.backlog.migration.common.conf.{BacklogApiConfiguration, BacklogConfiguration, BacklogPaths}
 import com.nulabinc.backlog.migration.common.modules.{ServiceInjector => BacklogInjector}
 import com.nulabinc.backlog.migration.common.service.ProjectService
 import com.nulabinc.backlog.migration.common.utils.{ConsoleOut, Logging}
@@ -18,6 +20,7 @@ import com.nulabinc.backlog.r2b.mapping.file._
 import com.nulabinc.backlog4j.Issue
 import com.osinka.i18n.Messages
 import monix.execution.Scheduler
+import com.nulabinc.backlog.migration.common.utils.ControlUtil.using
 
 import scala.concurrent.{Await, ExecutionContext, Future}
 import scala.concurrent.duration.Duration
@@ -71,6 +74,7 @@ object R2BCli extends BacklogConfiguration with Logging {
 
             BootExporter.execute(config.redmineConfig, mappingContainer, config.backlogConfig.projectKey, config.exclude)
             BootImporter.execute(config.backlogConfig, false)
+            finalize(config.backlogConfig)
           }
         }
       }
@@ -80,6 +84,7 @@ object R2BCli extends BacklogConfiguration with Logging {
   def doImport(config: AppConfiguration): Unit = {
     if (validateParam(config)) {
       BootImporter.execute(config.backlogConfig, false)
+      finalize(config.backlogConfig)
     }
   }
 
@@ -369,6 +374,21 @@ object R2BCli extends BacklogConfiguration with Logging {
          |${Messages("cli.help")}
       """.stripMargin
     ConsoleOut.println(message)
+  }
+
+  private[this] def finalize(config: BacklogApiConfiguration) = {
+    if (!versionName.contains("SNAPSHOT")) {
+      val url = new URL(s"${config.url}/api/v2/importer/redmine?projectKey=${config.projectKey}")
+      url.openConnection match {
+        case http: HttpURLConnection =>
+          http.setRequestMethod("GET")
+          http.connect()
+          using(http) { connection =>
+            connection.getResponseCode
+          }
+        case _ => 0
+      }
+    }
   }
 
 }
