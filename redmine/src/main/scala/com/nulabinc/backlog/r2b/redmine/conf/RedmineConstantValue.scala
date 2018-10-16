@@ -16,6 +16,7 @@ object RedmineConstantValue {
     val LIST: String    = "list"
     val VERSION: String = "version"
     val USER: String    = "user"
+    val ENUMERATION: String    = "enumeration"
   }
 
   val ATTACHMENT: String   = "attachment"

@@ -39,7 +39,7 @@ private[exporter] class CustomFieldDefinitionsWrites @Inject()(propertyValue: Pr
       case RedmineConstantValue.FieldFormat.INT | RedmineConstantValue.FieldFormat.FLOAT                                           => numericProperty(redmineCustomFieldDefinition)
       case RedmineConstantValue.FieldFormat.DATE                                                                                   => dateProperty(redmineCustomFieldDefinition)
       case RedmineConstantValue.FieldFormat.LIST | RedmineConstantValue.FieldFormat.USER | RedmineConstantValue.FieldFormat.VERSION |
-          RedmineConstantValue.FieldFormat.BOOL =>
+          RedmineConstantValue.FieldFormat.BOOL | RedmineConstantValue.FieldFormat.ENUMERATION =>
         multipleProperty(redmineCustomFieldDefinition)
     }
 
@@ -110,6 +110,7 @@ private[exporter] class CustomFieldDefinitionsWrites @Inject()(propertyValue: Pr
       case RedmineConstantValue.FieldFormat.USER | RedmineConstantValue.FieldFormat.VERSION =>
         if (redmineCustomFieldDefinition.isMultiple) FieldType.MultipleList.getIntValue else FieldType.SingleList.getIntValue
       case RedmineConstantValue.FieldFormat.BOOL => FieldType.Radio.getIntValue
+      case RedmineConstantValue.FieldFormat.ENUMERATION => FieldType.SingleList.getIntValue
     }
 
   private[this] def multipleTypeId(redmineCustomFieldDefinition: RedmineCustomFieldDefinition): Int = {

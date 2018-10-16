@@ -31,6 +31,8 @@ private[exporter] class CustomFieldWrites @Inject()(propertyValue: PropertyValue
           case RedmineConstantValue.FieldFormat.BOOL                                           => Some(bool(customField))
           case RedmineConstantValue.FieldFormat.LIST if (!customFieldDefinition.isMultiple)    => Some(toSingleListCustomField(customField))
           case RedmineConstantValue.FieldFormat.LIST if (customFieldDefinition.isMultiple)     => Some(toMultipleListCustomField(customField))
+          case RedmineConstantValue.FieldFormat.ENUMERATION if (!customFieldDefinition.isMultiple)    => Some(toSingleListCustomField(customField))
+          case RedmineConstantValue.FieldFormat.ENUMERATION if (customFieldDefinition.isMultiple)     => Some(toMultipleListCustomField(customField))
           case RedmineConstantValue.FieldFormat.VERSION                                        => Some(version(customField))
           case RedmineConstantValue.FieldFormat.USER                                           => Some(user(customField))
           case _                                                                               => None
