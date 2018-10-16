@@ -1,16 +1,17 @@
 package com.nulabinc.backlog.r2b.exporter.actor
 
 import akka.actor.{Actor, Props}
+import com.nulabinc.backlog.migration.common.domain.BacklogTextFormattingRule
 import com.nulabinc.backlog.migration.common.utils.Logging
 import com.nulabinc.backlog.r2b.exporter.core.ExportContext
 
 /**
   * @author uchida
   */
-private[exporter] class ContentActor(exportContext: ExportContext) extends Actor with Logging {
+private[exporter] class ContentActor(exportContext: ExportContext, backlogTextFormattingRule: BacklogTextFormattingRule) extends Actor with Logging {
 
   private[this] val wikisActor  = context.actorOf(Props(new WikisActor(exportContext)))
-  private[this] val issuesActor = context.actorOf(Props(new IssuesActor(exportContext)))
+  private[this] val issuesActor = context.actorOf(Props(new IssuesActor(exportContext, backlogTextFormattingRule)))
 
   def receive: Receive = {
     case ContentActor.Do =>

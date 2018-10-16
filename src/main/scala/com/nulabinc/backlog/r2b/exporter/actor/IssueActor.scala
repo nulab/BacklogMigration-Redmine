@@ -5,7 +5,7 @@ import java.util.concurrent.CountDownLatch
 import akka.actor.Actor
 import com.nulabinc.backlog.migration.common.domain.BacklogJsonProtocol._
 import com.nulabinc.backlog.migration.common.convert.Convert
-import com.nulabinc.backlog.migration.common.domain.{BacklogComment, BacklogIssue}
+import com.nulabinc.backlog.migration.common.domain.{BacklogComment, BacklogIssue, BacklogTextFormattingRule}
 import com.nulabinc.backlog.migration.common.utils.{DateUtil, IOUtil, Logging}
 import com.nulabinc.backlog.r2b.exporter.core.ExportContext
 import com.nulabinc.backlog.r2b.exporter.service.{ChangeLogReducer, CommentReducer, IssueInitializer}
@@ -20,7 +20,7 @@ import scala.concurrent.duration._
 /**
   * @author uchida
   */
-private[exporter] class IssueActor(exportContext: ExportContext) extends Actor with Logging {
+private[exporter] class IssueActor(exportContext: ExportContext, backlogTextFormattingRule: BacklogTextFormattingRule) extends Actor with Logging {
 
   implicit val issueWrites   = exportContext.issueWrites
   implicit val journalWrites = exportContext.journalWrites
@@ -50,7 +50,7 @@ private[exporter] class IssueActor(exportContext: ExportContext) extends Actor w
   private[this] def exportIssue(issue: Issue, journals: Seq[Journal], attachments: Seq[Attachment]) = {
     val issueCreated     = DateUtil.tryIsoParse(Option(issue.getCreatedOn).map(DateUtil.isoFormat))
     val issueDirPath     = exportContext.backlogPaths.issueDirectoryPath("issue", issue.getId.intValue(), issueCreated, 0)
-    val issueInitializer = new IssueInitializer(exportContext, issueDirPath, journals, attachments)
+    val issueInitializer = new IssueInitializer(exportContext, issueDirPath, journals, attachments, backlogTextFormattingRule)
     val backlogIssue     = issueInitializer.initialize(issue)
 
     IOUtil.output(exportContext.backlogPaths.issueJson(issueDirPath), backlogIssue.toJson.prettyPrint)

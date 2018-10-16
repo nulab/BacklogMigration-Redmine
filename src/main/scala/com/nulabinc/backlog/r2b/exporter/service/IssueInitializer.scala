@@ -14,11 +14,12 @@ import com.taskadapter.redmineapi.bean._
 
 import scala.collection.JavaConverters._
 import better.files.{File => Path}
+import com.nulabinc.backlog.r2b.utils.TextileUtil
 
 /**
   * @author uchida
   */
-private[exporter] class IssueInitializer(exportContext: ExportContext, issueDirPath: Path, journals: Seq[Journal], attachments: Seq[Attachment])
+private[exporter] class IssueInitializer(exportContext: ExportContext, issueDirPath: Path, journals: Seq[Journal], attachments: Seq[Attachment], backlogTextFormattingRule: BacklogTextFormattingRule)
     extends Logging {
 
   implicit val issueWrites            = exportContext.issueWrites
@@ -81,7 +82,7 @@ private[exporter] class IssueInitializer(exportContext: ExportContext, issueDirP
     val issueInitialValue = new IssueInitialValue(RedmineConstantValue.ATTR, RedmineConstantValue.Attr.DESCRIPTION)
     issueInitialValue.findJournalDetail(journals) match {
       case Some(detail) => Option(detail.getOldValue).getOrElse("")
-      case None         => issue.getDescription
+      case None         => TextileUtil.convert(issue.getDescription, backlogTextFormattingRule)
     }
   }
 

@@ -1,11 +1,11 @@
 package com.nulabinc.backlog.r2b.exporter.convert
 
 import javax.inject.Inject
-
 import com.nulabinc.backlog.migration.common.convert.{Convert, Writes}
 import com.nulabinc.backlog.migration.common.domain._
 import com.nulabinc.backlog.migration.common.utils.DateUtil
 import com.nulabinc.backlog.r2b.mapping.service.{MappingPriorityService, MappingStatusService}
+import com.nulabinc.backlog.r2b.utils.TextileUtil
 import com.taskadapter.redmineapi.bean.Issue
 
 import scala.collection.JavaConverters._
@@ -17,7 +17,8 @@ private[exporter] class IssueWrites @Inject()(implicit val attachmentWrites: Att
                                               implicit val userWrites: UserWrites,
                                               implicit val customFieldWrites: CustomFieldWrites,
                                               mappingPriorityService: MappingPriorityService,
-                                              mappingStatusService: MappingStatusService)
+                                              mappingStatusService: MappingStatusService,
+                                              backlogTextFormattingRule: BacklogTextFormattingRule)
     extends Writes[Issue, BacklogIssue] {
 
   override def writes(issue: Issue): BacklogIssue = {
@@ -27,7 +28,7 @@ private[exporter] class IssueWrites @Inject()(implicit val attachmentWrites: Att
       optIssueKey = None,
       summary = BacklogIssueSummary(value = issue.getSubject, original = issue.getSubject),
       optParentIssueId = parentIssueId(issue),
-      description = issue.getDescription,
+      description = TextileUtil.convert(issue.getDescription, backlogTextFormattingRule),
       optStartDate = Option(issue.getStartDate).map(DateUtil.dateFormat),
       optDueDate = Option(issue.getDueDate).map(DateUtil.dateFormat),
       optEstimatedHours = Option(issue.getEstimatedHours).map(_.floatValue()),

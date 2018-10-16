@@ -1,10 +1,10 @@
 package com.nulabinc.backlog.r2b.exporter.convert
 
 import javax.inject.Inject
-
 import com.nulabinc.backlog.migration.common.convert.{Convert, Writes}
 import com.nulabinc.backlog.migration.common.domain._
 import com.nulabinc.backlog.migration.common.utils.{DateUtil, Logging}
+import com.nulabinc.backlog.r2b.utils.TextileUtil
 import com.osinka.i18n.Messages
 import com.taskadapter.redmineapi.bean.WikiPageDetail
 
@@ -13,7 +13,7 @@ import scala.collection.JavaConverters._
 /**
   * @author uchida
   */
-private[exporter] class WikiWrites @Inject()(implicit val attachmentWrites: AttachmentWrites, implicit val userWrites: UserWrites)
+private[exporter] class WikiWrites @Inject()(implicit val attachmentWrites: AttachmentWrites, implicit val userWrites: UserWrites, backlogTextFormattingRule: BacklogTextFormattingRule)
     extends Writes[WikiPageDetail, BacklogWiki]
     with Logging {
 
@@ -46,7 +46,7 @@ private[exporter] class WikiWrites @Inject()(implicit val attachmentWrites: Atta
       sb.append("\n")
       sb.append(Messages("common.parent_page")).append(":[[").append(parent.getTitle).append("]]")
     }
-    sb.toString()
+    TextileUtil.convert(sb.toString(), backlogTextFormattingRule)
   }
 
 }

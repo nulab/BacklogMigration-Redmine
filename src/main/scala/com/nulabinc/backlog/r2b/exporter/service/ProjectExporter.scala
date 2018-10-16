@@ -41,13 +41,14 @@ private[exporter] class ProjectExporter @Inject()(implicit val projectWrites: Pr
                                                   issueCategoryService: IssueCategoryService,
                                                   versionService: VersionService,
                                                   newsService: NewsService,
-                                                  exportContextProvider: ExportContextProvider)
+                                                  exportContextProvider: ExportContextProvider,
+                                                  backlogTextFormattingRule: BacklogTextFormattingRule)
     extends Logging {
 
   def boot(mappingContainer: MappingContainer): Unit = {
     val exportContext = exportContextProvider.get()
     val system        = ActorSystem.apply("main-actor-system")
-    val contentActor  = system.actorOf(Props(new ContentActor(exportContext)))
+    val contentActor  = system.actorOf(Props(new ContentActor(exportContext, backlogTextFormattingRule)))
     contentActor ! ContentActor.Do
 
     Await.result(system.whenTerminated, Duration.Inf)

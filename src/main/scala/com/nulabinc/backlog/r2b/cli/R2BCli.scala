@@ -3,6 +3,7 @@ package com.nulabinc.backlog.r2b.cli
 import java.net.{HttpURLConnection, URL}
 
 import com.nulabinc.backlog.migration.common.conf.{BacklogApiConfiguration, BacklogConfiguration, BacklogPaths}
+import com.nulabinc.backlog.migration.common.domain.{BacklogProjectKey, BacklogTextFormattingRule}
 import com.nulabinc.backlog.migration.common.modules.{ServiceInjector => BacklogInjector}
 import com.nulabinc.backlog.migration.common.service.ProjectService
 import com.nulabinc.backlog.migration.common.utils.{ConsoleOut, Logging}
@@ -72,7 +73,10 @@ object R2BCli extends BacklogConfiguration with Logging {
               status = mappingFileContainer.status.tryUnmarshal(),
               priority = mappingFileContainer.priority.tryUnmarshal())
 
-            BootExporter.execute(config.redmineConfig, mappingContainer, config.backlogConfig.projectKey, config.exclude)
+
+            val backlogTextFormattingRule = fetchBacklogTextFormattingRule(config.backlogConfig)
+
+            BootExporter.execute(config.redmineConfig, mappingContainer, BacklogProjectKey(config.backlogConfig.projectKey), backlogTextFormattingRule, config.exclude)
             BootImporter.execute(config.backlogConfig, false)
             finalize(config.backlogConfig)
           }
@@ -388,6 +392,16 @@ object R2BCli extends BacklogConfiguration with Logging {
           }
         case _ => 0
       }
+    }
+  }
+
+  private[this] def fetchBacklogTextFormattingRule(backlogConfig: BacklogApiConfiguration): BacklogTextFormattingRule = {
+    val injector       = BacklogInjector.createInjector(backlogConfig)
+    val projectService = injector.getInstance(classOf[ProjectService])
+    val optProject     = projectService.optProject(backlogConfig.projectKey)
+    optProject match {
+      case Some(project) => BacklogTextFormattingRule(project.textFormattingRule)
+      case _ => BacklogTextFormattingRule("markdown")
     }
   }
 
