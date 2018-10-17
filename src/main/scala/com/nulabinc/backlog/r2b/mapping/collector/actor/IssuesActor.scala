@@ -18,7 +18,7 @@ import scala.concurrent.duration._
   */
 private[collector] class IssuesActor(mappingContext: MappingContext) extends Actor with BacklogConfiguration with Logging {
 
-  private[this] val strategy = OneForOneStrategy(maxNrOfRetries = 10, withinTimeRange = 1 minute) {
+  private[this] val strategy = OneForOneStrategy(maxNrOfRetries = 5, withinTimeRange = 10 seconds) {
     case _ => Restart
   }
 
