@@ -104,7 +104,7 @@ private[exporter] class JournalDetailWrites @Inject()(propertyValue: PropertyVal
         .map(_.name)
         .getOrElse {
           val message = propertyValue.customFieldDefinitions.map(c => s"${c.id}: ${c.name}").mkString("\n")
-          throw new RuntimeException(s"custom field id not found [${detail.getName}]\nAvailable custom fields are:\n$message")
+          throw new RuntimeException(s"custom field id not found. Custom field name: ${detail.getName}\nAvailable custom fields are:\n$message")
         }
     case RedmineConstantValue.ATTACHMENT =>
       BacklogConstantValue.ChangeLog.ATTACHMENT
