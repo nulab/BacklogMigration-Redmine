@@ -1,7 +1,8 @@
 .DEFAULT_GOAL := help
 
 build:  ## Build a jar file
-	@sbt clean test assembly
+	@rm -rf **/target
+	@sbt clean assembly
 
 .PHONY: help
 help:
