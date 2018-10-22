@@ -5,3 +5,5 @@ target/
 /mapping
 /backlog/project
 /backlog/*.json
+
+app.properties

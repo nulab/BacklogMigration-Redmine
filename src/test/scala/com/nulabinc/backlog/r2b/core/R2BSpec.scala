@@ -184,7 +184,15 @@ class R2BSpec extends FlatSpec with Matchers with SimpleFixture {
           }
 
           //due date
-          dateToString(redmineIssue.getDueDate) should equal(dateToString(backlogIssue.getDueDate))
+          (Option(redmineIssue.getDueDate), Option(backlogIssue.getDueDate)) match {
+            case (Some(r), Some(b)) =>
+              dateToString(r) should equal(dateToString(b))
+            case (None, None) =>
+              assert(true)
+            case (r, b) =>
+              r should equal(b)
+          }
+
 
           //priority
           convertPriority(redmineIssue.getPriorityText) should equal(backlogIssue.getPriority.getName)
