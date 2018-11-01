@@ -6,8 +6,9 @@ import akka.actor.SupervisorStrategy.Restart
 import akka.actor.{Actor, ActorRef, OneForOneStrategy, Props}
 import akka.routing.SmallestMailboxPool
 import com.nulabinc.backlog.migration.common.conf.BacklogConfiguration
-import com.nulabinc.backlog.migration.common.utils.{Logging, ProgressBar}
+import com.nulabinc.backlog.migration.common.utils.{ConsoleOut, Logging, ProgressBar}
 import com.nulabinc.backlog.r2b.mapping.collector.core.{MappingContext, MappingData}
+import com.nulabinc.backlog4j.BacklogAPIException
 import com.osinka.i18n.Messages
 import com.taskadapter.redmineapi.bean.User
 
@@ -18,9 +19,17 @@ import scala.concurrent.duration._
   */
 private[collector] class IssuesActor(mappingContext: MappingContext) extends Actor with BacklogConfiguration with Logging {
 
-  private[this] val strategy = OneForOneStrategy(maxNrOfRetries = 5, withinTimeRange = 10 seconds) {
-    case _ => Restart
-  }
+  private[this] val strategy =
+    OneForOneStrategy(maxNrOfRetries = 5, withinTimeRange = 10 seconds) {
+      case e: BacklogAPIException if e.getMessage.contains("429") =>
+        Restart
+      case e: BacklogAPIException if e.getMessage.contains("Stream closed") =>
+        Restart
+      case e =>
+        ConsoleOut.error("Fatal error: " + e.getMessage)
+        logger.error(e.getStackTrace.mkString("\n"))
+        sys.exit(2)
+    }
 
   private[this] val limit: Int = exportLimitAtOnce
   private[this] val allCount   = mappingContext.issueService.countIssues()
