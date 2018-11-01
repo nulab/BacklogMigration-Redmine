@@ -45,7 +45,7 @@ lazy val root = (project in file("."))
     name := "backlog-migration-redmine",
     libraryDependencies ++= {
       val catsVersion = "1.4.0"
-      val akkaVersion = "2.5.9"
+      val akkaVersion = "2.5.17"
       Seq(
         "org.typelevel"     %% "cats-core"      % catsVersion,
         "org.typelevel"     %% "cats-free"      % catsVersion,
