@@ -22,11 +22,11 @@ import scala.concurrent.duration._
   */
 private[exporter] class IssueActor(exportContext: ExportContext, backlogTextFormattingRule: BacklogTextFormattingRule) extends Actor with Logging {
 
-  implicit val issueWrites   = exportContext.issueWrites
-  implicit val journalWrites = exportContext.journalWrites
+  private implicit val issueWrites   = exportContext.issueWrites
+  private implicit val journalWrites = exportContext.journalWrites
 
-  override def preRestart(reason: Throwable, message: Option[Any]) = {
-    logger.debug(s"preRestart: reason: ${reason}, message: ${message}")
+  override def preRestart(reason: Throwable, message: Option[Any]): Unit = {
+    logger.debug(s"preRestart: reason: $reason, message: $message")
     for { value <- message } yield {
       context.system.scheduler.scheduleOnce(10.seconds, self, value)
     }
@@ -34,7 +34,7 @@ private[exporter] class IssueActor(exportContext: ExportContext, backlogTextForm
 
   def receive: Receive = {
     case IssueActor.Do(issueId: Int, completion: CountDownLatch, allCount: Int, console: ((Int, Int) => Unit)) =>
-      logger.debug(s"[START ISSUE]${issueId} thread numbers:${java.lang.Thread.activeCount()}")
+      logger.debug(s"[START ISSUE]$issueId thread numbers:${java.lang.Thread.activeCount()}")
 
       val issue                        = exportContext.issueService.issueOfId(issueId, Include.attachments, Include.journals)
       val journals                     = issue.getJournals.asScala.toSeq.sortWith((c1, c2) => c1.getCreatedOn.before(c2.getCreatedOn))
@@ -56,7 +56,7 @@ private[exporter] class IssueActor(exportContext: ExportContext, backlogTextForm
     IOUtil.output(exportContext.backlogPaths.issueJson(issueDirPath), backlogIssue.toJson.prettyPrint)
   }
 
-  private[this] def exportComments(issue: Issue, journals: Seq[Journal], attachments: Seq[Attachment]) = {
+  private[this] def exportComments(issue: Issue, journals: Seq[Journal], attachments: Seq[Attachment]): Unit = {
     val backlogIssue    = Convert.toBacklog(issue)
     val backlogComments = journals.map(Convert.toBacklog(_))
     backlogComments.zipWithIndex.foreach {
