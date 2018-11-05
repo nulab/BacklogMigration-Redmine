@@ -7,8 +7,9 @@ import akka.actor.{Actor, ActorRef, OneForOneStrategy, Props}
 import akka.routing.SmallestMailboxPool
 import com.nulabinc.backlog.migration.common.conf.BacklogConfiguration
 import com.nulabinc.backlog.migration.common.domain.BacklogTextFormattingRule
-import com.nulabinc.backlog.migration.common.utils.{Logging, ProgressBar}
+import com.nulabinc.backlog.migration.common.utils.{ConsoleOut, Logging, ProgressBar}
 import com.nulabinc.backlog.r2b.exporter.core.ExportContext
+import com.nulabinc.backlog4j.BacklogAPIException
 import com.osinka.i18n.Messages
 
 import scala.concurrent.duration._
@@ -18,9 +19,17 @@ import scala.concurrent.duration._
   */
 private[exporter] class IssuesActor(exportContext: ExportContext, backlogTextFormattingRule: BacklogTextFormattingRule) extends Actor with BacklogConfiguration with Logging {
 
-  private[this] val strategy = OneForOneStrategy(maxNrOfRetries = 5, withinTimeRange = 10 seconds) {
-    case _ => Restart
-  }
+  private[this] val strategy =
+    OneForOneStrategy(maxNrOfRetries = 5, withinTimeRange = 10 seconds) {
+      case e: BacklogAPIException if e.getMessage.contains("429") =>
+        Restart
+      case e: BacklogAPIException if e.getMessage.contains("Stream closed") =>
+        Restart
+      case e =>
+        ConsoleOut.error("Fatal error: " + e.getMessage)
+        logger.error(e.getStackTrace.mkString("\n"))
+        sys.exit(2)
+    }
 
   private[this] val limit      = exportLimitAtOnce
   private[this] val allCount   = exportContext.issueService.countIssues()
