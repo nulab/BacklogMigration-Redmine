@@ -29,23 +29,23 @@ private[exporter] class ChangeLogReducer(exportContext: ExportContext,
       case "done_ratio" =>
         val message =
           Messages("common.change_comment", Messages("common.done_ratio"), getValue(changeLog.optOriginalValue), getValue(changeLog.optNewValue))
-        (None, s"${message}\n")
+        (None, s"$message\n")
       case "relates" =>
         val message =
           Messages("common.change_comment", Messages("common.relation"), getValue(changeLog.optOriginalValue), getValue(changeLog.optNewValue))
-        (None, s"${message}\n")
+        (None, s"$message\n")
       case "is_private" =>
         val message = Messages("common.change_comment",
                                Messages("common.private"),
                                getValue(privateValue(changeLog.optOriginalValue)),
                                getValue(privateValue(changeLog.optNewValue)))
-        (None, s"${message}\n")
+        (None, s"$message\n")
       case "project_id" =>
         val message = Messages("common.change_comment",
                                Messages("common.project"),
                                getProjectName(changeLog.optOriginalValue),
                                getProjectName(changeLog.optNewValue))
-        (None, s"${message}\n")
+        (None, s"$message\n")
       case _ =>
         (Some(changeLog.copy(optNewValue = ValueReducer.reduce(targetComment, changeLog))), "")
     }
@@ -109,7 +109,7 @@ private[exporter] class ChangeLogReducer(exportContext: ExportContext,
         case BacklogConstantValue.ChangeLog.VERSION | BacklogConstantValue.ChangeLog.MILESTONE | BacklogConstantValue.ChangeLog.COMPONENT |
             BacklogConstantValue.ChangeLog.ISSUE_TYPE =>
           findProperty(comments)(changeLog.field) match {
-            case Some(lastComment) if (lastComment.optCreated == targetComment.optCreated) =>
+            case Some(lastComment) if lastComment.optCreated == targetComment.optCreated =>
               changeLog.field match {
                 case BacklogConstantValue.ChangeLog.VERSION =>
                   val issueValue = issue.versionNames.mkString(", ")
@@ -131,17 +131,14 @@ private[exporter] class ChangeLogReducer(exportContext: ExportContext,
       }
     }
 
-    private[this] def findProperty(comments: Seq[BacklogComment])(field: String): Option[BacklogComment] = {
+    private[this] def findProperty(comments: Seq[BacklogComment])(field: String): Option[BacklogComment] =
       comments.reverse.find(comment => findProperty(comment)(field))
-    }
 
-    private[this] def findProperty(comment: BacklogComment)(field: String): Boolean = {
+    private[this] def findProperty(comment: BacklogComment)(field: String): Boolean =
       comment.changeLogs.map(findProperty).exists(_(field))
-    }
 
-    private[this] def findProperty(changeLog: BacklogChangeLog)(field: String): Boolean = {
+    private[this] def findProperty(changeLog: BacklogChangeLog)(field: String): Boolean =
       changeLog.field == field
-    }
   }
 
 }
