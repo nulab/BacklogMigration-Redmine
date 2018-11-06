@@ -67,14 +67,13 @@ private[exporter] class IssueInitializer(exportContext: ExportContext, issueDirP
     issueInitialValue.findJournalDetail(journals) match {
       case Some(detail) =>
         Option(detail.getOldValue) match {
-          case Some(value) if (value.nonEmpty) =>
-            StringUtil.safeStringToInt(value) match {
-              case Some(intValue) => Some(intValue)
-              case _              => None
-            }
-          case _ => None
+          case Some(value) if value.nonEmpty =>
+            StringUtil.safeStringToInt(value).map(_.toLong)
+          case _ =>
+            None
         }
-      case None => Option(issue.getParentId).map(_.intValue())
+      case None =>
+        Option(issue.getParentId).map(_.intValue())
     }
   }
 
