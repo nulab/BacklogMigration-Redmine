@@ -11,9 +11,9 @@ private[exporter] class CommentReducer(issueId: Long, changeLogReducer: ChangeLo
   def reduce(comment: BacklogComment): BacklogComment = {
     val changeLogContent = new StringBuilder()
     val newChangeLogs = comment.changeLogs.flatMap { changeLog =>
-      val (optNewChangeLog, addingContent) = changeLogReducer.reduce(comment, changeLog)
-      changeLogContent.append(addingContent)
-      optNewChangeLog
+      val reduced = changeLogReducer.reduce(comment, changeLog)
+      changeLogContent.append(reduced.message)
+      reduced.optChangeLog
     }
     val optNewContent = comment.optContent match {
       case Some(content) =>
