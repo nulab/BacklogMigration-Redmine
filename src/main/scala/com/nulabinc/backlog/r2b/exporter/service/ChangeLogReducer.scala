@@ -20,8 +20,7 @@ private[exporter] class ChangeLogReducer(exportContext: ExportContext,
                                          issueDirPath: Path,
                                          issue: BacklogIssue,
                                          comments: Seq[BacklogComment],
-                                         attachments: Seq[Attachment])
-    extends Logging {
+                                         attachments: Seq[Attachment]) extends Logging {
 
   def reduce(targetComment: BacklogComment, changeLog: BacklogChangeLog): (Option[BacklogChangeLog], String) = {
     changeLog.field match {
@@ -66,13 +65,11 @@ private[exporter] class ChangeLogReducer(exportContext: ExportContext,
     }
   }
 
-  private[this] def privateValue(optValue: Option[String]): Option[String] = {
-    optValue match {
-      case Some("0") => Some(Messages("common.no"))
-      case Some("1") => Some(Messages("common.yes"))
-      case _         => None
+  private[this] def privateValue(optValue: Option[String]): Option[String] =
+    optValue.map {
+      case "0" => Messages("common.no")
+      case "1" => Messages("common.yes")
     }
-  }
 
   object AttachmentReducer {
     def reduce(changeLog: BacklogChangeLog): Option[BacklogChangeLog] = {
