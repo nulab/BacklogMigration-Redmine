@@ -17,7 +17,7 @@ private[exporter] class CommentReducer(issueId: Long, changeLogReducer: ChangeLo
     }
     val optNewContent = comment.optContent match {
       case Some(content) =>
-        val newContent = (s"${changeLogContent.result()}\n${content}").trim
+        val newContent = s"${changeLogContent.result()}\n$content".trim
         StringUtil.notEmpty(newContent)
       case None =>
         StringUtil.notEmpty(changeLogContent.result().trim)

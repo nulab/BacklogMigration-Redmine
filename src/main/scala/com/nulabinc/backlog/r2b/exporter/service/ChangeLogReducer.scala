@@ -22,7 +22,7 @@ private[exporter] class ChangeLogReducer(exportContext: ExportContext,
                                          comments: Seq[BacklogComment],
                                          attachments: Seq[Attachment]) extends Logging {
 
-  def reduce(targetComment: BacklogComment, changeLog: BacklogChangeLog): (Option[BacklogChangeLog], String) = {
+  def reduce(targetComment: BacklogComment, changeLog: BacklogChangeLog): (Option[BacklogChangeLog], String) =
     changeLog.field match {
       case BacklogConstantValue.ChangeLog.ATTACHMENT => (AttachmentReducer.reduce(changeLog), "")
       case "done_ratio" =>
@@ -63,7 +63,6 @@ private[exporter] class ChangeLogReducer(exportContext: ExportContext,
       case _ =>
         (Some(changeLog.copy(optNewValue = ValueReducer.reduce(targetComment, changeLog))), "")
     }
-  }
 
   private[this] def getParentIssueId(strId: String): Option[Int] =
     StringUtil.safeStringToInt(strId)
@@ -76,11 +75,10 @@ private[exporter] class ChangeLogReducer(exportContext: ExportContext,
   private[this] def generateBacklogIssueKey(issueId: String): String =
     s"${exportContext.backlogProjectKey}-$issueId"
 
-  private[this] def getValue(optValue: Option[String]): String = {
+  private[this] def getValue(optValue: Option[String]): String =
     optValue.getOrElse(Messages("common.empty"))
-  }
 
-  private[this] def getProjectName(optValue: Option[String]): String = {
+  private[this] def getProjectName(optValue: Option[String]): String =
     optValue match {
       case Some(value) =>
         StringUtil.safeStringToInt(value) match {
@@ -89,7 +87,6 @@ private[exporter] class ChangeLogReducer(exportContext: ExportContext,
         }
       case _ => Messages("common.empty")
     }
-  }
 
   private[this] def privateValue(optValue: Option[String]): Option[String] =
     optValue.map {
