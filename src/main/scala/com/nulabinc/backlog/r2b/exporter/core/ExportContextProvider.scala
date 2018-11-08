@@ -1,8 +1,8 @@
 package com.nulabinc.backlog.r2b.exporter.core
 
 import javax.inject.Inject
-
 import com.nulabinc.backlog.migration.common.conf.BacklogPaths
+import com.nulabinc.backlog.migration.common.domain.BacklogProjectKey
 import com.nulabinc.backlog.r2b.exporter.conf.ExportConfig
 import com.nulabinc.backlog.r2b.exporter.convert._
 import com.nulabinc.backlog.r2b.mapping.service.{MappingPriorityService, MappingUserService}
@@ -11,6 +11,7 @@ import com.nulabinc.backlog.r2b.redmine.domain.{PropertyValue, RedmineProjectId}
 import com.nulabinc.backlog.r2b.redmine.service.{IssueService, ProjectService, WikiService}
 
 class ExportContextProvider @Inject()(apiConfig: RedmineApiConfiguration,
+                                      backlogProjectKey: BacklogProjectKey,
                                       exportConfig: ExportConfig,
                                       projectId: RedmineProjectId,
                                       propertyValue: PropertyValue,
@@ -30,6 +31,7 @@ class ExportContextProvider @Inject()(apiConfig: RedmineApiConfiguration,
 
   def get(): ExportContext = {
     ExportContext(apiConfig,
+                  backlogProjectKey,
                   exportConfig,
                   projectId,
                   backlogPaths,

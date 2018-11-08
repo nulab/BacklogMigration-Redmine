@@ -47,8 +47,8 @@ private[exporter] class JournalDetailWrites @Inject()(propertyValue: PropertyVal
               case RedmineConstantValue.FieldFormat.INT | RedmineConstantValue.FieldFormat.FLOAT   => Some(FieldType.Numeric.getIntValue)
               case RedmineConstantValue.FieldFormat.DATE                                           => Some(FieldType.Date.getIntValue)
               case RedmineConstantValue.FieldFormat.BOOL                                           => Some(FieldType.SingleList.getIntValue)
-              case RedmineConstantValue.FieldFormat.LIST if (!customFieldDefinition.isMultiple)    => Some(FieldType.SingleList.getIntValue)
-              case RedmineConstantValue.FieldFormat.LIST if (customFieldDefinition.isMultiple)     => Some(FieldType.MultipleList.getIntValue)
+              case RedmineConstantValue.FieldFormat.LIST if !customFieldDefinition.isMultiple      => Some(FieldType.SingleList.getIntValue)
+              case RedmineConstantValue.FieldFormat.LIST if customFieldDefinition.isMultiple       => Some(FieldType.MultipleList.getIntValue)
               case RedmineConstantValue.FieldFormat.VERSION                                        => Some(FieldType.MultipleList.getIntValue)
               case RedmineConstantValue.FieldFormat.USER                                           => Some(FieldType.MultipleList.getIntValue)
               case _                                                                               => None
