@@ -73,9 +73,24 @@ private[exporter] class IssueInitializer(exportContext: ExportContext, issueDirP
             None
         }
       case None =>
-        Option(issue.getParentId).map(_.intValue())
+        Option(issue.getParentId).flatMap { id =>
+          val parent = exportContext.issueService.issueOfId(id)
+
+          if(Option(parent.getParentId).isDefined)
+            None
+          else
+            Some(id.toLong)
+        }
     }
   }
+
+  private[this] def getParentIssueId(strId: String): Option[Int] =
+    StringUtil.safeStringToInt(strId)
+      .flatMap(id => Option(exportContext.issueService.issueOfId(id).getParentId))
+      .flatMap {
+        case id if id > 0 => Some(id)
+        case _ => None
+      }
 
   private[this] def description(issue: Issue): String = {
     val issueInitialValue = new IssueInitialValue(RedmineConstantValue.ATTR, RedmineConstantValue.Attr.DESCRIPTION)
