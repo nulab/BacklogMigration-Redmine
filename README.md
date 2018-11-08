@@ -179,7 +179,10 @@ Only applied to **Premium** or **Platina** plan.
 ### About issues
 * All custom attributes in Redmine will be added to the migrating project in Backlog.
 * Private notes will be also migrated. A message to tell it's a private not will be added in the description.
-* The grandchild issue's parent issue will be shown as [**Parent issue: [Issue key]**] in the description.
+Readmin's grandchild issues will be treated in Backlog as follows.
+  * Parent issue will not be set.
+  * If a parent was set when creating the issue, no information regarding the parent will be entered into the issue.
+  * If a parent issue was set after creating the issue, the parent's issues link will be posted in the issue as a comment.
 * **Textile** formatting rule is not supported.
 * In case the user who registered the issue or the assignee of the issue has been deleted from the project, the person who is migrating data will be considered as the user who has registered and updated the issue in Backlog.  The assignee will be unset.
 
@@ -441,7 +444,10 @@ Backlogで **プレミアムプラン以上** のプランを契約している�
 ### 課題について
 * Redmine側に登録してあるカスタム属性の全てが、移行するプロジェクトに登録されます。
 * プライベート注記も移行されます。詳細にプライベート注記である旨の追記がされます。
-* 孫課題の親課題は、 **[親課題:課題キー]** という形で詳細に記述されます。
+* Redmineの孫課題はBacklogでは以下の扱いとします。
+  * 親課題は設定されません。
+  * 課題作成時に親課題を指定した場合、親課題の情報は記載されません。
+  * 課題作成後に親課題を指定した場合、コメントに親課題のリンクが追加されます。
 * **textile記法** を変換しません。
 * 課題登録者または、課題担当者であるユーザーがプロジェクトから削除されている場合、Backlog側では課題担当者は未設定、課題登録者・更新者はインポート実行者となります。
 
