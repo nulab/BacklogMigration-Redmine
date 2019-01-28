@@ -220,6 +220,7 @@ Following items cannot be migrated
 * Display
 
 ### Resources that can be migrated by Redmine version
+Projects with custom fields are supported only for Redmine 2.4 and later.
 
 | Resource | Availability |
 |:-----------|------------|
@@ -485,6 +486,7 @@ Backlogで **プレミアムプラン以上** のプランを契約している�
 * 表示
 
 ### Redmineバージョンによる移行可能なリソース
+カスタムフィールドが含まれるプロジェクトはRedmine 2.4以降のみ対応しています。
 
 |Resource|Availability|
 |:-----------|:------------:|
