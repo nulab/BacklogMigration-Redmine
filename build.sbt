@@ -5,7 +5,7 @@ scapegoatVersion in ThisBuild := "1.3.3"
 lazy val commonSettings = Seq(
   organization := "com.nulabinc",
   version := "0.14.0b2-SNAPSHOT",
-  scalaVersion := "2.12.7",
+  scalaVersion := "2.12.9",
   scalacOptions ++= Seq(
     "-language:reflectiveCalls",
     "-language:postfixOps",
