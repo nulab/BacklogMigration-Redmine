@@ -219,6 +219,9 @@ Following items cannot be migrated
 * Searched
 * Display
 
+### About status
+If an Issue was created with a status other than "New" and then there was no change to this status before importing it, the Issues status in Backlog will be set to "Open".
+
 ### Resources that can be migrated by Redmine version
 Projects with custom fields are supported only for Redmine 2.4 and later.
 
@@ -484,6 +487,9 @@ Backlogで **プレミアムプラン以上** のプランを契約している�
 * フィルタとして使用
 * 検索対象
 * 表示
+
+### 状態について
+課題追加時に「新規」以外のステータスを設定し、その後ステータスが変更されなかった場合は「未処理」に設定されます。
 
 ### Redmineバージョンによる移行可能なリソース
 カスタムフィールドが含まれるプロジェクトはRedmine 2.4以降のみ対応しています。
