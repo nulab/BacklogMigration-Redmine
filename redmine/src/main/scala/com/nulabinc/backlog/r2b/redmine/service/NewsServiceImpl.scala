@@ -7,7 +7,7 @@ import com.nulabinc.backlog.r2b.redmine.conf.RedmineApiConfiguration
 import com.taskadapter.redmineapi.RedmineManager
 import com.taskadapter.redmineapi.bean.News
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 /**
   * @author uchida
@@ -16,7 +16,7 @@ class NewsServiceImpl @Inject()(apiConfig: RedmineApiConfiguration, redmine: Red
 
   override def allNews(): Seq[News] =
     try {
-      redmine.getProjectManager.getNews(apiConfig.projectKey).asScala
+      redmine.getProjectManager.getNews(apiConfig.projectKey).asScala.toSeq
     } catch {
       case e: Throwable =>
         logger.warn(e.getMessage, e)

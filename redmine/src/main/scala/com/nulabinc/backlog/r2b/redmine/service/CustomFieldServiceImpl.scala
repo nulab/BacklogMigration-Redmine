@@ -10,7 +10,7 @@ import com.taskadapter.redmineapi.{RedmineFormatException, RedmineManager}
 import spray.json.DefaultJsonProtocol._
 import spray.json.{JsArray, JsValue, JsonParser}
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 /**
   * @author uchida
@@ -19,7 +19,7 @@ class CustomFieldServiceImpl @Inject()(apiConfig: RedmineApiConfiguration, redmi
 
   override def allCustomFieldDefinitions(): Seq[RedmineCustomFieldDefinition] =
     try {
-      redmine.getCustomFieldManager.getCustomFieldDefinitions.asScala.map(toCustomFields)
+      redmine.getCustomFieldManager.getCustomFieldDefinitions.asScala.toSeq.map(toCustomFields)
     } catch {
       case _: RedmineFormatException =>
         val url  = s"${apiConfig.url}/custom_fields.json?key=${apiConfig.key}"
@@ -41,8 +41,8 @@ class CustomFieldServiceImpl @Inject()(apiConfig: RedmineApiConfiguration, redmi
                                  isRequired = customFieldDefinition.isRequired,
                                  isMultiple = customFieldDefinition.isMultiple,
                                  optDefaultValue = StringUtil.notEmpty(customFieldDefinition.getDefaultValue),
-                                 trackers = customFieldDefinition.getTrackers.asScala.map(toTracker),
-                                 possibleValues = Option(customFieldDefinition.getPossibleValues.asScala).getOrElse(Seq.empty[String]))
+                                 trackers = customFieldDefinition.getTrackers.asScala.toSeq.map(toTracker),
+                                 possibleValues = Option(customFieldDefinition.getPossibleValues.asScala.toSeq).getOrElse(Seq.empty[String]))
 
   private[this] def toTracker(tracker: Tracker): RedmineTracker =
     RedmineTracker(tracker.getId, tracker.getName)

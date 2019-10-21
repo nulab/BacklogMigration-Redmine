@@ -6,7 +6,7 @@ import com.nulabinc.backlog.migration.common.utils.Logging
 import com.taskadapter.redmineapi.RedmineManager
 import com.taskadapter.redmineapi.bean.User
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 /**
   * @author uchida
@@ -21,7 +21,7 @@ class UserServiceImpl @Inject()(redmine: RedmineManager) extends UserService wit
       }
     }
 
-    val users: Seq[User] = redmine.getUserManager.getUsers.asScala
+    val users: Seq[User] = redmine.getUserManager.getUsers.asScala.toSeq
     users.flatMap(addInfo)
   }
 

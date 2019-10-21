@@ -6,7 +6,7 @@ import com.nulabinc.backlog.migration.common.utils.Logging
 import com.taskadapter.redmineapi.RedmineManager
 import com.taskadapter.redmineapi.bean.IssuePriority
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 /**
   * @author uchida
@@ -15,7 +15,7 @@ class IssuePriorityServiceImpl @Inject()(redmine: RedmineManager) extends IssueP
 
   override def allIssuePriorities(): Seq[IssuePriority] = {
     try {
-      redmine.getIssueManager.getIssuePriorities.asScala
+      redmine.getIssueManager.getIssuePriorities.asScala.toSeq
     } catch {
       case e: Throwable =>
         logger.warn(e.getMessage, e)

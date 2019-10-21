@@ -6,7 +6,7 @@ import com.nulabinc.backlog.migration.common.utils.Logging
 import com.taskadapter.redmineapi.RedmineManager
 import com.taskadapter.redmineapi.bean.IssueStatus
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 /**
   * @author uchida
@@ -15,7 +15,7 @@ class StatusServiceImpl @Inject()(redmine: RedmineManager) extends StatusService
 
   override def allStatuses(): Seq[IssueStatus] = {
     try {
-      redmine.getIssueManager.getStatuses.asScala
+      redmine.getIssueManager.getStatuses.asScala.toSeq
     } catch {
       case e: Throwable =>
         logger.warn(e.getMessage, e)

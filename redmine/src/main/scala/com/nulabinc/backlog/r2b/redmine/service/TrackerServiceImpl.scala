@@ -6,7 +6,7 @@ import com.nulabinc.backlog.migration.common.utils.Logging
 import com.taskadapter.redmineapi.RedmineManager
 import com.taskadapter.redmineapi.bean.Tracker
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 /**
   * @author uchida
@@ -15,7 +15,7 @@ class TrackerServiceImpl @Inject()(redmine: RedmineManager) extends TrackerServi
 
   override def allTrackers(): Seq[Tracker] = {
     try {
-      redmine.getIssueManager.getTrackers.asScala
+      redmine.getIssueManager.getTrackers.asScala.toSeq
     } catch {
       case e: Throwable =>
         logger.warn(e.getMessage, e)
