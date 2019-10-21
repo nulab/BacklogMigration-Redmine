@@ -10,11 +10,12 @@ import com.nulabinc.backlog.migration.common.utils.{DateUtil, IOUtil, Logging, S
 import com.nulabinc.backlog.r2b.exporter.core.ExportContext
 import com.nulabinc.backlog.r2b.redmine.conf.RedmineConstantValue
 import com.nulabinc.backlog.r2b.redmine.domain.RedmineCustomFieldDefinition
+import com.nulabinc.backlog.r2b.utils.TextileUtil
 import com.taskadapter.redmineapi.bean._
 
-import scala.collection.JavaConverters._
 import better.files.{File => Path}
-import com.nulabinc.backlog.r2b.utils.TextileUtil
+
+import scala.jdk.CollectionConverters._
 
 /**
   * @author uchida
@@ -84,13 +85,13 @@ private[exporter] class IssueInitializer(exportContext: ExportContext, issueDirP
     }
   }
 
-  private[this] def getParentIssueId(strId: String): Option[Int] =
-    StringUtil.safeStringToInt(strId)
-      .flatMap(id => Option(exportContext.issueService.issueOfId(id).getParentId))
-      .flatMap {
-        case id if id > 0 => Some(id)
-        case _ => None
-      }
+//  private[this] def getParentIssueId(strId: String): Option[Int] =
+//    StringUtil.safeStringToInt(strId)
+//      .flatMap(id => Option(exportContext.issueService.issueOfId(id).getParentId))
+//      .flatMap {
+//        case id if id > 0 => Some(id)
+//        case _ => None
+//      }
 
   private[this] def description(issue: Issue): String = {
     val issueInitialValue = new IssueInitialValue(RedmineConstantValue.ATTR, RedmineConstantValue.Attr.DESCRIPTION)
@@ -196,7 +197,7 @@ private[exporter] class IssueInitializer(exportContext: ExportContext, issueDirP
       optDetails match {
         case Some(details) =>
           details.flatMap(detail => Convert.toBacklog((customField.getId.toString, Option(detail.getOldValue))))
-        case _ => customField.getValues.asScala
+        case _ => customField.getValues.asScala.toSeq
       }
     Convert.toBacklog(customField) match {
       case Some(backlogCustomField) => Some(backlogCustomField.copy(values = initialValues))
