@@ -10,7 +10,7 @@ import com.nulabinc.backlog.migration.common.utils.Logging
   */
 object DisableSSLCertificateCheckUtil extends Logging {
 
-  def disableChecks() {
+  def disableChecks(): Unit = {
     try {
       val context: SSLContext = SSLContext.getInstance("TLS")
       val trustManagerArray: Array[TrustManager] = Array(
@@ -27,9 +27,9 @@ object DisableSSLCertificateCheckUtil extends Logging {
 
   private[this] class NullX509TrustManager extends X509TrustManager {
 
-    override def checkClientTrusted(chain: Array[X509Certificate], authType: String) {}
+    override def checkClientTrusted(chain: Array[X509Certificate], authType: String): Unit = ()
 
-    override def checkServerTrusted(chain: Array[X509Certificate], authType: String) {}
+    override def checkServerTrusted(chain: Array[X509Certificate], authType: String): Unit = ()
 
     override def getAcceptedIssuers: Array[X509Certificate] =
       Array.ofDim[X509Certificate](0)

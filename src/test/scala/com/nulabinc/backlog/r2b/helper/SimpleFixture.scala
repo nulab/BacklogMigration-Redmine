@@ -19,7 +19,7 @@ import com.taskadapter.redmineapi.RedmineManagerFactory
 import spray.json.{JsNumber, JsonParser}
 import com.nulabinc.backlog.r2b.mapping.domain.MappingJsonProtocol._
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 /**
   * @author uchida
@@ -95,7 +95,8 @@ trait SimpleFixture {
           redmineConfig = new RedmineApiConfiguration(url = redmineUrl, key = redmineKey, projectKey = redmine),
           backlogConfig = new BacklogApiConfiguration(url = backlogUrl, key = backlogKey, projectKey = backlog),
           exclude = None,
-          importOnly = false
+          importOnly = false,
+          retryCount = 5
         )
       )
     } else None
@@ -113,7 +114,7 @@ trait SimpleFixture {
         s"${appConfiguration.redmineConfig.url}/issues.json?limit=1&subproject_id=!*&project_id=${redmineProject.getId}&key=${appConfiguration.redmineConfig.key}&status_id=*")
       .mkString
     JsonParser(string).asJsObject.getFields("total_count") match {
-      case Seq(JsNumber(totalCount)) => totalCount.intValue()
+      case Seq(JsNumber(totalCount)) => totalCount.intValue
       case _                         => 0
     }
   }

@@ -32,6 +32,7 @@ class CommandLineInterface(arguments: Seq[String]) extends ScallopConf(arguments
     val projectKey = opt[String]("projectKey", descr = Messages("cli.help.projectKey"), required = true)
     val importOnly = opt[Boolean]("importOnly", descr = Messages("cli.help.importOnly"), required = true)
     val exclude    = opt[List[String]]("exclude", descr = Messages("cli.help.exclude"), required = false)
+    val retryCount = opt[Int](name = "retryCount", descr = Messages("cli.help.retryCount"), required = false)
     val help       = opt[String]("help", descr = Messages("cli.help.show_help"))
   }
 
@@ -62,7 +63,7 @@ class CommandLineInterface(arguments: Seq[String]) extends ScallopConf(arguments
 
 object R2B extends BacklogConfiguration with Logging {
 
-  def main(args: Array[String]) {
+  def main(args: Array[String]) = {
     ConsoleOut.println(s"""|${applicationName}
                  |--------------------------------------------------""".stripMargin)
     AnsiConsole.systemInstall()
@@ -76,7 +77,7 @@ object R2B extends BacklogConfiguration with Logging {
         AnsiConsole.systemUninstall()
         System.exit(0)
       } catch {
-        case e: Throwable ⇒
+        case e: Throwable =>
           logger.error(e.getMessage, e)
           AnsiConsole.systemUninstall()
           System.exit(1)
@@ -111,9 +112,10 @@ object R2B extends BacklogConfiguration with Logging {
   }
 
   private[this] def getConfiguration(cli: CommandLineInterface) = {
-    val keys: Array[String] = cli.execute.projectKey().split(":")
-    val redmine: String     = keys(0)
-    val backlog: String     = if (keys.length == 2) keys(1) else keys(0).toUpperCase.replaceAll("-", "_")
+    val keys        = cli.execute.projectKey().split(":")
+    val redmine     = keys(0)
+    val backlog     = if (keys.length == 2) keys(1) else keys(0).toUpperCase.replaceAll("-", "_")
+    val retryCount  = cli.execute.retryCount.toOption.getOrElse(20)
 
     ConsoleOut.println(s"""--------------------------------------------------
      |${Messages("common.redmine")} ${Messages("common.url")}[${cli.execute.redmineUrl()}]
@@ -123,6 +125,7 @@ object R2B extends BacklogConfiguration with Logging {
      |${Messages("common.backlog")} ${Messages("common.access_key")}[${cli.execute.backlogKey()}]
      |${Messages("common.backlog")} ${Messages("common.project_key")}[${backlog}]
      |${Messages("common.importOnly")}[${cli.execute.importOnly()}]
+     |${Messages("common.retryCount")}[$retryCount]
      |https.proxyHost[${Option(System.getProperty("https.proxyHost")).getOrElse("")}]
      |https.proxyPort[${Option(System.getProperty("https.proxyPort")).getOrElse("")}]
      |https.proxyUser[${Option(System.getProperty("https.proxyUser")).getOrElse("")}]
@@ -134,7 +137,8 @@ object R2B extends BacklogConfiguration with Logging {
       redmineConfig = RedmineApiConfiguration(url = cli.execute.redmineUrl(), key = cli.execute.redmineKey(), projectKey = redmine),
       backlogConfig = BacklogApiConfiguration(url = cli.execute.backlogUrl(), key = cli.execute.backlogKey(), projectKey = backlog),
       exclude = cli.execute.exclude.toOption,
-      importOnly = cli.execute.importOnly()
+      importOnly = cli.execute.importOnly(),
+      retryCount = retryCount
     )
   }
 
