@@ -27,7 +27,7 @@ class ParameterValidator(config: AppConfiguration) extends Logging {
     if (config.importOnly) {
       messages
     } else {
-      messages union Seq(validateRedmine, validateProject(optRedmineProject)).flatten
+      messages concat Seq(validateRedmine, validateProject(optRedmineProject)).flatten
     }
   }
 

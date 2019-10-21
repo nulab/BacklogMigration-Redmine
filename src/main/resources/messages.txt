@@ -36,6 +36,7 @@ common.access_key=Access Key
 common.project_key=Project Key
 common.importOnly=Only Import
 common.url=URL
+common.retryCount=Maximum number of retries
 
 
 # Message
@@ -97,7 +98,7 @@ cli.help.redmine.key=Your Redmine api access key (required) Example:--redmine.ke
 cli.help.redmine.url=Your Redmine URL (required) Example:--redmine.url [your redmine url]
 cli.help.exclude=Do not migrate the specified items.[issue,wiki]
 cli.help.importOnly=If you set this option, only import will be run by the program.
-
+cli.help.retryCount=Maximum number of retries when an error occurs.
 
 # CLI Validate Param
 cli.param.error=The parameter has the following error.

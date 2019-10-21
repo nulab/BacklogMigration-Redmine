@@ -8,7 +8,7 @@ import com.nulabinc.backlog.r2b.redmine.conf.RedmineApiConfiguration
 import com.taskadapter.redmineapi.{NotFoundException, RedmineFormatException, RedmineInternalError, RedmineManager}
 import com.taskadapter.redmineapi.bean.{WikiPage, WikiPageDetail}
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 import scala.util.Try
 
 /**
@@ -18,7 +18,7 @@ class WikiServiceImpl @Inject()(apiConfig: RedmineApiConfiguration, redmine: Red
 
   override def allWikis(): Seq[WikiPage] =
     try {
-      redmine.getWikiManager.getWikiPagesByProject(apiConfig.projectKey).asScala
+      redmine.getWikiManager.getWikiPagesByProject(apiConfig.projectKey).asScala.toSeq
     } catch {
       case e: Throwable =>
         logger.warn(e.getMessage, e)

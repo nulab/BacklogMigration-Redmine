@@ -3,7 +3,7 @@ package com.nulabinc.backlog.r2b.exporter.actor
 import java.util.concurrent.CountDownLatch
 
 import akka.actor.Actor
-import com.nulabinc.backlog.migration.common.domain.BacklogJsonProtocol._
+import better.files.File
 import com.nulabinc.backlog.migration.common.convert.Convert
 import com.nulabinc.backlog.migration.common.domain.{BacklogComment, BacklogIssue, BacklogTextFormattingRule}
 import com.nulabinc.backlog.migration.common.utils.{DateUtil, IOUtil, Logging}
@@ -21,6 +21,8 @@ import scala.concurrent.duration._
   * @author uchida
   */
 private[exporter] class IssueActor(exportContext: ExportContext, backlogTextFormattingRule: BacklogTextFormattingRule) extends Actor with Logging {
+
+  import com.nulabinc.backlog.migration.common.formatters.BacklogJsonProtocol._
 
   private implicit val issueWrites   = exportContext.issueWrites
   private implicit val journalWrites = exportContext.journalWrites
@@ -69,7 +71,7 @@ private[exporter] class IssueActor(exportContext: ExportContext, backlogTextForm
                                   issue: BacklogIssue,
                                   comments: Seq[BacklogComment],
                                   attachments: Seq[Attachment],
-                                  index: Int) = {
+                                  index: Int) : File = {
     val commentCreated   = DateUtil.tryIsoParse(comment.optCreated)
     val issueDirPath     = exportContext.backlogPaths.issueDirectoryPath("comment", issue.id, commentCreated, index)
     val changeLogReducer = new ChangeLogReducer(exportContext, issueDirPath, issue, comments, attachments)

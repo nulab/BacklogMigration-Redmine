@@ -7,7 +7,7 @@ import com.nulabinc.backlog.r2b.redmine.domain.RedmineProjectId
 import com.taskadapter.redmineapi.RedmineManager
 import com.taskadapter.redmineapi.bean.Version
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 /**
   * @author uchida
@@ -16,7 +16,7 @@ class VersionServiceImpl @Inject()(projectId: RedmineProjectId, redmine: Redmine
 
   override def allVersions(): Seq[Version] =
     try {
-      redmine.getProjectManager.getVersions(projectId.value).asScala
+      redmine.getProjectManager.getVersions(projectId.value).asScala.toSeq
     } catch {
       case e: Throwable =>
         logger.warn(e.getMessage, e)

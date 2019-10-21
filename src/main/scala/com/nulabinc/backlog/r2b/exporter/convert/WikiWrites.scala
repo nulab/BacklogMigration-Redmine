@@ -8,7 +8,7 @@ import com.nulabinc.backlog.r2b.utils.TextileUtil
 import com.osinka.i18n.Messages
 import com.taskadapter.redmineapi.bean.WikiPageDetail
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 /**
   * @author uchida
@@ -22,8 +22,9 @@ private[exporter] class WikiWrites @Inject()(implicit val attachmentWrites: Atta
       optId = None,
       name = convert(wiki.getTitle),
       optContent = Some(content(wiki)),
-      attachments = wiki.getAttachments.asScala.map(Convert.toBacklog(_)),
-      sharedFiles = Seq.empty[BacklogSharedFile],
+      attachments = wiki.getAttachments.asScala.toSeq.map(Convert.toBacklog(_)),
+      sharedFiles = Seq(),
+      tags = Seq(),
       optCreatedUser = Option(wiki.getUser).map(Convert.toBacklog(_)),
       optCreated = Option(wiki.getCreatedOn).map(DateUtil.isoFormat),
       optUpdatedUser = Option(wiki.getUser).map(Convert.toBacklog(_)),

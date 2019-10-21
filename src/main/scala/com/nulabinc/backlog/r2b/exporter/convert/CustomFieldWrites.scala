@@ -91,7 +91,7 @@ private[exporter] class CustomFieldWrites @Inject()(propertyValue: PropertyValue
       name = customField.getName,
       fieldTypeId = FieldType.MultipleList.getIntValue,
       optValue = None,
-      values = customField.getValues.asScala
+      values = customField.getValues.asScala.toSeq
     )
   }
 

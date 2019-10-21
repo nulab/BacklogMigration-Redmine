@@ -64,8 +64,8 @@ trait MappingFile extends Logging {
               addedList += convert(redmineItem)
           }
         }
-        IOUtil.output(File(filePath).path.toAbsolutePath, MappingsWrapper(description, mergeList).toJson.prettyPrint)
-        addedList
+        IOUtil.output(File(filePath).path.toAbsolutePath, MappingsWrapper(description, mergeList.toSeq).toJson.prettyPrint)
+        addedList.toSeq
       case _ =>
         Seq.empty[Mapping]
     }

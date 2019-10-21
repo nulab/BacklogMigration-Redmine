@@ -1,11 +1,9 @@
 import sbt.Keys._
 
-scapegoatVersion in ThisBuild := "1.3.3"
-
 lazy val commonSettings = Seq(
   organization := "com.nulabinc",
   version := "0.14.0b3-SNAPSHOT",
-  scalaVersion := "2.12.9",
+  scalaVersion := "2.13.1",
   scalacOptions ++= Seq(
     "-language:reflectiveCalls",
     "-language:postfixOps",
@@ -15,14 +13,7 @@ lazy val commonSettings = Seq(
     "-Xlint",
     "-Yrangepos",
     "-Ywarn-dead-code",
-    "-Ywarn-unused",
-    "-Ywarn-unused-import"
-  ),
-  scapegoatVersion := "1.3.4",
-  scapegoatDisabledInspections := Seq(
-    "NullParameter",
-    "CatchThrowable",
-    "NoOpOverride"
+    "-Xlint:unused"
   ),
   resolvers ++= Seq("snapshots", "releases").map(Resolver.sonatypeRepo),
   javacOptions ++= Seq("-encoding", "UTF-8")
@@ -44,16 +35,16 @@ lazy val root = (project in file("."))
   .settings(
     name := "backlog-migration-redmine",
     libraryDependencies ++= {
-      val catsVersion = "1.4.0"
-      val akkaVersion = "2.5.17"
+      val catsVersion = "2.0.0"
+      val akkaVersion = "2.5.26"
       Seq(
         "org.typelevel"     %% "cats-core"      % catsVersion,
         "org.typelevel"     %% "cats-free"      % catsVersion,
-        "io.monix"          %% "monix-reactive" % "3.0.0-RC1",
+        "io.monix"          %% "monix-reactive" % "3.0.0",
         "com.typesafe.akka" %% "akka-actor"     % akkaVersion,
         "com.typesafe.akka" %% "akka-slf4j"     % akkaVersion,
-        "org.rogach"        %% "scallop"        % "3.1.2",
-        "org.scalatest"     %% "scalatest"      % "3.0.5"       % "test"
+        "org.rogach"        %% "scallop"        % "3.3.1",
+        "org.scalatest"     %% "scalatest"      % "3.0.8"       % "test"
       )
     },
     assemblyJarName in assembly := {

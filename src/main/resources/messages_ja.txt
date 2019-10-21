@@ -36,7 +36,7 @@ common.access_key=アクセスキー
 common.project_key=プロジェクトキー
 common.importOnly=インポートのみ実行
 common.url=URL
-
+common.retryCount=エラー時の再試行回数
 
 # Message
 message.exporting=エクスポートしています...
@@ -97,6 +97,7 @@ cli.help.redmine.key=RedmineのAPIアクセスキーを指定します。(必須
 cli.help.redmine.url=RedmineのURLを指定します。(必須オプション)例：--redmine.url [RedmineのURL]
 cli.help.exclude=指定した項目を移行対象から除外します。issue、wikiが指定できます。
 cli.help.importOnly=このオプションを設定した場合、インポートのみを行います。
+cli.help.retryCount=エラーが発生したときに再試行する回数を指定します。
 
 
 # CLI Validate Param

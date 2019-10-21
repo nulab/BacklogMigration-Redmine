@@ -9,7 +9,8 @@ import com.taskadapter.redmineapi.bean._
 import com.taskadapter.redmineapi.{RedmineManager, RedmineManagerFactory}
 
 import scala.annotation.tailrec
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
+
 
 /**
   * @author uchida
@@ -50,48 +51,48 @@ class RedmineDefaultModule(apiConfig: RedmineApiConfiguration) extends AbstractM
 
   private[this] def createPropertyValue(redmine: RedmineManager, project: Project): PropertyValue = {
     val versions = try {
-      redmine.getProjectManager.getVersions(project.getId).asScala
+      redmine.getProjectManager.getVersions(project.getId).asScala.toSeq
     } catch {
       case e: Exception =>
         logger.warn(e.getMessage, e)
         Seq.empty[Version]
     }
     val categories = try {
-      redmine.getIssueManager.getCategories(project.getId).asScala
+      redmine.getIssueManager.getCategories(project.getId).asScala.toSeq
     } catch {
       case e: Exception =>
         logger.warn(e.getMessage, e)
         Seq.empty[IssueCategory]
     }
     val priorities = try {
-      redmine.getIssueManager.getIssuePriorities.asScala
+      redmine.getIssueManager.getIssuePriorities.asScala.toSeq
     } catch {
       case e: Exception =>
         logger.warn(e.getMessage, e)
         Seq.empty[IssuePriority]
     }
     val trackers = try {
-      redmine.getIssueManager.getTrackers.asScala
+      redmine.getIssueManager.getTrackers.asScala.toSeq
     } catch {
       case e: Exception =>
         logger.warn(e.getMessage, e)
         Seq.empty[Tracker]
     }
     val memberships = try {
-      redmine.getMembershipManager.getMemberships(apiConfig.projectKey).asScala
+      redmine.getMembershipManager.getMemberships(apiConfig.projectKey).asScala.toSeq
     } catch {
       case e: Exception =>
         logger.warn(e.getMessage, e)
         Seq.empty[Membership]
     }
     val statuses = try {
-      redmine.getIssueManager.getStatuses.asScala
+      redmine.getIssueManager.getStatuses.asScala.toSeq
     } catch {
       case e: Exception =>
         logger.warn(e.getMessage, e)
         Seq.empty[IssueStatus]
     }
-    val activeUsers = redmine.getUserManager.getUsers.asScala
+    val activeUsers = redmine.getUserManager.getUsers.asScala.toSeq
     val lockedUsers = getLockedUsers(redmine, Seq.empty, 25, 0)
     val allUsers = activeUsers ++ lockedUsers
 

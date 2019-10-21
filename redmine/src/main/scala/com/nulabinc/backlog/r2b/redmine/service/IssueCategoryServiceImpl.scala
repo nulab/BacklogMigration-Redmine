@@ -7,7 +7,8 @@ import com.nulabinc.backlog.r2b.redmine.domain.RedmineProjectId
 import com.taskadapter.redmineapi.RedmineManager
 import com.taskadapter.redmineapi.bean.IssueCategory
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
+
 
 /**
   * @author uchida
@@ -16,7 +17,7 @@ class IssueCategoryServiceImpl @Inject()(projectId: RedmineProjectId, redmine: R
 
   override def allCategories(): Seq[IssueCategory] =
     try {
-      redmine.getIssueManager.getCategories(projectId.value).asScala
+      redmine.getIssueManager.getCategories(projectId.value).asScala.toSeq
     } catch {
       case e: Throwable =>
         logger.warn(e.getMessage, e)

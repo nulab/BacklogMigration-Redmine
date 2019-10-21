@@ -8,8 +8,8 @@ import com.nulabinc.backlog4j.conf.BacklogPackageConfigure
 import com.nulabinc.backlog4j.{BacklogClient, BacklogClientFactory, Issue}
 import monix.eval.Task
 
-import scala.collection.JavaConverters._
 import scala.concurrent.ExecutionContext
+import scala.jdk.CollectionConverters._
 
 class Backlog4jInterpreter(url: String, key: String)
                           (implicit val exc: ExecutionContext) extends (BacklogADT ~> Task) {
@@ -27,7 +27,7 @@ class Backlog4jInterpreter(url: String, key: String)
     params.count(count)
     params.sort(GetIssuesParams.SortKey.Created)
     params.order(GetIssuesParams.Order.Asc)
-    client.getIssues(params).asScala
+    client.getIssues(params).asScala.toSeq
   }
 
   def deleteIssue(issue: Issue): Task[BacklogResponse[Unit]] = Task {

@@ -54,7 +54,7 @@ object R2BCli extends BacklogConfiguration with Logging {
 
   def migrate(config: AppConfiguration): Unit = {
     if (validateParam(config)) {
-      if (config.importOnly) BootImporter.execute(config.backlogConfig, false)
+      if (config.importOnly) BootImporter.execute(config.backlogConfig, false, config.retryCount)
       else {
         val mappingFileContainer = createMapping(config)
         if (validateMapping(mappingFileContainer.user) &&
@@ -77,7 +77,7 @@ object R2BCli extends BacklogConfiguration with Logging {
             val backlogTextFormattingRule = fetchBacklogTextFormattingRule(config.backlogConfig)
 
             BootExporter.execute(config.redmineConfig, mappingContainer, BacklogProjectKey(config.backlogConfig.projectKey), backlogTextFormattingRule, config.exclude)
-            BootImporter.execute(config.backlogConfig, false)
+            BootImporter.execute(config.backlogConfig, false, config.retryCount)
             finalize(config.backlogConfig)
           }
         }
@@ -87,7 +87,7 @@ object R2BCli extends BacklogConfiguration with Logging {
 
   def doImport(config: AppConfiguration): Unit = {
     if (validateParam(config)) {
-      BootImporter.execute(config.backlogConfig, false)
+      BootImporter.execute(config.backlogConfig, false, config.retryCount)
       finalize(config.backlogConfig)
     }
   }
@@ -190,7 +190,7 @@ object R2BCli extends BacklogConfiguration with Logging {
       }
     } yield stream
 
-    val f = interpreter.run(program).runAsync
+    val f = interpreter.run(program).runToFuture
 
     Await.result(f, Duration.Inf)
 

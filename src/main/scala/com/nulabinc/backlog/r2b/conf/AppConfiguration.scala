@@ -10,7 +10,8 @@ case class AppConfiguration(
   redmineConfig: RedmineApiConfiguration,
   backlogConfig: BacklogApiConfiguration,
   exclude: Option[List[String]],
-  importOnly: Boolean
+  importOnly: Boolean,
+  retryCount: Int
 )
 
 case class DestroyConfiguration(
