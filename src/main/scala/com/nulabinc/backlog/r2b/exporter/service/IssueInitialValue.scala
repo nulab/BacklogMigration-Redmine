@@ -2,7 +2,7 @@ package com.nulabinc.backlog.r2b.exporter.service
 
 import com.taskadapter.redmineapi.bean.{Journal, JournalDetail}
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 /**
   * @author uchida
@@ -25,6 +25,6 @@ private[exporter] class IssueInitialValue(property: String, name: String) {
     detail.getName == name && detail.getProperty == property
 
   private[this] def targetJournalDetails(journal: Journal): Seq[JournalDetail] =
-    journal.getDetails.asScala.filter(isTargetJournalDetail).filter(detail => Option(detail.getOldValue).isDefined)
+    journal.getDetails.asScala.toSeq.filter(isTargetJournalDetail).filter(detail => Option(detail.getOldValue).isDefined)
 
 }

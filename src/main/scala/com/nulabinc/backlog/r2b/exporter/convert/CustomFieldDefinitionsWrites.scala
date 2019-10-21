@@ -24,14 +24,16 @@ private[exporter] class CustomFieldDefinitionsWrites @Inject()(propertyValue: Pr
   }
 
   private[this] def toBacklog(redmineCustomFieldDefinition: RedmineCustomFieldDefinition): BacklogCustomFieldSetting =
-    BacklogCustomFieldSetting(optId = Some(redmineCustomFieldDefinition.id.toLong),
-                              name = redmineCustomFieldDefinition.name,
-                              description = "",
-                              typeId = typeId(redmineCustomFieldDefinition),
-                              required = redmineCustomFieldDefinition.isRequired,
-                              applicableIssueTypes = redmineCustomFieldDefinition.trackers.map(_.name),
-                              delete = false,
-                              property = property(redmineCustomFieldDefinition))
+    BacklogCustomFieldSetting(
+      optId = Some(redmineCustomFieldDefinition.id.toLong),
+      rawName = redmineCustomFieldDefinition.name,
+      description = "",
+      typeId = typeId(redmineCustomFieldDefinition),
+      required = redmineCustomFieldDefinition.isRequired,
+      applicableIssueTypes = redmineCustomFieldDefinition.trackers.map(_.name),
+      delete = false,
+      property = property(redmineCustomFieldDefinition)
+    )
 
   private[this] def property(redmineCustomFieldDefinition: RedmineCustomFieldDefinition): BacklogCustomFieldProperty =
     redmineCustomFieldDefinition.fieldFormat match {

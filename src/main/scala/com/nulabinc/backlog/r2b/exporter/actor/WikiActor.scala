@@ -6,7 +6,6 @@ import java.nio.channels.Channels
 import java.util.concurrent.CountDownLatch
 
 import akka.actor.Actor
-import com.nulabinc.backlog.migration.common.domain.BacklogJsonProtocol._
 import com.nulabinc.backlog.migration.common.convert.Convert
 import com.nulabinc.backlog.migration.common.utils.{IOUtil, Logging}
 import com.nulabinc.backlog.r2b.exporter.core.ExportContext
@@ -21,6 +20,8 @@ import scala.concurrent.duration._
   * @author uchida
   */
 private[exporter] class WikiActor(exportContext: ExportContext) extends Actor with Logging {
+
+  import com.nulabinc.backlog.migration.common.formatters.BacklogJsonProtocol._
 
   implicit val wikiWrites = exportContext.wikiWrites
 

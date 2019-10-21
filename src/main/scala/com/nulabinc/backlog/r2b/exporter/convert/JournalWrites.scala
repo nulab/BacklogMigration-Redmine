@@ -7,7 +7,7 @@ import com.nulabinc.backlog.migration.common.utils.{DateUtil, StringUtil}
 import com.nulabinc.backlog.r2b.utils.TextileUtil
 import com.taskadapter.redmineapi.bean.Journal
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 /**
   * @author uchida
@@ -20,7 +20,7 @@ private[exporter] class JournalWrites @Inject()(implicit val userWrites: UserWri
       eventType = "comment",
       optIssueId = None,
       optContent = StringUtil.notEmpty(TextileUtil.convert(journal.getNotes, backlogTextFormattingRule)),
-      changeLogs = journal.getDetails.asScala.map(Convert.toBacklog(_)),
+      changeLogs = journal.getDetails.asScala.toSeq.map(Convert.toBacklog(_)),
       notifications = Seq.empty[BacklogNotification],
       optCreatedUser = Option(journal.getUser).map(Convert.toBacklog(_)),
       optCreated = Option(journal.getCreatedOn).map(DateUtil.isoFormat)

@@ -5,7 +5,6 @@ import javax.inject.Inject
 import akka.actor.{ActorSystem, Props}
 import com.nulabinc.backlog.migration.common.conf.BacklogPaths
 import com.nulabinc.backlog.migration.common.convert.Convert
-import com.nulabinc.backlog.migration.common.domain.BacklogJsonProtocol._
 import com.nulabinc.backlog.migration.common.domain._
 import com.nulabinc.backlog.migration.common.utils.{ConsoleOut, IOUtil, Logging, ProgressBar}
 import com.nulabinc.backlog.r2b.exporter.actor.ContentActor
@@ -44,6 +43,7 @@ private[exporter] class ProjectExporter @Inject()(implicit val projectWrites: Pr
                                                   exportContextProvider: ExportContextProvider,
                                                   backlogTextFormattingRule: BacklogTextFormattingRule)
     extends Logging {
+  import com.nulabinc.backlog.migration.common.formatters.BacklogJsonProtocol._
 
   def boot(mappingContainer: MappingContainer): Unit = {
     val exportContext = exportContextProvider.get()
@@ -76,7 +76,7 @@ private[exporter] class ProjectExporter @Inject()(implicit val projectWrites: Pr
     //customFields
     val customFieldDefinitions = customFieldService.allCustomFieldDefinitions()
     IOUtil
-      .output(backlogPaths.customFieldSettingsJson, BacklogCustomFieldSettingsWrapper(Convert.toBacklog(customFieldDefinitions)).toJson.prettyPrint)
+      .output(backlogPaths.customFieldSettingsJson, BacklogCustomFieldSettings(Convert.toBacklog(customFieldDefinitions)).toJson.prettyPrint)
     ConsoleOut.boldln(Messages("message.executed", Messages("common.custom_field"), Messages("message.exported")), 1)
 
     //versions
