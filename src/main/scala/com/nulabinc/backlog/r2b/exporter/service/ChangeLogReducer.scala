@@ -26,53 +26,66 @@ private[exporter] class ChangeLogReducer(exportContext: ExportContext,
 
   def reduce(targetComment: BacklogComment, changeLog: BacklogChangeLog): ReducedChangeLogWithMessage =
     changeLog.field match {
-      case BacklogConstantValue.ChangeLog.ATTACHMENT => ReducedChangeLogWithMessage(AttachmentReducer.reduce(changeLog), "")
+      case BacklogConstantValue.ChangeLog.ATTACHMENT =>
+        ReducedChangeLogWithMessage(AttachmentReducer.reduce(changeLog), "")
       case "done_ratio" =>
-        val message =
-          Messages("common.change_comment", Messages("common.done_ratio"), getValue(changeLog.optOriginalValue), getValue(changeLog.optNewValue))
+        val message = Messages(
+          "common.change_comment",
+          Messages("common.done_ratio"),
+          getValue(changeLog.optOriginalValue),
+          getValue(changeLog.optNewValue)
+        )
         ReducedChangeLogWithMessage(None, s"$message\n")
       case "relates" =>
-        val message =
-          Messages("common.change_comment", Messages("common.relation"), getValue(changeLog.optOriginalValue), getValue(changeLog.optNewValue))
+        val message = Messages(
+          "common.change_comment",
+          Messages("common.relation"),
+          getValue(changeLog.optOriginalValue),
+          getValue(changeLog.optNewValue)
+        )
         ReducedChangeLogWithMessage(None, s"$message\n")
       case "is_private" =>
-        val message = Messages("common.change_comment",
-                               Messages("common.private"),
-                               getValue(privateValue(changeLog.optOriginalValue)),
-                               getValue(privateValue(changeLog.optNewValue)))
+        val message = Messages(
+          "common.change_comment",
+          Messages("common.private"),
+          getValue(privateValue(changeLog.optOriginalValue)),
+          getValue(privateValue(changeLog.optNewValue))
+        )
         ReducedChangeLogWithMessage(None, s"$message\n")
       case "project_id" =>
-        val message = Messages("common.change_comment",
-                               Messages("common.project"),
-                               getProjectName(changeLog.optOriginalValue),
-                               getProjectName(changeLog.optNewValue))
+        val message = Messages(
+          "common.change_comment",
+          Messages("common.project"),
+          getProjectName(changeLog.optOriginalValue),
+          getProjectName(changeLog.optNewValue)
+        )
         ReducedChangeLogWithMessage(None, s"$message\n")
       case BacklogConstantValue.ChangeLog.PARENT_ISSUE =>
-        val optOldParentId = changeLog.optOriginalValue.flatMap(getParentIssueId)
-        val optNewParentId = changeLog.optNewValue.flatMap(getParentIssueId)
-
-        if (optOldParentId.isDefined || optNewParentId.isDefined) {
-          val oldValue = changeLog.optOriginalValue.map(generateBacklogIssueKey)
-          val newValue = changeLog.optNewValue.map(generateBacklogIssueKey)
-          val message = Messages("common.change_comment",
-            Messages("common.parent_issue"),
-            getValue(oldValue),
-            getValue(newValue)
-          )
-          ReducedChangeLogWithMessage(None, s"$message\n")
-        } else
+//        val optOldParentId = changeLog.optOriginalValue.flatMap(getParentIssueId)
+//        val optNewParentId = changeLog.optNewValue.flatMap(getParentIssueId)
+//
+//        if (optOldParentId.isDefined || optNewParentId.isDefined) {
+//          val oldValue = changeLog.optOriginalValue.map(generateBacklogIssueKey)
+//          val newValue = changeLog.optNewValue.map(generateBacklogIssueKey)
+//          val message = Messages(
+//            "common.change_comment",
+//            Messages("common.parent_issue"), getValue(oldValue), getValue(newValue)
+//          )
+//          ReducedChangeLogWithMessage(None, s"$message\n")
+//        } else
           ReducedChangeLogWithMessage(Some(changeLog.copy(optNewValue = ValueReducer.reduce(targetComment, changeLog))), "")
       case _ =>
         ReducedChangeLogWithMessage(Some(changeLog.copy(optNewValue = ValueReducer.reduce(targetComment, changeLog))), "")
     }
 
   private[this] def getParentIssueId(strId: String): Option[Int] =
-    StringUtil.safeStringToInt(strId)
-      .flatMap(id => Option(exportContext.issueService.issueOfId(id).getParentId))
-      .flatMap {
-        case id if id > 0 => Some(id)
+    for {
+      id <- StringUtil.safeStringToInt(strId)
+      parentId <- exportContext.issueService.tryIssueOfId(id).map(_.getId) match {
+        case Right(id) if id > 0 => Some(id)
         case _ => None
       }
+    } yield parentId
 
   private[this] def generateBacklogIssueKey(issueId: String): String =
     s"${exportContext.backlogProjectKey}-$issueId"
