@@ -15,8 +15,15 @@ import better.files.{File => Path}
 
 private[exporter] case class ReducedChangeLogWithMessage(optChangeLog: Option[BacklogChangeLog], message: String)
 
+private[exporter] object ReducedChangeLogWithMessage {
+  def createMessageOnly(message: String): ReducedChangeLogWithMessage =
+    ReducedChangeLogWithMessage(None, s"$message\n")
+  def createWithChangeLog(changeLog: BacklogChangeLog): ReducedChangeLogWithMessage =
+    ReducedChangeLogWithMessage(Some(changeLog), "")
+}
+
 /**
-  * @author uchida
+ * @author uchida
   */
 private[exporter] class ChangeLogReducer(exportContext: ExportContext,
                                          issueDirPath: Path,
@@ -35,7 +42,7 @@ private[exporter] class ChangeLogReducer(exportContext: ExportContext,
           getValue(changeLog.optOriginalValue),
           getValue(changeLog.optNewValue)
         )
-        ReducedChangeLogWithMessage(None, s"$message\n")
+        ReducedChangeLogWithMessage.createMessageOnly(s"$message\n")
       case "relates" =>
         val message = Messages(
           "common.change_comment",
@@ -43,7 +50,7 @@ private[exporter] class ChangeLogReducer(exportContext: ExportContext,
           getValue(changeLog.optOriginalValue),
           getValue(changeLog.optNewValue)
         )
-        ReducedChangeLogWithMessage(None, s"$message\n")
+        ReducedChangeLogWithMessage.createMessageOnly(s"$message\n")
       case "is_private" =>
         val message = Messages(
           "common.change_comment",
@@ -51,7 +58,7 @@ private[exporter] class ChangeLogReducer(exportContext: ExportContext,
           getValue(privateValue(changeLog.optOriginalValue)),
           getValue(privateValue(changeLog.optNewValue))
         )
-        ReducedChangeLogWithMessage(None, s"$message\n")
+        ReducedChangeLogWithMessage.createMessageOnly(s"$message\n")
       case "project_id" =>
         val message = Messages(
           "common.change_comment",
@@ -59,7 +66,7 @@ private[exporter] class ChangeLogReducer(exportContext: ExportContext,
           getProjectName(changeLog.optOriginalValue),
           getProjectName(changeLog.optNewValue)
         )
-        ReducedChangeLogWithMessage(None, s"$message\n")
+        ReducedChangeLogWithMessage.createMessageOnly(s"$message\n")
       case BacklogConstantValue.ChangeLog.PARENT_ISSUE =>
 //        val optOldParentId = changeLog.optOriginalValue.flatMap(getParentIssueId)
 //        val optNewParentId = changeLog.optNewValue.flatMap(getParentIssueId)
@@ -73,9 +80,9 @@ private[exporter] class ChangeLogReducer(exportContext: ExportContext,
 //          )
 //          ReducedChangeLogWithMessage(None, s"$message\n")
 //        } else
-          ReducedChangeLogWithMessage(Some(changeLog.copy(optNewValue = ValueReducer.reduce(targetComment, changeLog))), "")
+          ReducedChangeLogWithMessage.createWithChangeLog(changeLog.copy(optNewValue = ValueReducer.reduce(targetComment, changeLog)))
       case _ =>
-        ReducedChangeLogWithMessage(Some(changeLog.copy(optNewValue = ValueReducer.reduce(targetComment, changeLog))), "")
+        ReducedChangeLogWithMessage.createWithChangeLog(changeLog.copy(optNewValue = ValueReducer.reduce(targetComment, changeLog)))
     }
 
   private[this] def getParentIssueId(strId: String): Option[Int] =
