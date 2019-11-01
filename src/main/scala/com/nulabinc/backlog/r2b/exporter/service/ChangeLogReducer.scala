@@ -68,31 +68,52 @@ private[exporter] class ChangeLogReducer(exportContext: ExportContext,
         )
         ReducedChangeLogWithMessage.createMessageOnly(s"$message\n")
       case BacklogConstantValue.ChangeLog.PARENT_ISSUE =>
-//        val optOldParentId = changeLog.optOriginalValue.flatMap(getParentIssueId)
-//        val optNewParentId = changeLog.optNewValue.flatMap(getParentIssueId)
-//
-//        if (optOldParentId.isDefined || optNewParentId.isDefined) {
-//          val oldValue = changeLog.optOriginalValue.map(generateBacklogIssueKey)
-//          val newValue = changeLog.optNewValue.map(generateBacklogIssueKey)
-//          val message = Messages(
-//            "common.change_comment",
-//            Messages("common.parent_issue"), getValue(oldValue), getValue(newValue)
-//          )
-//          ReducedChangeLogWithMessage(None, s"$message\n")
-//        } else
-          ReducedChangeLogWithMessage.createWithChangeLog(changeLog.copy(optNewValue = ValueReducer.reduce(targetComment, changeLog)))
+        val optOriginal = changeLog.optOriginalValue
+        val optNew = changeLog.optNewValue
+
+        val result = (optOriginal, optNew) match {
+          case (Some(originalId), Some(newId)) =>
+            for {
+              _ <- getParentIssueId(originalId)
+              _ <- getParentIssueId(newId)
+            } yield ()
+          case (Some(originalId), None) =>
+            for {
+              _ <- getParentIssueId(originalId)
+            } yield ()
+          case (None, Some(newId)) =>
+            for {
+              _ <- getParentIssueId(newId)
+            } yield ()
+          case (None, None) =>
+            Right(())
+        }
+
+        result match {
+          case Right(_) =>
+            ReducedChangeLogWithMessage.createWithChangeLog(changeLog.copy(optNewValue = ValueReducer.reduce(targetComment, changeLog)))
+          case Left(error) =>
+            logger.warn(s"Non Fatal. Reduce change log failed. Message: ${error.getMessage}")
+            val oldValue = optOriginal.map(_ => "(deleted)")
+            val newValue = optNew.map(_ => "(deleted)")
+            val message = Messages(
+              "common.change_comment",
+              Messages("common.parent_issue"),
+              getValue(oldValue),
+              getValue(newValue)
+            )
+            ReducedChangeLogWithMessage(None, s"$message\n")
+        }
       case _ =>
         ReducedChangeLogWithMessage.createWithChangeLog(changeLog.copy(optNewValue = ValueReducer.reduce(targetComment, changeLog)))
     }
 
-  private[this] def getParentIssueId(strId: String): Option[Int] =
+  private[this] def getParentIssueId(strId: String): Either[Throwable, Int] =
     for {
-      id <- StringUtil.safeStringToInt(strId)
-      parentId <- exportContext.issueService.tryIssueOfId(id).map(_.getId) match {
-        case Right(id) if id > 0 => Some(id)
-        case _ => None
-      }
-    } yield parentId
+      id <- StringUtil.safeStringToInt(strId).map(Right(_)).getOrElse(Left(new RuntimeException(s"cannot parse id. Input: $strId")))
+      parentId <- exportContext.issueService.tryIssueOfId(id).map(_.getId)
+      result <- if (parentId > 0) Right(parentId) else Left(new RuntimeException(s"invalid parent id: Input: $parentId"))
+    } yield result
 
   private[this] def generateBacklogIssueKey(issueId: String): String =
     s"${exportContext.backlogProjectKey}-$issueId"
