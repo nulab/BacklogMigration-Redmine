@@ -7,6 +7,7 @@ import better.files.File
 import com.nulabinc.backlog.migration.common.convert.Convert
 import com.nulabinc.backlog.migration.common.domain.{BacklogComment, BacklogIssue, BacklogTextFormattingRule}
 import com.nulabinc.backlog.migration.common.utils.{DateUtil, IOUtil, Logging}
+import com.nulabinc.backlog.r2b.exporter.convert.{IssueWrites, JournalWrites}
 import com.nulabinc.backlog.r2b.exporter.core.ExportContext
 import com.nulabinc.backlog.r2b.exporter.service.{ChangeLogReducer, CommentReducer, IssueInitializer}
 import com.taskadapter.redmineapi.Include
@@ -23,9 +24,11 @@ import scala.concurrent.duration._
 private[exporter] class IssueActor(exportContext: ExportContext, backlogTextFormattingRule: BacklogTextFormattingRule) extends Actor with Logging {
 
   import com.nulabinc.backlog.migration.common.formatters.BacklogJsonProtocol._
+  import IssueActor.ConsoleF
 
-  private implicit val issueWrites   = exportContext.issueWrites
-  private implicit val journalWrites = exportContext.journalWrites
+  private implicit val issueWrites: IssueWrites = exportContext.issueWrites
+  private implicit val journalWrites: JournalWrites = exportContext.journalWrites
+
 
   override def preRestart(reason: Throwable, message: Option[Any]): Unit = {
     logger.debug(s"preRestart: reason: $reason, message: $message")
@@ -35,7 +38,7 @@ private[exporter] class IssueActor(exportContext: ExportContext, backlogTextForm
   }
 
   def receive: Receive = {
-    case IssueActor.Do(issueId: Int, completion: CountDownLatch, allCount: Int, console: ((Int, Int) => Unit)) =>
+    case IssueActor.Do(issueId: Int, completion: CountDownLatch, allCount: Int, console: ConsoleF)=>
       logger.debug(s"[START ISSUE]$issueId thread numbers:${java.lang.Thread.activeCount()}")
 
       val issue                        = exportContext.issueService.issueOfId(issueId, Include.attachments, Include.journals)
@@ -49,7 +52,7 @@ private[exporter] class IssueActor(exportContext: ExportContext, backlogTextForm
       console((allCount - completion.getCount).toInt, allCount)
   }
 
-  private[this] def exportIssue(issue: Issue, journals: Seq[Journal], attachments: Seq[Attachment]) = {
+  private[this] def exportIssue(issue: Issue, journals: Seq[Journal], attachments: Seq[Attachment]): File = {
     val issueCreated     = DateUtil.tryIsoParse(Option(issue.getCreatedOn).map(DateUtil.isoFormat))
     val issueDirPath     = exportContext.backlogPaths.issueDirectoryPath("issue", issue.getId.intValue(), issueCreated, 0)
     val issueInitializer = new IssueInitializer(exportContext, issueDirPath, journals, attachments, backlogTextFormattingRule)
@@ -85,6 +88,8 @@ private[exporter] class IssueActor(exportContext: ExportContext, backlogTextForm
 
 private[exporter] object IssueActor {
 
-  case class Do(issueId: Int, completion: CountDownLatch, allCount: Int, console: ((Int, Int) => Unit))
+  type ConsoleF = (Int, Int) => Unit
+
+  case class Do(issueId: Int, completion: CountDownLatch, allCount: Int, console: ConsoleF)
 
 }
