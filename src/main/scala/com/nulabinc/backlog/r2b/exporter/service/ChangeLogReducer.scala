@@ -70,8 +70,8 @@ private[exporter] class ChangeLogReducer(exportContext: ExportContext,
             ReducedChangeLogWithMessage.createWithChangeLog(changeLog.copy(optNewValue = ValueReducer.reduce(targetComment, changeLog)))
           case Left(error) =>
             logger.warn(s"Non Fatal. Reduce change log failed. Message: ${error.getMessage}")
-            val oldValue = optOriginal.map(_ => "(deleted)")
-            val newValue = optNew.map(_ => "(deleted)")
+            val oldValue = optOriginal.map(_ => MessageResources.deleted)
+            val newValue = optNew.map(_ => MessageResources.deleted)
             val message = MessageResources.changeCommentParentIssue(getValue(oldValue), getValue(newValue))
             ReducedChangeLogWithMessage(None, s"$message\n")
         }

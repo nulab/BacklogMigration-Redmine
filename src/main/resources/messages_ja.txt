@@ -37,6 +37,7 @@ common.project_key=プロジェクトキー
 common.importOnly=インポートのみ実行
 common.url=URL
 common.retryCount=エラー時の再試行回数
+common.deleted=(削除済み)
 
 # Message
 message.exporting=エクスポートしています...

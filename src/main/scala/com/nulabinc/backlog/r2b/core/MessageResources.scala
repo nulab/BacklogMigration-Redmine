@@ -5,6 +5,8 @@ import com.osinka.i18n.Messages
 
 object MessageResources extends Logging {
 
+  val deleted: String = Messages("common.deleted")
+
   def changeCommentDoneRatio(originalValue: String, newValue: String): String = Messages("common.change_comment", Messages("common.done_ratio"), originalValue, newValue)
 
   def changeCommentRelation(originalValue: String, newValue: String): String = Messages("common.change_comment", Messages("common.relation"), originalValue, newValue)
