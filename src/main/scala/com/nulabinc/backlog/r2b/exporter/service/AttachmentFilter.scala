@@ -4,7 +4,7 @@ import com.nulabinc.backlog.migration.common.utils.FileUtil
 import com.nulabinc.backlog.r2b.redmine.conf.RedmineConstantValue
 import com.taskadapter.redmineapi.bean.{Attachment, Journal, JournalDetail}
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 /**
   * @author uchida

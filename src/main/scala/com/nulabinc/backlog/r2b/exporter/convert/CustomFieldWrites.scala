@@ -10,7 +10,7 @@ import com.nulabinc.backlog.r2b.redmine.domain.PropertyValue
 import com.nulabinc.backlog4j.CustomField.FieldType
 import com.taskadapter.redmineapi.bean.CustomField
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 /**
   * @author uchida

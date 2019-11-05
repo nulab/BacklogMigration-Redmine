@@ -171,7 +171,7 @@ object R2BCli extends BacklogConfiguration with Logging {
       } else {
         console(ConsoleDSL.print(Messages("destroy.start")))
       }
-      stream <- streamIssue(projectResult.right.get.getId, CHUNK_ISSUE_COUNT, config.dryRun) { (issues, _, _) =>
+      stream <- streamIssue(projectResult.getOrElse(throw new RuntimeException("cannot get project result")).getId, CHUNK_ISSUE_COUNT, config.dryRun) { (issues, _, _) =>
         val r = issues.map { issue =>
           for {
             _ <- pure(logger.debug("Issue Id: " + issue.getId))

@@ -42,7 +42,7 @@ class StatusMappingFile(redmineApiConfig: RedmineApiConfiguration, backlogApiCon
 
     val redmines    = redmineStatuses.map(createItem)
     val deleteItems = statuses.foldLeft(Seq.empty[MappingItem])(collectItems)
-    redmines union deleteItems
+    redmines concat deleteItems
   }
 
   private[this] def getBacklogItems(): Seq[MappingItem] = {

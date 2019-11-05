@@ -18,9 +18,9 @@ private[file] class MappingValidator(redmineMappings: Seq[MappingItem], backlogM
   def validate(optMappings: Option[Seq[Mapping]]): Seq[String] = {
     optMappings match {
       case Some(mappings) =>
-        itemsExists(mappings, CHECK_REDMINE) union
-          itemsRequired(mappings, CHECK_REDMINE) union
-          itemsExists(mappings, CHECK_BACKLOG) union
+        itemsExists(mappings, CHECK_REDMINE) concat
+          itemsRequired(mappings, CHECK_REDMINE) concat
+          itemsExists(mappings, CHECK_BACKLOG) concat
           itemsRequired(mappings, CHECK_BACKLOG)
       case _ => throw new RuntimeException
     }
