@@ -10,8 +10,8 @@ import com.nulabinc.backlog.migration.common.utils.{FileUtil, IOUtil, Logging, S
 import com.nulabinc.backlog.r2b.exporter.core.ExportContext
 import com.osinka.i18n.Messages
 import com.taskadapter.redmineapi.bean.Attachment
-
 import better.files.{File => Path}
+import com.nulabinc.backlog.r2b.core.MessageResources
 
 private[exporter] case class ReducedChangeLogWithMessage(optChangeLog: Option[BacklogChangeLog], message: String)
 
@@ -36,36 +36,16 @@ private[exporter] class ChangeLogReducer(exportContext: ExportContext,
       case BacklogConstantValue.ChangeLog.ATTACHMENT =>
         ReducedChangeLogWithMessage(AttachmentReducer.reduce(changeLog), "")
       case "done_ratio" =>
-        val message = Messages(
-          "common.change_comment",
-          Messages("common.done_ratio"),
-          getValue(changeLog.optOriginalValue),
-          getValue(changeLog.optNewValue)
-        )
+        val message = MessageResources.changeCommentDoneRatio(getValue(changeLog.optOriginalValue), getValue(changeLog.optNewValue))
         ReducedChangeLogWithMessage.createMessageOnly(s"$message\n")
       case "relates" =>
-        val message = Messages(
-          "common.change_comment",
-          Messages("common.relation"),
-          getValue(changeLog.optOriginalValue),
-          getValue(changeLog.optNewValue)
-        )
+        val message = MessageResources.changeCommentRelation(getValue(changeLog.optOriginalValue), getValue(changeLog.optNewValue))
         ReducedChangeLogWithMessage.createMessageOnly(s"$message\n")
       case "is_private" =>
-        val message = Messages(
-          "common.change_comment",
-          Messages("common.private"),
-          getValue(privateValue(changeLog.optOriginalValue)),
-          getValue(privateValue(changeLog.optNewValue))
-        )
+        val message = MessageResources.changeCommentPrivate(getValue(privateValue(changeLog.optOriginalValue)), getValue(privateValue(changeLog.optNewValue)))
         ReducedChangeLogWithMessage.createMessageOnly(s"$message\n")
       case "project_id" =>
-        val message = Messages(
-          "common.change_comment",
-          Messages("common.project"),
-          getProjectName(changeLog.optOriginalValue),
-          getProjectName(changeLog.optNewValue)
-        )
+        val message = MessageResources.changeCommentProject(getProjectName(changeLog.optOriginalValue), getProjectName(changeLog.optNewValue))
         ReducedChangeLogWithMessage.createMessageOnly(s"$message\n")
       case BacklogConstantValue.ChangeLog.PARENT_ISSUE =>
         val optOriginal = changeLog.optOriginalValue
@@ -78,13 +58,9 @@ private[exporter] class ChangeLogReducer(exportContext: ExportContext,
               _ <- getParentIssueId(newId)
             } yield ()
           case (Some(originalId), None) =>
-            for {
-              _ <- getParentIssueId(originalId)
-            } yield ()
+            getParentIssueId(originalId)
           case (None, Some(newId)) =>
-            for {
-              _ <- getParentIssueId(newId)
-            } yield ()
+            getParentIssueId(newId)
           case (None, None) =>
             Right(())
         }
@@ -96,12 +72,7 @@ private[exporter] class ChangeLogReducer(exportContext: ExportContext,
             logger.warn(s"Non Fatal. Reduce change log failed. Message: ${error.getMessage}")
             val oldValue = optOriginal.map(_ => "(deleted)")
             val newValue = optNew.map(_ => "(deleted)")
-            val message = Messages(
-              "common.change_comment",
-              Messages("common.parent_issue"),
-              getValue(oldValue),
-              getValue(newValue)
-            )
+            val message = MessageResources.changeCommentParentIssue(getValue(oldValue), getValue(newValue))
             ReducedChangeLogWithMessage(None, s"$message\n")
         }
       case _ =>
@@ -114,9 +85,6 @@ private[exporter] class ChangeLogReducer(exportContext: ExportContext,
       parentId <- exportContext.issueService.tryIssueOfId(id).map(_.getId)
       result <- if (parentId > 0) Right(parentId) else Left(new RuntimeException(s"invalid parent id: Input: $parentId"))
     } yield result
-
-  private[this] def generateBacklogIssueKey(issueId: String): String =
-    s"${exportContext.backlogProjectKey}-$issueId"
 
   private[this] def getValue(optValue: Option[String]): String =
     optValue.getOrElse(Messages("common.empty"))
