@@ -12,7 +12,7 @@ import com.nulabinc.backlog.r2b.exporter.core.ExportContext
 import com.taskadapter.redmineapi.bean.WikiPage
 import spray.json._
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration._
 

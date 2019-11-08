@@ -47,7 +47,7 @@ private[exporter] class IssuesActor(exportContext: ExportContext, backlogTextFor
 
       (0 until (allCount, limit))
         .foldLeft(Seq.empty[Int]) { (acc, offset) =>
-          acc union issueIds(offset)
+          acc concat issueIds(offset)
         }
         .map(issues)
         .foreach(_(issueActor))
@@ -57,18 +57,19 @@ private[exporter] class IssuesActor(exportContext: ExportContext, backlogTextFor
   }
 
   private[this] def issueIds(offset: Int): Seq[Int] = {
-    val params =
-      Map("offset"        -> offset.toString,
-          "limit"         -> limit.toString,
-          "project_id"    -> exportContext.projectId.value.toString,
-          "status_id"     -> "*",
-          "subproject_id" -> "!*")
+    val params = Map(
+      "offset"        -> offset.toString,
+      "limit"         -> limit.toString,
+      "project_id"    -> exportContext.projectId.value.toString,
+      "status_id"     -> "*",
+      "subproject_id" -> "!*"
+    )
     val ids = exportContext.issueService.allIssues(params).map(_.getId.intValue())
     issuesInfoProgress(((offset / limit) + 1), ((allCount / limit) + 1))
     ids
   }
 
-  private[this] def issues(issueId: Int)(issueActor: ActorRef) = {
+  private[this] def issues(issueId: Int)(issueActor: ActorRef): Unit = {
     issueActor ! IssueActor.Do(issueId, completion, allCount, console)
   }
 

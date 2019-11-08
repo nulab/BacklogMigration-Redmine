@@ -37,7 +37,7 @@ common.project_key=Project Key
 common.importOnly=Only Import
 common.url=URL
 common.retryCount=Maximum number of retries
-
+common.deleted=(deleted)
 
 # Message
 message.exporting=Exporting

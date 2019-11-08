@@ -10,7 +10,7 @@ import com.nulabinc.backlog.r2b.redmine.service.{MembershipService, NewsService,
 import com.osinka.i18n.Messages
 import com.taskadapter.redmineapi.bean.{Group, Membership, User}
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 import scala.concurrent.Await
 import scala.concurrent.duration.Duration
 
@@ -22,7 +22,7 @@ private[collector] class MappingCollector @Inject()(mappingContextProvider: Mapp
                                                     userService: UserService,
                                                     newsService: NewsService) extends Logging {
 
-  def boot(mappingData: MappingData) = {
+  def boot(mappingData: MappingData): Unit = {
     val mappingContext = mappingContextProvider.get()
     val system         = ActorSystem.apply("main-actor-system")
     val contentActor   = system.actorOf(Props(new ContentActor(mappingContext)))

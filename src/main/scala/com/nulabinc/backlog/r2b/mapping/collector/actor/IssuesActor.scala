@@ -46,7 +46,7 @@ private[collector] class IssuesActor(mappingContext: MappingContext) extends Act
 
       (0 until (allCount, limit))
         .foldLeft(Seq.empty[Int]) { (acc, offset) =>
-          acc union issueIds(offset)
+          acc concat issueIds(offset)
         }
         .map(issues)
         .foreach(_(issueActor))

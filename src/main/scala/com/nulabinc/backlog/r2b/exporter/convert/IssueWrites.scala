@@ -8,7 +8,7 @@ import com.nulabinc.backlog.r2b.mapping.service.{MappingPriorityService, Mapping
 import com.nulabinc.backlog.r2b.utils.TextileUtil
 import com.taskadapter.redmineapi.bean.Issue
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 /**
   * @author uchida

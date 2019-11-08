@@ -63,7 +63,7 @@ class CommandLineInterface(arguments: Seq[String]) extends ScallopConf(arguments
 
 object R2B extends BacklogConfiguration with Logging {
 
-  def main(args: Array[String]) = {
+  def main(args: Array[String]): Unit = {
     ConsoleOut.println(s"""|${applicationName}
                  |--------------------------------------------------""".stripMargin)
     AnsiConsole.systemInstall()
@@ -72,7 +72,7 @@ object R2B extends BacklogConfiguration with Logging {
     checkRelease()
     if (ClassVersion.isValid()) {
       try {
-        val cli: CommandLineInterface = new CommandLineInterface(args)
+        val cli: CommandLineInterface = new CommandLineInterface(args.toIndexedSeq)
         execute(cli)
         AnsiConsole.systemUninstall()
         System.exit(0)

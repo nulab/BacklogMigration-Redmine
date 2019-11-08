@@ -7,7 +7,7 @@ import com.nulabinc.backlog.migration.common.domain.{BacklogGroup, BacklogUser}
 import com.nulabinc.backlog.r2b.redmine.domain.PropertyValue
 import com.taskadapter.redmineapi.bean.{Group, Membership, User}
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 /**
   * @author uchida
