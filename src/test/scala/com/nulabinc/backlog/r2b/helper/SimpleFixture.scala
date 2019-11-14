@@ -7,7 +7,7 @@ import java.util.{Date, Locale, Properties}
 import better.files.File
 import com.nulabinc.backlog.migration.common.conf.BacklogApiConfiguration
 import com.nulabinc.backlog.migration.common.utils.IOUtil
-import com.nulabinc.backlog.r2b.conf.AppConfiguration
+import com.nulabinc.backlog.r2b.conf.{AppConfiguration, ExcludeOption}
 import com.nulabinc.backlog.r2b.mapping.core._
 import com.nulabinc.backlog.r2b.mapping.domain.{Mapping, MappingsWrapper}
 import com.nulabinc.backlog.r2b.mapping.service.{MappingPriorityServiceImpl, MappingStatusServiceImpl, MappingUserServiceImpl}
@@ -94,7 +94,7 @@ trait SimpleFixture {
         AppConfiguration(
           redmineConfig = new RedmineApiConfiguration(url = redmineUrl, key = redmineKey, projectKey = redmine),
           backlogConfig = new BacklogApiConfiguration(url = backlogUrl, key = backlogKey, projectKey = backlog),
-          exclude = None,
+          exclude = ExcludeOption.default,
           importOnly = false,
           retryCount = 5
         )

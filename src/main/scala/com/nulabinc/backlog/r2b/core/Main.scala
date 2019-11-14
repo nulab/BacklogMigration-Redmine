@@ -136,7 +136,12 @@ object R2B extends BacklogConfiguration with Logging {
     AppConfiguration(
       redmineConfig = RedmineApiConfiguration(url = cli.execute.redmineUrl(), key = cli.execute.redmineKey(), projectKey = redmine),
       backlogConfig = BacklogApiConfiguration(url = cli.execute.backlogUrl(), key = cli.execute.backlogKey(), projectKey = backlog),
-      exclude = cli.execute.exclude.toOption,
+      exclude = cli.execute.exclude.toOption.map { args =>
+        ExcludeOption(
+          excludeIssue = args.contains("issue"),
+          excludeWiki = args.contains("wiki")
+        )
+      }.getOrElse(ExcludeOption.default),
       importOnly = cli.execute.importOnly(),
       retryCount = retryCount
     )
