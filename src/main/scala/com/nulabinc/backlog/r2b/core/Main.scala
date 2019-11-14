@@ -41,7 +41,7 @@ class CommandLineInterface(arguments: Seq[String]) extends ScallopConf(arguments
     val backlogUrl = opt[String]("backlog.url", descr = Messages("cli.help.backlog.url"), required = true, noshort = true)
     val redmineKey = opt[String]("redmine.key", descr = Messages("cli.help.redmine.key"), required = true, noshort = true)
     val redmineUrl = opt[String]("redmine.url", descr = Messages("cli.help.redmine.url"), required = true, noshort = true)
-
+    val exclude    = opt[List[String]]("exclude", descr = Messages("cli.help.exclude"), required = false)
     val projectKey = opt[String]("projectKey", descr = Messages("cli.help.projectKey"), required = true)
     val help       = opt[String]("help", descr = Messages("cli.help.show_help"))
   }
@@ -115,7 +115,14 @@ object R2B extends BacklogConfiguration with Logging {
     val keys        = cli.execute.projectKey().split(":")
     val redmine     = keys(0)
     val backlog     = if (keys.length == 2) keys(1) else keys(0).toUpperCase.replaceAll("-", "_")
-    val retryCount  = cli.execute.retryCount.toOption.getOrElse(20)
+
+    val retryCount = cli.execute.retryCount.toOption.getOrElse(20)
+    val exclude = cli.execute.exclude.toOption.map { args =>
+      ExcludeOption(
+        issue = args.contains("issue"),
+        wiki = args.contains("wiki")
+      )
+    }.getOrElse(ExcludeOption.default)
 
     ConsoleOut.println(s"""--------------------------------------------------
      |${Messages("common.redmine")} ${Messages("common.url")}[${cli.execute.redmineUrl()}]
@@ -126,6 +133,7 @@ object R2B extends BacklogConfiguration with Logging {
      |${Messages("common.backlog")} ${Messages("common.project_key")}[${backlog}]
      |${Messages("common.importOnly")}[${cli.execute.importOnly()}]
      |${Messages("common.retryCount")}[$retryCount]
+     |exclude[${exclude.toString}]
      |https.proxyHost[${Option(System.getProperty("https.proxyHost")).getOrElse("")}]
      |https.proxyPort[${Option(System.getProperty("https.proxyPort")).getOrElse("")}]
      |https.proxyUser[${Option(System.getProperty("https.proxyUser")).getOrElse("")}]
@@ -136,12 +144,7 @@ object R2B extends BacklogConfiguration with Logging {
     AppConfiguration(
       redmineConfig = RedmineApiConfiguration(url = cli.execute.redmineUrl(), key = cli.execute.redmineKey(), projectKey = redmine),
       backlogConfig = BacklogApiConfiguration(url = cli.execute.backlogUrl(), key = cli.execute.backlogKey(), projectKey = backlog),
-      exclude = cli.execute.exclude.toOption.map { args =>
-        ExcludeOption(
-          issue = args.contains("issue"),
-          wiki = args.contains("wiki")
-        )
-      }.getOrElse(ExcludeOption.default),
+      exclude = exclude,
       importOnly = cli.execute.importOnly(),
       retryCount = retryCount
     )
