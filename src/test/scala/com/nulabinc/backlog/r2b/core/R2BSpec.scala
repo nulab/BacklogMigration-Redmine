@@ -12,7 +12,7 @@ import com.taskadapter.redmineapi.Include
 import com.taskadapter.redmineapi.bean.{User, Issue => RedmineIssue}
 import org.scalatest.{FlatSpec, Matchers}
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 /**
   * @author uchida
@@ -259,7 +259,7 @@ class R2BSpec extends FlatSpec with Matchers with SimpleFixture {
         val optLastId = for { lastComment <- commentsPart.lastOption } yield {
           lastComment.getId
         }
-        loop(optLastId, comments union commentsPart, offset + 100)
+        loop(optLastId, comments concat commentsPart, offset + 100)
       } else comments
 
     loop(None, Seq.empty[IssueComment], 0).sortWith((c1, c2) => c1.getCreated.before(c2.getCreated))
