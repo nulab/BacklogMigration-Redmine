@@ -16,7 +16,7 @@ private[collector] class ContentActor(exclude: ExcludeOption, mappingContext: Ma
 
   def receive: Receive = {
     case ContentActor.Do(mappingData: MappingData) =>
-      if (exclude.excludeWiki) {
+      if (exclude.wiki) {
         self ! WikisActor.Done(mappingData)
       } else {
         wikisActor ! WikisActor.Do(mappingData)

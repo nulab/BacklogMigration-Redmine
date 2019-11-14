@@ -138,8 +138,8 @@ object R2B extends BacklogConfiguration with Logging {
       backlogConfig = BacklogApiConfiguration(url = cli.execute.backlogUrl(), key = cli.execute.backlogKey(), projectKey = backlog),
       exclude = cli.execute.exclude.toOption.map { args =>
         ExcludeOption(
-          excludeIssue = args.contains("issue"),
-          excludeWiki = args.contains("wiki")
+          issue = args.contains("issue"),
+          wiki = args.contains("wiki")
         )
       }.getOrElse(ExcludeOption.default),
       importOnly = cli.execute.importOnly(),

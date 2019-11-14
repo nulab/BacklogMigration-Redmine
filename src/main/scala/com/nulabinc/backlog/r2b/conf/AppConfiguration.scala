@@ -3,10 +3,10 @@ package com.nulabinc.backlog.r2b.conf
 import com.nulabinc.backlog.migration.common.conf.BacklogApiConfiguration
 import com.nulabinc.backlog.r2b.redmine.conf.RedmineApiConfiguration
 
-case class ExcludeOption(excludeIssue: Boolean, excludeWiki: Boolean)
+case class ExcludeOption(issue: Boolean, wiki: Boolean)
 
 object ExcludeOption {
-  val default: ExcludeOption = ExcludeOption(excludeIssue = false, excludeWiki = false)
+  val default: ExcludeOption = ExcludeOption(issue = false, wiki = false)
 }
 
 case class AppConfiguration(

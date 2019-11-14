@@ -15,13 +15,13 @@ private[exporter] class ContentActor(exportContext: ExportContext, backlogTextFo
 
   def receive: Receive = {
     case ContentActor.Do =>
-      if (exportContext.exportConfig.exclude.excludeWiki) {
+      if (exportContext.exportConfig.exclude.wiki) {
         self ! WikisActor.Done
       } else {
         wikisActor ! WikisActor.Do
       }
     case WikisActor.Done =>
-      if (exportContext.exportConfig.exclude.excludeIssue) {
+      if (exportContext.exportConfig.exclude.issue) {
         self ! IssuesActor.Done
       } else {
         issuesActor ! IssuesActor.Do
