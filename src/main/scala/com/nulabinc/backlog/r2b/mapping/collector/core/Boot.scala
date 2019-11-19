@@ -1,8 +1,8 @@
 package com.nulabinc.backlog.r2b.mapping.collector.core
 
 import com.google.inject.Guice
+import com.nulabinc.backlog.migration.common.conf.ExcludeOption
 import com.nulabinc.backlog.migration.common.utils.{ConsoleOut, Logging}
-import com.nulabinc.backlog.r2b.conf.ExcludeOption
 import com.nulabinc.backlog.r2b.mapping.collector.modules.RedmineModule
 import com.nulabinc.backlog.r2b.mapping.collector.service.MappingCollector
 import com.nulabinc.backlog.r2b.redmine.conf.RedmineApiConfiguration

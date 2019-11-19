@@ -2,7 +2,7 @@ package com.nulabinc.backlog.r2b.core
 
 import java.util.Locale
 
-import com.nulabinc.backlog.migration.common.conf.{BacklogApiConfiguration, BacklogConfiguration}
+import com.nulabinc.backlog.migration.common.conf.{BacklogApiConfiguration, BacklogConfiguration, ExcludeOption}
 import com.nulabinc.backlog.migration.common.utils.{ConsoleOut, Logging}
 import com.nulabinc.backlog.r2b.cli.R2BCli
 import com.nulabinc.backlog.r2b.conf._
