@@ -2,20 +2,25 @@ package com.nulabinc.backlog.r2b.mapping.collector.actor
 
 import akka.actor.{Actor, Props}
 import com.nulabinc.backlog.migration.common.utils.Logging
+import com.nulabinc.backlog.r2b.conf.ExcludeOption
 import com.nulabinc.backlog.r2b.mapping.collector.core.{MappingContext, MappingData}
 import com.taskadapter.redmineapi.bean.User
 
 /**
   * @author uchida
   */
-private[collector] class ContentActor(mappingContext: MappingContext) extends Actor with Logging {
+private[collector] class ContentActor(exclude: ExcludeOption, mappingContext: MappingContext) extends Actor with Logging {
 
   private[this] val wikisActor  = context.actorOf(Props(new WikisActor(mappingContext)))
   private[this] val issuesActor = context.actorOf(Props(new IssuesActor(mappingContext)))
 
   def receive: Receive = {
     case ContentActor.Do(mappingData: MappingData) =>
-      wikisActor ! WikisActor.Do(mappingData)
+      if (exclude.wiki) {
+        self ! WikisActor.Done(mappingData)
+      } else {
+        wikisActor ! WikisActor.Do(mappingData)
+      }
     case WikisActor.Done(mappingData) =>
       val allUsers: Seq[User] = mappingContext.userService.allUsers()
       issuesActor ! IssuesActor.Do(mappingData, allUsers)

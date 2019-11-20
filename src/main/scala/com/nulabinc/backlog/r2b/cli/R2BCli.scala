@@ -325,7 +325,7 @@ object R2BCli extends BacklogConfiguration with Logging {
   }
 
   private[this] def createMapping(config: AppConfiguration): MappingFileContainer = {
-    val mappingData     = BootMapping.execute(config.redmineConfig)
+    val mappingData     = BootMapping.execute(config.redmineConfig, config.exclude)
     val userMapping     = new UserMappingFile(config.redmineConfig, config.backlogConfig, mappingData.users.toSeq)
     val statusMapping   = new StatusMappingFile(config.redmineConfig, config.backlogConfig, mappingData.statuses.toSeq)
     val priorityMapping = new PriorityMappingFile(config.redmineConfig, config.backlogConfig)

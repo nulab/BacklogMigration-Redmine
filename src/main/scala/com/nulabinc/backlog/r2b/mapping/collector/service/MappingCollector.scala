@@ -1,9 +1,9 @@
 package com.nulabinc.backlog.r2b.mapping.collector.service
 
 import javax.inject.Inject
-
 import akka.actor.{ActorSystem, Props}
 import com.nulabinc.backlog.migration.common.utils.{Logging, ProgressBar}
+import com.nulabinc.backlog.r2b.conf.ExcludeOption
 import com.nulabinc.backlog.r2b.mapping.collector.actor.ContentActor
 import com.nulabinc.backlog.r2b.mapping.collector.core.{MappingContextProvider, MappingData}
 import com.nulabinc.backlog.r2b.redmine.service.{MembershipService, NewsService, UserService}
@@ -22,10 +22,10 @@ private[collector] class MappingCollector @Inject()(mappingContextProvider: Mapp
                                                     userService: UserService,
                                                     newsService: NewsService) extends Logging {
 
-  def boot(mappingData: MappingData): Unit = {
+  def boot(exclude: ExcludeOption, mappingData: MappingData): Unit = {
     val mappingContext = mappingContextProvider.get()
     val system         = ActorSystem.apply("main-actor-system")
-    val contentActor   = system.actorOf(Props(new ContentActor(mappingContext)))
+    val contentActor   = system.actorOf(Props(new ContentActor(exclude, mappingContext)))
     contentActor ! ContentActor.Do(mappingData)
 
     Await.result(system.whenTerminated, Duration.Inf)

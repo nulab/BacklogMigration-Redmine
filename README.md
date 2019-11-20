@@ -80,6 +80,18 @@ The mapping file is created as follows.
 - 2.mapping / priorities.json (priority)
 - 3.mapping / statuses.json (state)
 
+#### Exclude wiki
+[**--exclude**] If you set this property, specified initialize will **not** be run by the program.
+
+    java -jar backlog-migration-redmine-[latest version].jar \
+      init \
+      --redmine.key [Redmine API key] \
+      --redmine.url [Redmine of URL] \
+      --backlog.key [Backlog of API key] \
+      --backlog.url [URL of Backlog] \
+      --projects [Redmine project identifier]: [Backlog project key] \
+      --exclude [wiki]
+      
 #### About mapping projects
 
 Specify the destination project for **--projectKey** option by colon (:).  i.e. [**--projectKey redmine_project:BACKLOG_PROJECT**] migrates **redmine_project** redmine project in **BACKLOG_PROJECT** backlog project.
@@ -147,7 +159,8 @@ When import has been completed, the directory will be created and data file that
       --backlog.url [URL of Backlog] \
       --projects [Redmine project identifier]: [Backlog project key] \
       --importOnly
-      
+
+#### Exclude issue or wiki 
 [**--exclude**] If you set this property, specified import will **not** be run by the program.
 
     java -jar backlog-migration-redmine-[latest version].jar \
@@ -344,6 +357,19 @@ https://github.com/nulab/BacklogMigration-Redmine/releases
 - 1.mapping/users.json(ユーザー)
 - 2.mapping/priorities.json(優先度)
 - 3.mapping/statuses.json(状態)
+
+#### Wikiを除外して初期化
+
+[**--exclude**]オプションを利用すると指定された項目を**除外**してインポートを実行します。
+
+    java -jar backlog-migration-redmine-[最新バージョン].jar \
+      init \
+      --redmine.key [RedmineのAPIキー] \
+      --redmine.url [RedmineのURL] \
+      --backlog.key [BacklogのAPIキー] \
+      --backlog.url [BacklogのURL] \
+      --projectKey [Redmineプロジェクト識別子]:[Backlogプロジェクトキー] \
+      --exclude [wiki]
 
 #### プロジェクトのマッピングについて
 

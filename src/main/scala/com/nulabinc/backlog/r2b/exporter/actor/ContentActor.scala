@@ -15,26 +15,21 @@ private[exporter] class ContentActor(exportContext: ExportContext, backlogTextFo
 
   def receive: Receive = {
     case ContentActor.Do =>
-      if (isMigrate(exportContext.exportConfig.exclude, "wiki")) {
-        wikisActor ! WikisActor.Do
-      } else {
+      if (exportContext.exportConfig.exclude.wiki) {
         self ! WikisActor.Done
+      } else {
+        wikisActor ! WikisActor.Do
       }
     case WikisActor.Done =>
-      if (isMigrate(exportContext.exportConfig.exclude, "issue")) {
-        issuesActor ! IssuesActor.Do
-      } else {
+      if (exportContext.exportConfig.exclude.issue) {
         self ! IssuesActor.Done
+      } else {
+        issuesActor ! IssuesActor.Do
       }
     case IssuesActor.Done =>
       context.system.terminate()
   }
 
-  private[this] def isMigrate(exclude: Option[List[String]], item: String): Boolean =
-    exclude match {
-      case Some(excludes) => !excludes.contains(item)
-      case _              => true
-    }
 }
 
 private[exporter] object ContentActor {

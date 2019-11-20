@@ -1,8 +1,11 @@
 package com.nulabinc.backlog.r2b.exporter.core
 
+import java.io.PrintStream
+
 import com.google.inject.Guice
 import com.nulabinc.backlog.migration.common.domain.{BacklogProjectKey, BacklogTextFormattingRule}
 import com.nulabinc.backlog.migration.common.utils.{ConsoleOut, Logging}
+import com.nulabinc.backlog.r2b.conf.ExcludeOption
 import com.nulabinc.backlog.r2b.exporter.conf.ExportConfig
 import com.nulabinc.backlog.r2b.exporter.modules.RedmineModule
 import com.nulabinc.backlog.r2b.exporter.service.ProjectExporter
@@ -15,7 +18,7 @@ import com.osinka.i18n.Messages
   */
 object Boot extends Logging {
 
-  def execute(apiConfig: RedmineApiConfiguration, mappingContainer: MappingContainer, backlogProjectKey: BacklogProjectKey, backlogTextFormattingRule: BacklogTextFormattingRule, exclude: Option[List[String]]) = {
+  def execute(apiConfig: RedmineApiConfiguration, mappingContainer: MappingContainer, backlogProjectKey: BacklogProjectKey, backlogTextFormattingRule: BacklogTextFormattingRule, exclude: ExcludeOption): PrintStream = {
     try {
       val injector = Guice.createInjector(new RedmineModule(apiConfig, mappingContainer, backlogProjectKey, backlogTextFormattingRule, ExportConfig(exclude)))
 
