@@ -1,7 +1,7 @@
 package com.nulabinc.backlog.r2b.exporter.service
 
-import java.io.FileOutputStream
-import java.net.URL
+import java.io.{File, FileOutputStream}
+import java.net.{HttpURLConnection, URL}
 import java.nio.channels.Channels
 
 import com.nulabinc.backlog.migration.common.convert.Convert
@@ -12,8 +12,8 @@ import com.nulabinc.backlog.r2b.redmine.conf.RedmineConstantValue
 import com.nulabinc.backlog.r2b.redmine.domain.RedmineCustomFieldDefinition
 import com.nulabinc.backlog.r2b.utils.TextileUtil
 import com.taskadapter.redmineapi.bean._
-
 import better.files.{File => Path}
+import com.nulabinc.backlog.migration.common.utils.ControlUtil.using
 
 import scala.jdk.CollectionConverters._
 
@@ -225,10 +225,34 @@ private[exporter] class IssueInitializer(exportContext: ExportContext, issueDirP
     IOUtil.createDirectory(dir)
 
     val url: URL = new URL(s"${attachment.getContentURL}?key=${exportContext.apiConfig.key}")
+    val redirected = followRedirect(url)
 
+    doDownload(redirected, path.path.toFile)
+  }
+
+  private val MAX_REDIRECT_COUNT = 10
+
+  private[this] def followRedirect(url: URL, count: Int = 0): URL =
+    url.openConnection match {
+      case http: HttpURLConnection =>
+        http.setRequestMethod("GET")
+        http.connect()
+        using(http) { connection =>
+          connection.getResponseCode match {
+            case 302 | 303 =>
+              val newUrl = new URL(connection.getHeaderField("Location"))
+              if (count < MAX_REDIRECT_COUNT) followRedirect(newUrl, count + 1) else newUrl
+            case _ =>
+              url
+          }
+        }
+      case _ => url
+    }
+
+  private[this] def doDownload(url: URL, file: File): Unit =
     try {
       val rbc = Channels.newChannel(url.openStream())
-      val fos = new FileOutputStream(path.path.toFile)
+      val fos = new FileOutputStream(file)
       fos.getChannel.transferFrom(rbc, 0, java.lang.Long.MAX_VALUE)
 
       rbc.close()
@@ -236,6 +260,5 @@ private[exporter] class IssueInitializer(exportContext: ExportContext, issueDirP
     } catch {
       case e: Throwable => logger.warn("Download issue attachment failed: " + e.getMessage)
     }
-  }
 
 }
