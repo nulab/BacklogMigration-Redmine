@@ -6,8 +6,9 @@ import com.nulabinc.backlog.migration.common.conf.{BacklogApiConfiguration, Back
 import com.nulabinc.backlog.migration.common.domain.{BacklogProjectKey, BacklogTextFormattingRule}
 import com.nulabinc.backlog.migration.common.modules.{ServiceInjector => BacklogInjector}
 import com.nulabinc.backlog.migration.common.service.ProjectService
+import com.nulabinc.backlog.migration.common.utils.ControlUtil.using
 import com.nulabinc.backlog.migration.common.utils.{ConsoleOut, Logging}
-import com.nulabinc.backlog.migration.importer.core.{Boot => BootImporter}
+import com.nulabinc.backlog.migration.importer.core.{ImportConfig, Boot => BootImporter}
 import com.nulabinc.backlog.r2b.conf.{AppConfiguration, DestroyConfiguration}
 import com.nulabinc.backlog.r2b.dsl.BacklogDSL
 import com.nulabinc.backlog.r2b.exporter.core.{Boot => BootExporter}
@@ -21,10 +22,9 @@ import com.nulabinc.backlog.r2b.mapping.file._
 import com.nulabinc.backlog4j.Issue
 import com.osinka.i18n.Messages
 import monix.execution.Scheduler
-import com.nulabinc.backlog.migration.common.utils.ControlUtil.using
 
-import scala.concurrent.{Await, ExecutionContext, Future}
 import scala.concurrent.duration.Duration
+import scala.concurrent.{Await, ExecutionContext, Future}
 
 object FutureUtils {
   case class Suspend[A](eval: () => Future[A])
@@ -53,8 +53,10 @@ object R2BCli extends BacklogConfiguration with Logging {
   }
 
   def migrate(config: AppConfiguration): Unit = {
+    val importConfig = ImportConfig(fitIssueKey = false, retryCount = config.retryCount, excludeOption = config.exclude)
+
     if (validateParam(config)) {
-      if (config.importOnly) BootImporter.execute(config.backlogConfig, false, config.retryCount)
+      if (config.importOnly) BootImporter.execute(config.backlogConfig, importConfig)
       else {
         val mappingFileContainer = createMapping(config)
         if (validateMapping(mappingFileContainer.user) &&
@@ -77,7 +79,7 @@ object R2BCli extends BacklogConfiguration with Logging {
             val backlogTextFormattingRule = fetchBacklogTextFormattingRule(config.backlogConfig)
 
             BootExporter.execute(config.redmineConfig, mappingContainer, BacklogProjectKey(config.backlogConfig.projectKey), backlogTextFormattingRule, config.exclude)
-            BootImporter.execute(config.backlogConfig, false, config.retryCount)
+            BootImporter.execute(config.backlogConfig, importConfig)
             finalize(config.backlogConfig)
           }
         }
@@ -87,7 +89,7 @@ object R2BCli extends BacklogConfiguration with Logging {
 
   def doImport(config: AppConfiguration): Unit = {
     if (validateParam(config)) {
-      BootImporter.execute(config.backlogConfig, false, config.retryCount)
+      BootImporter.execute(config.backlogConfig, ImportConfig(fitIssueKey = false, retryCount = config.retryCount, excludeOption = config.exclude))
       finalize(config.backlogConfig)
     }
   }
@@ -209,7 +211,7 @@ object R2BCli extends BacklogConfiguration with Logging {
       val message =
         s"""
            |
-          |${Messages("cli.param.error")}
+           |${Messages("cli.param.error")}
            |--------------------------------------------------
            |${errors.mkString("\n")}
            |

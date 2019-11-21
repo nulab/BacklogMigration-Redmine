@@ -2,8 +2,8 @@ package com.nulabinc.backlog.r2b.mapping.collector.service
 
 import javax.inject.Inject
 import akka.actor.{ActorSystem, Props}
+import com.nulabinc.backlog.migration.common.conf.ExcludeOption
 import com.nulabinc.backlog.migration.common.utils.{Logging, ProgressBar}
-import com.nulabinc.backlog.r2b.conf.ExcludeOption
 import com.nulabinc.backlog.r2b.mapping.collector.actor.ContentActor
 import com.nulabinc.backlog.r2b.mapping.collector.core.{MappingContextProvider, MappingData}
 import com.nulabinc.backlog.r2b.redmine.service.{MembershipService, NewsService, UserService}
