@@ -1,20 +1,19 @@
 package com.nulabinc.backlog.r2b.exporter.actor
 
-import java.io.FileOutputStream
 import java.net.URL
-import java.nio.channels.Channels
 import java.util.concurrent.CountDownLatch
 
 import akka.actor.Actor
 import com.nulabinc.backlog.migration.common.convert.Convert
 import com.nulabinc.backlog.migration.common.utils.{IOUtil, Logging}
 import com.nulabinc.backlog.r2b.exporter.core.ExportContext
+import com.nulabinc.backlog.r2b.exporter.service.AttachmentService
 import com.taskadapter.redmineapi.bean.WikiPage
 import spray.json._
 
-import scala.jdk.CollectionConverters._
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration._
+import scala.jdk.CollectionConverters._
 
 /**
   * @author uchida
@@ -48,16 +47,7 @@ private[exporter] class WikiActor(exportContext: ExportContext) extends Actor wi
 
           val url: URL = new URL(s"${attachment.getContentURL}?key=${exportContext.apiConfig.key}")
 
-          try {
-            val rbc = Channels.newChannel(url.openStream())
-            val fos = new FileOutputStream(path.path.toFile)
-            fos.getChannel.transferFrom(rbc, 0, java.lang.Long.MAX_VALUE)
-
-            rbc.close()
-            fos.close()
-          } catch {
-            case e: Throwable => logger.warn("Download wiki attachment failed: " + e.getMessage)
-          }
+          AttachmentService.download(url, path.path.toFile)
         }
       }
 
