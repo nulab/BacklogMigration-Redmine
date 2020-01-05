@@ -35,13 +35,14 @@ object AttachmentService extends Logging {
         http.connect()
         using(http) { connection =>
           connection.getResponseCode match {
-            case 302 | 303 =>
+            case 301 | 302 | 303 =>
               val newUrl = new URL(connection.getHeaderField("Location"))
               if (count < MAX_REDIRECT_COUNT) followRedirect(newUrl, count + 1) else newUrl
             case _ =>
               url
           }
         }
-      case _ => url
+      case _ =>
+        url
     }
 }
