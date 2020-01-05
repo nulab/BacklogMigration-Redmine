@@ -21,18 +21,19 @@ import scala.jdk.CollectionConverters._
 private[exporter] class WikiActor(exportContext: ExportContext) extends Actor with Logging {
 
   import com.nulabinc.backlog.migration.common.formatters.BacklogJsonProtocol._
+  import WikiActor.ConsoleF
 
   implicit val wikiWrites = exportContext.wikiWrites
 
-  override def preRestart(reason: Throwable, message: Option[Any]) = {
-    logger.debug(s"preRestart: reason: ${reason}, message: ${message}")
+  override def preRestart(reason: Throwable, message: Option[Any]) : Unit = {
+    logger.debug(s"preRestart: reason: $reason, message: $message")
     for { value <- message } yield {
       context.system.scheduler.scheduleOnce(10.seconds, self, value)
     }
   }
 
   def receive: Receive = {
-    case WikiActor.Do(wiki: WikiPage, completion: CountDownLatch, allCount: Int, console: ((Int, Int) => Unit)) =>
+    case WikiActor.Do(wiki: WikiPage, completion: CountDownLatch, allCount: Int, console: ConsoleF) =>
       exportContext.wikiService.optWikiDetail(wiki.getTitle).foreach { wikiDetail =>
 
         val backlogWiki = Convert.toBacklog(wikiDetail)
@@ -59,6 +60,8 @@ private[exporter] class WikiActor(exportContext: ExportContext) extends Actor wi
 
 private[exporter] object WikiActor {
 
-  case class Do(wiki: WikiPage, completion: CountDownLatch, allCount: Int, console: ((Int, Int) => Unit))
+  type ConsoleF = (Int, Int) => Unit
+
+  case class Do(wiki: WikiPage, completion: CountDownLatch, allCount: Int, console: ConsoleF)
 
 }
