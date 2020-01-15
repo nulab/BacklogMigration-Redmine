@@ -1,17 +1,15 @@
 package com.nulabinc.backlog.r2b.exporter.service
 
-import java.io.{FileOutputStream, InputStream}
 import java.net.URL
-import java.nio.channels.Channels
 
+import better.files.{File => Path}
 import com.nulabinc.backlog.migration.common.conf.BacklogConstantValue
 import com.nulabinc.backlog.migration.common.domain.{BacklogChangeLog, BacklogComment, BacklogIssue}
 import com.nulabinc.backlog.migration.common.utils.{FileUtil, IOUtil, Logging, StringUtil}
+import com.nulabinc.backlog.r2b.core.MessageResources
 import com.nulabinc.backlog.r2b.exporter.core.ExportContext
 import com.osinka.i18n.Messages
 import com.taskadapter.redmineapi.bean.Attachment
-import better.files.{File => Path}
-import com.nulabinc.backlog.r2b.core.MessageResources
 
 private[exporter] case class ReducedChangeLogWithMessage(optChangeLog: Option[BacklogChangeLog], message: String)
 
@@ -112,25 +110,18 @@ private[exporter] class ChangeLogReducer(exportContext: ExportContext,
           val optAttachment = attachments.find(attachment => FileUtil.normalize(attachment.getFileName) == attachmentInfo.name)
           optAttachment match {
             case Some(attachment) =>
+              val dir  = exportContext.backlogPaths.issueAttachmentDirectoryPath(issueDirPath)
+              val path = exportContext.backlogPaths.issueAttachmentPath(dir, attachmentInfo.name)
+              IOUtil.createDirectory(dir)
+
               val url: URL = new URL(s"${attachment.getContentURL}?key=${exportContext.apiConfig.key}")
-              download(attachmentInfo.name, url.openStream())
+
+              AttachmentService.download(url, path.path.toFile)
               Some(changeLog)
             case _ => None
           }
         case _ => Some(changeLog)
       }
-    }
-
-    private[this] def download(name: String, content: InputStream) = {
-      val dir  = exportContext.backlogPaths.issueAttachmentDirectoryPath(issueDirPath)
-      val path = exportContext.backlogPaths.issueAttachmentPath(dir, name)
-      IOUtil.createDirectory(dir)
-      val rbc = Channels.newChannel(content)
-      val fos = new FileOutputStream(path.path.toFile)
-      fos.getChannel.transferFrom(rbc, 0, java.lang.Long.MAX_VALUE)
-
-      rbc.close()
-      fos.close()
     }
   }
 

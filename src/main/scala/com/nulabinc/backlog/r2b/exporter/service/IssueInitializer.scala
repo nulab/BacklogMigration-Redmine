@@ -1,9 +1,8 @@
 package com.nulabinc.backlog.r2b.exporter.service
 
-import java.io.FileOutputStream
 import java.net.URL
-import java.nio.channels.Channels
 
+import better.files.{File => Path}
 import com.nulabinc.backlog.migration.common.convert.Convert
 import com.nulabinc.backlog.migration.common.domain._
 import com.nulabinc.backlog.migration.common.utils.{DateUtil, IOUtil, Logging, StringUtil}
@@ -12,8 +11,6 @@ import com.nulabinc.backlog.r2b.redmine.conf.RedmineConstantValue
 import com.nulabinc.backlog.r2b.redmine.domain.RedmineCustomFieldDefinition
 import com.nulabinc.backlog.r2b.utils.TextileUtil
 import com.taskadapter.redmineapi.bean._
-
-import better.files.{File => Path}
 
 import scala.jdk.CollectionConverters._
 
@@ -219,23 +216,12 @@ private[exporter] class IssueInitializer(exportContext: ExportContext, issueDirP
   }
 
   private[this] def attachment(attachment: Attachment): Unit = {
-
     val dir  = exportContext.backlogPaths.issueAttachmentDirectoryPath(issueDirPath)
     val path = exportContext.backlogPaths.issueAttachmentPath(dir, attachment.getFileName)
     IOUtil.createDirectory(dir)
 
     val url: URL = new URL(s"${attachment.getContentURL}?key=${exportContext.apiConfig.key}")
 
-    try {
-      val rbc = Channels.newChannel(url.openStream())
-      val fos = new FileOutputStream(path.path.toFile)
-      fos.getChannel.transferFrom(rbc, 0, java.lang.Long.MAX_VALUE)
-
-      rbc.close()
-      fos.close()
-    } catch {
-      case e: Throwable => logger.warn("Download issue attachment failed: " + e.getMessage)
-    }
+    AttachmentService.download(url, path.path.toFile)
   }
-
 }

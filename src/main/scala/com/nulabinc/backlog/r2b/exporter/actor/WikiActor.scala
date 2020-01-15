@@ -1,20 +1,19 @@
 package com.nulabinc.backlog.r2b.exporter.actor
 
-import java.io.FileOutputStream
 import java.net.URL
-import java.nio.channels.Channels
 import java.util.concurrent.CountDownLatch
 
 import akka.actor.Actor
 import com.nulabinc.backlog.migration.common.convert.Convert
 import com.nulabinc.backlog.migration.common.utils.{IOUtil, Logging}
 import com.nulabinc.backlog.r2b.exporter.core.ExportContext
+import com.nulabinc.backlog.r2b.exporter.service.AttachmentService
 import com.taskadapter.redmineapi.bean.WikiPage
 import spray.json._
 
-import scala.jdk.CollectionConverters._
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration._
+import scala.jdk.CollectionConverters._
 
 /**
   * @author uchida
@@ -22,18 +21,19 @@ import scala.concurrent.duration._
 private[exporter] class WikiActor(exportContext: ExportContext) extends Actor with Logging {
 
   import com.nulabinc.backlog.migration.common.formatters.BacklogJsonProtocol._
+  import WikiActor.ConsoleF
 
   implicit val wikiWrites = exportContext.wikiWrites
 
-  override def preRestart(reason: Throwable, message: Option[Any]) = {
-    logger.debug(s"preRestart: reason: ${reason}, message: ${message}")
+  override def preRestart(reason: Throwable, message: Option[Any]) : Unit = {
+    logger.debug(s"preRestart: reason: $reason, message: $message")
     for { value <- message } yield {
       context.system.scheduler.scheduleOnce(10.seconds, self, value)
     }
   }
 
   def receive: Receive = {
-    case WikiActor.Do(wiki: WikiPage, completion: CountDownLatch, allCount: Int, console: ((Int, Int) => Unit)) =>
+    case WikiActor.Do(wiki: WikiPage, completion: CountDownLatch, allCount: Int, console: ConsoleF) =>
       exportContext.wikiService.optWikiDetail(wiki.getTitle).foreach { wikiDetail =>
 
         val backlogWiki = Convert.toBacklog(wikiDetail)
@@ -48,16 +48,7 @@ private[exporter] class WikiActor(exportContext: ExportContext) extends Actor wi
 
           val url: URL = new URL(s"${attachment.getContentURL}?key=${exportContext.apiConfig.key}")
 
-          try {
-            val rbc = Channels.newChannel(url.openStream())
-            val fos = new FileOutputStream(path.path.toFile)
-            fos.getChannel.transferFrom(rbc, 0, java.lang.Long.MAX_VALUE)
-
-            rbc.close()
-            fos.close()
-          } catch {
-            case e: Throwable => logger.warn("Download wiki attachment failed: " + e.getMessage)
-          }
+          AttachmentService.download(url, path.path.toFile)
         }
       }
 
@@ -69,6 +60,8 @@ private[exporter] class WikiActor(exportContext: ExportContext) extends Actor wi
 
 private[exporter] object WikiActor {
 
-  case class Do(wiki: WikiPage, completion: CountDownLatch, allCount: Int, console: ((Int, Int) => Unit))
+  type ConsoleF = (Int, Int) => Unit
+
+  case class Do(wiki: WikiPage, completion: CountDownLatch, allCount: Int, console: ConsoleF)
 
 }
