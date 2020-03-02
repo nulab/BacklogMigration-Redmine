@@ -3,8 +3,10 @@ name: Default
 on: [push]
 
 jobs:
+
   build:
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout
         uses: actions/checkout@v2
@@ -15,6 +17,6 @@ jobs:
           version: 1.8
 
       - name: sbt build
-        uses: shomatan/sbt-actions
+        uses: shomatan/sbt-actions@master
         with:
           args: build
