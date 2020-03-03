@@ -1,10 +1,10 @@
-package com.nulabinc.backlog.r2b.core
+package integration.core
 
 import java.util.Date
 
 import com.nulabinc.backlog.migration.common.utils.FileUtil
 import com.nulabinc.backlog.r2b.conf.AppConfiguration
-import com.nulabinc.backlog.r2b.helper.SimpleFixture
+import integration.helper.SimpleFixture
 import com.nulabinc.backlog4j.api.option.{GetIssuesParams, QueryParams}
 import com.nulabinc.backlog4j.{IssueComment, Issue => BacklogIssue}
 import com.osinka.i18n.Messages

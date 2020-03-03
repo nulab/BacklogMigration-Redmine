@@ -1,4 +1,4 @@
-package com.nulabinc.backlog.r2b.core
+package integration.core
 
 /**
   * @author uchida
