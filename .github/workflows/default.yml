@@ -65,9 +65,6 @@ jobs:
           mkdir -p target/dist
           mv target/scala-2.13/*.jar target/dist
 
-      - name: test
-        run: ls -la target/dist
-
       - name: Upload jar file
         uses: actions/upload-artifact@v1
         with:
