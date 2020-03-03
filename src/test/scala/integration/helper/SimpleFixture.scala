@@ -1,4 +1,4 @@
-package com.nulabinc.backlog.r2b.helper
+package integration.helper
 
 import java.io.FileInputStream
 import java.text.SimpleDateFormat

@@ -4,19 +4,104 @@ on: [push]
 
 jobs:
 
-  build:
+  all:
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout
         uses: actions/checkout@v2
 
+      - name: Checkout submodules
+        shell: bash
+        run: |
+          git config --global url."https://github.com/".insteadOf "git@github.com:"
+          auth_header="$(git config --local --get http.https://github.com/.extraheader)"
+          git submodule sync --recursive
+          git -c "http.extraheader=$auth_header" -c protocol.version=2 submodule update --init --force --recursive --depth=1
+
       - name: Set up JDK 1.8
         uses: actions/setup-java@v1
         with:
           version: 1.8
 
-      - name: sbt build
-        uses: shomatan/sbt-actions@master
+      - name: Set up sbt
+        uses: shomatan/setup-sbt-action@master
         with:
-          args: build
+          version: 1.3.8
+
+      - name: Cache ivy
+        uses: actions/cache@v1
+        with:
+          path: ~/.ivy2/cache
+          key: ${{ runner.os }}-sbt-ivy-cache-${{ github.run_id }}
+          restore-keys: |
+            ${{ runner.os }}-sbt-ivy-cache-
+
+      - name: Cache coursier
+        uses: actions/cache@v1
+        with:
+          path: ~/.cache/coursier
+          key: ${{ runner.os }}-sbt-coursier-cache-${{ github.run_id }}
+          restore-keys: |
+            ${{ runner.os }}-sbt-coursier-cache-
+
+      - name: Cache sbt
+        uses: actions/cache@v1
+        with:
+          path: ~/.sbt
+          key: ${{ runner.os }}-sbt-cache-${{ github.run_id }}
+          restore-keys: |
+            ${{ runner.os }}-sbt-cache-
+
+      - name: Compile
+        run: sbt compile
+
+      - name: Test
+        run: 'sbt "testOnly com.nulabinc.*"'
+
+      - name: Assembly
+        run: |
+          sbt assembly
+          mkdir -p target/dist
+          mv target/scala-2.13/*.jar target/dist
+
+      - name: test
+        run: ls -la target/dist
+
+      - name: Upload jar file
+        uses: actions/upload-artifact@v1
+        with:
+          name: backlog-migration-redmine
+          path: target/dist
+
+  notify:
+    runs-on: ubuntu-latest
+    needs: all
+
+    steps:
+      - name: Notify to Typetalk if success
+        if: success()
+        uses: shomatan/typetalk-action@master
+        env:
+          TYPETALK_TOKEN: ${{ secrets.TYPETALK_TOKEN }}
+        with:
+          topic-id: 54145
+          message: "Redmine importer job success :smile:"
+
+      - name: Notify to Typetalk if fail
+        if: failure()
+        uses: shomatan/typetalk-action@master
+        env:
+          TYPETALK_TOKEN: ${{ secrets.TYPETALK_TOKEN }}
+        with:
+          topic-id: 54145
+          message: "Redmine importer job failed"
+
+      - name: Notify to Typetalk if cancelled
+        if: cancelled()
+        uses: shomatan/typetalk-action@master
+        env:
+          TYPETALK_TOKEN: ${{ secrets.TYPETALK_TOKEN }}
+        with:
+          topic-id: 54145
+          message: "Redmine importer job cancelled"
