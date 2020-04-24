@@ -173,7 +173,19 @@ When import has been completed, the directory will be created and data file that
       --backlog.url [URL of Backlog] \
       --projects [Redmine project identifier]: [Backlog project key] \
       --exclude [issue or wiki]
-        
+     
+#### Control retry count
+[**--retryCount**] Setting this property allows you to specify the number of retries when a network error occurs.
+
+    java -jar backlog-migration-redmine-[latest version].jar \
+      execute \
+      --redmine.key [Redmine API key] \
+      --redmine.url [Redmine of URL] \
+      --backlog.key [Backlog of API key] \
+      --backlog.url [URL of Backlog] \
+      --projects [Redmine project identifier]: [Backlog project key] \
+      --retryCount [Number of retries]
+   
 ## Limitation
 
 ### Supported Redmine versions
@@ -455,6 +467,19 @@ descriptionにある項目を使い、空白を埋める必要が有ります。
       --backlog.url [BacklogのURL] \
       --projectKey [Redmineプロジェクト識別子]:[Backlogプロジェクトキー] \
       --exclude [issue または wiki]
+
+#### 再試行する回数の指定
+
+[**--retryCount**]オプションを利用すると、ネットワークエラー等が発生したときに再試行する回数を指定できます。
+
+    java -jar backlog-migration-redmine-[最新バージョン].jar \
+      execute \
+      --redmine.key [RedmineのAPIキー] \
+      --redmine.url [RedmineのURL] \
+      --backlog.key [BacklogのAPIキー] \
+      --backlog.url [BacklogのURL] \
+      --projectKey [Redmineプロジェクト識別子]:[Backlogプロジェクトキー] \
+      --retryCount [再試行する回数]
       
 ## 制限事項
 
