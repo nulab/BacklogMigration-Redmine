@@ -9,6 +9,7 @@ target/
 app.properties
 
 ## vscode plugin (metals)
-.bloop
-.metals
-project/metals.sbt
+.metals/
+.bloop/
+.ammonite/
+metals.sbt
