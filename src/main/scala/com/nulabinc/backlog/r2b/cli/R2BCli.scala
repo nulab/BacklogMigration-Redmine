@@ -8,7 +8,7 @@ import com.nulabinc.backlog.migration.common.modules.{ServiceInjector => Backlog
 import com.nulabinc.backlog.migration.common.service.ProjectService
 import com.nulabinc.backlog.migration.common.utils.ControlUtil.using
 import com.nulabinc.backlog.migration.common.utils.{ConsoleOut, Logging}
-import com.nulabinc.backlog.migration.importer.core.{ImportConfig, Boot => BootImporter}
+import com.nulabinc.backlog.migration.importer.core.{Boot => BootImporter}
 import com.nulabinc.backlog.r2b.conf.{AppConfiguration, DestroyConfiguration}
 import com.nulabinc.backlog.r2b.dsl.BacklogDSL
 import com.nulabinc.backlog.r2b.exporter.core.{Boot => BootExporter}
@@ -53,15 +53,17 @@ object R2BCli extends BacklogConfiguration with Logging {
   }
 
   def migrate(config: AppConfiguration): Unit = {
-    val importConfig = ImportConfig(fitIssueKey = false, retryCount = config.retryCount, excludeOption = config.exclude)
+    val retryCount = config.retryCount
 
     if (validateParam(config)) {
-      if (config.importOnly) BootImporter.execute(config.backlogConfig, importConfig)
+      if (config.importOnly) BootImporter.execute(config.backlogConfig, fitIssueKey = false, retryCount = retryCount)
       else {
         val mappingFileContainer = createMapping(config)
-        if (validateMapping(mappingFileContainer.user) &&
-            validateMapping(mappingFileContainer.status) &&
-            validateMapping(mappingFileContainer.priority)) {
+        if (
+          validateMapping(mappingFileContainer.user) &&
+          validateMapping(mappingFileContainer.status) &&
+          validateMapping(mappingFileContainer.priority)
+        ) {
           if (confirmImport(config, mappingFileContainer)) {
 
             val backlogInjector = BacklogInjector.createInjector(config.backlogConfig)
@@ -71,18 +73,22 @@ object R2BCli extends BacklogConfiguration with Logging {
               backlogPaths.outputPath.listRecursively.foreach(_.delete(false))
             }
 
-            val mappingContainer = MappingContainer(user = mappingFileContainer.user.tryUnmarshal(),
-                                                    status = mappingFileContainer.status.tryUnmarshal(),
-                                                    priority = mappingFileContainer.priority.tryUnmarshal())
+            val mappingContainer = MappingContainer(
+              user = mappingFileContainer.user.tryUnmarshal(),
+              status = mappingFileContainer.status.tryUnmarshal(),
+              priority = mappingFileContainer.priority.tryUnmarshal()
+            )
 
             val backlogTextFormattingRule = fetchBacklogTextFormattingRule(config.backlogConfig)
 
-            BootExporter.execute(config.redmineConfig,
-                                 mappingContainer,
-                                 BacklogProjectKey(config.backlogConfig.projectKey),
-                                 backlogTextFormattingRule,
-                                 config.exclude)
-            BootImporter.execute(config.backlogConfig, importConfig)
+            BootExporter.execute(
+              config.redmineConfig,
+              mappingContainer,
+              BacklogProjectKey(config.backlogConfig.projectKey),
+              backlogTextFormattingRule,
+              config.exclude
+            )
+            BootImporter.execute(config.backlogConfig, fitIssueKey = false, retryCount = retryCount)
             finalize(config.backlogConfig)
           }
         }
@@ -92,7 +98,7 @@ object R2BCli extends BacklogConfiguration with Logging {
 
   def doImport(config: AppConfiguration): Unit = {
     if (validateParam(config)) {
-      BootImporter.execute(config.backlogConfig, ImportConfig(fitIssueKey = false, retryCount = config.retryCount, excludeOption = config.exclude))
+      BootImporter.execute(config.backlogConfig, fitIssueKey = false, retryCount = config.retryCount)
       finalize(config.backlogConfig)
     }
   }
@@ -164,36 +170,40 @@ object R2BCli extends BacklogConfiguration with Logging {
       _ <- for {
         projectKey <- console(ConsoleDSL.read(Messages("destroy.confirm")))
         isValid = projectKey == config.backlogConfig.projectKey
-        _ <- if (isValid) {
-          AppDSL.pure(())
-        } else {
-          exit(Messages("destroy.confirm.fail"), 1)
-        }
+        _ <-
+          if (isValid) {
+            AppDSL.pure(())
+          } else {
+            exit(Messages("destroy.confirm.fail"), 1)
+          }
       } yield isValid
       // start
-      _ <- if (config.dryRun) {
-        console(ConsoleDSL.print(Messages("destroy.start.dryRun")))
-      } else {
-        console(ConsoleDSL.print(Messages("destroy.start")))
-      }
-      stream <- streamIssue(projectResult.getOrElse(throw new RuntimeException("cannot get project result")).getId, CHUNK_ISSUE_COUNT, config.dryRun) {
-        (issues, _, _) =>
-          val r = issues.map { issue =>
-            for {
-              _ <- pure(logger.debug("Issue Id: " + issue.getId))
-              result <- if (config.dryRun) {
-                backlog(BacklogDSL.pure(Right(issue)))
-              } else {
-                backlog(BacklogDSL.deleteIssue(issue))
-              }
-              _ <- result match {
-                case Right(_)    => console(ConsoleDSL.print(Messages("destroy.issue.deleted", issue.getIssueKey, issue.getSummary)))
-                case Left(error) => console(ConsoleDSL.print(s"ERROR: ${issue.getIssueKey} ${issue.getSummary} ${error.toString}"))
-              }
-            } yield ()
-          }
-          sequence(r)
-      }
+      _ <-
+        if (config.dryRun) {
+          console(ConsoleDSL.print(Messages("destroy.start.dryRun")))
+        } else {
+          console(ConsoleDSL.print(Messages("destroy.start")))
+        }
+      stream <-
+        streamIssue(projectResult.getOrElse(throw new RuntimeException("cannot get project result")).getId, CHUNK_ISSUE_COUNT, config.dryRun) {
+          (issues, _, _) =>
+            val r = issues.map { issue =>
+              for {
+                _ <- pure(logger.debug("Issue Id: " + issue.getId))
+                result <-
+                  if (config.dryRun) {
+                    backlog(BacklogDSL.pure(Right(issue)))
+                  } else {
+                    backlog(BacklogDSL.deleteIssue(issue))
+                  }
+                _ <- result match {
+                  case Right(_)    => console(ConsoleDSL.print(Messages("destroy.issue.deleted", issue.getIssueKey, issue.getSummary)))
+                  case Left(error) => console(ConsoleDSL.print(s"ERROR: ${issue.getIssueKey} ${issue.getSummary} ${error.toString}"))
+                }
+              } yield ()
+            }
+            sequence(r)
+        }
     } yield stream
 
     val f = interpreter.run(program).runToFuture
@@ -291,13 +301,13 @@ object R2BCli extends BacklogConfiguration with Logging {
                               |${mappingString(mappingFileContainer.user)}
                               |--------------------------------------------------
                               |""".stripMargin)
-        if (mappingFileContainer.priority.nonEmpty) {
+        if (mappingFileContainer.priority.nonEmpty()) {
           ConsoleOut.println(s"""${Messages("cli.mapping.show", mappingFileContainer.priority.itemName)}
                                 |--------------------------------------------------
                                 |${mappingString(mappingFileContainer.priority)}
                                 |--------------------------------------------------""".stripMargin)
         }
-        if (mappingFileContainer.status.nonEmpty) {
+        if (mappingFileContainer.status.nonEmpty()) {
           ConsoleOut.println(s"""${Messages("cli.mapping.show", mappingFileContainer.status.itemName)}
                                 |--------------------------------------------------
                                 |${mappingString(mappingFileContainer.status)}
@@ -324,7 +334,8 @@ object R2BCli extends BacklogConfiguration with Logging {
       case Some(mappings) =>
         mappings
           .map(mapping =>
-            s"- ${mappingFile.display(mapping.redmine, mappingFile.redmines)} => ${mappingFile.display(mapping.backlog, mappingFile.backlogs)}")
+            s"- ${mappingFile.display(mapping.redmine, mappingFile.redmines)} => ${mappingFile.display(mapping.backlog, mappingFile.backlogs)}"
+          )
           .mkString("\n")
       case _ => throw new RuntimeException
     }

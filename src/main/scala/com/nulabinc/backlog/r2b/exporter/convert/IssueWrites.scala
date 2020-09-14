@@ -13,13 +13,14 @@ import scala.jdk.CollectionConverters._
 /**
   * @author uchida
   */
-private[exporter] class IssueWrites @Inject()(implicit val attachmentWrites: AttachmentWrites,
-                                              implicit val userWrites: UserWrites,
-                                              implicit val customFieldWrites: CustomFieldWrites,
-                                              mappingPriorityService: MappingPriorityService,
-                                              mappingStatusService: MappingStatusService,
-                                              backlogTextFormattingRule: BacklogTextFormattingRule)
-    extends Writes[Issue, BacklogIssue] {
+private[exporter] class IssueWrites @Inject() (
+    implicit val attachmentWrites: AttachmentWrites,
+    implicit val userWrites: UserWrites,
+    implicit val customFieldWrites: CustomFieldWrites,
+    mappingPriorityService: MappingPriorityService,
+    mappingStatusService: MappingStatusService,
+    backlogTextFormattingRule: BacklogTextFormattingRule
+) extends Writes[Issue, BacklogIssue] {
 
   override def writes(issue: Issue): BacklogIssue = {
     BacklogIssue(

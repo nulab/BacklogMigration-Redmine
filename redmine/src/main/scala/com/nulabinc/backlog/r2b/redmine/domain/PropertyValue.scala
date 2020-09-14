@@ -6,14 +6,16 @@ import com.taskadapter.redmineapi.bean._
 /**
   * @author uchida
   */
-case class PropertyValue(users: Seq[User],
-                         versions: Seq[Version],
-                         categories: Seq[IssueCategory],
-                         priorities: Seq[IssuePriority],
-                         trackers: Seq[Tracker],
-                         memberships: Seq[Membership],
-                         statuses: Seq[IssueStatus],
-                         customFieldDefinitions: Seq[RedmineCustomFieldDefinition]) {
+case class PropertyValue(
+    users: Seq[User],
+    versions: Seq[Version],
+    categories: Seq[IssueCategory],
+    priorities: Seq[IssuePriority],
+    trackers: Seq[Tracker],
+    memberships: Seq[Membership],
+    statuses: Seq[IssueStatus],
+    customFieldDefinitions: Seq[RedmineCustomFieldDefinition]
+) {
 
   def versionOfId(optValue: Option[String]): Option[Version] =
     optValue match {
