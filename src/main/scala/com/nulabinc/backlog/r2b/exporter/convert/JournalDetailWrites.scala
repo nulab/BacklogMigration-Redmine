@@ -99,13 +99,10 @@ private[exporter] class JournalDetailWrites @Inject()(propertyValue: PropertyVal
 
   private[this] def field(detail: JournalDetail): String = detail.getProperty match {
     case RedmineConstantValue.CUSTOM_FIELD =>
-      propertyValue
-        .customFieldDefinitionOfId(detail.getName)
-        .map(_.name)
-        .getOrElse {
-          val message = propertyValue.customFieldDefinitions.map(c => s"${c.id}: ${c.name}").mkString("\n")
-          throw new RuntimeException(s"custom field id not found. Custom field name: ${detail.getName}\nAvailable custom fields are:\n$message")
-        }
+      propertyValue.customFieldDefinitionOfId(detail.getName).map(_.name).getOrElse {
+        val message = propertyValue.customFieldDefinitions.map(c => s"${c.id}: ${c.name}").mkString("\n")
+        throw new RuntimeException(s"custom field id not found. Custom field name: ${detail.getName}\nAvailable custom fields are:\n$message")
+      }
     case RedmineConstantValue.ATTACHMENT =>
       BacklogConstantValue.ChangeLog.ATTACHMENT
     case _ =>

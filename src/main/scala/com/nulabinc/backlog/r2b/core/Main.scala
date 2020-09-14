@@ -112,9 +112,9 @@ object R2B extends BacklogConfiguration with Logging {
   }
 
   private[this] def getConfiguration(cli: CommandLineInterface) = {
-    val keys        = cli.execute.projectKey().split(":")
-    val redmine     = keys(0)
-    val backlog     = if (keys.length == 2) keys(1) else keys(0).toUpperCase.replaceAll("-", "_")
+    val keys    = cli.execute.projectKey().split(":")
+    val redmine = keys(0)
+    val backlog = if (keys.length == 2) keys(1) else keys(0).toUpperCase.replaceAll("-", "_")
 
     val retryCount = cli.execute.retryCount.toOption.getOrElse(20)
     val exclude = cli.execute.exclude.toOption.map { args =>
@@ -162,8 +162,8 @@ object R2B extends BacklogConfiguration with Logging {
     import java.io._
     import java.net._
 
-    val url = new URL("https://api.github.com/repos/nulab/BacklogMigration-Redmine/releases")
-    val http = url.openConnection().asInstanceOf[HttpURLConnection]
+    val url          = new URL("https://api.github.com/repos/nulab/BacklogMigration-Redmine/releases")
+    val http         = url.openConnection().asInstanceOf[HttpURLConnection]
     val optProxyUser = Option(System.getProperty("https.proxyUser"))
     val optProxyPass = Option(System.getProperty("https.proxyPassword"))
 
@@ -183,7 +183,7 @@ object R2B extends BacklogConfiguration with Logging {
 
       val reader = new BufferedReader(new InputStreamReader(http.getInputStream))
       val output = new StringBuilder()
-      var line = ""
+      var line   = ""
 
       while (line != null) {
         line = reader.readLine()
@@ -199,8 +199,7 @@ object R2B extends BacklogConfiguration with Logging {
       }
 
       if (latest != versionName) {
-        ConsoleOut.warning(
-          s"""
+        ConsoleOut.warning(s"""
              |--------------------------------------------------
              |${Messages("cli.warn.not.latest", latest, versionName)}
              |--------------------------------------------------

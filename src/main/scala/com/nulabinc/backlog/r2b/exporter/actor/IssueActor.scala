@@ -26,9 +26,8 @@ private[exporter] class IssueActor(exportContext: ExportContext, backlogTextForm
   import com.nulabinc.backlog.migration.common.formatters.BacklogJsonProtocol._
   import IssueActor.ConsoleF
 
-  private implicit val issueWrites: IssueWrites = exportContext.issueWrites
+  private implicit val issueWrites: IssueWrites     = exportContext.issueWrites
   private implicit val journalWrites: JournalWrites = exportContext.journalWrites
-
 
   override def preRestart(reason: Throwable, message: Option[Any]): Unit = {
     logger.debug(s"preRestart: reason: $reason, message: $message")
@@ -38,7 +37,7 @@ private[exporter] class IssueActor(exportContext: ExportContext, backlogTextForm
   }
 
   def receive: Receive = {
-    case IssueActor.Do(issueId: Int, completion: CountDownLatch, allCount: Int, console: ConsoleF)=>
+    case IssueActor.Do(issueId: Int, completion: CountDownLatch, allCount: Int, console: ConsoleF) =>
       logger.debug(s"[START ISSUE]$issueId thread numbers:${java.lang.Thread.activeCount()}")
 
       val issue                        = exportContext.issueService.issueOfId(issueId, Include.attachments, Include.journals)
@@ -74,7 +73,7 @@ private[exporter] class IssueActor(exportContext: ExportContext, backlogTextForm
                                   issue: BacklogIssue,
                                   comments: Seq[BacklogComment],
                                   attachments: Seq[Attachment],
-                                  index: Int) : File = {
+                                  index: Int): File = {
     val commentCreated   = DateUtil.tryIsoParse(comment.optCreated)
     val issueDirPath     = exportContext.backlogPaths.issueDirectoryPath("comment", issue.id, commentCreated, index)
     val changeLogReducer = new ChangeLogReducer(exportContext, issueDirPath, issue, comments, attachments)

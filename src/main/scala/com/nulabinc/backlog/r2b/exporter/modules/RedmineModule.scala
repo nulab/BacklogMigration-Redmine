@@ -15,7 +15,8 @@ private[exporter] class RedmineModule(apiConfig: RedmineApiConfiguration,
                                       mappingContainer: MappingContainer,
                                       backlogProjectKey: BacklogProjectKey,
                                       backlogTextFormattingRule: BacklogTextFormattingRule,
-                                      exportConfig: ExportConfig) extends RedmineDefaultModule(apiConfig) {
+                                      exportConfig: ExportConfig)
+    extends RedmineDefaultModule(apiConfig) {
 
   override def configure() = {
     super.configure()

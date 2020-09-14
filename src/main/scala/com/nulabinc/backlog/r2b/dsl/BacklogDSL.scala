@@ -8,8 +8,8 @@ case class ResponseError(ex: Throwable) extends BacklogError
 
 object BacklogDSL {
 
-  type BacklogProgram[A] = Free[BacklogADT, A]
-  type IssueStreamF[A] = (Seq[Issue], Int, Int) => BacklogProgram[A]
+  type BacklogProgram[A]  = Free[BacklogADT, A]
+  type IssueStreamF[A]    = (Seq[Issue], Int, Int) => BacklogProgram[A]
   type BacklogResponse[A] = Either[BacklogError, A]
 
   def pure[A](a: A): BacklogProgram[A] =
@@ -25,4 +25,3 @@ object BacklogDSL {
     Free.liftF(DeleteIssue(issue))
 
 }
-

@@ -21,13 +21,14 @@ private[exporter] object ReducedChangeLogWithMessage {
 }
 
 /**
- * @author uchida
+  * @author uchida
   */
 private[exporter] class ChangeLogReducer(exportContext: ExportContext,
                                          issueDirPath: Path,
                                          issue: BacklogIssue,
                                          comments: Seq[BacklogComment],
-                                         attachments: Seq[Attachment]) extends Logging {
+                                         attachments: Seq[Attachment])
+    extends Logging {
 
   def reduce(targetComment: BacklogComment, changeLog: BacklogChangeLog): ReducedChangeLogWithMessage =
     changeLog.field match {
@@ -40,14 +41,15 @@ private[exporter] class ChangeLogReducer(exportContext: ExportContext,
         val message = MessageResources.changeCommentRelation(getValue(changeLog.optOriginalValue), getValue(changeLog.optNewValue))
         ReducedChangeLogWithMessage.createMessageOnly(s"$message\n")
       case "is_private" =>
-        val message = MessageResources.changeCommentPrivate(getValue(privateValue(changeLog.optOriginalValue)), getValue(privateValue(changeLog.optNewValue)))
+        val message =
+          MessageResources.changeCommentPrivate(getValue(privateValue(changeLog.optOriginalValue)), getValue(privateValue(changeLog.optNewValue)))
         ReducedChangeLogWithMessage.createMessageOnly(s"$message\n")
       case "project_id" =>
         val message = MessageResources.changeCommentProject(getProjectName(changeLog.optOriginalValue), getProjectName(changeLog.optNewValue))
         ReducedChangeLogWithMessage.createMessageOnly(s"$message\n")
       case BacklogConstantValue.ChangeLog.PARENT_ISSUE =>
         val optOriginal = changeLog.optOriginalValue
-        val optNew = changeLog.optNewValue
+        val optNew      = changeLog.optNewValue
 
         val result = (optOriginal, optNew) match {
           case (Some(originalId), Some(newId)) =>
@@ -70,7 +72,7 @@ private[exporter] class ChangeLogReducer(exportContext: ExportContext,
             logger.warn(s"Non Fatal. Reduce change log failed. Message: ${error.getMessage}")
             val oldValue = optOriginal.map(_ => MessageResources.deleted)
             val newValue = optNew.map(_ => MessageResources.deleted)
-            val message = MessageResources.changeCommentParentIssue(getValue(oldValue), getValue(newValue))
+            val message  = MessageResources.changeCommentParentIssue(getValue(oldValue), getValue(newValue))
             ReducedChangeLogWithMessage(None, s"$message\n")
         }
       case _ =>
@@ -79,9 +81,9 @@ private[exporter] class ChangeLogReducer(exportContext: ExportContext,
 
   private[this] def getParentIssueId(strId: String): Either[Throwable, Int] =
     for {
-      id <- StringUtil.safeStringToInt(strId).map(Right(_)).getOrElse(Left(new RuntimeException(s"cannot parse id. Input: $strId")))
+      id       <- StringUtil.safeStringToInt(strId).map(Right(_)).getOrElse(Left(new RuntimeException(s"cannot parse id. Input: $strId")))
       parentId <- exportContext.issueService.tryIssueOfId(id).map(_.getId)
-      result <- if (parentId > 0) Right(parentId) else Left(new RuntimeException(s"invalid parent id: Input: $parentId"))
+      result   <- if (parentId > 0) Right(parentId) else Left(new RuntimeException(s"invalid parent id: Input: $parentId"))
     } yield result
 
   private[this] def getValue(optValue: Option[String]): String =

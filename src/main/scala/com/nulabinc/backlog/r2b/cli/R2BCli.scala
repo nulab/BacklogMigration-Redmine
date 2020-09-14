@@ -60,8 +60,8 @@ object R2BCli extends BacklogConfiguration with Logging {
       else {
         val mappingFileContainer = createMapping(config)
         if (validateMapping(mappingFileContainer.user) &&
-          validateMapping(mappingFileContainer.status) &&
-          validateMapping(mappingFileContainer.priority)) {
+            validateMapping(mappingFileContainer.status) &&
+            validateMapping(mappingFileContainer.priority)) {
           if (confirmImport(config, mappingFileContainer)) {
 
             val backlogInjector = BacklogInjector.createInjector(config.backlogConfig)
@@ -72,13 +72,16 @@ object R2BCli extends BacklogConfiguration with Logging {
             }
 
             val mappingContainer = MappingContainer(user = mappingFileContainer.user.tryUnmarshal(),
-              status = mappingFileContainer.status.tryUnmarshal(),
-              priority = mappingFileContainer.priority.tryUnmarshal())
-
+                                                    status = mappingFileContainer.status.tryUnmarshal(),
+                                                    priority = mappingFileContainer.priority.tryUnmarshal())
 
             val backlogTextFormattingRule = fetchBacklogTextFormattingRule(config.backlogConfig)
 
-            BootExporter.execute(config.redmineConfig, mappingContainer, BacklogProjectKey(config.backlogConfig.projectKey), backlogTextFormattingRule, config.exclude)
+            BootExporter.execute(config.redmineConfig,
+                                 mappingContainer,
+                                 BacklogProjectKey(config.backlogConfig.projectKey),
+                                 backlogTextFormattingRule,
+                                 config.exclude)
             BootImporter.execute(config.backlogConfig, importConfig)
             finalize(config.backlogConfig)
           }
@@ -153,8 +156,8 @@ object R2BCli extends BacklogConfiguration with Logging {
       projectResult <- for {
         accessCheck <- backlog(BacklogDSL.getProject(config.backlogConfig.projectKey))
         _ <- accessCheck match {
-            case Right(_) => console(ConsoleDSL.print(Messages("cli.param.ok.access", Messages("common.backlog"))))
-            case Left(error) => exit(error.toString, 1)
+          case Right(_)    => console(ConsoleDSL.print(Messages("cli.param.ok.access", Messages("common.backlog"))))
+          case Left(error) => exit(error.toString, 1)
         }
       } yield accessCheck
       // confirm
@@ -173,22 +176,23 @@ object R2BCli extends BacklogConfiguration with Logging {
       } else {
         console(ConsoleDSL.print(Messages("destroy.start")))
       }
-      stream <- streamIssue(projectResult.getOrElse(throw new RuntimeException("cannot get project result")).getId, CHUNK_ISSUE_COUNT, config.dryRun) { (issues, _, _) =>
-        val r = issues.map { issue =>
-          for {
-            _ <- pure(logger.debug("Issue Id: " + issue.getId))
-            result <- if (config.dryRun) {
-              backlog(BacklogDSL.pure(Right(issue)))
-            } else {
-              backlog(BacklogDSL.deleteIssue(issue))
-            }
-            _ <- result match {
-              case Right(_) => console(ConsoleDSL.print(Messages("destroy.issue.deleted", issue.getIssueKey, issue.getSummary)))
-              case Left(error) => console(ConsoleDSL.print(s"ERROR: ${issue.getIssueKey} ${issue.getSummary} ${error.toString}"))
-            }
-          } yield ()
-        }
-        sequence(r)
+      stream <- streamIssue(projectResult.getOrElse(throw new RuntimeException("cannot get project result")).getId, CHUNK_ISSUE_COUNT, config.dryRun) {
+        (issues, _, _) =>
+          val r = issues.map { issue =>
+            for {
+              _ <- pure(logger.debug("Issue Id: " + issue.getId))
+              result <- if (config.dryRun) {
+                backlog(BacklogDSL.pure(Right(issue)))
+              } else {
+                backlog(BacklogDSL.deleteIssue(issue))
+              }
+              _ <- result match {
+                case Right(_)    => console(ConsoleDSL.print(Messages("destroy.issue.deleted", issue.getIssueKey, issue.getSummary)))
+                case Left(error) => console(ConsoleDSL.print(s"ERROR: ${issue.getIssueKey} ${issue.getSummary} ${error.toString}"))
+              }
+            } yield ()
+          }
+          sequence(r)
       }
     } yield stream
 
@@ -403,7 +407,7 @@ object R2BCli extends BacklogConfiguration with Logging {
     val optProject     = projectService.optProject(backlogConfig.projectKey)
     optProject match {
       case Some(project) => BacklogTextFormattingRule(project.textFormattingRule)
-      case _ => BacklogTextFormattingRule("markdown")
+      case _             => BacklogTextFormattingRule("markdown")
     }
   }
 

@@ -11,12 +11,11 @@ import monix.eval.Task
 import scala.concurrent.ExecutionContext
 import scala.jdk.CollectionConverters._
 
-class Backlog4jInterpreter(url: String, key: String)
-                          (implicit val exc: ExecutionContext) extends (BacklogADT ~> Task) {
+class Backlog4jInterpreter(url: String, key: String)(implicit val exc: ExecutionContext) extends (BacklogADT ~> Task) {
 
   private val backlogPackageConfigure = new BacklogPackageConfigure(url)
-  private val configure = backlogPackageConfigure.apiKey(key)
-  private val client: BacklogClient = new BacklogClientFactory(configure).newClient()
+  private val configure               = backlogPackageConfigure.apiKey(key)
+  private val client: BacklogClient   = new BacklogClientFactory(configure).newClient()
 
   def run[A](program: BacklogProgram[A]): Task[A] =
     program.foldMap(this)

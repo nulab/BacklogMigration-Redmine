@@ -17,7 +17,11 @@ import scala.jdk.CollectionConverters._
 /**
   * @author uchida
   */
-private[exporter] class IssueInitializer(exportContext: ExportContext, issueDirPath: Path, journals: Seq[Journal], attachments: Seq[Attachment], backlogTextFormattingRule: BacklogTextFormattingRule)
+private[exporter] class IssueInitializer(exportContext: ExportContext,
+                                         issueDirPath: Path,
+                                         journals: Seq[Journal],
+                                         attachments: Seq[Attachment],
+                                         backlogTextFormattingRule: BacklogTextFormattingRule)
     extends Logging {
 
   implicit val issueWrites            = exportContext.issueWrites
@@ -74,7 +78,7 @@ private[exporter] class IssueInitializer(exportContext: ExportContext, issueDirP
         Option(issue.getParentId).flatMap { id =>
           val parent = exportContext.issueService.issueOfId(id)
 
-          if(Option(parent.getParentId).isDefined)
+          if (Option(parent.getParentId).isDefined)
             None
           else
             Some(id.toLong)

@@ -6,7 +6,7 @@ import com.nulabinc.backlog.migration.common.utils.ConsoleOut
 import monix.eval.Task
 
 sealed trait ConsoleADT[A]
-case class Print(str: String) extends ConsoleADT[Unit]
+case class Print(str: String)         extends ConsoleADT[Unit]
 case class Read(printMessage: String) extends ConsoleADT[String]
 
 object ConsoleDSL {
@@ -23,13 +23,15 @@ object ConsoleDSL {
 
 class ConsoleInterpreter extends (ConsoleADT ~> Task) {
 
-  def apply[A](fa: ConsoleADT[A]): Task[A] = fa match  {
-    case Print(str) => Task {
-      ConsoleOut.println(str)
-      ()
-    }
-    case Read(printMessage) => Task {
-      scala.io.StdIn.readLine(printMessage)
-    }
+  def apply[A](fa: ConsoleADT[A]): Task[A] = fa match {
+    case Print(str) =>
+      Task {
+        ConsoleOut.println(str)
+        ()
+      }
+    case Read(printMessage) =>
+      Task {
+        scala.io.StdIn.readLine(printMessage)
+      }
   }
 }

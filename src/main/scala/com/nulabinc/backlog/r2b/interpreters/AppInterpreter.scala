@@ -9,10 +9,10 @@ import com.nulabinc.backlog.r2b.interpreters.backlog.Backlog4jInterpreter
 import monix.eval.Task
 
 sealed trait AppADT[+A]
-case class Pure[A](a: A) extends AppADT[A]
+case class Pure[A](a: A)                      extends AppADT[A]
 case class Backlog[A](prg: BacklogProgram[A]) extends AppADT[A]
 case class Console[A](prg: ConsoleProgram[A]) extends AppADT[A]
-case class Exit(exitCode: Int) extends AppADT[Unit]
+case class Exit(exitCode: Int)                extends AppADT[Unit]
 
 object AppDSL {
 
@@ -36,17 +36,15 @@ object AppDSL {
 
 }
 
-case class AppInterpreter(backlogInterpreter: Backlog4jInterpreter,
-                          consoleInterpreter: ConsoleInterpreter) extends (AppADT ~> Task) {
+case class AppInterpreter(backlogInterpreter: Backlog4jInterpreter, consoleInterpreter: ConsoleInterpreter) extends (AppADT ~> Task) {
 
   def run[A](prg: AppProgram[A]): Task[A] =
     prg.foldMap(this)
 
   override def apply[A](fa: AppADT[A]): Task[A] = fa match {
-    case Pure(a) => Task(a)
-    case Backlog(prg) => backlogInterpreter.run(prg)
-    case Console(prg) => prg.foldMap(consoleInterpreter)
+    case Pure(a)          => Task(a)
+    case Backlog(prg)     => backlogInterpreter.run(prg)
+    case Console(prg)     => prg.foldMap(consoleInterpreter)
     case Exit(statusCode) => sys.exit(statusCode)
   }
 }
-

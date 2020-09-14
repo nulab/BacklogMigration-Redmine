@@ -75,8 +75,7 @@ private[exporter] class ProjectExporter @Inject()(implicit val projectWrites: Pr
 
     //customFields
     val customFieldDefinitions = customFieldService.allCustomFieldDefinitions()
-    IOUtil
-      .output(backlogPaths.customFieldSettingsJson, BacklogCustomFieldSettings(Convert.toBacklog(customFieldDefinitions)).toJson.prettyPrint)
+    IOUtil.output(backlogPaths.customFieldSettingsJson, BacklogCustomFieldSettings(Convert.toBacklog(customFieldDefinitions)).toJson.prettyPrint)
     ConsoleOut.boldln(Messages("message.executed", Messages("common.custom_field"), Messages("message.exported")), 1)
 
     //versions

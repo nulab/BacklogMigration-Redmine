@@ -17,7 +17,10 @@ import scala.concurrent.duration._
 /**
   * @author uchida
   */
-private[exporter] class IssuesActor(exportContext: ExportContext, backlogTextFormattingRule: BacklogTextFormattingRule) extends Actor with BacklogConfiguration with Logging {
+private[exporter] class IssuesActor(exportContext: ExportContext, backlogTextFormattingRule: BacklogTextFormattingRule)
+    extends Actor
+    with BacklogConfiguration
+    with Logging {
 
   private[this] val strategy =
     OneForOneStrategy(maxNrOfRetries = 5, withinTimeRange = 10 seconds) {

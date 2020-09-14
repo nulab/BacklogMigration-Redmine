@@ -111,7 +111,7 @@ private[exporter] class CustomFieldDefinitionsWrites @Inject()(propertyValue: Pr
         if (redmineCustomFieldDefinition.isMultiple) FieldType.MultipleList.getIntValue else FieldType.SingleList.getIntValue
       case RedmineConstantValue.FieldFormat.USER | RedmineConstantValue.FieldFormat.VERSION =>
         if (redmineCustomFieldDefinition.isMultiple) FieldType.MultipleList.getIntValue else FieldType.SingleList.getIntValue
-      case RedmineConstantValue.FieldFormat.BOOL => FieldType.Radio.getIntValue
+      case RedmineConstantValue.FieldFormat.BOOL        => FieldType.Radio.getIntValue
       case RedmineConstantValue.FieldFormat.ENUMERATION => FieldType.SingleList.getIntValue
     }
 
