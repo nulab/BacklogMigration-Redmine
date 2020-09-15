@@ -10,7 +10,7 @@ import com.nulabinc.backlog.migration.common.utils.IOUtil
 import com.nulabinc.backlog.r2b.conf.AppConfiguration
 import com.nulabinc.backlog.r2b.mapping.core._
 import com.nulabinc.backlog.r2b.mapping.domain.{Mapping, MappingsWrapper}
-import com.nulabinc.backlog.r2b.mapping.service.{MappingPriorityServiceImpl, MappingStatusServiceImpl, MappingUserServiceImpl}
+import com.nulabinc.backlog.r2b.mapping.service.{MappingPriorityServiceImpl, MappingUserServiceImpl}
 import com.nulabinc.backlog.r2b.redmine.conf.RedmineApiConfiguration
 import com.nulabinc.backlog4j.conf.{BacklogConfigure, BacklogPackageConfigure}
 import com.nulabinc.backlog4j.{BacklogClient, BacklogClientFactory}
@@ -28,7 +28,7 @@ trait SimpleFixture {
 
   implicit val userLang = if (Locale.getDefault.equals(Locale.JAPAN)) Lang("ja") else Lang("en")
 
-  val dateFormat = new SimpleDateFormat("yyyy-MM-dd")
+  val dateFormat      = new SimpleDateFormat("yyyy-MM-dd")
   val timestampFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ")
 
   val optAppConfiguration    = getAppConfiguration
@@ -111,7 +111,8 @@ trait SimpleFixture {
   def redmineIssueCount(appConfiguration: AppConfiguration) = {
     val string = scala.io.Source
       .fromURL(
-        s"${appConfiguration.redmineConfig.url}/issues.json?limit=1&subproject_id=!*&project_id=${redmineProject.getId}&key=${appConfiguration.redmineConfig.key}&status_id=*")
+        s"${appConfiguration.redmineConfig.url}/issues.json?limit=1&subproject_id=!*&project_id=${redmineProject.getId}&key=${appConfiguration.redmineConfig.key}&status_id=*"
+      )
       .mkString
     JsonParser(string).asJsObject.getFields("total_count") match {
       case Seq(JsNumber(totalCount)) => totalCount.intValue
@@ -120,11 +121,13 @@ trait SimpleFixture {
   }
 
   def allRedmineIssues(count: Int, offset: Long) = {
-    val params = Map("offset" -> offset.toString,
-                     "limit"         -> count.toString,
-                     "project_id"    -> redmineProject.getId.toString,
-                     "status_id"     -> "*",
-                     "subproject_id" -> "!*")
+    val params = Map(
+      "offset"        -> offset.toString,
+      "limit"         -> count.toString,
+      "project_id"    -> redmineProject.getId.toString,
+      "status_id"     -> "*",
+      "subproject_id" -> "!*"
+    )
     redmine.getIssueManager.getIssues(params.asJava).asScala
   }
 

@@ -8,7 +8,6 @@ import com.nulabinc.backlog.r2b.mapping.core.MappingDirectory
 import com.nulabinc.backlog.r2b.redmine.conf.RedmineApiConfiguration
 import com.nulabinc.backlog.r2b.redmine.modules.{ServiceInjector => RedmineInjector}
 import com.nulabinc.backlog.r2b.redmine.service.{StatusService => RedmineStatusService}
-import com.nulabinc.backlog4j.Status
 import com.osinka.i18n.{Lang, Messages}
 import com.taskadapter.redmineapi.bean.IssueStatus
 
@@ -46,14 +45,12 @@ class StatusMappingFile(redmineApiConfig: RedmineApiConfiguration, backlogApiCon
   }
 
   private[this] def getBacklogItems(): Seq[MappingItem] = {
-    def createItem(status: Status): MappingItem = {
-      MappingItem(status.getName, status.getName)
-    }
-
     val injector        = BacklogInjector.createInjector(backlogApiConfig)
     val statusService   = injector.getInstance(classOf[BacklogStatusService])
     val backlogStatuses = statusService.allStatuses()
-    backlogStatuses.map(createItem)
+    backlogStatuses.map { backlogStatus =>
+      MappingItem(backlogStatus.name.trimmed, backlogStatus.name.trimmed)
+    }
   }
 
   private[this] object Backlog {
