@@ -96,16 +96,6 @@ object R2B extends BacklogConfiguration with Logging {
         else R2BCli.migrate(getConfiguration(cli))
       case Some(cli.init) =>
         R2BCli.init(getConfiguration(cli))
-      case Some(cli.destroy) =>
-        val config = DestroyConfiguration(
-          backlogConfig = BacklogApiConfiguration(
-            projectKey = cli.destroy.projectKey().split(":").last.toUpperCase.replaceAll("-", "_"),
-            url = cli.destroy.backlogUrl(),
-            key = cli.destroy.backlogKey()
-          ),
-          dryRun = cli.destroy.dryRun.getOrElse(false)
-        )
-        R2BCli.destroy(config)
       case _ =>
         R2BCli.help()
     }

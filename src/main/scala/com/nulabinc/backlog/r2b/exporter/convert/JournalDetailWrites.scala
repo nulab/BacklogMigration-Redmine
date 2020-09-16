@@ -5,8 +5,9 @@ import com.nulabinc.backlog.migration.common.conf.BacklogConstantValue
 import com.nulabinc.backlog.migration.common.convert.{Convert, Writes}
 import com.nulabinc.backlog.migration.common.domain.{BacklogAttachment, BacklogAttributeInfo, BacklogChangeLog, BacklogTextFormattingRule}
 import com.nulabinc.backlog.migration.common.utils.{DateUtil, FileUtil, Logging, StringUtil}
+import com.nulabinc.backlog.r2b.mapping.converters.MappingStatusConverter
 import com.nulabinc.backlog.r2b.mapping.core.MappingContainer
-import com.nulabinc.backlog.r2b.mapping.service.{MappingPriorityService, MappingStatusService, MappingUserService}
+import com.nulabinc.backlog.r2b.mapping.service.{MappingPriorityService, MappingUserService}
 import com.nulabinc.backlog.r2b.redmine.conf.RedmineConstantValue
 import com.nulabinc.backlog.r2b.redmine.domain.PropertyValue
 import com.nulabinc.backlog.r2b.utils.TextileUtil
@@ -85,7 +86,7 @@ private[exporter] class JournalDetailWrites @Inject() (
         propertyValue.statuses
           .find(status => StringUtil.safeEquals(status.getId.intValue(), value))
           .map(_.getName)
-          .map(statusName => MappingStatusService.convert(mappingContainer.status, statusName))
+          .map(statusName => MappingStatusConverter.convert(mappingContainer.statuses, statusName))
           .map(_.name.trimmed)
       case RedmineConstantValue.Attr.PRIORITY =>
         propertyValue.priorities

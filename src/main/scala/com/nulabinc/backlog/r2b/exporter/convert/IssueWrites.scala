@@ -4,8 +4,9 @@ import javax.inject.Inject
 import com.nulabinc.backlog.migration.common.convert.{Convert, Writes}
 import com.nulabinc.backlog.migration.common.domain._
 import com.nulabinc.backlog.migration.common.utils.DateUtil
+import com.nulabinc.backlog.r2b.mapping.converters.MappingStatusConverter
 import com.nulabinc.backlog.r2b.mapping.core.MappingContainer
-import com.nulabinc.backlog.r2b.mapping.service.{MappingPriorityService, MappingStatusService}
+import com.nulabinc.backlog.r2b.mapping.service.MappingPriorityService
 import com.nulabinc.backlog.r2b.utils.TextileUtil
 import com.taskadapter.redmineapi.bean.Issue
 
@@ -36,7 +37,7 @@ private[exporter] class IssueWrites @Inject() (
       optEstimatedHours = Option(issue.getEstimatedHours).map(_.floatValue()),
       optActualHours = Option(issue.getSpentHours).map(_.floatValue()),
       optIssueTypeName = Option(issue.getTracker).map(_.getName),
-      status = MappingStatusService.convert(mappingContainer.status, issue.getStatusName),
+      status = MappingStatusConverter.convert(mappingContainer.statuses, issue.getStatusName),
       categoryNames = Option(issue.getCategory).map(_.getName).toSeq,
       versionNames = Seq.empty[String],
       milestoneNames = Option(issue.getTargetVersion).map(_.getName).toSeq,

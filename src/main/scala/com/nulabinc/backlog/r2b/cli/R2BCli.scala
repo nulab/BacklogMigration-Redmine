@@ -1,30 +1,31 @@
 package com.nulabinc.backlog.r2b.cli
 
+import java.io.File
 import java.net.{HttpURLConnection, URL}
 
 import com.nulabinc.backlog.migration.common.conf.{BacklogApiConfiguration, BacklogConfiguration, BacklogPaths}
 import com.nulabinc.backlog.migration.common.domain.{BacklogProjectKey, BacklogTextFormattingRule}
+import com.nulabinc.backlog.migration.common.dsl.{ConsoleDSL, StorageDSL}
+import com.nulabinc.backlog.migration.common.interpreters.{JansiConsoleDSL, LocalStorageDSL}
 import com.nulabinc.backlog.migration.common.modules.{ServiceInjector => BacklogInjector}
-import com.nulabinc.backlog.migration.common.service.ProjectService
+import com.nulabinc.backlog.migration.common.service.{ProjectService, StatusService => BacklogStatusService}
+import com.nulabinc.backlog.migration.common.services.StatusMappingFileService
 import com.nulabinc.backlog.migration.common.utils.ControlUtil.using
 import com.nulabinc.backlog.migration.common.utils.{ConsoleOut, Logging}
 import com.nulabinc.backlog.migration.importer.core.{Boot => BootImporter}
-import com.nulabinc.backlog.r2b.conf.{AppConfiguration, DestroyConfiguration}
-import com.nulabinc.backlog.r2b.dsl.BacklogDSL
+import com.nulabinc.backlog.r2b.conf.AppConfiguration
+import com.nulabinc.backlog.r2b.domain.mappings.RedmineStatusMappingItem
 import com.nulabinc.backlog.r2b.exporter.core.{Boot => BootExporter}
 import com.nulabinc.backlog.r2b.interpreters.AppDSL.AppProgram
-import com.nulabinc.backlog.r2b.interpreters._
-import com.nulabinc.backlog.r2b.interpreters.backlog.Backlog4jInterpreter
 import com.nulabinc.backlog.r2b.mapping.collector.core.{Boot => BootMapping}
-import com.nulabinc.backlog.r2b.mapping.core.MappingContainer
+import com.nulabinc.backlog.r2b.mapping.core.{MappingContainer, MappingDirectory}
 import com.nulabinc.backlog.r2b.mapping.domain.Mapping
 import com.nulabinc.backlog.r2b.mapping.file._
-import com.nulabinc.backlog4j.Issue
 import com.osinka.i18n.Messages
+import monix.eval.Task
 import monix.execution.Scheduler
 
-import scala.concurrent.duration.Duration
-import scala.concurrent.{Await, ExecutionContext, Future}
+import scala.concurrent.{ExecutionContext, Future}
 
 object FutureUtils {
   case class Suspend[A](eval: () => Future[A])
@@ -35,13 +36,17 @@ object FutureUtils {
         acc.flatMap(res => future.eval().map(res2 => res :+ res2))
     }
   }
-
 }
 
 /**
   * @author uchida
   */
 object R2BCli extends BacklogConfiguration with Logging {
+  import com.nulabinc.backlog.r2b.deserializers.RedmineMappingDeserializer._
+
+  private implicit val exc: Scheduler               = monix.execution.Scheduler.Implicits.global
+  private implicit val storageDSL: StorageDSL[Task] = LocalStorageDSL()
+  private implicit val consoleDSL: ConsoleDSL[Task] = JansiConsoleDSL()
 
   def init(config: AppConfiguration): Unit = {
     if (validateParam(config)) {
@@ -68,28 +73,42 @@ object R2BCli extends BacklogConfiguration with Logging {
 
             val backlogInjector = BacklogInjector.createInjector(config.backlogConfig)
             val backlogPaths    = backlogInjector.getInstance(classOf[BacklogPaths])
+            val backlogStatusService =
+              backlogInjector.getInstance(classOf[BacklogStatusService])
 
             if (backlogPaths.outputPath.exists) {
               backlogPaths.outputPath.listRecursively.foreach(_.delete(false))
             }
 
-            val mappingContainer = MappingContainer(
-              user = mappingFileContainer.user.tryUnmarshal(),
-              status = mappingFileContainer.status.tryUnmarshal(),
-              priority = mappingFileContainer.priority.tryUnmarshal()
-            )
+            for {
 
-            val backlogTextFormattingRule = fetchBacklogTextFormattingRule(config.backlogConfig)
+              statusMappings <-
+                StatusMappingFileService
+                  .execute[RedmineStatusMappingItem, Task](
+                    path = new File(
+                      MappingDirectory.STATUS_MAPPING_FILE
+                    ).getAbsoluteFile.toPath,
+                    dstItems = backlogStatusService.allStatuses()
+                  )
+                  .runSyncUnsafe()
+            } yield {
+              val mappingContainer = MappingContainer(
+                user = mappingFileContainer.user.tryUnmarshal(),
+                statuses = statusMappings,
+                priority = mappingFileContainer.priority.tryUnmarshal()
+              )
+              val backlogTextFormattingRule = fetchBacklogTextFormattingRule(config.backlogConfig)
 
-            BootExporter.execute(
-              config.redmineConfig,
-              mappingContainer,
-              BacklogProjectKey(config.backlogConfig.projectKey),
-              backlogTextFormattingRule,
-              config.exclude
-            )
-            BootImporter.execute(config.backlogConfig, fitIssueKey = false, retryCount = retryCount)
-            finalize(config.backlogConfig)
+              BootExporter.execute(
+                config.redmineConfig,
+                mappingContainer,
+                BacklogProjectKey(config.backlogConfig.projectKey),
+                backlogTextFormattingRule,
+                config.exclude
+              )
+              BootImporter.execute(config.backlogConfig, fitIssueKey = false, retryCount = retryCount)
+              finalize(config.backlogConfig)
+            }
           }
         }
       }
@@ -113,107 +132,6 @@ object R2BCli extends BacklogConfiguration with Logging {
             results :+ result
           }
         }
-    }
-  }
-
-  def destroy(config: DestroyConfiguration): Unit = {
-
-    import com.nulabinc.backlog.r2b.interpreters.AppDSL._
-
-    implicit val exc: Scheduler = monix.execution.Scheduler.Implicits.global
-
-    val CHUNK_ISSUE_COUNT = 10
-
-    val interpreter = AppInterpreter(
-      new Backlog4jInterpreter(
-        config.backlogConfig.url,
-        config.backlogConfig.key
-      ),
-      new ConsoleInterpreter
-    )
-
-    type IssueStreamF[A] = (Seq[Issue], Int, Int) => AppProgram[A]
-
-    def streamIssue[A](projectId: Long, limit: Int, druRun: Boolean)(f: IssueStreamF[A]): AppProgram[A] = {
-      def go(current: Int): AppProgram[A] = {
-        backlog(BacklogDSL.getProjectIssues(projectId, current, limit)).flatMap {
-          case Right(issues) =>
-            if (issues.isEmpty)
-              f(issues, current, limit)
-            else {
-              val nextCurrent = if (druRun) current + limit else 0
-              f(issues, current, limit).flatMap(_ => go(nextCurrent))
-            }
-          case Left(error) =>
-            throw new RuntimeException(error.toString)
-        }
-      }
-      go(0)
-    }
-
-    val program = for {
-      _ <- console(ConsoleDSL.print(s"""--------------------------------------------------
-                                       |${Messages("common.backlog")} ${Messages("common.url")}[${config.backlogConfig.url}]
-                                       |${Messages("common.backlog")} ${Messages("common.access_key")}[${config.backlogConfig.key}]
-                                       |${Messages("common.backlog")} ${Messages("common.project_key")}[${config.backlogConfig.projectKey}]
-                                       |Dry run mode [${config.dryRun}]
-                                       |--------------------------------------------------""".stripMargin))
-      // access check
-      projectResult <- for {
-        accessCheck <- backlog(BacklogDSL.getProject(config.backlogConfig.projectKey))
-        _ <- accessCheck match {
-          case Right(_)    => console(ConsoleDSL.print(Messages("cli.param.ok.access", Messages("common.backlog"))))
-          case Left(error) => exit(error.toString, 1)
-        }
-      } yield accessCheck
-      // confirm
-      _ <- for {
-        projectKey <- console(ConsoleDSL.read(Messages("destroy.confirm")))
-        isValid = projectKey == config.backlogConfig.projectKey
-        _ <-
-          if (isValid) {
-            AppDSL.pure(())
-          } else {
-            exit(Messages("destroy.confirm.fail"), 1)
-          }
-      } yield isValid
-      // start
-      _ <-
-        if (config.dryRun) {
-          console(ConsoleDSL.print(Messages("destroy.start.dryRun")))
-        } else {
-          console(ConsoleDSL.print(Messages("destroy.start")))
-        }
-      stream <-
-        streamIssue(projectResult.getOrElse(throw new RuntimeException("cannot get project result")).getId, CHUNK_ISSUE_COUNT, config.dryRun) {
-          (issues, _, _) =>
-            val r = issues.map { issue =>
-              for {
-                _ <- pure(logger.debug("Issue Id: " + issue.getId))
-                result <-
-                  if (config.dryRun) {
-                    backlog(BacklogDSL.pure(Right(issue)))
-                  } else {
-                    backlog(BacklogDSL.deleteIssue(issue))
-                  }
-                _ <- result match {
-                  case Right(_)    => console(ConsoleDSL.print(Messages("destroy.issue.deleted", issue.getIssueKey, issue.getSummary)))
-                  case Left(error) => console(ConsoleDSL.print(s"ERROR: ${issue.getIssueKey} ${issue.getSummary} ${error.toString}"))
-                }
-              } yield ()
-            }
-            sequence(r)
-        }
-    } yield stream
-
-    val f = interpreter.run(program).runToFuture
-
-    Await.result(f, Duration.Inf)
-
-    if (config.dryRun) {
-      ConsoleOut.println(Messages("destroy.finish.dryRun"))
-    } else {
-      ConsoleOut.println(Messages("destroy.finish"))
     }
   }
 
