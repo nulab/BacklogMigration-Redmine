@@ -16,7 +16,6 @@ import com.nulabinc.backlog.migration.importer.core.{Boot => BootImporter}
 import com.nulabinc.backlog.r2b.conf.AppConfiguration
 import com.nulabinc.backlog.r2b.domain.mappings.RedmineStatusMappingItem
 import com.nulabinc.backlog.r2b.exporter.core.{Boot => BootExporter}
-import com.nulabinc.backlog.r2b.interpreters.AppDSL.AppProgram
 import com.nulabinc.backlog.r2b.mapping.collector.core.{Boot => BootMapping}
 import com.nulabinc.backlog.r2b.mapping.core.{MappingContainer, MappingDirectory}
 import com.nulabinc.backlog.r2b.mapping.domain.Mapping
@@ -24,19 +23,6 @@ import com.nulabinc.backlog.r2b.mapping.file._
 import com.osinka.i18n.Messages
 import monix.eval.Task
 import monix.execution.Scheduler
-
-import scala.concurrent.{ExecutionContext, Future}
-
-object FutureUtils {
-  case class Suspend[A](eval: () => Future[A])
-
-  def sequential[A](prgs: Seq[Suspend[A]])(implicit exc: ExecutionContext): Future[Seq[A]] = {
-    prgs.foldLeft(Future.successful(Seq.empty[A])) {
-      case (acc, future) =>
-        acc.flatMap(res => future.eval().map(res2 => res :+ res2))
-    }
-  }
-}
 
 /**
   * @author uchida
@@ -81,7 +67,6 @@ object R2BCli extends BacklogConfiguration with Logging {
             }
 
             for {
-
               statusMappings <-
                 StatusMappingFileService
                   .execute[RedmineStatusMappingItem, Task](
@@ -119,19 +104,6 @@ object R2BCli extends BacklogConfiguration with Logging {
     if (validateParam(config)) {
       BootImporter.execute(config.backlogConfig, fitIssueKey = false, retryCount = config.retryCount)
       finalize(config.backlogConfig)
-    }
-  }
-
-  def sequence[A](prgs: Seq[AppProgram[A]]): AppProgram[Seq[A]] = {
-    import com.nulabinc.backlog.r2b.interpreters.AppDSL._
-
-    prgs.foldLeft(pure(Seq.empty[A])) {
-      case (newPrg, prg) =>
-        newPrg.flatMap { results =>
-          prg.map { result =>
-            results :+ result
-          }
-        }
     }
   }
 
