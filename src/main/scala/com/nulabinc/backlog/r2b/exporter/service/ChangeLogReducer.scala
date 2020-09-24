@@ -23,12 +23,13 @@ private[exporter] object ReducedChangeLogWithMessage {
 /**
   * @author uchida
   */
-private[exporter] class ChangeLogReducer(exportContext: ExportContext,
-                                         issueDirPath: Path,
-                                         issue: BacklogIssue,
-                                         comments: Seq[BacklogComment],
-                                         attachments: Seq[Attachment])
-    extends Logging {
+private[exporter] class ChangeLogReducer(
+    exportContext: ExportContext,
+    issueDirPath: Path,
+    issue: BacklogIssue,
+    comments: Seq[BacklogComment],
+    attachments: Seq[Attachment]
+) extends Logging {
 
   def reduce(targetComment: BacklogComment, changeLog: BacklogChangeLog): ReducedChangeLogWithMessage =
     changeLog.field match {

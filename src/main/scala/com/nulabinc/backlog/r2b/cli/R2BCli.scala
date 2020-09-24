@@ -63,10 +63,11 @@ object R2BCli extends BacklogConfiguration with Logging {
       if (config.importOnly) BootImporter.execute(config.backlogConfig, fitIssueKey = false, retryCount = retryCount)
       else {
         val mappingFileContainer = createMapping(config)
-        if (validateMapping(mappingFileContainer.user) &&
+        if (
+          validateMapping(mappingFileContainer.user) &&
 //          validateMapping(mappingFileContainer.status) && // TODO: fix
 //          validateMapping(mappingFileContainer.priority)
-            ) {
+        ) {
           if (confirmImport(config, mappingFileContainer)) {
 
             val backlogInjector = BacklogInjector.createInjector(config.backlogConfig)
@@ -79,12 +80,13 @@ object R2BCli extends BacklogConfiguration with Logging {
             }
 
             for {
-              statusMappings <- StatusMappingFileService
-                .execute[RedmineStatusMappingItem, Task](
-                  path = MappingDirectory.default.statusMappingFilePath,
-                  dstItems = backlogStatusService.allStatuses()
-                )
-                .runSyncUnsafe()
+              statusMappings <-
+                StatusMappingFileService
+                  .execute[RedmineStatusMappingItem, Task](
+                    path = MappingDirectory.default.statusMappingFilePath,
+                    dstItems = backlogStatusService.allStatuses()
+                  )
+                  .runSyncUnsafe()
             } yield {
               val mappingContainer = MappingContainer(
                 user = mappingFileContainer.user.tryUnmarshal(),
@@ -233,7 +235,8 @@ object R2BCli extends BacklogConfiguration with Logging {
       case Some(mappings) =>
         mappings
           .map(mapping =>
-            s"- ${mappingFile.display(mapping.redmine, mappingFile.redmines)} => ${mappingFile.display(mapping.backlog, mappingFile.backlogs)}")
+            s"- ${mappingFile.display(mapping.redmine, mappingFile.redmines)} => ${mappingFile.display(mapping.backlog, mappingFile.backlogs)}"
+          )
           .mkString("\n")
       case _ => throw new RuntimeException
     }

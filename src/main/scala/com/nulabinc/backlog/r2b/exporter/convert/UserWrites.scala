@@ -14,7 +14,7 @@ import com.taskadapter.redmineapi.bean.User
 /**
   * @author uchida
   */
-private[exporter] class UserWrites @Inject()(propertyValue: PropertyValue, mappingUserService: MappingUserService)
+private[exporter] class UserWrites @Inject() (propertyValue: PropertyValue, mappingUserService: MappingUserService)
     extends Writes[User, BacklogUser]
     with Logging {
 
@@ -30,12 +30,14 @@ private[exporter] class UserWrites @Inject()(propertyValue: PropertyValue, mappi
   }
 
   private[this] def toBacklog(user: User): BacklogUser = {
-    BacklogUser(optId = Option(user.getId.intValue()),
-                optUserId = Option(user.getLogin).map(mappingUserService.convert),
-                optPassword = Option(user.getPassword),
-                name = user.getFullName,
-                optMailAddress = Option(user.getMail),
-                roleType = BacklogConstantValue.USER_ROLE)
+    BacklogUser(
+      optId = Option(user.getId.intValue()),
+      optUserId = Option(user.getLogin).map(mappingUserService.convert),
+      optPassword = Option(user.getPassword),
+      name = user.getFullName,
+      optMailAddress = Option(user.getMail),
+      roleType = BacklogConstantValue.USER_ROLE
+    )
   }
 
   private[this] def toBacklog(name: String): BacklogUser = {

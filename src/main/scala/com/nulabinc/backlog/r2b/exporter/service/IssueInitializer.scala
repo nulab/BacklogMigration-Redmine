@@ -17,12 +17,13 @@ import scala.jdk.CollectionConverters._
 /**
   * @author uchida
   */
-private[exporter] class IssueInitializer(exportContext: ExportContext,
-                                         issueDirPath: Path,
-                                         journals: Seq[Journal],
-                                         attachments: Seq[Attachment],
-                                         backlogTextFormattingRule: BacklogTextFormattingRule)
-    extends Logging {
+private[exporter] class IssueInitializer(
+    exportContext: ExportContext,
+    issueDirPath: Path,
+    journals: Seq[Journal],
+    attachments: Seq[Attachment],
+    backlogTextFormattingRule: BacklogTextFormattingRule
+) extends Logging {
 
   implicit val issueWrites            = exportContext.issueWrites
   implicit val attachmentWrites       = exportContext.attachmentWrites

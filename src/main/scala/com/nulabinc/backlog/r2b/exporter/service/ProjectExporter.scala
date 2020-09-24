@@ -23,26 +23,27 @@ import scala.concurrent.duration.Duration
 /**
   * @author uchida
   */
-private[exporter] class ProjectExporter @Inject()(implicit val projectWrites: ProjectWrites,
-                                                  implicit val customFieldDefinitionsWrites: CustomFieldDefinitionsWrites,
-                                                  implicit val versionsWrites: VersionsWrites,
-                                                  implicit val issueTypesWrites: IssueTypesWrites,
-                                                  implicit val issueCategoriesWrites: IssueCategoriesWrites,
-                                                  implicit val newsWrites: NewsWrites,
-                                                  implicit val mappingUserWrites: MappingUserWrites,
-                                                  membershipWrites: MembershipWrites,
-                                                  groupsWrites: GroupsWrites,
-                                                  backlogPaths: BacklogPaths,
-                                                  project: Project,
-                                                  customFieldService: CustomFieldService,
-                                                  trackerService: TrackerService,
-                                                  membershipService: MembershipService,
-                                                  issueCategoryService: IssueCategoryService,
-                                                  versionService: VersionService,
-                                                  newsService: NewsService,
-                                                  exportContextProvider: ExportContextProvider,
-                                                  backlogTextFormattingRule: BacklogTextFormattingRule)
-    extends Logging {
+private[exporter] class ProjectExporter @Inject() (
+    implicit val projectWrites: ProjectWrites,
+    implicit val customFieldDefinitionsWrites: CustomFieldDefinitionsWrites,
+    implicit val versionsWrites: VersionsWrites,
+    implicit val issueTypesWrites: IssueTypesWrites,
+    implicit val issueCategoriesWrites: IssueCategoriesWrites,
+    implicit val newsWrites: NewsWrites,
+    implicit val mappingUserWrites: MappingUserWrites,
+    membershipWrites: MembershipWrites,
+    groupsWrites: GroupsWrites,
+    backlogPaths: BacklogPaths,
+    project: Project,
+    customFieldService: CustomFieldService,
+    trackerService: TrackerService,
+    membershipService: MembershipService,
+    issueCategoryService: IssueCategoryService,
+    versionService: VersionService,
+    newsService: NewsService,
+    exportContextProvider: ExportContextProvider,
+    backlogTextFormattingRule: BacklogTextFormattingRule
+) extends Logging {
   import com.nulabinc.backlog.migration.common.formatters.BacklogJsonProtocol._
 
   def boot(mappingContainer: MappingContainer): Unit = {

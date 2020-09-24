@@ -10,17 +10,19 @@ import com.taskadapter.redmineapi.bean.Tracker
 /**
   * @author uchida
   */
-private[exporter] class IssueTypesWrites @Inject()() extends Writes[Seq[Tracker], Seq[BacklogIssueType]] {
+private[exporter] class IssueTypesWrites @Inject() () extends Writes[Seq[Tracker], Seq[BacklogIssueType]] {
 
   override def writes(trackers: Seq[Tracker]): Seq[BacklogIssueType] = {
     trackers.map(toBacklog)
   }
 
   private[this] def toBacklog(tracker: Tracker) = {
-    BacklogIssueType(optId = Some(tracker.getId.intValue()),
-                     name = tracker.getName,
-                     color = BacklogConstantValue.ISSUE_TYPE_COLOR.getStrValue,
-                     delete = false)
+    BacklogIssueType(
+      optId = Some(tracker.getId.intValue()),
+      name = tracker.getName,
+      color = BacklogConstantValue.ISSUE_TYPE_COLOR.getStrValue,
+      delete = false
+    )
   }
 
 }

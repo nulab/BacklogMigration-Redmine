@@ -16,5 +16,5 @@ object RedmineMappingDeserializer {
           src.value
         override val optDst: Option[BacklogStatusMappingItem] =
           Option(record.get(1)).map(s => BacklogStatusMappingItem(s))
-    }
+      }
 }

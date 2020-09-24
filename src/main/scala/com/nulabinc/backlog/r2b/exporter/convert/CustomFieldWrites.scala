@@ -15,7 +15,7 @@ import scala.jdk.CollectionConverters._
 /**
   * @author uchida
   */
-private[exporter] class CustomFieldWrites @Inject()(propertyValue: PropertyValue, customFieldValueWrites: CustomFieldValueWrites)
+private[exporter] class CustomFieldWrites @Inject() (propertyValue: PropertyValue, customFieldValueWrites: CustomFieldValueWrites)
     extends Writes[CustomField, Option[BacklogCustomField]]
     with Logging {
 

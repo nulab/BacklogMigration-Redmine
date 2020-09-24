@@ -15,7 +15,7 @@ import scala.jdk.CollectionConverters._
 /**
   * @author uchida
   */
-private[exporter] class IssueWrites @Inject()(
+private[exporter] class IssueWrites @Inject() (
     implicit val attachmentWrites: AttachmentWrites,
     implicit val userWrites: UserWrites,
     implicit val customFieldWrites: CustomFieldWrites,

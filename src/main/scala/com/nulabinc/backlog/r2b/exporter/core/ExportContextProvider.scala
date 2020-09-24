@@ -10,44 +10,48 @@ import com.nulabinc.backlog.r2b.redmine.conf.RedmineApiConfiguration
 import com.nulabinc.backlog.r2b.redmine.domain.{PropertyValue, RedmineProjectId}
 import com.nulabinc.backlog.r2b.redmine.service.{IssueService, ProjectService, WikiService}
 
-class ExportContextProvider @Inject()(apiConfig: RedmineApiConfiguration,
-                                      backlogProjectKey: BacklogProjectKey,
-                                      exportConfig: ExportConfig,
-                                      projectId: RedmineProjectId,
-                                      propertyValue: PropertyValue,
-                                      backlogPaths: BacklogPaths,
-                                      issueService: IssueService,
-                                      projectService: ProjectService,
-                                      mappingUserService: MappingUserService,
-                                      mappingPriorityService: MappingPriorityService,
-                                      wikiService: WikiService,
-                                      issueWrites: IssueWrites,
-                                      journalWrites: JournalWrites,
-                                      userWrites: UserWrites,
-                                      customFieldWrites: CustomFieldWrites,
-                                      customFieldValueWrites: CustomFieldValueWrites,
-                                      attachmentWrites: AttachmentWrites,
-                                      wikiWrites: WikiWrites) {
+class ExportContextProvider @Inject() (
+    apiConfig: RedmineApiConfiguration,
+    backlogProjectKey: BacklogProjectKey,
+    exportConfig: ExportConfig,
+    projectId: RedmineProjectId,
+    propertyValue: PropertyValue,
+    backlogPaths: BacklogPaths,
+    issueService: IssueService,
+    projectService: ProjectService,
+    mappingUserService: MappingUserService,
+    mappingPriorityService: MappingPriorityService,
+    wikiService: WikiService,
+    issueWrites: IssueWrites,
+    journalWrites: JournalWrites,
+    userWrites: UserWrites,
+    customFieldWrites: CustomFieldWrites,
+    customFieldValueWrites: CustomFieldValueWrites,
+    attachmentWrites: AttachmentWrites,
+    wikiWrites: WikiWrites
+) {
 
   def get(): ExportContext = {
-    ExportContext(apiConfig,
-                  backlogProjectKey,
-                  exportConfig,
-                  projectId,
-                  backlogPaths,
-                  propertyValue,
-                  mappingUserService,
-                  mappingPriorityService,
-                  projectService,
-                  issueService,
-                  wikiService,
-                  issueWrites,
-                  journalWrites,
-                  userWrites,
-                  customFieldWrites,
-                  customFieldValueWrites,
-                  attachmentWrites,
-                  wikiWrites)
+    ExportContext(
+      apiConfig,
+      backlogProjectKey,
+      exportConfig,
+      projectId,
+      backlogPaths,
+      propertyValue,
+      mappingUserService,
+      mappingPriorityService,
+      projectService,
+      issueService,
+      wikiService,
+      issueWrites,
+      journalWrites,
+      userWrites,
+      customFieldWrites,
+      customFieldValueWrites,
+      attachmentWrites,
+      wikiWrites
+    )
   }
 
 }

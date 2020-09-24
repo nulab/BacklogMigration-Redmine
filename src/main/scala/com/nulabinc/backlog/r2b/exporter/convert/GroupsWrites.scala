@@ -12,7 +12,7 @@ import scala.jdk.CollectionConverters._
 /**
   * @author uchida
   */
-private[exporter] class GroupsWrites @Inject()(implicit val userWrites: UserWrites, propertyValue: PropertyValue)
+private[exporter] class GroupsWrites @Inject() (implicit val userWrites: UserWrites, propertyValue: PropertyValue)
     extends Writes[Seq[Membership], Seq[BacklogGroup]] {
 
   override def writes(memberships: Seq[Membership]): Seq[BacklogGroup] = {

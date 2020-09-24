@@ -9,21 +9,23 @@ import com.nulabinc.backlog.r2b.redmine.conf.RedmineApiConfiguration
 import com.nulabinc.backlog.r2b.redmine.domain.{PropertyValue, RedmineProjectId}
 import com.nulabinc.backlog.r2b.redmine.service.{IssueService, ProjectService, WikiService}
 
-case class ExportContext(apiConfig: RedmineApiConfiguration,
-                         backlogProjectKey: BacklogProjectKey,
-                         exportConfig: ExportConfig,
-                         projectId: RedmineProjectId,
-                         backlogPaths: BacklogPaths,
-                         propertyValue: PropertyValue,
-                         mappingUserService: MappingUserService,
-                         mappingPriorityService: MappingPriorityService,
-                         projectService: ProjectService,
-                         issueService: IssueService,
-                         wikiService: WikiService,
-                         issueWrites: IssueWrites,
-                         journalWrites: JournalWrites,
-                         userWrites: UserWrites,
-                         customFieldWrites: CustomFieldWrites,
-                         customFieldValueWrites: CustomFieldValueWrites,
-                         attachmentWrites: AttachmentWrites,
-                         wikiWrites: WikiWrites)
+case class ExportContext(
+    apiConfig: RedmineApiConfiguration,
+    backlogProjectKey: BacklogProjectKey,
+    exportConfig: ExportConfig,
+    projectId: RedmineProjectId,
+    backlogPaths: BacklogPaths,
+    propertyValue: PropertyValue,
+    mappingUserService: MappingUserService,
+    mappingPriorityService: MappingPriorityService,
+    projectService: ProjectService,
+    issueService: IssueService,
+    wikiService: WikiService,
+    issueWrites: IssueWrites,
+    journalWrites: JournalWrites,
+    userWrites: UserWrites,
+    customFieldWrites: CustomFieldWrites,
+    customFieldValueWrites: CustomFieldValueWrites,
+    attachmentWrites: AttachmentWrites,
+    wikiWrites: WikiWrites
+)

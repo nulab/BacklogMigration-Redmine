@@ -18,11 +18,13 @@ import com.osinka.i18n.Messages
   */
 object Boot extends Logging {
 
-  def execute(apiConfig: RedmineApiConfiguration,
-              mappingContainer: MappingContainer,
-              backlogProjectKey: BacklogProjectKey,
-              backlogTextFormattingRule: BacklogTextFormattingRule,
-              exclude: ExcludeOption): PrintStream = {
+  def execute(
+      apiConfig: RedmineApiConfiguration,
+      mappingContainer: MappingContainer,
+      backlogProjectKey: BacklogProjectKey,
+      backlogTextFormattingRule: BacklogTextFormattingRule,
+      exclude: ExcludeOption
+  ): PrintStream = {
     try {
       val injector =
         Guice.createInjector(new RedmineModule(apiConfig, mappingContainer, backlogProjectKey, backlogTextFormattingRule, ExportConfig(exclude)))

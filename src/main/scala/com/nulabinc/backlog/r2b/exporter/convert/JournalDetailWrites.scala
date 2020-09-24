@@ -17,7 +17,7 @@ import com.taskadapter.redmineapi.bean.JournalDetail
 /**
   * @author uchida
   */
-private[exporter] class JournalDetailWrites @Inject()(
+private[exporter] class JournalDetailWrites @Inject() (
     propertyValue: PropertyValue,
     customFieldValueWrites: CustomFieldValueWrites,
     mappingPriorityService: MappingPriorityService,
