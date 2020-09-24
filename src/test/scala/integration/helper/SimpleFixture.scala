@@ -72,9 +72,7 @@ trait SimpleFixture {
   def convertStatus(target: String): String =
     StatusMappingFileService
       .getMappings[RedmineStatusMappingItem, Task](
-        path = new File(
-          MappingDirectory.STATUS_MAPPING_FILE
-        ).getAbsoluteFile.toPath
+        path = MappingDirectory.STATUS_MAPPING_FILE
       )
       .runSyncUnsafe()
       .getOrElse(throw new RuntimeException("cannot convert status. target: " + target))

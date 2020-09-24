@@ -1,6 +1,5 @@
 package com.nulabinc.backlog.r2b.cli
 
-import java.io.File
 import java.net.{HttpURLConnection, URL}
 
 import com.nulabinc.backlog.migration.common.conf.{BacklogApiConfiguration, BacklogConfiguration, BacklogPaths}
@@ -29,17 +28,31 @@ import monix.execution.Scheduler
   */
 object R2BCli extends BacklogConfiguration with Logging {
   import com.nulabinc.backlog.r2b.deserializers.RedmineMappingDeserializer._
+  import com.nulabinc.backlog.r2b.formatters.RedmineFormatter._
+  import com.nulabinc.backlog.r2b.mapping.RedmineMappingHeader._
+  import com.nulabinc.backlog.r2b.serializers.RedmineMappingSerializer._
 
   private implicit val exc: Scheduler               = monix.execution.Scheduler.Implicits.global
   private implicit val storageDSL: StorageDSL[Task] = LocalStorageDSL()
   private implicit val consoleDSL: ConsoleDSL[Task] = JansiConsoleDSL()
 
   def init(config: AppConfiguration): Unit = {
+    val injector             = BacklogInjector.createInjector(config.backlogConfig)
+    val backlogStatusService = injector.getInstance(classOf[BacklogStatusService])
+
     if (validateParam(config)) {
       val mappingFileContainer = createMapping(config)
       output(mappingFileContainer.user)
-      output(mappingFileContainer.status)
       output(mappingFileContainer.priority)
+
+      StatusMappingFileService
+        .init[RedmineStatusMappingItem, Task](
+          mappingFilePath = MappingDirectory.STATUS_MAPPING_FILE,
+          mappingListPath = MappingDirectory.STATUS_MAPPING_LIST_FILE,
+          srcItems = mappingFileContainer.status.redmines.map(r => RedmineStatusMappingItem(r.name)),
+          dstItems = backlogStatusService.allStatuses()
+        )
+        .runSyncUnsafe()
     }
   }
 
@@ -52,7 +65,7 @@ object R2BCli extends BacklogConfiguration with Logging {
         val mappingFileContainer = createMapping(config)
         if (
           validateMapping(mappingFileContainer.user) &&
-          validateMapping(mappingFileContainer.status) &&
+//          validateMapping(mappingFileContainer.status) && // TODO: fix
           validateMapping(mappingFileContainer.priority)
         ) {
           if (confirmImport(config, mappingFileContainer)) {
@@ -70,9 +83,7 @@ object R2BCli extends BacklogConfiguration with Logging {
               statusMappings <-
                 StatusMappingFileService
                   .execute[RedmineStatusMappingItem, Task](
-                    path = new File(
-                      MappingDirectory.STATUS_MAPPING_FILE
-                    ).getAbsoluteFile.toPath,
+                    path = MappingDirectory.STATUS_MAPPING_FILE,
                     dstItems = backlogStatusService.allStatuses()
                   )
                   .runSyncUnsafe()
@@ -197,12 +208,12 @@ object R2BCli extends BacklogConfiguration with Logging {
                                 |${mappingString(mappingFileContainer.priority)}
                                 |--------------------------------------------------""".stripMargin)
         }
-        if (mappingFileContainer.status.nonEmpty()) {
-          ConsoleOut.println(s"""${Messages("cli.mapping.show", mappingFileContainer.status.itemName)}
-                                |--------------------------------------------------
-                                |${mappingString(mappingFileContainer.status)}
-                                |--------------------------------------------------""".stripMargin)
-        }
+//        if (mappingFileContainer.status.nonEmpty()) { // TODO: fix
+//          ConsoleOut.println(s"""${Messages("cli.mapping.show", mappingFileContainer.status.itemName)}
+//                                |--------------------------------------------------
+//                                |${mappingString(mappingFileContainer.status)}
+//                                |--------------------------------------------------""".stripMargin)
+//        }
         val input: String = scala.io.StdIn.readLine(Messages("cli.confirm"))
         if (input == "y" || input == "Y") true
         else {

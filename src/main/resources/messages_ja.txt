@@ -1,6 +1,6 @@
 # Common
-common.backlog=Backlog
-common.redmine=Redmine
+common.src=Redmine
+common.dst=Backlog
 common.projects=プロジェクト
 common.users=ユーザー
 common.statuses=ステータス

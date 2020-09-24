@@ -115,12 +115,12 @@ object R2B extends BacklogConfiguration with Logging {
     }.getOrElse(ExcludeOption.default)
 
     ConsoleOut.println(s"""--------------------------------------------------
-     |${Messages("common.redmine")} ${Messages("common.url")}[${cli.execute.redmineUrl()}]
-     |${Messages("common.redmine")} ${Messages("common.access_key")}[${cli.execute.redmineKey()}]
-     |${Messages("common.redmine")} ${Messages("common.project_key")}[${redmine}]
-     |${Messages("common.backlog")} ${Messages("common.url")}[${cli.execute.backlogUrl()}]
-     |${Messages("common.backlog")} ${Messages("common.access_key")}[${cli.execute.backlogKey()}]
-     |${Messages("common.backlog")} ${Messages("common.project_key")}[${backlog}]
+     |${Messages("common.src")} ${Messages("common.url")}[${cli.execute.redmineUrl()}]
+     |${Messages("common.src")} ${Messages("common.access_key")}[${cli.execute.redmineKey()}]
+     |${Messages("common.src")} ${Messages("common.project_key")}[${redmine}]
+     |${Messages("common.dst")} ${Messages("common.url")}[${cli.execute.backlogUrl()}]
+     |${Messages("common.dst")} ${Messages("common.access_key")}[${cli.execute.backlogKey()}]
+     |${Messages("common.dst")} ${Messages("common.project_key")}[${backlog}]
      |${Messages("common.importOnly")}[${cli.execute.importOnly()}]
      |${Messages("common.retryCount")}[$retryCount]
      |exclude[${exclude.toString}]
