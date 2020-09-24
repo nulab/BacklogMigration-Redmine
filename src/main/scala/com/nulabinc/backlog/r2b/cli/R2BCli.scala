@@ -7,13 +7,17 @@ import com.nulabinc.backlog.migration.common.domain.{BacklogProjectKey, BacklogT
 import com.nulabinc.backlog.migration.common.dsl.{ConsoleDSL, StorageDSL}
 import com.nulabinc.backlog.migration.common.interpreters.{JansiConsoleDSL, LocalStorageDSL}
 import com.nulabinc.backlog.migration.common.modules.{ServiceInjector => BacklogInjector}
-import com.nulabinc.backlog.migration.common.service.{ProjectService, StatusService => BacklogStatusService}
-import com.nulabinc.backlog.migration.common.services.StatusMappingFileService
+import com.nulabinc.backlog.migration.common.service.{
+  PriorityService => BacklogPriorityService,
+  ProjectService,
+  StatusService => BacklogStatusService
+}
+import com.nulabinc.backlog.migration.common.services.{PriorityMappingFileService, StatusMappingFileService}
 import com.nulabinc.backlog.migration.common.utils.ControlUtil.using
 import com.nulabinc.backlog.migration.common.utils.{ConsoleOut, Logging}
 import com.nulabinc.backlog.migration.importer.core.{Boot => BootImporter}
 import com.nulabinc.backlog.r2b.conf.AppConfiguration
-import com.nulabinc.backlog.r2b.domain.mappings.RedmineStatusMappingItem
+import com.nulabinc.backlog.r2b.domain.mappings.{RedminePriorityMappingItem, RedmineStatusMappingItem}
 import com.nulabinc.backlog.r2b.exporter.core.{Boot => BootExporter}
 import com.nulabinc.backlog.r2b.mapping.collector.core.{Boot => BootMapping}
 import com.nulabinc.backlog.r2b.mapping.core.MappingContainer
@@ -37,12 +41,13 @@ object R2BCli extends BacklogConfiguration with Logging {
   private implicit val consoleDSL: ConsoleDSL[Task] = JansiConsoleDSL()
 
   def init(config: AppConfiguration): Unit = {
-    val injector             = BacklogInjector.createInjector(config.backlogConfig)
-    val backlogStatusService = injector.getInstance(classOf[BacklogStatusService])
+    val injector               = BacklogInjector.createInjector(config.backlogConfig)
+    val backlogStatusService   = injector.getInstance(classOf[BacklogStatusService])
+    val backlogPriorityService = injector.getInstance(classOf[BacklogPriorityService])
 
     if (validateParam(config)) {
       val mappingFileContainer = createMapping(config)
-      output(mappingFileContainer.user)
+//      output(mappingFileContainer.user)
 //      output(mappingFileContainer.priority)
 
       StatusMappingFileService
@@ -51,6 +56,15 @@ object R2BCli extends BacklogConfiguration with Logging {
           mappingListPath = MappingDirectory.default.statusMappingListFilePath,
           srcItems = mappingFileContainer.status.redmines.map(r => RedmineStatusMappingItem(r.name)),
           dstItems = backlogStatusService.allStatuses()
+        )
+        .runSyncUnsafe()
+
+      PriorityMappingFileService
+        .init[RedminePriorityMappingItem, Task](
+          mappingFilePath = MappingDirectory.default.priorityMappingFilePath,
+          mappingListPath = MappingDirectory.default.priorityMappingListFilePath,
+          srcItems = mappingFileContainer.priority.redmines.map(r => RedminePriorityMappingItem(r.name)),
+          dstItems = backlogPriorityService.allPriorities()
         )
         .runSyncUnsafe()
     }
@@ -64,16 +78,17 @@ object R2BCli extends BacklogConfiguration with Logging {
       else {
         val mappingFileContainer = createMapping(config)
         if (
-          validateMapping(mappingFileContainer.user) &&
+          true // TODO
+//          validateMapping(mappingFileContainer.user) &&
 //          validateMapping(mappingFileContainer.status) && // TODO: fix
 //          validateMapping(mappingFileContainer.priority)
         ) {
           if (confirmImport(config, mappingFileContainer)) {
 
-            val backlogInjector = BacklogInjector.createInjector(config.backlogConfig)
-            val backlogPaths    = backlogInjector.getInstance(classOf[BacklogPaths])
-            val backlogStatusService =
-              backlogInjector.getInstance(classOf[BacklogStatusService])
+            val backlogInjector        = BacklogInjector.createInjector(config.backlogConfig)
+            val backlogPaths           = backlogInjector.getInstance(classOf[BacklogPaths])
+            val backlogStatusService   = backlogInjector.getInstance(classOf[BacklogStatusService])
+            val backlogPriorityService = backlogInjector.getInstance(classOf[BacklogPriorityService])
 
             if (backlogPaths.outputPath.exists) {
               backlogPaths.outputPath.listRecursively.foreach(_.delete(false))
@@ -87,11 +102,18 @@ object R2BCli extends BacklogConfiguration with Logging {
                     dstItems = backlogStatusService.allStatuses()
                   )
                   .runSyncUnsafe()
+              priorityMappings <-
+                PriorityMappingFileService
+                  .execute[RedminePriorityMappingItem, Task](
+                    path = MappingDirectory.default.priorityMappingFilePath,
+                    dstItems = backlogPriorityService.allPriorities()
+                  )
+                  .runSyncUnsafe()
             } yield {
               val mappingContainer = MappingContainer(
                 user = mappingFileContainer.user.tryUnmarshal(),
                 statuses = statusMappings,
-                priority = mappingFileContainer.priority.tryUnmarshal()
+                priority = priorityMappings
               )
               val backlogTextFormattingRule = fetchBacklogTextFormattingRule(config.backlogConfig)
 
@@ -191,23 +213,23 @@ object R2BCli extends BacklogConfiguration with Logging {
     confirmProject(config) match {
       case Some(projectKeys) =>
         val (redmine, backlog): (String, String) = projectKeys
-        ConsoleOut.println(s"""
-                              |${Messages("cli.mapping.show", Messages("common.projects"))}
-                              |--------------------------------------------------
-                              |- ${redmine} => ${backlog}
-                              |--------------------------------------------------
-                              |
-                              |${Messages("cli.mapping.show", mappingFileContainer.user.itemName)}
-                              |--------------------------------------------------
-                              |${mappingString(mappingFileContainer.user)}
-                              |--------------------------------------------------
-                              |""".stripMargin)
-        if (mappingFileContainer.priority.nonEmpty()) {
-          ConsoleOut.println(s"""${Messages("cli.mapping.show", mappingFileContainer.priority.itemName)}
-                                |--------------------------------------------------
-                                |${mappingString(mappingFileContainer.priority)}
-                                |--------------------------------------------------""".stripMargin)
-        }
+//        ConsoleOut.println(s"""
+//                              |${Messages("cli.mapping.show", Messages("common.projects"))}
+//                              |--------------------------------------------------
+//                              |- ${redmine} => ${backlog}
+//                              |--------------------------------------------------
+//                              |
+//                              |${Messages("cli.mapping.show", mappingFileContainer.user.itemName)}
+//                              |--------------------------------------------------
+//                              |${mappingString(mappingFileContainer.user)}
+//                              |--------------------------------------------------
+//                              |""".stripMargin)
+//        if (mappingFileContainer.priority.nonEmpty()) {
+//          ConsoleOut.println(s"""${Messages("cli.mapping.show", mappingFileContainer.priority.itemName)}
+//                                |--------------------------------------------------
+//                                |${mappingString(mappingFileContainer.priority)}
+//                                |--------------------------------------------------""".stripMargin)
+//        }
 //        if (mappingFileContainer.status.nonEmpty()) { // TODO: fix
 //          ConsoleOut.println(s"""${Messages("cli.mapping.show", mappingFileContainer.status.itemName)}
 //                                |--------------------------------------------------

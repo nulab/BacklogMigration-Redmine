@@ -4,7 +4,8 @@ import com.nulabinc.backlog.migration.common.conf.BacklogPaths
 import com.nulabinc.backlog.migration.common.domain.BacklogProjectKey
 import com.nulabinc.backlog.r2b.exporter.conf.ExportConfig
 import com.nulabinc.backlog.r2b.exporter.convert._
-import com.nulabinc.backlog.r2b.mapping.service.{MappingPriorityService, MappingUserService}
+import com.nulabinc.backlog.r2b.mapping.core.MappingContainer
+import com.nulabinc.backlog.r2b.mapping.service.MappingUserService
 import com.nulabinc.backlog.r2b.redmine.conf.RedmineApiConfiguration
 import com.nulabinc.backlog.r2b.redmine.domain.{PropertyValue, RedmineProjectId}
 import com.nulabinc.backlog.r2b.redmine.service.{IssueService, ProjectService, WikiService}
@@ -17,7 +18,7 @@ case class ExportContext(
     backlogPaths: BacklogPaths,
     propertyValue: PropertyValue,
     mappingUserService: MappingUserService,
-    mappingPriorityService: MappingPriorityService,
+    mappingContainer: MappingContainer,
     projectService: ProjectService,
     issueService: IssueService,
     wikiService: WikiService,

@@ -1,20 +1,20 @@
 package integration.helper
 
 import java.io.{File, FileInputStream}
+import java.nio.file.Path
 import java.text.SimpleDateFormat
 import java.util.{Date, Locale, Properties}
 
-import com.nulabinc.backlog.migration.common.conf.{BacklogApiConfiguration, ExcludeOption}
+import com.nulabinc.backlog.migration.common.conf.{BacklogApiConfiguration, ExcludeOption, MappingDirectory}
 import com.nulabinc.backlog.migration.common.dsl.{ConsoleDSL, StorageDSL}
 import com.nulabinc.backlog.migration.common.interpreters.{JansiConsoleDSL, LocalStorageDSL}
-import com.nulabinc.backlog.migration.common.services.StatusMappingFileService
+import com.nulabinc.backlog.migration.common.services.{PriorityMappingFileService, StatusMappingFileService}
 import com.nulabinc.backlog.migration.common.utils.IOUtil
 import com.nulabinc.backlog.r2b.conf.AppConfiguration
-import com.nulabinc.backlog.r2b.domain.mappings.RedmineStatusMappingItem
-import com.nulabinc.backlog.r2b.mapping.core._
+import com.nulabinc.backlog.r2b.domain.mappings.{RedminePriorityMappingItem, RedmineStatusMappingItem}
 import com.nulabinc.backlog.r2b.mapping.domain.MappingJsonProtocol._
 import com.nulabinc.backlog.r2b.mapping.domain.{Mapping, MappingsWrapper}
-import com.nulabinc.backlog.r2b.mapping.service.{MappingPriorityServiceImpl, MappingUserServiceImpl}
+import com.nulabinc.backlog.r2b.mapping.service.MappingUserServiceImpl
 import com.nulabinc.backlog.r2b.redmine.conf.RedmineApiConfiguration
 import com.nulabinc.backlog4j.conf.{BacklogConfigure, BacklogPackageConfigure}
 import com.nulabinc.backlog4j.{BacklogClient, BacklogClientFactory}
@@ -43,9 +43,8 @@ trait SimpleFixture {
   val dateFormat      = new SimpleDateFormat("yyyy-MM-dd")
   val timestampFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ")
 
-  val optAppConfiguration    = getAppConfiguration
-  val mappingUserService     = new MappingUserServiceImpl(unmarshal(MappingDirectory.USER_MAPPING_FILE))
-  val mappingPriorityService = new MappingPriorityServiceImpl(unmarshal(MappingDirectory.PRIORITY_MAPPING_FILE))
+  val optAppConfiguration = getAppConfiguration
+  val mappingUserService  = new MappingUserServiceImpl(unmarshal(MappingDirectory.default.userMappingFilePath))
 
   def redmine: RedmineManager =
     optAppConfiguration match {
@@ -72,7 +71,7 @@ trait SimpleFixture {
   def convertStatus(target: String): String =
     StatusMappingFileService
       .getMappings[RedmineStatusMappingItem, Task](
-        path = MappingDirectory.STATUS_MAPPING_FILE
+        path = MappingDirectory.default.statusMappingFilePath
       )
       .runSyncUnsafe()
       .getOrElse(throw new RuntimeException("cannot convert status. target: " + target))
@@ -82,12 +81,20 @@ trait SimpleFixture {
       .map(_.value)
       .getOrElse("")
 
-  def convertPriority(target: String): String = {
-    mappingPriorityService.convert(target)
-  }
+  def convertPriority(target: String): String =
+    PriorityMappingFileService
+      .getMappings[RedminePriorityMappingItem, Task](
+        path = MappingDirectory.default.priorityMappingFilePath
+      )
+      .runSyncUnsafe()
+      .getOrElse(throw new RuntimeException("cannot convert priority. target: " + target))
+      .find(_.src.value == target)
+      .getOrElse(throw new RuntimeException("cannot resolve priority. target: " + target))
+      .optDst
+      .map(_.value)
+      .getOrElse("")
 
-  private[this] def unmarshal(strPath: String): Seq[Mapping] = {
-    val path = new File(strPath).getAbsoluteFile.toPath
+  private[this] def unmarshal(path: Path): Seq[Mapping] = {
     val json = IOUtil.input(path).getOrElse("")
     JsonParser(json).convertTo[MappingsWrapper].mappings
   }

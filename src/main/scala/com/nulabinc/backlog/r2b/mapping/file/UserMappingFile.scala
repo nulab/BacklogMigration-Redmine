@@ -1,11 +1,13 @@
 package com.nulabinc.backlog.r2b.mapping.file
 
+import java.nio.file.Path
+
 import better.files.File
-import com.nulabinc.backlog.migration.common.conf.{BacklogApiConfiguration, BacklogConfiguration}
+import com.nulabinc.backlog.migration.common.conf.{BacklogApiConfiguration, BacklogConfiguration, MappingDirectory}
 import com.nulabinc.backlog.migration.common.domain.BacklogUser
 import com.nulabinc.backlog.migration.common.modules.{ServiceInjector => BacklogInjector}
 import com.nulabinc.backlog.migration.common.service.{UserService => BacklogUserService}
-import com.nulabinc.backlog.migration.common.utils.{IOUtil, StringUtil}
+import com.nulabinc.backlog.migration.common.utils.{IOUtil, Logging, StringUtil}
 import com.nulabinc.backlog.r2b.mapping.domain.MappingJsonProtocol._
 import com.nulabinc.backlog.r2b.mapping.domain.{Mapping, MappingsWrapper}
 import com.nulabinc.backlog.r2b.redmine.conf.RedmineApiConfiguration
@@ -19,7 +21,7 @@ import spray.json.JsonParser
   * @author uchida
   */
 class UserMappingFile(redmineApiConfig: RedmineApiConfiguration, backlogApiConfig: BacklogApiConfiguration, users: Seq[RedmineUser])
-    extends MappingFile
+    extends Logging
     with BacklogConfiguration {
 
   private[this] val redmineItems = getRedmineItems()
@@ -75,28 +77,28 @@ class UserMappingFile(redmineApiConfig: RedmineApiConfiguration, backlogApiConfi
     } else mapping
   }
 
-  override def tryUnmarshal(): Seq[Mapping] = {
+  def tryUnmarshal(): Seq[Mapping] = {
     val path    = File(filePath).path.toAbsolutePath
     val json    = IOUtil.input(path).getOrElse("")
     val convert = convertForNAI(allUsers()) _
     JsonParser(json).convertTo[MappingsWrapper].mappings.map(convert)
   }
 
-  override def matchItem(redmine: MappingItem): String =
+  def matchItem(redmine: MappingItem): String =
     backlogs.map(_.name).find(_ == redmine.name).getOrElse("")
 
-  override def redmines: Seq[MappingItem] = redmineItems
+  def redmines: Seq[MappingItem] = redmineItems
 
-  override def backlogs: Seq[MappingItem] = backlogItems
+  def backlogs: Seq[MappingItem] = backlogItems
 
-  override def filePath: String = MappingDirectory.USER_MAPPING_FILE
+  def filePath: Path = MappingDirectory.default.userMappingFilePath
 
-  override def itemName: String = Messages("common.users")
+  def itemName: String = Messages("common.users")
 
-  override def description: String = {
+  def description: String = {
     Messages("cli.mapping.configurable", itemName, backlogs.map(_.name).mkString(","))
   }
 
-  override def isDisplayDetail: Boolean = true
+  def isDisplayDetail: Boolean = true
 
 }

@@ -27,7 +27,6 @@ private[exporter] class RedmineModule(
 
     //mapping service
     bind(classOf[MappingUserService]).toInstance(new MappingUserServiceImpl(mappingContainer.user))
-    bind(classOf[MappingPriorityService]).toInstance(new MappingPriorityServiceImpl(mappingContainer.priority))
     bind(classOf[MappingContainer]).toInstance(mappingContainer)
 
     // export

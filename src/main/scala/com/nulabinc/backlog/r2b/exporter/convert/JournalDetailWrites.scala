@@ -5,9 +5,9 @@ import com.nulabinc.backlog.migration.common.conf.BacklogConstantValue
 import com.nulabinc.backlog.migration.common.convert.{Convert, Writes}
 import com.nulabinc.backlog.migration.common.domain.{BacklogAttachment, BacklogAttributeInfo, BacklogChangeLog, BacklogTextFormattingRule}
 import com.nulabinc.backlog.migration.common.utils.{DateUtil, FileUtil, Logging, StringUtil}
-import com.nulabinc.backlog.r2b.mapping.converters.MappingStatusConverter
+import com.nulabinc.backlog.r2b.mapping.converters.{MappingPriorityConverter, MappingStatusConverter}
 import com.nulabinc.backlog.r2b.mapping.core.MappingContainer
-import com.nulabinc.backlog.r2b.mapping.service.{MappingPriorityService, MappingUserService}
+import com.nulabinc.backlog.r2b.mapping.service.MappingUserService
 import com.nulabinc.backlog.r2b.redmine.conf.RedmineConstantValue
 import com.nulabinc.backlog.r2b.redmine.domain.PropertyValue
 import com.nulabinc.backlog.r2b.utils.TextileUtil
@@ -20,7 +20,6 @@ import com.taskadapter.redmineapi.bean.JournalDetail
 private[exporter] class JournalDetailWrites @Inject() (
     propertyValue: PropertyValue,
     customFieldValueWrites: CustomFieldValueWrites,
-    mappingPriorityService: MappingPriorityService,
     mappingUserService: MappingUserService,
     mappingContainer: MappingContainer,
     backlogTextFormattingRule: BacklogTextFormattingRule
@@ -92,7 +91,7 @@ private[exporter] class JournalDetailWrites @Inject() (
         propertyValue.priorities
           .find(priority => StringUtil.safeEquals(priority.getId.intValue(), value))
           .map(_.getName)
-          .map(mappingPriorityService.convert)
+          .map(MappingPriorityConverter.convert(mappingContainer.priority, _))
       case RedmineConstantValue.Attr.ASSIGNED =>
         propertyValue.optUserOfId(Some(value)).map(_.getLogin).map(mappingUserService.convert)
       case RedmineConstantValue.Attr.VERSION =>

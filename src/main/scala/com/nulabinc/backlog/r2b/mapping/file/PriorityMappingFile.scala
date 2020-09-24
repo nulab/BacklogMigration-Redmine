@@ -1,6 +1,6 @@
 package com.nulabinc.backlog.r2b.mapping.file
 
-import com.nulabinc.backlog.migration.common.conf.{BacklogApiConfiguration, MappingDirectory}
+import com.nulabinc.backlog.migration.common.conf.BacklogApiConfiguration
 import com.nulabinc.backlog.migration.common.modules.{ServiceInjector => BacklogInjector}
 import com.nulabinc.backlog.migration.common.service.{PriorityService => BacklogPriorityService}
 import com.nulabinc.backlog.migration.common.utils.Logging
@@ -68,7 +68,7 @@ class PriorityMappingFile(redmineApiConfig: RedmineApiConfiguration, backlogApiC
     val IMMEDIATE_EN: String = Messages("mapping.priority.redmine.immediate")(Lang("en"))
   }
 
-  override def matchItem(redmine: MappingItem): String =
+  def matchItem(redmine: MappingItem): String =
     backlogs.map(_.name).find(_ == redmine.name) match {
       case Some(backlog) => backlog
       case None =>
