@@ -1,9 +1,9 @@
 package com.nulabinc.backlog.r2b.mapping.file
 
-import com.nulabinc.backlog.migration.common.conf.BacklogApiConfiguration
+import com.nulabinc.backlog.migration.common.conf.{BacklogApiConfiguration, MappingDirectory}
 import com.nulabinc.backlog.migration.common.modules.{ServiceInjector => BacklogInjector}
 import com.nulabinc.backlog.migration.common.service.{PriorityService => BacklogPriorityService}
-import com.nulabinc.backlog.r2b.mapping.core.MappingDirectory
+import com.nulabinc.backlog.migration.common.utils.Logging
 import com.nulabinc.backlog.r2b.redmine.conf.RedmineApiConfiguration
 import com.nulabinc.backlog.r2b.redmine.modules.{ServiceInjector => RedmineInjector}
 import com.nulabinc.backlog.r2b.redmine.service.{PriorityService => RedminePriorityService}
@@ -14,7 +14,7 @@ import com.taskadapter.redmineapi.bean.IssuePriority
 /**
   * @author uchida
   */
-class PriorityMappingFile(redmineApiConfig: RedmineApiConfiguration, backlogApiConfig: BacklogApiConfiguration) extends MappingFile {
+class PriorityMappingFile(redmineApiConfig: RedmineApiConfiguration, backlogApiConfig: BacklogApiConfiguration) extends Logging {
 
   private[this] val redmineItems = getRedmineItems()
   private[this] val backlogItems = getBacklogItems()
@@ -82,17 +82,15 @@ class PriorityMappingFile(redmineApiConfig: RedmineApiConfiguration, backlogApiC
         }
     }
 
-  override def redmines: Seq[MappingItem] = redmineItems
+  def redmines: Seq[MappingItem] = redmineItems
 
-  override def backlogs: Seq[MappingItem] = backlogItems
+  def backlogs: Seq[MappingItem] = backlogItems
 
-  override def filePath: String = MappingDirectory.PRIORITY_MAPPING_FILE
+  def itemName: String = Messages("common.priorities")
 
-  override def itemName: String = Messages("common.priorities")
-
-  override def description: String =
+  def description: String =
     Messages("cli.mapping.configurable", itemName, backlogs.map(_.name).mkString(","))
 
-  override def isDisplayDetail: Boolean = false
+  def isDisplayDetail: Boolean = false
 
 }

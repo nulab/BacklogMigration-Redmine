@@ -2,7 +2,7 @@ package com.nulabinc.backlog.r2b.cli
 
 import java.net.{HttpURLConnection, URL}
 
-import com.nulabinc.backlog.migration.common.conf.{BacklogApiConfiguration, BacklogConfiguration, BacklogPaths}
+import com.nulabinc.backlog.migration.common.conf.{BacklogApiConfiguration, BacklogConfiguration, BacklogPaths, MappingDirectory}
 import com.nulabinc.backlog.migration.common.domain.{BacklogProjectKey, BacklogTextFormattingRule}
 import com.nulabinc.backlog.migration.common.dsl.{ConsoleDSL, StorageDSL}
 import com.nulabinc.backlog.migration.common.interpreters.{JansiConsoleDSL, LocalStorageDSL}
@@ -16,7 +16,7 @@ import com.nulabinc.backlog.r2b.conf.AppConfiguration
 import com.nulabinc.backlog.r2b.domain.mappings.RedmineStatusMappingItem
 import com.nulabinc.backlog.r2b.exporter.core.{Boot => BootExporter}
 import com.nulabinc.backlog.r2b.mapping.collector.core.{Boot => BootMapping}
-import com.nulabinc.backlog.r2b.mapping.core.{MappingContainer, MappingDirectory}
+import com.nulabinc.backlog.r2b.mapping.core.MappingContainer
 import com.nulabinc.backlog.r2b.mapping.domain.Mapping
 import com.nulabinc.backlog.r2b.mapping.file._
 import com.osinka.i18n.Messages
@@ -43,12 +43,12 @@ object R2BCli extends BacklogConfiguration with Logging {
     if (validateParam(config)) {
       val mappingFileContainer = createMapping(config)
       output(mappingFileContainer.user)
-      output(mappingFileContainer.priority)
+//      output(mappingFileContainer.priority)
 
       StatusMappingFileService
         .init[RedmineStatusMappingItem, Task](
-          mappingFilePath = MappingDirectory.STATUS_MAPPING_FILE,
-          mappingListPath = MappingDirectory.STATUS_MAPPING_LIST_FILE,
+          mappingFilePath = MappingDirectory.default.statusMappingFilePath,
+          mappingListPath = MappingDirectory.default.statusMappingListFilePath,
           srcItems = mappingFileContainer.status.redmines.map(r => RedmineStatusMappingItem(r.name)),
           dstItems = backlogStatusService.allStatuses()
         )
@@ -63,11 +63,10 @@ object R2BCli extends BacklogConfiguration with Logging {
       if (config.importOnly) BootImporter.execute(config.backlogConfig, fitIssueKey = false, retryCount = retryCount)
       else {
         val mappingFileContainer = createMapping(config)
-        if (
-          validateMapping(mappingFileContainer.user) &&
+        if (validateMapping(mappingFileContainer.user) &&
 //          validateMapping(mappingFileContainer.status) && // TODO: fix
-          validateMapping(mappingFileContainer.priority)
-        ) {
+//          validateMapping(mappingFileContainer.priority)
+            ) {
           if (confirmImport(config, mappingFileContainer)) {
 
             val backlogInjector = BacklogInjector.createInjector(config.backlogConfig)
@@ -80,13 +79,12 @@ object R2BCli extends BacklogConfiguration with Logging {
             }
 
             for {
-              statusMappings <-
-                StatusMappingFileService
-                  .execute[RedmineStatusMappingItem, Task](
-                    path = MappingDirectory.STATUS_MAPPING_FILE,
-                    dstItems = backlogStatusService.allStatuses()
-                  )
-                  .runSyncUnsafe()
+              statusMappings <- StatusMappingFileService
+                .execute[RedmineStatusMappingItem, Task](
+                  path = MappingDirectory.default.statusMappingFilePath,
+                  dstItems = backlogStatusService.allStatuses()
+                )
+                .runSyncUnsafe()
             } yield {
               val mappingContainer = MappingContainer(
                 user = mappingFileContainer.user.tryUnmarshal(),
@@ -235,8 +233,7 @@ object R2BCli extends BacklogConfiguration with Logging {
       case Some(mappings) =>
         mappings
           .map(mapping =>
-            s"- ${mappingFile.display(mapping.redmine, mappingFile.redmines)} => ${mappingFile.display(mapping.backlog, mappingFile.backlogs)}"
-          )
+            s"- ${mappingFile.display(mapping.redmine, mappingFile.redmines)} => ${mappingFile.display(mapping.backlog, mappingFile.backlogs)}")
           .mkString("\n")
       case _ => throw new RuntimeException
     }

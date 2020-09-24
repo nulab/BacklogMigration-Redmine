@@ -38,8 +38,7 @@ private[file] class MappingValidator(redmineMappings: Seq[MappingItem], backlogM
           case Some(error) => errors :+ error
           case None        => errors
         }
-      }
-    )
+    })
   }
 
   private[this] def itemExists(value: String, mappingItems: Seq[MappingItem], serviceName: String): Option[String] = {
