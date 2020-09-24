@@ -49,7 +49,8 @@ private[exporter] class ProjectExporter @Inject() (
   def boot(mappingContainer: MappingContainer): Unit = {
     val exportContext = exportContextProvider.get()
     val system        = ActorSystem.apply("main-actor-system")
-    val contentActor  = system.actorOf(Props(new ContentActor(exportContext, backlogTextFormattingRule)))
+    val contentActor =
+      system.actorOf(Props(new ContentActor(exportContext, backlogTextFormattingRule)))
     contentActor ! ContentActor.Do
 
     Await.result(system.whenTerminated, Duration.Inf)
@@ -61,45 +62,91 @@ private[exporter] class ProjectExporter @Inject() (
     val allMemberships: Seq[Membership] = membershipService.allMemberships()
 
     //project
-    IOUtil.output(backlogPaths.projectJson, BacklogProjectWrapper(Convert.toBacklog(project)).toJson.prettyPrint)
+    IOUtil.output(
+      backlogPaths.projectJson,
+      BacklogProjectWrapper(Convert.toBacklog(project)).toJson.prettyPrint
+    )
 
     //group
-    IOUtil.output(backlogPaths.groupsJson, BacklogGroupsWrapper(Convert.toBacklog(allMemberships)(groupsWrites)).toJson.prettyPrint)
+    IOUtil.output(
+      backlogPaths.groupsJson,
+      BacklogGroupsWrapper(Convert.toBacklog(allMemberships)(groupsWrites)).toJson.prettyPrint
+    )
 
     //memberships
     val allProjectUser = mutable.Set.empty[BacklogUser]
     val projectUsers   = Convert.toBacklog(allMemberships)(membershipWrites)
+
     projectUsers.foreach(projectUser => allProjectUser += projectUser)
-    mappingContainer.user.map(mapping => Convert.toBacklog(mapping)).foreach(projectUser => allProjectUser += projectUser)
-    IOUtil.output(backlogPaths.projectUsersJson, BacklogProjectUsersWrapper(allProjectUser.toSeq).toJson.prettyPrint)
-    ConsoleOut.boldln(Messages("message.executed", Messages("common.project_user"), Messages("message.exported")), 1)
+
+    mappingContainer.user
+      .map(mapping => Convert.toBacklog(mapping))
+      .foreach(projectUser => allProjectUser += projectUser)
+
+    IOUtil.output(
+      backlogPaths.projectUsersJson,
+      BacklogProjectUsersWrapper(allProjectUser.toSeq).toJson.prettyPrint
+    )
+    ConsoleOut.boldln(
+      Messages("message.executed", Messages("common.project_user"), Messages("message.exported")),
+      1
+    )
 
     //customFields
     val customFieldDefinitions = customFieldService.allCustomFieldDefinitions()
-    IOUtil.output(backlogPaths.customFieldSettingsJson, BacklogCustomFieldSettings(Convert.toBacklog(customFieldDefinitions)).toJson.prettyPrint)
-    ConsoleOut.boldln(Messages("message.executed", Messages("common.custom_field"), Messages("message.exported")), 1)
+    IOUtil.output(
+      backlogPaths.customFieldSettingsJson,
+      BacklogCustomFieldSettings(Convert.toBacklog(customFieldDefinitions)).toJson.prettyPrint
+    )
+    ConsoleOut.boldln(
+      Messages("message.executed", Messages("common.custom_field"), Messages("message.exported")),
+      1
+    )
 
     //versions
     val versions = versionService.allVersions()
-    IOUtil.output(backlogPaths.versionsJson, BacklogVersionsWrapper(Convert.toBacklog(versions)).toJson.prettyPrint)
-    ConsoleOut.boldln(Messages("message.executed", Messages("common.version"), Messages("message.exported")), 1)
+    IOUtil.output(
+      backlogPaths.versionsJson,
+      BacklogVersionsWrapper(Convert.toBacklog(versions)).toJson.prettyPrint
+    )
+    ConsoleOut.boldln(
+      Messages("message.executed", Messages("common.version"), Messages("message.exported")),
+      1
+    )
 
     //trackers
     val trackers = trackerService.allTrackers()
-    IOUtil.output(backlogPaths.issueTypesJson, BacklogIssueTypesWrapper(Convert.toBacklog(trackers)).toJson.prettyPrint)
-    ConsoleOut.boldln(Messages("message.executed", Messages("common.trackers"), Messages("message.exported")), 1)
+    IOUtil.output(
+      backlogPaths.issueTypesJson,
+      BacklogIssueTypesWrapper(Convert.toBacklog(trackers)).toJson.prettyPrint
+    )
+    ConsoleOut.boldln(
+      Messages("message.executed", Messages("common.trackers"), Messages("message.exported")),
+      1
+    )
 
     //categories
     val categories = issueCategoryService.allCategories()
-    IOUtil.output(backlogPaths.issueCategoriesJson, BacklogIssueCategoriesWrapper(Convert.toBacklog(categories)).toJson.prettyPrint)
-    ConsoleOut.boldln(Messages("message.executed", Messages("common.category"), Messages("message.exported")), 1)
+    IOUtil.output(
+      backlogPaths.issueCategoriesJson,
+      BacklogIssueCategoriesWrapper(Convert.toBacklog(categories)).toJson.prettyPrint
+    )
+    ConsoleOut.boldln(
+      Messages("message.executed", Messages("common.category"), Messages("message.exported")),
+      1
+    )
 
     //news
-    val console = (ProgressBar.progress _)(Messages("common.news"), Messages("message.exporting"), Messages("message.exported"))
+    val console = (ProgressBar.progress _)(
+      Messages("common.news"),
+      Messages("message.exporting"),
+      Messages("message.exported")
+    )
     val allNews = newsService.allNews()
     allNews.zipWithIndex.foreach {
       case (news, index) =>
-        IOUtil.output(backlogPaths.wikiJson(news.getTitle), Convert.toBacklog(news).toJson.prettyPrint)
+        IOUtil
+          .output(backlogPaths.wikiJson(news.getTitle), Convert.toBacklog(news).toJson.prettyPrint)
         console(index + 1, allNews.size)
     }
 

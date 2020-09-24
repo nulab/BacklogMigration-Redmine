@@ -5,16 +5,27 @@ import java.nio.file.Path
 import java.text.SimpleDateFormat
 import java.util.{Date, Locale, Properties}
 
-import com.nulabinc.backlog.migration.common.conf.{BacklogApiConfiguration, ExcludeOption, MappingDirectory}
+import com.nulabinc.backlog.migration.common.conf.{
+  BacklogApiConfiguration,
+  ExcludeOption,
+  MappingDirectory
+}
 import com.nulabinc.backlog.migration.common.dsl.{ConsoleDSL, StorageDSL}
 import com.nulabinc.backlog.migration.common.interpreters.{JansiConsoleDSL, LocalStorageDSL}
-import com.nulabinc.backlog.migration.common.services.{PriorityMappingFileService, StatusMappingFileService}
+import com.nulabinc.backlog.migration.common.services.{
+  PriorityMappingFileService,
+  StatusMappingFileService,
+  UserMappingFileService
+}
 import com.nulabinc.backlog.migration.common.utils.IOUtil
 import com.nulabinc.backlog.r2b.conf.AppConfiguration
-import com.nulabinc.backlog.r2b.domain.mappings.{RedminePriorityMappingItem, RedmineStatusMappingItem}
+import com.nulabinc.backlog.r2b.domain.mappings.{
+  RedminePriorityMappingItem,
+  RedmineStatusMappingItem,
+  RedmineUserMappingItem
+}
 import com.nulabinc.backlog.r2b.mapping.domain.MappingJsonProtocol._
 import com.nulabinc.backlog.r2b.mapping.domain.{Mapping, MappingsWrapper}
-import com.nulabinc.backlog.r2b.mapping.service.MappingUserServiceImpl
 import com.nulabinc.backlog.r2b.redmine.conf.RedmineApiConfiguration
 import com.nulabinc.backlog4j.conf.{BacklogConfigure, BacklogPackageConfigure}
 import com.nulabinc.backlog4j.{BacklogClient, BacklogClientFactory}
@@ -44,12 +55,13 @@ trait SimpleFixture {
   val timestampFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ")
 
   val optAppConfiguration = getAppConfiguration
-  val mappingUserService  = new MappingUserServiceImpl(unmarshal(MappingDirectory.default.userMappingFilePath))
 
   def redmine: RedmineManager =
     optAppConfiguration match {
-      case Some(appConfiguration) => RedmineManagerFactory.createWithApiKey(appConfiguration.redmineConfig.url, appConfiguration.redmineConfig.key)
-      case _                      => throw new RuntimeException("App configuration is missing")
+      case Some(appConfiguration) =>
+        RedmineManagerFactory
+          .createWithApiKey(appConfiguration.redmineConfig.url, appConfiguration.redmineConfig.key)
+      case _ => throw new RuntimeException("App configuration is missing")
     }
 
   def backlog: BacklogClient =
@@ -60,12 +72,23 @@ trait SimpleFixture {
 
   def redmineProject: Project =
     optAppConfiguration match {
-      case Some(appConfiguration) => redmine.getProjectManager.getProjectByKey(appConfiguration.redmineConfig.projectKey)
-      case _                      => throw new RuntimeException()
+      case Some(appConfiguration) =>
+        redmine.getProjectManager.getProjectByKey(appConfiguration.redmineConfig.projectKey)
+      case _ => throw new RuntimeException()
     }
 
   def convertUser(target: String): String = {
-    mappingUserService.convert(target)
+    UserMappingFileService
+      .getMappings[RedmineUserMappingItem, Task](
+        path = MappingDirectory.default.userMappingFilePath
+      )
+      .runSyncUnsafe()
+      .getOrElse(throw new RuntimeException("cannot convert status. target: " + target))
+      .find(_.src.name == target)
+      .getOrElse(throw new RuntimeException("cannot resolve status. target: " + target))
+      .optDst
+      .map(_.value)
+      .getOrElse("")
   }
 
   def convertStatus(target: String): String =
@@ -112,12 +135,15 @@ trait SimpleFixture {
 
       val keys: Array[String] = projectKey.split(":")
       val redmine: String     = keys(0)
-      val backlog: String     = if (keys.length == 2) keys(1) else keys(0).toUpperCase.replaceAll("-", "_")
+      val backlog: String =
+        if (keys.length == 2) keys(1) else keys(0).toUpperCase.replaceAll("-", "_")
 
       Some(
         AppConfiguration(
-          redmineConfig = new RedmineApiConfiguration(url = redmineUrl, key = redmineKey, projectKey = redmine),
-          backlogConfig = new BacklogApiConfiguration(url = backlogUrl, key = backlogKey, projectKey = backlog),
+          redmineConfig =
+            new RedmineApiConfiguration(url = redmineUrl, key = redmineKey, projectKey = redmine),
+          backlogConfig =
+            new BacklogApiConfiguration(url = backlogUrl, key = backlogKey, projectKey = backlog),
           exclude = ExcludeOption.default,
           importOnly = false,
           retryCount = 5
@@ -127,8 +153,10 @@ trait SimpleFixture {
   }
 
   private[this] def getBacklogClient(appConfiguration: BacklogApiConfiguration): BacklogClient = {
-    val backlogPackageConfigure: BacklogPackageConfigure = new BacklogPackageConfigure(appConfiguration.url)
-    val configure: BacklogConfigure                      = backlogPackageConfigure.apiKey(appConfiguration.key)
+    val backlogPackageConfigure: BacklogPackageConfigure = new BacklogPackageConfigure(
+      appConfiguration.url
+    )
+    val configure: BacklogConfigure = backlogPackageConfigure.apiKey(appConfiguration.key)
     new BacklogClientFactory(configure).newClient()
   }
 

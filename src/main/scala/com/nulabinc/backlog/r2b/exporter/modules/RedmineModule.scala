@@ -4,7 +4,6 @@ import com.nulabinc.backlog.migration.common.conf.BacklogPaths
 import com.nulabinc.backlog.migration.common.domain.{BacklogProjectKey, BacklogTextFormattingRule}
 import com.nulabinc.backlog.r2b.exporter.conf.ExportConfig
 import com.nulabinc.backlog.r2b.mapping.core.MappingContainer
-import com.nulabinc.backlog.r2b.mapping.service._
 import com.nulabinc.backlog.r2b.redmine.conf.RedmineApiConfiguration
 import com.nulabinc.backlog.r2b.redmine.modules.RedmineDefaultModule
 
@@ -26,7 +25,6 @@ private[exporter] class RedmineModule(
     bind(classOf[BacklogTextFormattingRule]).toInstance(backlogTextFormattingRule)
 
     //mapping service
-    bind(classOf[MappingUserService]).toInstance(new MappingUserServiceImpl(mappingContainer.user))
     bind(classOf[MappingContainer]).toInstance(mappingContainer)
 
     // export

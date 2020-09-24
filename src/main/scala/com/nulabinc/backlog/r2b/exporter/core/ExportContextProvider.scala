@@ -6,7 +6,6 @@ import com.nulabinc.backlog.migration.common.domain.BacklogProjectKey
 import com.nulabinc.backlog.r2b.exporter.conf.ExportConfig
 import com.nulabinc.backlog.r2b.exporter.convert._
 import com.nulabinc.backlog.r2b.mapping.core.MappingContainer
-import com.nulabinc.backlog.r2b.mapping.service.MappingUserService
 import com.nulabinc.backlog.r2b.redmine.conf.RedmineApiConfiguration
 import com.nulabinc.backlog.r2b.redmine.domain.{PropertyValue, RedmineProjectId}
 import com.nulabinc.backlog.r2b.redmine.service.{IssueService, ProjectService, WikiService}
@@ -20,7 +19,6 @@ class ExportContextProvider @Inject() (
     backlogPaths: BacklogPaths,
     issueService: IssueService,
     projectService: ProjectService,
-    mappingUserService: MappingUserService,
     mappingContainer: MappingContainer,
     wikiService: WikiService,
     issueWrites: IssueWrites,
@@ -40,7 +38,6 @@ class ExportContextProvider @Inject() (
       projectId,
       backlogPaths,
       propertyValue,
-      mappingUserService,
       mappingContainer,
       projectService,
       issueService,
