@@ -17,8 +17,10 @@ import scala.concurrent.duration._
 /**
   * @author uchida
   */
-private[exporter] class IssuesActor(exportContext: ExportContext, backlogTextFormattingRule: BacklogTextFormattingRule)
-    extends Actor
+private[exporter] class IssuesActor(
+    exportContext: ExportContext,
+    backlogTextFormattingRule: BacklogTextFormattingRule
+) extends Actor
     with BacklogConfiguration
     with Logging {
 
@@ -39,14 +41,24 @@ private[exporter] class IssuesActor(exportContext: ExportContext, backlogTextFor
   private[this] val completion = new CountDownLatch(allCount)
 
   private[this] val console =
-    (ProgressBar.progress _)(Messages("common.issues"), Messages("message.exporting"), Messages("message.exported"))
+    (ProgressBar.progress _)(
+      Messages("common.issues"),
+      Messages("message.exporting"),
+      Messages("message.exported")
+    )
   private[this] val issuesInfoProgress =
-    (ProgressBar.progress _)(Messages("common.issues_info"), Messages("message.collecting"), Messages("message.collected"))
+    (ProgressBar.progress _)(
+      Messages("common.issues_info"),
+      Messages("message.collecting"),
+      Messages("message.collected")
+    )
 
   def receive: Receive = {
     case IssuesActor.Do =>
-      val router     = SmallestMailboxPool(akkaMailBoxPool, supervisorStrategy = strategy)
-      val issueActor = context.actorOf(router.props(Props(new IssueActor(exportContext, backlogTextFormattingRule))))
+      val router = SmallestMailboxPool(akkaMailBoxPool, supervisorStrategy = strategy)
+      val issueActor = context.actorOf(
+        router.props(Props(new IssueActor(exportContext, backlogTextFormattingRule)))
+      )
 
       (0 until (allCount, limit))
         .foldLeft(Seq.empty[Int]) { (acc, offset) =>

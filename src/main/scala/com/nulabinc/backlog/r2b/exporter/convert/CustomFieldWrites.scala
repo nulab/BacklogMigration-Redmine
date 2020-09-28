@@ -15,8 +15,10 @@ import scala.jdk.CollectionConverters._
 /**
   * @author uchida
   */
-private[exporter] class CustomFieldWrites @Inject() (propertyValue: PropertyValue, customFieldValueWrites: CustomFieldValueWrites)
-    extends Writes[CustomField, Option[BacklogCustomField]]
+private[exporter] class CustomFieldWrites @Inject() (
+    propertyValue: PropertyValue,
+    customFieldValueWrites: CustomFieldValueWrites
+) extends Writes[CustomField, Option[BacklogCustomField]]
     with Logging {
 
   override def writes(customField: CustomField): Option[BacklogCustomField] = {
@@ -24,18 +26,25 @@ private[exporter] class CustomFieldWrites @Inject() (propertyValue: PropertyValu
     optCustomFieldDefinition match {
       case Some(customFieldDefinition) =>
         customFieldDefinition.fieldFormat match {
-          case RedmineConstantValue.FieldFormat.TEXT                                               => Some(toTextCustomField(customField))
-          case RedmineConstantValue.FieldFormat.STRING | RedmineConstantValue.FieldFormat.LINK     => Some(toTextAreaCustomField(customField))
-          case RedmineConstantValue.FieldFormat.INT | RedmineConstantValue.FieldFormat.FLOAT       => Some(toNumericCustomField(customField))
-          case RedmineConstantValue.FieldFormat.DATE                                               => Some(toDateCustomField(customField))
-          case RedmineConstantValue.FieldFormat.BOOL                                               => Some(bool(customField))
-          case RedmineConstantValue.FieldFormat.LIST if (!customFieldDefinition.isMultiple)        => Some(toSingleListCustomField(customField))
-          case RedmineConstantValue.FieldFormat.LIST if (customFieldDefinition.isMultiple)         => Some(toMultipleListCustomField(customField))
-          case RedmineConstantValue.FieldFormat.ENUMERATION if (!customFieldDefinition.isMultiple) => Some(toSingleListCustomField(customField))
-          case RedmineConstantValue.FieldFormat.ENUMERATION if (customFieldDefinition.isMultiple)  => Some(toMultipleListCustomField(customField))
-          case RedmineConstantValue.FieldFormat.VERSION                                            => Some(version(customField))
-          case RedmineConstantValue.FieldFormat.USER                                               => Some(user(customField))
-          case _                                                                                   => None
+          case RedmineConstantValue.FieldFormat.TEXT => Some(toTextCustomField(customField))
+          case RedmineConstantValue.FieldFormat.STRING | RedmineConstantValue.FieldFormat.LINK =>
+            Some(toTextAreaCustomField(customField))
+          case RedmineConstantValue.FieldFormat.INT | RedmineConstantValue.FieldFormat.FLOAT =>
+            Some(toNumericCustomField(customField))
+          case RedmineConstantValue.FieldFormat.DATE => Some(toDateCustomField(customField))
+          case RedmineConstantValue.FieldFormat.BOOL => Some(bool(customField))
+          case RedmineConstantValue.FieldFormat.LIST if (!customFieldDefinition.isMultiple) =>
+            Some(toSingleListCustomField(customField))
+          case RedmineConstantValue.FieldFormat.LIST if (customFieldDefinition.isMultiple) =>
+            Some(toMultipleListCustomField(customField))
+          case RedmineConstantValue.FieldFormat.ENUMERATION
+              if (!customFieldDefinition.isMultiple) =>
+            Some(toSingleListCustomField(customField))
+          case RedmineConstantValue.FieldFormat.ENUMERATION if (customFieldDefinition.isMultiple) =>
+            Some(toMultipleListCustomField(customField))
+          case RedmineConstantValue.FieldFormat.VERSION => Some(version(customField))
+          case RedmineConstantValue.FieldFormat.USER    => Some(user(customField))
+          case _                                        => None
         }
       case _ => None
     }
@@ -99,7 +108,9 @@ private[exporter] class CustomFieldWrites @Inject() (propertyValue: PropertyValu
     BacklogCustomField(
       name = customField.getName,
       fieldTypeId = FieldType.SingleList.getIntValue,
-      optValue = Convert.toBacklog((customField.getId.toString, Option(customField.getValue)))(customFieldValueWrites),
+      optValue = Convert.toBacklog((customField.getId.toString, Option(customField.getValue)))(
+        customFieldValueWrites
+      ),
       values = Seq.empty[String]
     )
 
@@ -107,7 +118,9 @@ private[exporter] class CustomFieldWrites @Inject() (propertyValue: PropertyValu
     BacklogCustomField(
       name = customField.getName,
       fieldTypeId = FieldType.SingleList.getIntValue,
-      optValue = Convert.toBacklog((customField.getId.toString, Option(customField.getValue)))(customFieldValueWrites),
+      optValue = Convert.toBacklog((customField.getId.toString, Option(customField.getValue)))(
+        customFieldValueWrites
+      ),
       values = Seq.empty[String]
     )
 
@@ -115,7 +128,9 @@ private[exporter] class CustomFieldWrites @Inject() (propertyValue: PropertyValu
     BacklogCustomField(
       name = customField.getName,
       fieldTypeId = FieldType.SingleList.getIntValue,
-      optValue = Convert.toBacklog((customField.getId.toString, Option(customField.getValue)))(customFieldValueWrites),
+      optValue = Convert.toBacklog((customField.getId.toString, Option(customField.getValue)))(
+        customFieldValueWrites
+      ),
       values = Seq.empty[String]
     )
 

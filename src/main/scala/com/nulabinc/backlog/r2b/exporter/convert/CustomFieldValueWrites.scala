@@ -24,7 +24,10 @@ private[exporter] class CustomFieldValueWrites @Inject() (propertyValue: Propert
     }
   }
 
-  private[this] def convert(customFieldDefinition: RedmineCustomFieldDefinition, optValue: Option[String]) =
+  private[this] def convert(
+      customFieldDefinition: RedmineCustomFieldDefinition,
+      optValue: Option[String]
+  ) =
     customFieldDefinition.fieldFormat match {
       case RedmineConstantValue.FieldFormat.VERSION =>
         propertyValue.versionOfId(optValue).map(_.getName)

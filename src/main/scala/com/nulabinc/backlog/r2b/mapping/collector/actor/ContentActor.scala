@@ -9,7 +9,9 @@ import com.taskadapter.redmineapi.bean.User
 /**
   * @author uchida
   */
-private[collector] class ContentActor(exclude: ExcludeOption, mappingContext: MappingContext) extends Actor with Logging {
+private[collector] class ContentActor(exclude: ExcludeOption, mappingContext: MappingContext)
+    extends Actor
+    with Logging {
 
   private[this] val wikisActor  = context.actorOf(Props(new WikisActor(mappingContext)))
   private[this] val issuesActor = context.actorOf(Props(new IssuesActor(mappingContext)))

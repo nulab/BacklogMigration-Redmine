@@ -1,8 +1,16 @@
 package com.nulabinc.backlog.r2b.formatters
 
-import com.nulabinc.backlog.migration.common.domain.mappings.{PriorityMapping, StatusMapping, UserMapping}
+import com.nulabinc.backlog.migration.common.domain.mappings.{
+  PriorityMapping,
+  StatusMapping,
+  UserMapping
+}
 import com.nulabinc.backlog.migration.common.formatters.Formatter
-import com.nulabinc.backlog.r2b.domain.mappings.{RedminePriorityMappingItem, RedmineStatusMappingItem, RedmineUserMappingItem}
+import com.nulabinc.backlog.r2b.domain.mappings.{
+  RedminePriorityMappingItem,
+  RedmineStatusMappingItem,
+  RedmineUserMappingItem
+}
 
 object RedmineFormatter {
 

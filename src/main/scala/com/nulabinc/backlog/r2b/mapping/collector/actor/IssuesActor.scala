@@ -17,7 +17,10 @@ import scala.concurrent.duration._
 /**
   * @author uchida
   */
-private[collector] class IssuesActor(mappingContext: MappingContext) extends Actor with BacklogConfiguration with Logging {
+private[collector] class IssuesActor(mappingContext: MappingContext)
+    extends Actor
+    with BacklogConfiguration
+    with Logging {
 
   private[this] val strategy =
     OneForOneStrategy(maxNrOfRetries = 5, withinTimeRange = 10 seconds) {
@@ -35,14 +38,24 @@ private[collector] class IssuesActor(mappingContext: MappingContext) extends Act
   private[this] val allCount   = mappingContext.issueService.countIssues()
   private[this] val completion = new CountDownLatch(allCount)
   private[this] val console =
-    (ProgressBar.progress _)(Messages("common.issues"), Messages("message.analyzing"), Messages("message.analyzed"))
+    (ProgressBar.progress _)(
+      Messages("common.issues"),
+      Messages("message.analyzing"),
+      Messages("message.analyzed")
+    )
   private[this] val issuesInfoProgress =
-    (ProgressBar.progress _)(Messages("common.issues_info"), Messages("message.collecting"), Messages("message.collected"))
+    (ProgressBar.progress _)(
+      Messages("common.issues_info"),
+      Messages("message.collecting"),
+      Messages("message.collected")
+    )
 
   def receive: Receive = {
     case IssuesActor.Do(mappingData: MappingData, allUsers: Seq[User]) =>
-      val router     = SmallestMailboxPool(akkaMailBoxPool, supervisorStrategy = strategy)
-      val issueActor = context.actorOf(router.props(Props(new IssueActor(mappingContext.issueService, mappingData, allUsers))))
+      val router = SmallestMailboxPool(akkaMailBoxPool, supervisorStrategy = strategy)
+      val issueActor = context.actorOf(
+        router.props(Props(new IssueActor(mappingContext.issueService, mappingData, allUsers)))
+      )
 
       (0 until (allCount, limit))
         .foldLeft(Seq.empty[Int]) { (acc, offset) =>

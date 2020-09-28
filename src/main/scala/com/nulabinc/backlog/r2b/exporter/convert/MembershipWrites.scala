@@ -9,7 +9,8 @@ import com.taskadapter.redmineapi.bean.Membership
 /**
   * @author uchida
   */
-private[exporter] class MembershipWrites @Inject() (implicit val userWrites: UserWrites) extends Writes[Seq[Membership], Seq[BacklogUser]] {
+private[exporter] class MembershipWrites @Inject() (implicit val userWrites: UserWrites)
+    extends Writes[Seq[Membership], Seq[BacklogUser]] {
 
   override def writes(memberships: Seq[Membership]): Seq[BacklogUser] = {
     memberships.filter(condition).map(_.getUser).map(Convert.toBacklog(_))

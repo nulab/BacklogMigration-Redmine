@@ -1,8 +1,15 @@
 package com.nulabinc.backlog.r2b.mapping.converters
 
 import com.nulabinc.backlog.migration.common.domain.mappings.ValidatedStatusMapping
-import com.nulabinc.backlog.migration.common.domain.{BacklogCustomStatus, BacklogStatus, BacklogStatusName}
-import com.nulabinc.backlog.r2b.domain.mappings.{RedmineStatusMappingItem, ValidatedRedmineStatusMapping}
+import com.nulabinc.backlog.migration.common.domain.{
+  BacklogCustomStatus,
+  BacklogStatus,
+  BacklogStatusName
+}
+import com.nulabinc.backlog.r2b.domain.mappings.{
+  RedmineStatusMappingItem,
+  ValidatedRedmineStatusMapping
+}
 
 object MappingStatusConverter {
 

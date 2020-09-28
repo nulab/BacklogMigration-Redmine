@@ -37,7 +37,10 @@ trait MappingFile extends Logging {
   def isParsed: Boolean = unmarshal().isDefined
 
   def create(afterMessage: () => Unit) = {
-    IOUtil.output(File(filePath).path.toAbsolutePath, MappingsWrapper(description, redmines.map(convert)).toJson.prettyPrint)
+    IOUtil.output(
+      File(filePath).path.toAbsolutePath,
+      MappingsWrapper(description, redmines.map(convert)).toJson.prettyPrint
+    )
     if (redmines.nonEmpty) {
       afterMessage()
     }
@@ -64,7 +67,10 @@ trait MappingFile extends Logging {
               addedList += convert(redmineItem)
           }
         }
-        IOUtil.output(File(filePath).path.toAbsolutePath, MappingsWrapper(description, mergeList.toSeq).toJson.prettyPrint)
+        IOUtil.output(
+          File(filePath).path.toAbsolutePath,
+          MappingsWrapper(description, mergeList.toSeq).toJson.prettyPrint
+        )
         addedList.toSeq
       case _ =>
         Seq.empty[Mapping]
@@ -103,6 +109,7 @@ trait MappingFile extends Logging {
       case _ => name
     }
 
-  private[this] def convert(redmine: MappingItem): Mapping = Mapping(redmine.name, matchItem(redmine))
+  private[this] def convert(redmine: MappingItem): Mapping =
+    Mapping(redmine.name, matchItem(redmine))
 
 }

@@ -10,7 +10,8 @@ import com.taskadapter.redmineapi.bean.Attachment
 /**
   * @author uchida
   */
-private[exporter] class AttachmentWrites @Inject() () extends Writes[Attachment, BacklogAttachment] {
+private[exporter] class AttachmentWrites @Inject() ()
+    extends Writes[Attachment, BacklogAttachment] {
 
   override def writes(attachment: Attachment): BacklogAttachment = {
     BacklogAttachment(

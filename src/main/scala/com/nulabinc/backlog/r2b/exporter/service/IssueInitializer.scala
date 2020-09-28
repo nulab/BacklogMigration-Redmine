@@ -59,15 +59,21 @@ private[exporter] class IssueInitializer(
   }
 
   private[this] def summary(issue: Issue): BacklogIssueSummary = {
-    val issueInitialValue = new IssueInitialValue(RedmineConstantValue.ATTR, RedmineConstantValue.Attr.SUBJECT)
+    val issueInitialValue =
+      new IssueInitialValue(RedmineConstantValue.ATTR, RedmineConstantValue.Attr.SUBJECT)
     issueInitialValue.findJournalDetail(journals) match {
-      case Some(detail) => BacklogIssueSummary(value = Option(detail.getOldValue).getOrElse(""), original = issue.getSubject)
-      case None         => BacklogIssueSummary(value = issue.getSubject, original = issue.getSubject)
+      case Some(detail) =>
+        BacklogIssueSummary(
+          value = Option(detail.getOldValue).getOrElse(""),
+          original = issue.getSubject
+        )
+      case None => BacklogIssueSummary(value = issue.getSubject, original = issue.getSubject)
     }
   }
 
   private[this] def parentIssueId(issue: Issue): Option[Long] = {
-    val issueInitialValue = new IssueInitialValue(RedmineConstantValue.ATTR, RedmineConstantValue.Attr.PARENT)
+    val issueInitialValue =
+      new IssueInitialValue(RedmineConstantValue.ATTR, RedmineConstantValue.Attr.PARENT)
     issueInitialValue.findJournalDetail(journals) match {
       case Some(detail) =>
         Option(detail.getOldValue) match {
@@ -97,7 +103,8 @@ private[exporter] class IssueInitializer(
 //      }
 
   private[this] def description(issue: Issue): String = {
-    val issueInitialValue = new IssueInitialValue(RedmineConstantValue.ATTR, RedmineConstantValue.Attr.DESCRIPTION)
+    val issueInitialValue =
+      new IssueInitialValue(RedmineConstantValue.ATTR, RedmineConstantValue.Attr.DESCRIPTION)
     issueInitialValue.findJournalDetail(journals) match {
       case Some(detail) => Option(detail.getOldValue).getOrElse("")
       case None         => TextileUtil.convert(issue.getDescription, backlogTextFormattingRule)
@@ -105,7 +112,8 @@ private[exporter] class IssueInitializer(
   }
 
   private[this] def startDate(issue: Issue): Option[String] = {
-    val issueInitialValue = new IssueInitialValue(RedmineConstantValue.ATTR, RedmineConstantValue.Attr.START_DATE)
+    val issueInitialValue =
+      new IssueInitialValue(RedmineConstantValue.ATTR, RedmineConstantValue.Attr.START_DATE)
     issueInitialValue.findJournalDetail(journals) match {
       case Some(detail) => Option(detail.getOldValue)
       case None         => Option(issue.getStartDate).map(DateUtil.dateFormat)
@@ -113,7 +121,8 @@ private[exporter] class IssueInitializer(
   }
 
   private[this] def dueDate(issue: Issue): Option[String] = {
-    val issueInitialValue = new IssueInitialValue(RedmineConstantValue.ATTR, RedmineConstantValue.Attr.DUE_DATE)
+    val issueInitialValue =
+      new IssueInitialValue(RedmineConstantValue.ATTR, RedmineConstantValue.Attr.DUE_DATE)
     issueInitialValue.findJournalDetail(journals) match {
       case Some(detail) => Option(detail.getOldValue)
       case None         => Option(issue.getDueDate).map(DateUtil.dateFormat)
@@ -121,7 +130,8 @@ private[exporter] class IssueInitializer(
   }
 
   private[this] def estimatedHours(issue: Issue): Option[Float] = {
-    val issueInitialValue = new IssueInitialValue(RedmineConstantValue.ATTR, RedmineConstantValue.Attr.ESTIMATED_HOURS)
+    val issueInitialValue =
+      new IssueInitialValue(RedmineConstantValue.ATTR, RedmineConstantValue.Attr.ESTIMATED_HOURS)
     issueInitialValue.findJournalDetail(journals) match {
       case Some(detail) => Option(detail.getOldValue).filter(_.nonEmpty).map(_.toFloat)
       case None         => Option(issue.getEstimatedHours).map(_.toFloat)
@@ -129,7 +139,8 @@ private[exporter] class IssueInitializer(
   }
 
   private[this] def issueTypeName(issue: Issue): Option[String] = {
-    val issueInitialValue = new IssueInitialValue(RedmineConstantValue.ATTR, RedmineConstantValue.Attr.TRACKER)
+    val issueInitialValue =
+      new IssueInitialValue(RedmineConstantValue.ATTR, RedmineConstantValue.Attr.TRACKER)
     issueInitialValue.findJournalDetail(journals) match {
       case Some(detail) =>
         exportContext.propertyValue.trackerOfId(Option(detail.getOldValue)).map(_.getName)
@@ -138,8 +149,9 @@ private[exporter] class IssueInitializer(
   }
 
   private[this] def categoryNames(issue: Issue): Seq[String] = {
-    val issueInitialValue = new IssueInitialValue(RedmineConstantValue.ATTR, RedmineConstantValue.Attr.CATEGORY)
-    val optDetails        = issueInitialValue.findJournalDetails(journals)
+    val issueInitialValue =
+      new IssueInitialValue(RedmineConstantValue.ATTR, RedmineConstantValue.Attr.CATEGORY)
+    val optDetails = issueInitialValue.findJournalDetails(journals)
     optDetails match {
       case Some(details) =>
         details.flatMap { detail =>
@@ -150,8 +162,9 @@ private[exporter] class IssueInitializer(
   }
 
   private[this] def milestoneNames(issue: Issue): Seq[String] = {
-    val issueInitialValue = new IssueInitialValue(RedmineConstantValue.ATTR, RedmineConstantValue.Attr.VERSION)
-    val optDetails        = issueInitialValue.findJournalDetails(journals)
+    val issueInitialValue =
+      new IssueInitialValue(RedmineConstantValue.ATTR, RedmineConstantValue.Attr.VERSION)
+    val optDetails = issueInitialValue.findJournalDetails(journals)
     optDetails match {
       case Some(details) =>
         details.flatMap { detail =>
@@ -162,7 +175,8 @@ private[exporter] class IssueInitializer(
   }
 
   private[this] def priorityName(issue: Issue): String = {
-    val issueInitialValue = new IssueInitialValue(RedmineConstantValue.ATTR, RedmineConstantValue.Attr.PRIORITY)
+    val issueInitialValue =
+      new IssueInitialValue(RedmineConstantValue.ATTR, RedmineConstantValue.Attr.PRIORITY)
     issueInitialValue.findJournalDetail(journals) match {
       case Some(detail) =>
         exportContext.propertyValue
@@ -171,12 +185,14 @@ private[exporter] class IssueInitializer(
           .map(MappingPriorityConverter.convert(exportContext.mappingContainer.priority, _))
           .getOrElse("")
       case None =>
-        MappingPriorityConverter.convert(exportContext.mappingContainer.priority, issue.getPriorityText)
+        MappingPriorityConverter
+          .convert(exportContext.mappingContainer.priority, issue.getPriorityText)
     }
   }
 
   private[this] def assignee(issue: Issue): Option[BacklogUser] = {
-    val issueInitialValue = new IssueInitialValue(RedmineConstantValue.ATTR, RedmineConstantValue.Attr.ASSIGNED)
+    val issueInitialValue =
+      new IssueInitialValue(RedmineConstantValue.ATTR, RedmineConstantValue.Attr.ASSIGNED)
     issueInitialValue.findJournalDetail(journals) match {
       case Some(detail) =>
         exportContext.propertyValue.userOfId(Option(detail.getOldValue)).map(Convert.toBacklog(_))
@@ -185,22 +201,30 @@ private[exporter] class IssueInitializer(
   }
 
   private[this] def customField(customField: CustomField): Option[BacklogCustomField] = {
-    val optCustomFieldDefinition = exportContext.propertyValue.customFieldDefinitionOfName(customField.getName)
+    val optCustomFieldDefinition =
+      exportContext.propertyValue.customFieldDefinitionOfName(customField.getName)
     optCustomFieldDefinition match {
       case Some(customFieldDefinition) =>
-        if (customFieldDefinition.isMultiple) multipleCustomField(customField, customFieldDefinition)
+        if (customFieldDefinition.isMultiple)
+          multipleCustomField(customField, customFieldDefinition)
         else singleCustomField(customField, customFieldDefinition)
       case _ => None
     }
   }
 
-  private[this] def multipleCustomField(customField: CustomField, customFieldDefinition: RedmineCustomFieldDefinition): Option[BacklogCustomField] = {
-    val issueInitialValue                      = new IssueInitialValue(RedmineConstantValue.CUSTOM_FIELD, customFieldDefinition.id.toString)
+  private[this] def multipleCustomField(
+      customField: CustomField,
+      customFieldDefinition: RedmineCustomFieldDefinition
+  ): Option[BacklogCustomField] = {
+    val issueInitialValue =
+      new IssueInitialValue(RedmineConstantValue.CUSTOM_FIELD, customFieldDefinition.id.toString)
     val optDetails: Option[Seq[JournalDetail]] = issueInitialValue.findJournalDetails(journals)
     val initialValues: Seq[String] =
       optDetails match {
         case Some(details) =>
-          details.flatMap(detail => Convert.toBacklog((customField.getId.toString, Option(detail.getOldValue))))
+          details.flatMap(detail =>
+            Convert.toBacklog((customField.getId.toString, Option(detail.getOldValue)))
+          )
         case _ => customField.getValues.asScala.toSeq
       }
     Convert.toBacklog(customField) match {
@@ -209,12 +233,17 @@ private[exporter] class IssueInitializer(
     }
   }
 
-  private[this] def singleCustomField(customField: CustomField, customFieldDefinition: RedmineCustomFieldDefinition): Option[BacklogCustomField] = {
-    val issueInitialValue = new IssueInitialValue(RedmineConstantValue.CUSTOM_FIELD, customFieldDefinition.id.toString)
+  private[this] def singleCustomField(
+      customField: CustomField,
+      customFieldDefinition: RedmineCustomFieldDefinition
+  ): Option[BacklogCustomField] = {
+    val issueInitialValue =
+      new IssueInitialValue(RedmineConstantValue.CUSTOM_FIELD, customFieldDefinition.id.toString)
     val initialValue: Option[String] =
       issueInitialValue.findJournalDetail(journals) match {
-        case Some(detail) => Convert.toBacklog((customField.getId.toString, Option(detail.getOldValue)))
-        case _            => Convert.toBacklog((customField.getId.toString, Option(customField.getValue)))
+        case Some(detail) =>
+          Convert.toBacklog((customField.getId.toString, Option(detail.getOldValue)))
+        case _ => Convert.toBacklog((customField.getId.toString, Option(customField.getValue)))
       }
     Convert.toBacklog(customField) match {
       case Some(backlogCustomField) => Some(backlogCustomField.copy(optValue = initialValue))

@@ -18,7 +18,12 @@ import scala.concurrent.duration._
 /**
   * @author uchida
   */
-private[collector] class IssueActor(issueService: IssueService, mappingData: MappingData, allUsers: Seq[User]) extends Actor with Logging {
+private[collector] class IssueActor(
+    issueService: IssueService,
+    mappingData: MappingData,
+    allUsers: Seq[User]
+) extends Actor
+    with Logging {
 
   override def preRestart(reason: Throwable, message: Option[Any]) = {
     logger.debug(s"preRestart: reason: ${reason}, message: ${message}")
@@ -31,7 +36,12 @@ private[collector] class IssueActor(issueService: IssueService, mappingData: Map
   private[this] val statuses = mutable.Set.empty[Option[String]]
 
   def receive: Receive = {
-    case IssueActor.Do(issueId: Int, completion: CountDownLatch, allCount: Int, console: ((Int, Int) => Unit)) =>
+    case IssueActor.Do(
+          issueId: Int,
+          completion: CountDownLatch,
+          allCount: Int,
+          console: ((Int, Int) => Unit)
+        ) =>
       logger.debug(s"[START ISSUE]${issueId} thread numbers:${java.lang.Thread.activeCount()}")
       val issue = issueService.issueOfId(issueId, Include.journals)
       parse(issue)
@@ -66,7 +76,9 @@ private[collector] class IssueActor(issueService: IssueService, mappingData: Map
   }
 
   private[this] def addUser(value: String) =
-    for { userId <- Option(value) } yield users += allUsers.find(user => user.getId.intValue() == userId.toInt)
+    for { userId <- Option(value) } yield users += allUsers.find(user =>
+      user.getId.intValue() == userId.toInt
+    )
 
   private[this] def addStatus(value: String) = statuses += Option(value)
 
@@ -74,6 +86,11 @@ private[collector] class IssueActor(issueService: IssueService, mappingData: Map
 
 private[collector] object IssueActor {
 
-  case class Do(issueId: Int, completion: CountDownLatch, allCount: Int, console: ((Int, Int) => Unit))
+  case class Do(
+      issueId: Int,
+      completion: CountDownLatch,
+      allCount: Int,
+      console: ((Int, Int) => Unit)
+  )
 
 }

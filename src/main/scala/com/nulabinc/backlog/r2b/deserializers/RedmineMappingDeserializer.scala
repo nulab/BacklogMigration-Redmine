@@ -9,12 +9,17 @@ import com.nulabinc.backlog.migration.common.domain.mappings.{
   StatusMapping,
   UserMapping
 }
-import com.nulabinc.backlog.r2b.domain.mappings.{RedminePriorityMappingItem, RedmineStatusMappingItem, RedmineUserMappingItem}
+import com.nulabinc.backlog.r2b.domain.mappings.{
+  RedminePriorityMappingItem,
+  RedmineStatusMappingItem,
+  RedmineUserMappingItem
+}
 import org.apache.commons.csv.CSVRecord
 
 object RedmineMappingDeserializer {
 
-  implicit val statusDeserializer: Deserializer[CSVRecord, StatusMapping[RedmineStatusMappingItem]] =
+  implicit val statusDeserializer
+      : Deserializer[CSVRecord, StatusMapping[RedmineStatusMappingItem]] =
     (record: CSVRecord) =>
       new StatusMapping[RedmineStatusMappingItem] {
         override val src: RedmineStatusMappingItem =
@@ -25,7 +30,8 @@ object RedmineMappingDeserializer {
           Option(record.get(1)).map(s => BacklogStatusMappingItem(s))
       }
 
-  implicit val priorityDeserializer: Deserializer[CSVRecord, PriorityMapping[RedminePriorityMappingItem]] =
+  implicit val priorityDeserializer
+      : Deserializer[CSVRecord, PriorityMapping[RedminePriorityMappingItem]] =
     (record: CSVRecord) =>
       new PriorityMapping[RedminePriorityMappingItem] {
         override val src: RedminePriorityMappingItem = RedminePriorityMappingItem(
