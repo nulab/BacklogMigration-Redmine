@@ -42,7 +42,6 @@ import com.nulabinc.backlog.r2b.redmine.conf.RedmineApiConfiguration
 import com.nulabinc.backlog.r2b.{AppError, MappingError, OperationCanceled, ValidationError}
 import com.osinka.i18n.Messages
 import monix.eval.Task
-import monix.execution.Scheduler
 
 /**
   * @author uchida
@@ -54,7 +53,6 @@ object R2BCli extends BacklogConfiguration with Logging {
   import com.nulabinc.backlog.r2b.mapping.RedmineMappingHeader._
   import com.nulabinc.backlog.r2b.serializers.RedmineMappingSerializer._
 
-  private implicit val exc: Scheduler               = monix.execution.Scheduler.Implicits.global
   private implicit val storageDSL: StorageDSL[Task] = LocalStorageDSL()
   private implicit val consoleDSL: ConsoleDSL[Task] = JansiConsoleDSL()
 
@@ -66,42 +64,31 @@ object R2BCli extends BacklogConfiguration with Logging {
 
     for {
       _ <- validateParam(config)
-    } yield {
-      val mappingFileContainer = createMapping(config)
+      mappingFileContainer = createMapping(config)
+      _ <- StatusMappingFileService.init[RedmineStatusMappingItem, Task](
+        mappingFilePath = MappingDirectory.default.statusMappingFilePath,
+        mappingListPath = MappingDirectory.default.statusMappingListFilePath,
+        srcItems = mappingFileContainer.status.redmines.map(r => RedmineStatusMappingItem(r.name)),
+        dstItems = backlogStatusService.allStatuses()
+      )
 
-      StatusMappingFileService
-        .init[RedmineStatusMappingItem, Task](
-          mappingFilePath = MappingDirectory.default.statusMappingFilePath,
-          mappingListPath = MappingDirectory.default.statusMappingListFilePath,
-          srcItems =
-            mappingFileContainer.status.redmines.map(r => RedmineStatusMappingItem(r.name)),
-          dstItems = backlogStatusService.allStatuses()
-        )
-        .runSyncUnsafe()
+      _ <- PriorityMappingFileService.init[RedminePriorityMappingItem, Task](
+        mappingFilePath = MappingDirectory.default.priorityMappingFilePath,
+        mappingListPath = MappingDirectory.default.priorityMappingListFilePath,
+        srcItems =
+          mappingFileContainer.priority.redmines.map(r => RedminePriorityMappingItem(r.name)),
+        dstItems = backlogPriorityService.allPriorities()
+      )
 
-      PriorityMappingFileService
-        .init[RedminePriorityMappingItem, Task](
-          mappingFilePath = MappingDirectory.default.priorityMappingFilePath,
-          mappingListPath = MappingDirectory.default.priorityMappingListFilePath,
-          srcItems =
-            mappingFileContainer.priority.redmines.map(r => RedminePriorityMappingItem(r.name)),
-          dstItems = backlogPriorityService.allPriorities()
-        )
-        .runSyncUnsafe()
-
-      UserMappingFileService
-        .init[RedmineUserMappingItem, Task](
-          mappingFilePath = MappingDirectory.default.userMappingFilePath,
-          mappingListPath = MappingDirectory.default.userMappingListFilePath,
-          srcItems =
-            mappingFileContainer.user.redmines.map(r => RedmineUserMappingItem(r.name, r.display)),
-          dstItems = backlogUserService.allUsers(),
-          dstApiConfiguration = config.backlogConfig
-        )
-        .runSyncUnsafe()
-
-      Right(())
-    }
+      _ <- UserMappingFileService.init[RedmineUserMappingItem, Task](
+        mappingFilePath = MappingDirectory.default.userMappingFilePath,
+        mappingListPath = MappingDirectory.default.userMappingListFilePath,
+        srcItems =
+          mappingFileContainer.user.redmines.map(r => RedmineUserMappingItem(r.name, r.display)),
+        dstItems = backlogUserService.allUsers(),
+        dstApiConfiguration = config.backlogConfig
+      )
+    } yield Right(())
   }
 
   def migrate(config: AppConfiguration): Task[Either[AppError, Unit]] = {

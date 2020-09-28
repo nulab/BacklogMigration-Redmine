@@ -7,18 +7,26 @@ import com.nulabinc.backlog.migration.common.conf.{
   BacklogConfiguration,
   ExcludeOption
 }
+import com.nulabinc.backlog.migration.common.dsl.{ConsoleDSL, StorageDSL}
+import com.nulabinc.backlog.migration.common.errors.{MappingFileNotFound, MappingValidationError}
+import com.nulabinc.backlog.migration.common.interpreters.{JansiConsoleDSL, LocalStorageDSL}
+import com.nulabinc.backlog.migration.common.messages.ConsoleMessages
 import com.nulabinc.backlog.migration.common.utils.{ConsoleOut, Logging}
-import com.nulabinc.backlog.r2b.AppError
 import com.nulabinc.backlog.r2b.cli.R2BCli
 import com.nulabinc.backlog.r2b.conf._
 import com.nulabinc.backlog.r2b.redmine.conf.RedmineApiConfiguration
 import com.nulabinc.backlog.r2b.utils.{ClassVersion, DisableSSLCertificateCheckUtil}
+import com.nulabinc.backlog.r2b.{AppError, MappingError, OperationCanceled, ValidationError}
 import com.osinka.i18n.Messages
 import monix.eval.Task
+import monix.execution.Scheduler
 import org.fusesource.jansi.AnsiConsole
 import org.rogach.scallop._
-import spray.json._
 import spray.json.DefaultJsonProtocol._
+import spray.json._
+
+import scala.concurrent.Await
+import scala.concurrent.duration.Duration
 
 class CommandLineInterface(arguments: Seq[String])
     extends ScallopConf(arguments)
@@ -130,6 +138,10 @@ class CommandLineInterface(arguments: Seq[String])
 
 object R2B extends BacklogConfiguration with Logging {
 
+  private implicit val exc: Scheduler               = monix.execution.Scheduler.Implicits.global
+  private implicit val storageDSL: StorageDSL[Task] = LocalStorageDSL()
+  private implicit val consoleDSL: ConsoleDSL[Task] = JansiConsoleDSL()
+
   def main(args: Array[String]): Unit = {
     ConsoleOut.println(s"""|${applicationName}
                  |--------------------------------------------------""".stripMargin)
@@ -139,8 +151,33 @@ object R2B extends BacklogConfiguration with Logging {
     checkRelease()
     if (ClassVersion.isValid()) {
       try {
-        val cli: CommandLineInterface = new CommandLineInterface(args.toIndexedSeq)
-        execute(cli)
+        val cli = new CommandLineInterface(args.toIndexedSeq)
+        val asyncResult = for {
+          result <- execute(cli)
+          _ <- result match {
+            case Right(_) =>
+              Task(Right(()))
+            case Left(error: ValidationError) => ???
+            case Left(error: MappingError) =>
+              error.inner match {
+                case _: MappingFileNotFound =>
+                  ConsoleDSL[Task].errorln(ConsoleMessages.Mappings.needsSetup)
+                case e: MappingValidationError[_] =>
+                  ConsoleDSL[Task].errorln(ConsoleMessages.Mappings.validationError(e))
+                case e =>
+                  ConsoleDSL[Task].errorln(e.toString)
+              }
+            case Left(OperationCanceled) =>
+              ConsoleDSL[Task].errorln(MessageResources.cancel)
+          }
+        } yield ()
+
+        val f = asyncResult.onErrorRecover { ex =>
+          logger.error(ex.getMessage, ex)
+          exit(1, ex)
+        }.runToFuture
+
+        Await.result(f, Duration.Inf)
         AnsiConsole.systemUninstall()
         System.exit(0)
       } catch {
@@ -158,7 +195,17 @@ object R2B extends BacklogConfiguration with Logging {
     }
   }
 
-  private[this] def execute(cli: CommandLineInterface): Task[Either[AppError, Unit]] =
+  private def exit(exitCode: Int): Unit =
+    System.exit(exitCode)
+
+  private def exit(exitCode: Int, error: Throwable): Unit = {
+    ConsoleOut.error(
+      "ERROR: " + error.getMessage + "\n" + error.printStackTrace()
+    )
+    exit(exitCode)
+  }
+
+  private def execute(cli: CommandLineInterface): Task[Either[AppError, Unit]] =
     cli.subcommand match {
       case Some(cli.execute) if cli.execute.importOnly() =>
         R2BCli.doImport(getConfiguration(cli))
