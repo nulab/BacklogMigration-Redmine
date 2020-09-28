@@ -17,11 +17,12 @@ import scala.concurrent.duration.Duration
 /**
   * @author uchida
   */
-private[collector] class MappingCollector @Inject()(mappingContextProvider: MappingContextProvider,
-                                                    membershipService: MembershipService,
-                                                    userService: UserService,
-                                                    newsService: NewsService)
-    extends Logging {
+private[collector] class MappingCollector @Inject() (
+    mappingContextProvider: MappingContextProvider,
+    membershipService: MembershipService,
+    userService: UserService,
+    newsService: NewsService
+) extends Logging {
 
   def boot(exclude: ExcludeOption, mappingData: MappingData): Unit = {
     val mappingContext = mappingContextProvider.get()

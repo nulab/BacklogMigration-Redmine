@@ -57,11 +57,13 @@ private[collector] class IssuesActor(mappingContext: MappingContext) extends Act
 
   private[this] def issueIds(offset: Int): Seq[Int] = {
     val params =
-      Map("offset"        -> offset.toString,
-          "limit"         -> limit.toString,
-          "project_id"    -> mappingContext.projectId.value.toString,
-          "status_id"     -> "*",
-          "subproject_id" -> "!*")
+      Map(
+        "offset"        -> offset.toString,
+        "limit"         -> limit.toString,
+        "project_id"    -> mappingContext.projectId.value.toString,
+        "status_id"     -> "*",
+        "subproject_id" -> "!*"
+      )
     val ids = mappingContext.issueService.allIssues(params).map(_.getId.intValue())
     issuesInfoProgress(((offset / limit) + 1), ((allCount / limit) + 1))
     ids

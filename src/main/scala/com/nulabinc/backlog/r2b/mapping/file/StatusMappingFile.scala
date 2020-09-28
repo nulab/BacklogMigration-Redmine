@@ -3,25 +3,22 @@ package com.nulabinc.backlog.r2b.mapping.file
 import com.nulabinc.backlog.migration.common.conf.BacklogApiConfiguration
 import com.nulabinc.backlog.migration.common.modules.{ServiceInjector => BacklogInjector}
 import com.nulabinc.backlog.migration.common.service.{StatusService => BacklogStatusService}
-import com.nulabinc.backlog.migration.common.utils.StringUtil
-import com.nulabinc.backlog.r2b.mapping.core.MappingDirectory
+import com.nulabinc.backlog.migration.common.utils.{Logging, StringUtil}
 import com.nulabinc.backlog.r2b.redmine.conf.RedmineApiConfiguration
 import com.nulabinc.backlog.r2b.redmine.modules.{ServiceInjector => RedmineInjector}
 import com.nulabinc.backlog.r2b.redmine.service.{StatusService => RedmineStatusService}
-import com.nulabinc.backlog4j.Status
 import com.osinka.i18n.{Lang, Messages}
 import com.taskadapter.redmineapi.bean.IssueStatus
 
 /**
   * @author uchida
   */
-class StatusMappingFile(redmineApiConfig: RedmineApiConfiguration, backlogApiConfig: BacklogApiConfiguration, statuses: Seq[String])
-    extends MappingFile {
+class StatusMappingFile(redmineApiConfig: RedmineApiConfiguration, backlogApiConfig: BacklogApiConfiguration, statuses: Seq[String]) extends Logging {
 
-  private[this] val redmineItems = getRedmineItems()
-  private[this] val backlogItems = getBacklogItems()
+  private[this] val redmineItems = getRedmineItems
+  private[this] val backlogItems = getBacklogItems
 
-  private[this] def getRedmineItems(): Seq[MappingItem] = {
+  private[this] def getRedmineItems: Seq[MappingItem] = {
 
     val injector        = RedmineInjector.createInjector(redmineApiConfig)
     val statusService   = injector.getInstance(classOf[RedmineStatusService])
@@ -45,15 +42,13 @@ class StatusMappingFile(redmineApiConfig: RedmineApiConfiguration, backlogApiCon
     redmines concat deleteItems
   }
 
-  private[this] def getBacklogItems(): Seq[MappingItem] = {
-    def createItem(status: Status): MappingItem = {
-      MappingItem(status.getName, status.getName)
-    }
-
+  private[this] def getBacklogItems: Seq[MappingItem] = {
     val injector        = BacklogInjector.createInjector(backlogApiConfig)
     val statusService   = injector.getInstance(classOf[BacklogStatusService])
     val backlogStatuses = statusService.allStatuses()
-    backlogStatuses.map(createItem)
+    backlogStatuses.map { backlogStatus =>
+      MappingItem(backlogStatus.name.trimmed, backlogStatus.name.trimmed)
+    }
   }
 
   private[this] object Backlog {
@@ -90,7 +85,7 @@ class StatusMappingFile(redmineApiConfig: RedmineApiConfiguration, backlogApiCon
     val REJECTED_EN: String    = Messages("mapping.status.redmine.rejected")(Lang("en"))
   }
 
-  override def matchItem(redmine: MappingItem): String =
+  def matchItem(redmine: MappingItem): String =
     backlogs.map(_.name).find(_ == redmine.name) match {
       case Some(backlog) => backlog
       case None =>
@@ -105,17 +100,15 @@ class StatusMappingFile(redmineApiConfig: RedmineApiConfiguration, backlogApiCon
         }
     }
 
-  override def redmines: Seq[MappingItem] = redmineItems
+  def redmines: Seq[MappingItem] = redmineItems
 
-  override def backlogs: Seq[MappingItem] = backlogItems
+  def backlogs: Seq[MappingItem] = backlogItems
 
-  override def filePath: String = MappingDirectory.STATUS_MAPPING_FILE
+  def itemName: String = Messages("common.statuses")
 
-  override def itemName: String = Messages("common.statuses")
-
-  override def description: String =
+  def description: String =
     Messages("cli.mapping.configurable", itemName, backlogs.map(_.name).mkString(","))
 
-  override def isDisplayDetail: Boolean = false
+  def isDisplayDetail: Boolean = false
 
 }

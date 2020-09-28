@@ -1,6 +1,6 @@
 # Common
-common.backlog=Backlog
-common.redmine=Redmine
+common.src=Redmine
+common.dst=Backlog
 common.projects=projects
 common.users=users
 common.statuses=statuses

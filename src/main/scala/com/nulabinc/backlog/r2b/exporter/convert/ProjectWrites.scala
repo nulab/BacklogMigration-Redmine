@@ -10,15 +10,17 @@ import com.taskadapter.redmineapi.bean._
 /**
   * @author uchida
   */
-private[exporter] class ProjectWrites @Inject()(projectKey: BacklogProjectKey) extends Writes[Project, BacklogProject] {
+private[exporter] class ProjectWrites @Inject() (projectKey: BacklogProjectKey) extends Writes[Project, BacklogProject] {
 
   override def writes(project: Project): BacklogProject = {
-    BacklogProject(optId = Some(project.getId.intValue()),
-                   name = project.getName,
-                   key = projectKey.value,
-                   isChartEnabled = true,
-                   isSubtaskingEnabled = true,
-                   textFormattingRule = TextFormattingRule.Markdown.getStrValue)
+    BacklogProject(
+      optId = Some(project.getId.intValue()),
+      name = project.getName,
+      key = projectKey.value,
+      isChartEnabled = true,
+      isSubtaskingEnabled = true,
+      textFormattingRule = TextFormattingRule.Markdown.getStrValue
+    )
   }
 
 }

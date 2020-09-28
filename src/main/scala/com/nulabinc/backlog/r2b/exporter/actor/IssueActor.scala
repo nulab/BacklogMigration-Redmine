@@ -69,11 +69,13 @@ private[exporter] class IssueActor(exportContext: ExportContext, backlogTextForm
     }
   }
 
-  private[this] def exportComment(comment: BacklogComment,
-                                  issue: BacklogIssue,
-                                  comments: Seq[BacklogComment],
-                                  attachments: Seq[Attachment],
-                                  index: Int): File = {
+  private[this] def exportComment(
+      comment: BacklogComment,
+      issue: BacklogIssue,
+      comments: Seq[BacklogComment],
+      attachments: Seq[Attachment],
+      index: Int
+  ): File = {
     val commentCreated   = DateUtil.tryIsoParse(comment.optCreated)
     val issueDirPath     = exportContext.backlogPaths.issueDirectoryPath("comment", issue.id, commentCreated, index)
     val changeLogReducer = new ChangeLogReducer(exportContext, issueDirPath, issue, comments, attachments)

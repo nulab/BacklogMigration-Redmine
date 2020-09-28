@@ -29,16 +29,17 @@ private[file] class MappingValidator(redmineMappings: Seq[MappingItem], backlogM
   private[this] def itemsExists(mappings: Seq[Mapping], checkService: String): Seq[String] = {
     mappings.foldLeft(Seq.empty[String])((errors: Seq[String], mapping: Mapping) =>
       if (checkService == CHECK_REDMINE) {
-        itemExists(mapping.redmine, redmineMappings, Messages("common.redmine")) match {
+        itemExists(mapping.redmine, redmineMappings, Messages("common.src")) match {
           case Some(error) => errors :+ error
           case None        => errors
         }
       } else {
-        itemExists(mapping.backlog, backlogMappings, Messages("common.backlog")) match {
+        itemExists(mapping.backlog, backlogMappings, Messages("common.dst")) match {
           case Some(error) => errors :+ error
           case None        => errors
         }
-    })
+      }
+    )
   }
 
   private[this] def itemExists(value: String, mappingItems: Seq[MappingItem], serviceName: String): Option[String] = {
@@ -58,10 +59,10 @@ private[file] class MappingValidator(redmineMappings: Seq[MappingItem], backlogM
 
   private[this] def itemRequired(mapping: Mapping, checkService: String): Option[String] = {
     if (checkService == CHECK_REDMINE) {
-      if (mapping.redmine.isEmpty) Some(s"- ${Messages("cli.mapping.error.empty.item", Messages("common.backlog"), itemName, mapping.backlog)}")
+      if (mapping.redmine.isEmpty) Some(s"- ${Messages("cli.mapping.error.empty.item", Messages("common.dst"), itemName, mapping.backlog)}")
       else None
     } else {
-      if (mapping.backlog.isEmpty) Some(s"- ${Messages("cli.mapping.error.empty.item", Messages("common.redmine"), itemName, mapping.redmine)}")
+      if (mapping.backlog.isEmpty) Some(s"- ${Messages("cli.mapping.error.empty.item", Messages("common.dst"), itemName, mapping.redmine)}")
       else None
     }
   }

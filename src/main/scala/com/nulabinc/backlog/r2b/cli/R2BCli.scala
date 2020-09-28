@@ -2,391 +2,310 @@ package com.nulabinc.backlog.r2b.cli
 
 import java.net.{HttpURLConnection, URL}
 
-import com.nulabinc.backlog.migration.common.conf.{BacklogApiConfiguration, BacklogConfiguration, BacklogPaths}
+import cats.data.EitherT
+import com.nulabinc.backlog.migration.common.conf.{
+  BacklogApiConfiguration,
+  BacklogConfiguration,
+  BacklogPaths,
+  MappingDirectory
+}
 import com.nulabinc.backlog.migration.common.domain.{BacklogProjectKey, BacklogTextFormattingRule}
+import com.nulabinc.backlog.migration.common.dsl.{ConsoleDSL, StorageDSL}
+import com.nulabinc.backlog.migration.common.interpreters.{JansiConsoleDSL, LocalStorageDSL}
 import com.nulabinc.backlog.migration.common.modules.{ServiceInjector => BacklogInjector}
-import com.nulabinc.backlog.migration.common.service.ProjectService
+import com.nulabinc.backlog.migration.common.service.{
+  ProjectService,
+  PriorityService => BacklogPriorityService,
+  StatusService => BacklogStatusService,
+  UserService => BacklogUserService
+}
+import com.nulabinc.backlog.migration.common.services.{
+  PriorityMappingFileService,
+  StatusMappingFileService,
+  UserMappingFileService
+}
 import com.nulabinc.backlog.migration.common.utils.ControlUtil.using
-import com.nulabinc.backlog.migration.common.utils.{ConsoleOut, Logging}
-import com.nulabinc.backlog.migration.importer.core.{ImportConfig, Boot => BootImporter}
-import com.nulabinc.backlog.r2b.conf.{AppConfiguration, DestroyConfiguration}
-import com.nulabinc.backlog.r2b.dsl.BacklogDSL
+import com.nulabinc.backlog.migration.common.utils.Logging
+import com.nulabinc.backlog.migration.importer.core.{Boot => BootImporter}
+import com.nulabinc.backlog.r2b.conf.AppConfiguration
+import com.nulabinc.backlog.r2b.core.MessageResources
+import com.nulabinc.backlog.r2b.domain.mappings.{
+  RedminePriorityMappingItem,
+  RedmineStatusMappingItem,
+  RedmineUserMappingItem
+}
 import com.nulabinc.backlog.r2b.exporter.core.{Boot => BootExporter}
-import com.nulabinc.backlog.r2b.interpreters.AppDSL.AppProgram
-import com.nulabinc.backlog.r2b.interpreters._
-import com.nulabinc.backlog.r2b.interpreters.backlog.Backlog4jInterpreter
 import com.nulabinc.backlog.r2b.mapping.collector.core.{Boot => BootMapping}
 import com.nulabinc.backlog.r2b.mapping.core.MappingContainer
-import com.nulabinc.backlog.r2b.mapping.domain.Mapping
 import com.nulabinc.backlog.r2b.mapping.file._
-import com.nulabinc.backlog4j.Issue
+import com.nulabinc.backlog.r2b.redmine.conf.RedmineApiConfiguration
+import com.nulabinc.backlog.r2b.{AppError, MappingError, OperationCanceled, ValidationError}
 import com.osinka.i18n.Messages
-import monix.execution.Scheduler
-
-import scala.concurrent.duration.Duration
-import scala.concurrent.{Await, ExecutionContext, Future}
-
-object FutureUtils {
-  case class Suspend[A](eval: () => Future[A])
-
-  def sequential[A](prgs: Seq[Suspend[A]])(implicit exc: ExecutionContext): Future[Seq[A]] = {
-    prgs.foldLeft(Future.successful(Seq.empty[A])) {
-      case (acc, future) =>
-        acc.flatMap(res => future.eval().map(res2 => res :+ res2))
-    }
-  }
-
-}
+import monix.eval.Task
 
 /**
   * @author uchida
   */
 object R2BCli extends BacklogConfiguration with Logging {
+  import com.nulabinc.backlog.migration.common.shared.syntax._
+  import com.nulabinc.backlog.r2b.deserializers.RedmineMappingDeserializer._
+  import com.nulabinc.backlog.r2b.formatters.RedmineFormatter._
+  import com.nulabinc.backlog.r2b.mapping.RedmineMappingHeader._
+  import com.nulabinc.backlog.r2b.serializers.RedmineMappingSerializer._
 
-  def init(config: AppConfiguration): Unit = {
-    if (validateParam(config)) {
-      val mappingFileContainer = createMapping(config)
-      output(mappingFileContainer.user)
-      output(mappingFileContainer.status)
-      output(mappingFileContainer.priority)
-    }
+  private implicit val storageDSL: StorageDSL[Task] = LocalStorageDSL()
+  private implicit val consoleDSL: ConsoleDSL[Task] = JansiConsoleDSL()
+
+  def init(config: AppConfiguration): Task[Either[AppError, Unit]] = {
+    val injector               = BacklogInjector.createInjector(config.backlogConfig)
+    val backlogStatusService   = injector.getInstance(classOf[BacklogStatusService])
+    val backlogPriorityService = injector.getInstance(classOf[BacklogPriorityService])
+    val backlogUserService     = injector.getInstance(classOf[BacklogUserService])
+
+    for {
+      _ <- validateParam(config)
+      mappingFileContainer = createMapping(config)
+      _ <- StatusMappingFileService.init[RedmineStatusMappingItem, Task](
+        mappingFilePath = MappingDirectory.default.statusMappingFilePath,
+        mappingListPath = MappingDirectory.default.statusMappingListFilePath,
+        srcItems = mappingFileContainer.status.redmines.map(r => RedmineStatusMappingItem(r.name)),
+        dstItems = backlogStatusService.allStatuses()
+      )
+
+      _ <- PriorityMappingFileService.init[RedminePriorityMappingItem, Task](
+        mappingFilePath = MappingDirectory.default.priorityMappingFilePath,
+        mappingListPath = MappingDirectory.default.priorityMappingListFilePath,
+        srcItems =
+          mappingFileContainer.priority.redmines.map(r => RedminePriorityMappingItem(r.name)),
+        dstItems = backlogPriorityService.allPriorities()
+      )
+
+      _ <- UserMappingFileService.init[RedmineUserMappingItem, Task](
+        mappingFilePath = MappingDirectory.default.userMappingFilePath,
+        mappingListPath = MappingDirectory.default.userMappingListFilePath,
+        srcItems =
+          mappingFileContainer.user.redmines.map(r => RedmineUserMappingItem(r.name, r.display)),
+        dstItems = backlogUserService.allUsers(),
+        dstApiConfiguration = config.backlogConfig
+      )
+    } yield Right(())
   }
 
-  def migrate(config: AppConfiguration): Unit = {
-    val importConfig = ImportConfig(fitIssueKey = false, retryCount = config.retryCount, excludeOption = config.exclude)
+  def migrate(config: AppConfiguration): Task[Either[AppError, Unit]] = {
+    val backlogInjector      = BacklogInjector.createInjector(config.backlogConfig)
+    val backlogPaths         = backlogInjector.getInstance(classOf[BacklogPaths])
+    val backlogStatusService = backlogInjector.getInstance(classOf[BacklogStatusService])
+    val backlogPriorityService =
+      backlogInjector.getInstance(classOf[BacklogPriorityService])
+    val backlogUserService = backlogInjector.getInstance(classOf[BacklogUserService])
 
-    if (validateParam(config)) {
-      if (config.importOnly) BootImporter.execute(config.backlogConfig, importConfig)
-      else {
-        val mappingFileContainer = createMapping(config)
-        if (validateMapping(mappingFileContainer.user) &&
-            validateMapping(mappingFileContainer.status) &&
-            validateMapping(mappingFileContainer.priority)) {
-          if (confirmImport(config, mappingFileContainer)) {
+    val result = for {
+      _ <- validateParam(config).handleError
+      userMappings <-
+        UserMappingFileService
+          .execute[RedmineUserMappingItem, Task](
+            MappingDirectory.default.userMappingFilePath,
+            backlogUserService.allUsers()
+          )
+          .mapError(MappingError)
+          .handleError
+      statusMappings <-
+        StatusMappingFileService
+          .execute[RedmineStatusMappingItem, Task](
+            MappingDirectory.default.statusMappingFilePath,
+            backlogStatusService.allStatuses()
+          )
+          .mapError(MappingError)
+          .handleError
+      priorityMappings <-
+        PriorityMappingFileService
+          .execute[RedminePriorityMappingItem, Task](
+            MappingDirectory.default.priorityMappingFilePath,
+            backlogPriorityService.allPriorities()
+          )
+          .mapError(MappingError)
+          .handleError
+      mappingContainer = MappingContainer(userMappings, priorityMappings, statusMappings)
+      _     <- confirmImport(config, mappingContainer).handleError
+      input <- readConfirm().handleError
+      _     <- confirmStartMigration(input).handleError
+    } yield {
 
-            val backlogInjector = BacklogInjector.createInjector(config.backlogConfig)
-            val backlogPaths    = backlogInjector.getInstance(classOf[BacklogPaths])
-
-            if (backlogPaths.outputPath.exists) {
-              backlogPaths.outputPath.listRecursively.foreach(_.delete(false))
-            }
-
-            val mappingContainer = MappingContainer(user = mappingFileContainer.user.tryUnmarshal(),
-                                                    status = mappingFileContainer.status.tryUnmarshal(),
-                                                    priority = mappingFileContainer.priority.tryUnmarshal())
-
-            val backlogTextFormattingRule = fetchBacklogTextFormattingRule(config.backlogConfig)
-
-            BootExporter.execute(config.redmineConfig,
-                                 mappingContainer,
-                                 BacklogProjectKey(config.backlogConfig.projectKey),
-                                 backlogTextFormattingRule,
-                                 config.exclude)
-            BootImporter.execute(config.backlogConfig, importConfig)
-            finalize(config.backlogConfig)
-          }
-        }
+      if (backlogPaths.outputPath.exists) {
+        backlogPaths.outputPath.listRecursively.foreach(_.delete(false))
       }
-    }
-  }
 
-  def doImport(config: AppConfiguration): Unit = {
-    if (validateParam(config)) {
-      BootImporter.execute(config.backlogConfig, ImportConfig(fitIssueKey = false, retryCount = config.retryCount, excludeOption = config.exclude))
+      val backlogTextFormattingRule = fetchBacklogTextFormattingRule(config.backlogConfig)
+
+      BootExporter.execute(
+        config.redmineConfig,
+        mappingContainer,
+        BacklogProjectKey(config.backlogConfig.projectKey),
+        backlogTextFormattingRule,
+        config.exclude
+      )
+      BootImporter.execute(
+        config.backlogConfig,
+        fitIssueKey = false,
+        retryCount = config.retryCount
+      )
       finalize(config.backlogConfig)
+      ()
     }
+    result.value
   }
 
-  def sequence[A](prgs: Seq[AppProgram[A]]): AppProgram[Seq[A]] = {
-    import com.nulabinc.backlog.r2b.interpreters.AppDSL._
-
-    prgs.foldLeft(pure(Seq.empty[A])) {
-      case (newPrg, prg) =>
-        newPrg.flatMap { results =>
-          prg.map { result =>
-            results :+ result
-          }
-        }
-    }
-  }
-
-  def destroy(config: DestroyConfiguration): Unit = {
-
-    import com.nulabinc.backlog.r2b.interpreters.AppDSL._
-
-    implicit val exc: Scheduler = monix.execution.Scheduler.Implicits.global
-
-    val CHUNK_ISSUE_COUNT = 10
-
-    val interpreter = AppInterpreter(
-      new Backlog4jInterpreter(
-        config.backlogConfig.url,
-        config.backlogConfig.key
-      ),
-      new ConsoleInterpreter
-    )
-
-    type IssueStreamF[A] = (Seq[Issue], Int, Int) => AppProgram[A]
-
-    def streamIssue[A](projectId: Long, limit: Int, druRun: Boolean)(f: IssueStreamF[A]): AppProgram[A] = {
-      def go(current: Int): AppProgram[A] = {
-        backlog(BacklogDSL.getProjectIssues(projectId, current, limit)).flatMap {
-          case Right(issues) =>
-            if (issues.isEmpty)
-              f(issues, current, limit)
-            else {
-              val nextCurrent = if (druRun) current + limit else 0
-              f(issues, current, limit).flatMap(_ => go(nextCurrent))
-            }
-          case Left(error) =>
-            throw new RuntimeException(error.toString)
-        }
-      }
-      go(0)
+  def doImport(config: AppConfiguration): Task[Either[AppError, Unit]] =
+    for {
+      _ <- validateParam(config)
+    } yield {
+      BootImporter
+        .execute(config.backlogConfig, fitIssueKey = false, retryCount = config.retryCount)
+      finalize(config.backlogConfig)
+      Right(())
     }
 
-    val program = for {
-      _ <- console(ConsoleDSL.print(s"""--------------------------------------------------
-                                       |${Messages("common.backlog")} ${Messages("common.url")}[${config.backlogConfig.url}]
-                                       |${Messages("common.backlog")} ${Messages("common.access_key")}[${config.backlogConfig.key}]
-                                       |${Messages("common.backlog")} ${Messages("common.project_key")}[${config.backlogConfig.projectKey}]
-                                       |Dry run mode [${config.dryRun}]
-                                       |--------------------------------------------------""".stripMargin))
-      // access check
-      projectResult <- for {
-        accessCheck <- backlog(BacklogDSL.getProject(config.backlogConfig.projectKey))
-        _ <- accessCheck match {
-          case Right(_)    => console(ConsoleDSL.print(Messages("cli.param.ok.access", Messages("common.backlog"))))
-          case Left(error) => exit(error.toString, 1)
-        }
-      } yield accessCheck
-      // confirm
-      _ <- for {
-        projectKey <- console(ConsoleDSL.read(Messages("destroy.confirm")))
-        isValid = projectKey == config.backlogConfig.projectKey
-        _ <- if (isValid) {
-          AppDSL.pure(())
-        } else {
-          exit(Messages("destroy.confirm.fail"), 1)
-        }
-      } yield isValid
-      // start
-      _ <- if (config.dryRun) {
-        console(ConsoleDSL.print(Messages("destroy.start.dryRun")))
-      } else {
-        console(ConsoleDSL.print(Messages("destroy.start")))
-      }
-      stream <- streamIssue(projectResult.getOrElse(throw new RuntimeException("cannot get project result")).getId, CHUNK_ISSUE_COUNT, config.dryRun) {
-        (issues, _, _) =>
-          val r = issues.map { issue =>
-            for {
-              _ <- pure(logger.debug("Issue Id: " + issue.getId))
-              result <- if (config.dryRun) {
-                backlog(BacklogDSL.pure(Right(issue)))
-              } else {
-                backlog(BacklogDSL.deleteIssue(issue))
-              }
-              _ <- result match {
-                case Right(_)    => console(ConsoleDSL.print(Messages("destroy.issue.deleted", issue.getIssueKey, issue.getSummary)))
-                case Left(error) => console(ConsoleDSL.print(s"ERROR: ${issue.getIssueKey} ${issue.getSummary} ${error.toString}"))
-              }
-            } yield ()
-          }
-          sequence(r)
-      }
-    } yield stream
+  private def validateParam(config: AppConfiguration): Task[Either[AppError, Unit]] =
+    Task {
+      val validator = new ParameterValidator(config)
+      val errors    = validator.validate()
 
-    val f = interpreter.run(program).runToFuture
-
-    Await.result(f, Duration.Inf)
-
-    if (config.dryRun) {
-      ConsoleOut.println(Messages("destroy.finish.dryRun"))
-    } else {
-      ConsoleOut.println(Messages("destroy.finish"))
+      if (errors.isEmpty) Right(())
+      else Left(ValidationError(errors))
     }
-  }
 
-  private[this] def validateParam(config: AppConfiguration): Boolean = {
-    val validator           = new ParameterValidator(config)
-    val errors: Seq[String] = validator.validate()
-    if (errors.isEmpty) true
-    else {
-      val message =
-        s"""
-           |
-           |${Messages("cli.param.error")}
-           |--------------------------------------------------
-           |${errors.mkString("\n")}
-           |
-        """.stripMargin
-      ConsoleOut.error(message)
-      false
-    }
-  }
-
-  private[this] def confirmProject(config: AppConfiguration): Option[(String, String)] = {
+  private def confirmProject(config: AppConfiguration): Task[Either[AppError, (String, String)]] = {
     val injector       = BacklogInjector.createInjector(config.backlogConfig)
     val projectService = injector.getInstance(classOf[ProjectService])
     val optProject     = projectService.optProject(config.backlogConfig.projectKey)
-    optProject match {
+    val result = optProject match {
       case Some(_) =>
-        val input: String = scala.io.StdIn.readLine(Messages("cli.backlog_project_already_exist", config.backlogConfig.projectKey))
-        if (input == "y" || input == "Y") Some((config.redmineConfig.projectKey, config.backlogConfig.projectKey))
-        else None
+        for {
+          input <- readProjectAlreadyExists(config.backlogConfig).handleError
+          answer <-
+            checkProjectAlreadyExists(input, config.redmineConfig, config.backlogConfig).handleError
+        } yield answer
       case None =>
-        Some((config.redmineConfig.projectKey, config.backlogConfig.projectKey))
+        EitherT.fromEither[Task](
+          Right((config.redmineConfig.projectKey, config.backlogConfig.projectKey))
+        )
     }
+
+    result.value
   }
 
-  private[this] def validateMapping(mappingFile: MappingFile): Boolean = {
-    if (!mappingFile.isExists) {
-      ConsoleOut.error(s"""
-                          |--------------------------------------------------
-                          |${Messages("cli.invalid_setup")}""".stripMargin)
-      false
-    } else if (!mappingFile.isParsed) {
-      val error =
-        s"""
-           |--------------------------------------------------
-           |${Messages("cli.mapping.error.broken_file", mappingFile.itemName)}
-           |--------------------------------------------------
-        """.stripMargin
-      ConsoleOut.error(error)
-      val message =
-        s"""|--------------------------------------------------
-            |${Messages("cli.mapping.fix_file", mappingFile.filePath)}""".stripMargin
-      ConsoleOut.println(message)
-      false
-    } else if (!mappingFile.isValid) {
-      val error =
-        s"""
-           |${Messages("cli.mapping.error", mappingFile.itemName)}
-           |--------------------------------------------------
-           |${mappingFile.errors.mkString("\n")}
-           |--------------------------------------------------""".stripMargin
-      ConsoleOut.error(error)
-      val message =
-        s"""
-           |--------------------------------------------------
-           |${Messages("cli.mapping.fix_file", mappingFile.filePath)}
-        """.stripMargin
-      ConsoleOut.println(message)
-      false
-    } else true
-  }
+  private def readProjectAlreadyExists(
+      config: BacklogApiConfiguration
+  ): Task[Either[AppError, String]] =
+    ConsoleDSL[Task].read(MessageResources.projectAlreadyExists(config.projectKey)).map(Right(_))
 
-  private[this] def confirmImport(config: AppConfiguration, mappingFileContainer: MappingFileContainer): Boolean = {
-    confirmProject(config) match {
-      case Some(projectKeys) =>
-        val (redmine, backlog): (String, String) = projectKeys
-        ConsoleOut.println(s"""
-                              |${Messages("cli.mapping.show", Messages("common.projects"))}
-                              |--------------------------------------------------
-                              |- ${redmine} => ${backlog}
-                              |--------------------------------------------------
-                              |
-                              |${Messages("cli.mapping.show", mappingFileContainer.user.itemName)}
-                              |--------------------------------------------------
-                              |${mappingString(mappingFileContainer.user)}
-                              |--------------------------------------------------
-                              |""".stripMargin)
-        if (mappingFileContainer.priority.nonEmpty) {
-          ConsoleOut.println(s"""${Messages("cli.mapping.show", mappingFileContainer.priority.itemName)}
-                                |--------------------------------------------------
-                                |${mappingString(mappingFileContainer.priority)}
-                                |--------------------------------------------------""".stripMargin)
-        }
-        if (mappingFileContainer.status.nonEmpty) {
-          ConsoleOut.println(s"""${Messages("cli.mapping.show", mappingFileContainer.status.itemName)}
-                                |--------------------------------------------------
-                                |${mappingString(mappingFileContainer.status)}
-                                |--------------------------------------------------""".stripMargin)
-        }
-        val input: String = scala.io.StdIn.readLine(Messages("cli.confirm"))
-        if (input == "y" || input == "Y") true
-        else {
-          ConsoleOut.println(s"""
-                                |--------------------------------------------------
-                                |${Messages("cli.cancel")}""".stripMargin)
-          false
-        }
-      case _ =>
-        ConsoleOut.println(s"""
-                              |--------------------------------------------------
-                              |${Messages("cli.cancel")}""".stripMargin)
-        false
+  private def readConfirm(): Task[Either[AppError, String]] =
+    ConsoleDSL[Task].read(MessageResources.confirm).map(Right(_))
+
+  private def checkProjectAlreadyExists(
+      input: String,
+      redmineConfig: RedmineApiConfiguration,
+      backlogConfig: BacklogApiConfiguration
+  ): Task[Either[AppError, (String, String)]] =
+    Task {
+      if (input.toLowerCase == "y") Right((redmineConfig.projectKey, backlogConfig.projectKey))
+      else Left(OperationCanceled)
     }
-  }
 
-  private[this] def mappingString(mappingFile: MappingFile): String = {
-    mappingFile.unmarshal() match {
-      case Some(mappings) =>
-        mappings
-          .map(mapping =>
-            s"- ${mappingFile.display(mapping.redmine, mappingFile.redmines)} => ${mappingFile.display(mapping.backlog, mappingFile.backlogs)}")
-          .mkString("\n")
-      case _ => throw new RuntimeException
+  private def confirmStartMigration(input: String): Task[Either[AppError, Unit]] =
+    Task {
+      if (input.toLowerCase == "y") Right(()) else Left(OperationCanceled)
     }
+
+  private def confirmImport(
+      config: AppConfiguration,
+      mappingContainer: MappingContainer
+  ): Task[Either[AppError, Unit]] = {
+    val userStr = mappingContainer.user
+      .map(item => toMappingRow(item.src.displayName, item.dst.value))
+      .mkString("\n")
+    val priorityStr = mappingContainer.priority
+      .map(item => toMappingRow(item.src.value, item.dst.value))
+      .mkString("\n")
+    val statusStr = mappingContainer.statuses
+      .map(item => s"- ${item.src.value} => ${item.dst.value}")
+      .mkString("\n")
+
+    val result = for {
+      keys <- confirmProject(config).handleError
+      _    <- projectInfoMessage(keys._1, keys._2).handleError
+      _    <- userMappingMessage(userStr).handleError
+      _    <- priorityMappingMessage(priorityStr).handleError
+      _    <- statusMappingMessage(statusStr).handleError
+    } yield ()
+
+    result.value
   }
 
-  private[this] def createMapping(config: AppConfiguration): MappingFileContainer = {
-    val mappingData     = BootMapping.execute(config.redmineConfig, config.exclude)
-    val userMapping     = new UserMappingFile(config.redmineConfig, config.backlogConfig, mappingData.users.toSeq)
-    val statusMapping   = new StatusMappingFile(config.redmineConfig, config.backlogConfig, mappingData.statuses.toSeq)
+  private def projectInfoMessage(
+      redmineProjectKey: String,
+      backlogProjectKey: String
+  ): Task[Either[AppError, Unit]] =
+    ConsoleDSL[Task]
+      .println(
+        s"""
+           |${Messages("cli.mapping.show", Messages("common.projects"))}
+           |--------------------------------------------------
+           |- $redmineProjectKey => $backlogProjectKey
+           |--------------------------------------------------
+           |
+           |""".stripMargin
+      )
+      .map(Right(_))
+
+  private def userMappingMessage(str: String): Task[Either[AppError, Unit]] =
+    ConsoleDSL[Task]
+      .println(
+        s"""${Messages("cli.mapping.show", MessageResources.userMappingItemName)}
+            |--------------------------------------------------
+            |$str
+            |--------------------------------------------------
+            |""".stripMargin
+      )
+      .map(Right(_))
+
+  private def priorityMappingMessage(str: String): Task[Either[AppError, Unit]] =
+    ConsoleDSL[Task]
+      .println(
+        s"""${Messages("cli.mapping.show", MessageResources.priorityMappingItemName)}
+            |--------------------------------------------------
+            |$str
+            |--------------------------------------------------""".stripMargin
+      )
+      .map(Right(_))
+
+  private def statusMappingMessage(str: String): Task[Either[AppError, Unit]] =
+    ConsoleDSL[Task]
+      .println(
+        s"""${Messages("cli.mapping.show", MessageResources.statusMappingItemName)}
+            |--------------------------------------------------
+            |$str
+            |--------------------------------------------------""".stripMargin
+      )
+      .map(Right(_))
+
+  private def toMappingRow(src: String, dst: String): String =
+    s"- $src => $dst"
+
+  private def createMapping(config: AppConfiguration): MappingFileContainer = {
+    val mappingData = BootMapping.execute(config.redmineConfig, config.exclude)
+    val userMapping =
+      new UserMappingFile(config.redmineConfig, config.backlogConfig, mappingData.users.toSeq)
+    val statusMapping =
+      new StatusMappingFile(config.redmineConfig, config.backlogConfig, mappingData.statuses.toSeq)
     val priorityMapping = new PriorityMappingFile(config.redmineConfig, config.backlogConfig)
     MappingFileContainer(user = userMapping, status = statusMapping, priority = priorityMapping)
   }
 
-  private[this] def output(mappingFile: MappingFile) = {
-    if (mappingFile.isExists) {
-      val addItems = mappingFile.merge()
-      val message = if (addItems.nonEmpty) {
-        def displayItem(value: String) = {
-          if (value.isEmpty) Messages("common.empty") else value
-        }
-        def display(mapping: Mapping) = {
-          s"- ${mapping.redmine} => ${displayItem(mapping.backlog)}"
-        }
-        val mappingString = addItems.map(display).mkString("\n")
-        s"""
-           |--------------------------------------------------
-           |${Messages("cli.mapping.merge_file", mappingFile.itemName, mappingFile.filePath)}
-           |[${mappingFile.filePath}]
-           |${mappingString}
-           |--------------------------------------------------""".stripMargin
-      } else {
-        s"""
-           |--------------------------------------------------
-           |${Messages("cli.mapping.no_change", mappingFile.itemName)}
-           |--------------------------------------------------""".stripMargin
-      }
-      ConsoleOut.println(message)
-    } else {
-      def afterMessage(): Unit = {
-        val message =
-          s"""
-             |--------------------------------------------------
-             |${Messages("cli.mapping.output_file", mappingFile.itemName)}
-             |[${mappingFile.filePath}]
-             |--------------------------------------------------""".stripMargin
-        ConsoleOut.println(message)
-        ()
-      }
-      mappingFile.create(afterMessage _)
-    }
-  }
+  def help(): Task[Either[AppError, Unit]] =
+    consoleDSL.println(MessageResources.helpMessage).map(Right(_))
 
-  def help() = {
-    val message =
-      s"""
-         |${Messages("cli.help.sample_command")}
-         |${Messages("cli.help")}
-      """.stripMargin
-    ConsoleOut.println(message)
-  }
-
-  private[this] def finalize(config: BacklogApiConfiguration) = {
+  private def finalize(config: BacklogApiConfiguration) = {
     if (!versionName.contains("SNAPSHOT")) {
       val url = new URL(s"${config.url}/api/v2/importer/redmine?projectKey=${config.projectKey}")
       url.openConnection match {
@@ -401,7 +320,9 @@ object R2BCli extends BacklogConfiguration with Logging {
     }
   }
 
-  private[this] def fetchBacklogTextFormattingRule(backlogConfig: BacklogApiConfiguration): BacklogTextFormattingRule = {
+  private def fetchBacklogTextFormattingRule(
+      backlogConfig: BacklogApiConfiguration
+  ): BacklogTextFormattingRule = {
     val injector       = BacklogInjector.createInjector(backlogConfig)
     val projectService = injector.getInstance(classOf[ProjectService])
     val optProject     = projectService.optProject(backlogConfig.projectKey)
@@ -410,5 +331,4 @@ object R2BCli extends BacklogConfiguration with Logging {
       case _             => BacklogTextFormattingRule("markdown")
     }
   }
-
 }

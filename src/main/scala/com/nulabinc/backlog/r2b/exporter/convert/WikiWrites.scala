@@ -13,10 +13,11 @@ import scala.jdk.CollectionConverters._
 /**
   * @author uchida
   */
-private[exporter] class WikiWrites @Inject()(implicit val attachmentWrites: AttachmentWrites,
-                                             implicit val userWrites: UserWrites,
-                                             backlogTextFormattingRule: BacklogTextFormattingRule)
-    extends Writes[WikiPageDetail, BacklogWiki]
+private[exporter] class WikiWrites @Inject() (
+    implicit val attachmentWrites: AttachmentWrites,
+    implicit val userWrites: UserWrites,
+    backlogTextFormattingRule: BacklogTextFormattingRule
+) extends Writes[WikiPageDetail, BacklogWiki]
     with Logging {
 
   override def writes(wiki: WikiPageDetail): BacklogWiki = {

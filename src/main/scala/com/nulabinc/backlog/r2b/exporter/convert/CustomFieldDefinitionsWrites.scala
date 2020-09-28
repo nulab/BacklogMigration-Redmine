@@ -15,7 +15,7 @@ import com.osinka.i18n.Messages
 /**
   * @author uchida
   */
-private[exporter] class CustomFieldDefinitionsWrites @Inject()(propertyValue: PropertyValue)
+private[exporter] class CustomFieldDefinitionsWrites @Inject() (propertyValue: PropertyValue)
     extends Writes[Seq[RedmineCustomFieldDefinition], Seq[BacklogCustomFieldSetting]]
     with Logging {
 
@@ -46,23 +46,29 @@ private[exporter] class CustomFieldDefinitionsWrites @Inject()(propertyValue: Pr
     }
 
   private[this] def multipleProperty(redmineCustomFieldDefinition: RedmineCustomFieldDefinition): BacklogCustomFieldMultipleProperty =
-    BacklogCustomFieldMultipleProperty(typeId = multipleTypeId(redmineCustomFieldDefinition),
-                                       items = possibleValues(redmineCustomFieldDefinition).map(toBacklogItem),
-                                       allowAddItem = true,
-                                       allowInput = false)
+    BacklogCustomFieldMultipleProperty(
+      typeId = multipleTypeId(redmineCustomFieldDefinition),
+      items = possibleValues(redmineCustomFieldDefinition).map(toBacklogItem),
+      allowAddItem = true,
+      allowInput = false
+    )
 
   private[this] def dateProperty(redmineCustomFieldDefinition: RedmineCustomFieldDefinition): BacklogCustomFieldDateProperty =
-    BacklogCustomFieldDateProperty(typeId = BacklogConstantValue.CustomField.Date,
-                                   optInitialDate = optInitialValueDate(redmineCustomFieldDefinition),
-                                   optMin = None,
-                                   optMax = None)
+    BacklogCustomFieldDateProperty(
+      typeId = BacklogConstantValue.CustomField.Date,
+      optInitialDate = optInitialValueDate(redmineCustomFieldDefinition),
+      optMin = None,
+      optMax = None
+    )
 
   private[this] def numericProperty(redmineCustomFieldDefinition: RedmineCustomFieldDefinition): BacklogCustomFieldNumericProperty =
-    BacklogCustomFieldNumericProperty(typeId = BacklogConstantValue.CustomField.Numeric,
-                                      optInitialValue = initialValueNumeric(redmineCustomFieldDefinition),
-                                      optUnit = None,
-                                      optMin = minNumeric(redmineCustomFieldDefinition.optMinLength),
-                                      optMax = maxNumeric(redmineCustomFieldDefinition.optMaxLength))
+    BacklogCustomFieldNumericProperty(
+      typeId = BacklogConstantValue.CustomField.Numeric,
+      optInitialValue = initialValueNumeric(redmineCustomFieldDefinition),
+      optUnit = None,
+      optMin = minNumeric(redmineCustomFieldDefinition.optMinLength),
+      optMax = maxNumeric(redmineCustomFieldDefinition.optMaxLength)
+    )
 
   private[this] def textProperty(): BacklogCustomFieldTextProperty =
     BacklogCustomFieldTextProperty(BacklogConstantValue.CustomField.Text)
@@ -90,9 +96,11 @@ private[exporter] class CustomFieldDefinitionsWrites @Inject()(propertyValue: Pr
   private[this] def optInitialValueDate(redmineCustomFieldDefinition: RedmineCustomFieldDefinition): Option[BacklogCustomFieldInitialDate] =
     if (redmineCustomFieldDefinition.fieldFormat == RedmineConstantValue.FieldFormat.DATE) {
       val initialDate =
-        BacklogCustomFieldInitialDate(typeId = DateCustomFieldSetting.InitialValueType.FixedDate.getIntValue.toLong,
-                                      optDate = redmineCustomFieldDefinition.optDefaultValue,
-                                      optShift = None)
+        BacklogCustomFieldInitialDate(
+          typeId = DateCustomFieldSetting.InitialValueType.FixedDate.getIntValue.toLong,
+          optDate = redmineCustomFieldDefinition.optDefaultValue,
+          optShift = None
+        )
       Some(initialDate)
     } else None
 

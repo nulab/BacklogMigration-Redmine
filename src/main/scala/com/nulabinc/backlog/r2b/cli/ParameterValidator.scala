@@ -19,7 +19,7 @@ class ParameterValidator(config: AppConfiguration) extends Logging {
   def validate(): Seq[String] = {
     val validateRedmine = validateConfigRedmine()
     val validateBacklog = validateConfigBacklog()
-    ConsoleOut.println(Messages("cli.param.get.project", Messages("common.redmine")))
+    ConsoleOut.println(Messages("cli.param.get.project", Messages("common.src")))
     val optRedmineProject = optProject()
 
     val messages = Seq(validateBacklog, validProjectKey(config.backlogConfig.projectKey), validateAuthBacklog(validateBacklog)).flatten
@@ -39,21 +39,22 @@ class ParameterValidator(config: AppConfiguration) extends Logging {
   }
 
   private[this] def validateConfigBacklog(): Option[String] = {
-    ConsoleOut.println(Messages("cli.param.check.access", Messages("common.backlog")))
-    val messages = try {
-      val injector     = BacklogInjector.createInjector(config.backlogConfig)
-      val spaceService = injector.getInstance(classOf[SpaceService])
-      spaceService.space()
-      ConsoleOut.println(Messages("cli.param.ok.access", Messages("common.backlog")))
-      None
-    } catch {
-      case unknown: BacklogAPIException if unknown.getStatusCode == 404 =>
-        logger.error(unknown.getMessage, unknown)
-        Some(s"- ${Messages("cli.param.error.disable.host", Messages("common.backlog"), config.backlogConfig.url)}")
-      case e: Throwable =>
-        logger.error(e.getMessage, e)
-        Some(s"- ${Messages("cli.param.error.disable.access", Messages("common.backlog"))}")
-    }
+    ConsoleOut.println(Messages("cli.param.check.access", Messages("common.dst")))
+    val messages =
+      try {
+        val injector     = BacklogInjector.createInjector(config.backlogConfig)
+        val spaceService = injector.getInstance(classOf[SpaceService])
+        spaceService.space()
+        ConsoleOut.println(Messages("cli.param.ok.access", Messages("common.dst")))
+        None
+      } catch {
+        case unknown: BacklogAPIException if unknown.getStatusCode == 404 =>
+          logger.error(unknown.getMessage, unknown)
+          Some(s"- ${Messages("cli.param.error.disable.host", Messages("common.dst"), config.backlogConfig.url)}")
+        case e: Throwable =>
+          logger.error(e.getMessage, e)
+          Some(s"- ${Messages("cli.param.error.disable.access", Messages("common.dst"))}")
+      }
     messages
   }
 
@@ -70,26 +71,26 @@ class ParameterValidator(config: AppConfiguration) extends Logging {
   }
 
   private[this] def validateConfigRedmine(): Option[String] = {
-    ConsoleOut.println(Messages("cli.param.check.access", Messages("common.redmine")))
+    ConsoleOut.println(Messages("cli.param.check.access", Messages("common.src")))
     try {
       val injector    = RedmineInjector.createInjector(config.redmineConfig)
       val userService = injector.getInstance(classOf[RedmineUserService])
       userService.allUsers()
-      ConsoleOut.println(Messages("cli.param.ok.access", Messages("common.redmine")))
+      ConsoleOut.println(Messages("cli.param.ok.access", Messages("common.src")))
       None
     } catch {
       case auth: RedmineAuthenticationException =>
         logger.error(auth.getMessage, auth)
-        Some(s"- ${Messages("cli.param.error.auth", Messages("common.redmine"))}")
+        Some(s"- ${Messages("cli.param.error.auth", Messages("common.src"))}")
       case noauth: NotAuthorizedException =>
         logger.error(noauth.getMessage, noauth)
         Some(s"- ${Messages("cli.param.error.auth.not.auth", noauth.getMessage)}")
       case transport: RedmineTransportException =>
         logger.error(transport.getMessage, transport)
-        Some(s"- ${Messages("cli.param.error.disable.host", Messages("common.redmine"), config.redmineConfig.url)}")
+        Some(s"- ${Messages("cli.param.error.disable.host", Messages("common.src"), config.redmineConfig.url)}")
       case e: Throwable =>
         logger.error(e.getMessage, e)
-        Some(s"- ${Messages("cli.param.error.disable.access", Messages("common.redmine"))}")
+        Some(s"- ${Messages("cli.param.error.disable.access", Messages("common.src"))}")
     }
   }
 

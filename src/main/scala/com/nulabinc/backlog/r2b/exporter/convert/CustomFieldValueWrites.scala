@@ -11,7 +11,7 @@ import com.osinka.i18n.Messages
 /**
   * @author uchida
   */
-private[exporter] class CustomFieldValueWrites @Inject()(propertyValue: PropertyValue)
+private[exporter] class CustomFieldValueWrites @Inject() (propertyValue: PropertyValue)
     extends Writes[(String, Option[String]), Option[String]]
     with Logging {
 

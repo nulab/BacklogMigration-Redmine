@@ -7,6 +7,7 @@ import com.nulabinc.backlog.migration.common.convert.Convert
 import com.nulabinc.backlog.migration.common.domain._
 import com.nulabinc.backlog.migration.common.utils.{DateUtil, IOUtil, Logging, StringUtil}
 import com.nulabinc.backlog.r2b.exporter.core.ExportContext
+import com.nulabinc.backlog.r2b.mapping.converters.MappingPriorityConverter
 import com.nulabinc.backlog.r2b.redmine.conf.RedmineConstantValue
 import com.nulabinc.backlog.r2b.redmine.domain.RedmineCustomFieldDefinition
 import com.nulabinc.backlog.r2b.utils.TextileUtil
@@ -17,12 +18,13 @@ import scala.jdk.CollectionConverters._
 /**
   * @author uchida
   */
-private[exporter] class IssueInitializer(exportContext: ExportContext,
-                                         issueDirPath: Path,
-                                         journals: Seq[Journal],
-                                         attachments: Seq[Attachment],
-                                         backlogTextFormattingRule: BacklogTextFormattingRule)
-    extends Logging {
+private[exporter] class IssueInitializer(
+    exportContext: ExportContext,
+    issueDirPath: Path,
+    journals: Seq[Journal],
+    attachments: Seq[Attachment],
+    backlogTextFormattingRule: BacklogTextFormattingRule
+) extends Logging {
 
   implicit val issueWrites            = exportContext.issueWrites
   implicit val attachmentWrites       = exportContext.attachmentWrites
@@ -166,9 +168,10 @@ private[exporter] class IssueInitializer(exportContext: ExportContext,
         exportContext.propertyValue
           .priorityOfId(Option(detail.getOldValue))
           .map(_.getName)
-          .map(exportContext.mappingPriorityService.convert)
+          .map(MappingPriorityConverter.convert(exportContext.mappingContainer.priority, _))
           .getOrElse("")
-      case None => exportContext.mappingPriorityService.convert(issue.getPriorityText)
+      case None =>
+        MappingPriorityConverter.convert(exportContext.mappingContainer.priority, issue.getPriorityText)
     }
   }
 
