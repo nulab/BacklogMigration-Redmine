@@ -2,19 +2,28 @@ package com.nulabinc.backlog.r2b.core
 
 import java.util.Locale
 
-import com.nulabinc.backlog.migration.common.conf.{BacklogApiConfiguration, BacklogConfiguration, ExcludeOption}
+import com.nulabinc.backlog.migration.common.conf.{
+  BacklogApiConfiguration,
+  BacklogConfiguration,
+  ExcludeOption
+}
 import com.nulabinc.backlog.migration.common.utils.{ConsoleOut, Logging}
+import com.nulabinc.backlog.r2b.AppError
 import com.nulabinc.backlog.r2b.cli.R2BCli
 import com.nulabinc.backlog.r2b.conf._
 import com.nulabinc.backlog.r2b.redmine.conf.RedmineApiConfiguration
 import com.nulabinc.backlog.r2b.utils.{ClassVersion, DisableSSLCertificateCheckUtil}
 import com.osinka.i18n.Messages
+import monix.eval.Task
 import org.fusesource.jansi.AnsiConsole
 import org.rogach.scallop._
 import spray.json._
 import spray.json.DefaultJsonProtocol._
 
-class CommandLineInterface(arguments: Seq[String]) extends ScallopConf(arguments) with BacklogConfiguration with Logging {
+class CommandLineInterface(arguments: Seq[String])
+    extends ScallopConf(arguments)
+    with BacklogConfiguration
+    with Logging {
 
   banner("""Usage: Backlog Migration for Redmine [OPTION]....
       | """.stripMargin)
@@ -24,34 +33,92 @@ class CommandLineInterface(arguments: Seq[String]) extends ScallopConf(arguments
   val version = opt[String]("version", descr = Messages("cli.help.show_version"))
 
   val execute = new Subcommand("execute") {
-    val backlogKey = opt[String]("backlog.key", descr = Messages("cli.help.backlog.key"), required = true, noshort = true)
-    val backlogUrl = opt[String]("backlog.url", descr = Messages("cli.help.backlog.url"), required = true, noshort = true)
-    val redmineKey = opt[String]("redmine.key", descr = Messages("cli.help.redmine.key"), required = true, noshort = true)
-    val redmineUrl = opt[String]("redmine.url", descr = Messages("cli.help.redmine.url"), required = true, noshort = true)
+    val backlogKey = opt[String](
+      "backlog.key",
+      descr = Messages("cli.help.backlog.key"),
+      required = true,
+      noshort = true
+    )
+    val backlogUrl = opt[String](
+      "backlog.url",
+      descr = Messages("cli.help.backlog.url"),
+      required = true,
+      noshort = true
+    )
+    val redmineKey = opt[String](
+      "redmine.key",
+      descr = Messages("cli.help.redmine.key"),
+      required = true,
+      noshort = true
+    )
+    val redmineUrl = opt[String](
+      "redmine.url",
+      descr = Messages("cli.help.redmine.url"),
+      required = true,
+      noshort = true
+    )
 
-    val projectKey = opt[String]("projectKey", descr = Messages("cli.help.projectKey"), required = true)
-    val importOnly = opt[Boolean]("importOnly", descr = Messages("cli.help.importOnly"), required = true)
-    val exclude    = opt[List[String]]("exclude", descr = Messages("cli.help.exclude"), required = false)
-    val retryCount = opt[Int](name = "retryCount", descr = Messages("cli.help.retryCount"), required = false)
-    val help       = opt[String]("help", descr = Messages("cli.help.show_help"))
+    val projectKey =
+      opt[String]("projectKey", descr = Messages("cli.help.projectKey"), required = true)
+    val importOnly =
+      opt[Boolean]("importOnly", descr = Messages("cli.help.importOnly"), required = true)
+    val exclude =
+      opt[List[String]]("exclude", descr = Messages("cli.help.exclude"), required = false)
+    val retryCount =
+      opt[Int](name = "retryCount", descr = Messages("cli.help.retryCount"), required = false)
+    val help = opt[String]("help", descr = Messages("cli.help.show_help"))
   }
 
   val init = new Subcommand("init") {
-    val backlogKey = opt[String]("backlog.key", descr = Messages("cli.help.backlog.key"), required = true, noshort = true)
-    val backlogUrl = opt[String]("backlog.url", descr = Messages("cli.help.backlog.url"), required = true, noshort = true)
-    val redmineKey = opt[String]("redmine.key", descr = Messages("cli.help.redmine.key"), required = true, noshort = true)
-    val redmineUrl = opt[String]("redmine.url", descr = Messages("cli.help.redmine.url"), required = true, noshort = true)
-    val exclude    = opt[List[String]]("exclude", descr = Messages("cli.help.exclude"), required = false)
-    val projectKey = opt[String]("projectKey", descr = Messages("cli.help.projectKey"), required = true)
-    val help       = opt[String]("help", descr = Messages("cli.help.show_help"))
+    val backlogKey = opt[String](
+      "backlog.key",
+      descr = Messages("cli.help.backlog.key"),
+      required = true,
+      noshort = true
+    )
+    val backlogUrl = opt[String](
+      "backlog.url",
+      descr = Messages("cli.help.backlog.url"),
+      required = true,
+      noshort = true
+    )
+    val redmineKey = opt[String](
+      "redmine.key",
+      descr = Messages("cli.help.redmine.key"),
+      required = true,
+      noshort = true
+    )
+    val redmineUrl = opt[String](
+      "redmine.url",
+      descr = Messages("cli.help.redmine.url"),
+      required = true,
+      noshort = true
+    )
+    val exclude =
+      opt[List[String]]("exclude", descr = Messages("cli.help.exclude"), required = false)
+    val projectKey =
+      opt[String]("projectKey", descr = Messages("cli.help.projectKey"), required = true)
+    val help = opt[String]("help", descr = Messages("cli.help.show_help"))
   }
 
   val destroy = new Subcommand("destroy") {
-    val backlogKey: ScallopOption[String] = opt[String]("backlog.key", descr = Messages("cli.help.backlog.key"), required = true, noshort = true)
-    val backlogUrl: ScallopOption[String] = opt[String]("backlog.url", descr = Messages("cli.help.backlog.url"), required = true, noshort = true)
-    val projectKey: ScallopOption[String] = opt[String]("projectKey", descr = Messages("cli.help.projectKey"), required = true)
-    val dryRun: ScallopOption[Boolean]    = opt[Boolean]("dryRun", descr = Messages("destroy.help.dryRun"), required = false)
-    val help: ScallopOption[String]       = opt[String]("help", descr = Messages("cli.help.show_help"))
+    val backlogKey: ScallopOption[String] = opt[String](
+      "backlog.key",
+      descr = Messages("cli.help.backlog.key"),
+      required = true,
+      noshort = true
+    )
+    val backlogUrl: ScallopOption[String] = opt[String](
+      "backlog.url",
+      descr = Messages("cli.help.backlog.url"),
+      required = true,
+      noshort = true
+    )
+    val projectKey: ScallopOption[String] =
+      opt[String]("projectKey", descr = Messages("cli.help.projectKey"), required = true)
+    val dryRun: ScallopOption[Boolean] =
+      opt[Boolean]("dryRun", descr = Messages("destroy.help.dryRun"), required = false)
+    val help: ScallopOption[String] = opt[String]("help", descr = Messages("cli.help.show_help"))
   }
 
   addSubcommand(destroy)
@@ -83,23 +150,25 @@ object R2B extends BacklogConfiguration with Logging {
           System.exit(1)
       }
     } else {
-      ConsoleOut.error(Messages("cli.require_java8", System.getProperty("java.specification.version")))
+      ConsoleOut.error(
+        Messages("cli.require_java8", System.getProperty("java.specification.version"))
+      )
       AnsiConsole.systemUninstall()
       System.exit(1)
     }
   }
 
-  private[this] def execute(cli: CommandLineInterface) = {
+  private[this] def execute(cli: CommandLineInterface): Task[Either[AppError, Unit]] =
     cli.subcommand match {
+      case Some(cli.execute) if cli.execute.importOnly() =>
+        R2BCli.doImport(getConfiguration(cli))
       case Some(cli.execute) =>
-        if (cli.execute.importOnly()) R2BCli.doImport(getConfiguration(cli))
-        else R2BCli.migrate(getConfiguration(cli))
+        R2BCli.migrate(getConfiguration(cli))
       case Some(cli.init) =>
         R2BCli.init(getConfiguration(cli))
       case _ =>
         R2BCli.help()
     }
-  }
 
   private[this] def getConfiguration(cli: CommandLineInterface) = {
     val keys    = cli.execute.projectKey().split(":")
@@ -132,23 +201,27 @@ object R2B extends BacklogConfiguration with Logging {
      |""".stripMargin)
 
     AppConfiguration(
-      redmineConfig = RedmineApiConfiguration(url = cli.execute.redmineUrl(), key = cli.execute.redmineKey(), projectKey = redmine),
-      backlogConfig = BacklogApiConfiguration(url = cli.execute.backlogUrl(), key = cli.execute.backlogKey(), projectKey = backlog),
+      redmineConfig = RedmineApiConfiguration(
+        url = cli.execute.redmineUrl(),
+        key = cli.execute.redmineKey(),
+        projectKey = redmine
+      ),
+      backlogConfig = BacklogApiConfiguration(
+        url = cli.execute.backlogUrl(),
+        key = cli.execute.backlogKey(),
+        projectKey = backlog
+      ),
       exclude = exclude,
       importOnly = cli.execute.importOnly(),
       retryCount = retryCount
     )
   }
 
-  private[this] def setLang() = {
-    if (language == "ja") {
-      Locale.setDefault(Locale.JAPAN)
-    } else if (language == "en") {
-      Locale.setDefault(Locale.US)
-    }
-  }
+  private[this] def setLang(): Unit =
+    if (language == "ja") Locale.setDefault(Locale.JAPAN)
+    else Locale.setDefault(Locale.US)
 
-  private[this] def checkRelease() = {
+  private[this] def checkRelease(): Unit = {
     import java.io._
     import java.net._
 
