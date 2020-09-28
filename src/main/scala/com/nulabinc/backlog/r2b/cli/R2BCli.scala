@@ -28,7 +28,6 @@ import com.nulabinc.backlog.migration.common.utils.ControlUtil.using
 import com.nulabinc.backlog.migration.common.utils.Logging
 import com.nulabinc.backlog.migration.importer.core.{Boot => BootImporter}
 import com.nulabinc.backlog.r2b.conf.AppConfiguration
-import com.nulabinc.backlog.r2b.core.MessageResources
 import com.nulabinc.backlog.r2b.domain.mappings.{
   RedminePriorityMappingItem,
   RedmineStatusMappingItem,
@@ -38,6 +37,7 @@ import com.nulabinc.backlog.r2b.exporter.core.{Boot => BootExporter}
 import com.nulabinc.backlog.r2b.mapping.collector.core.{Boot => BootMapping}
 import com.nulabinc.backlog.r2b.mapping.core.MappingContainer
 import com.nulabinc.backlog.r2b.mapping.file._
+import com.nulabinc.backlog.r2b.messages.RedmineMessages
 import com.nulabinc.backlog.r2b.redmine.conf.RedmineApiConfiguration
 import com.nulabinc.backlog.r2b.{AppError, MappingError, OperationCanceled, ValidationError}
 import com.osinka.i18n.Messages
@@ -197,10 +197,10 @@ object R2BCli extends BacklogConfiguration with Logging {
   private def readProjectAlreadyExists(
       config: BacklogApiConfiguration
   ): Task[Either[AppError, String]] =
-    ConsoleDSL[Task].read(MessageResources.projectAlreadyExists(config.projectKey)).map(Right(_))
+    ConsoleDSL[Task].read(RedmineMessages.projectAlreadyExists(config.projectKey)).map(Right(_))
 
   private def readConfirm(): Task[Either[AppError, String]] =
-    ConsoleDSL[Task].read(MessageResources.confirm).map(Right(_))
+    ConsoleDSL[Task].read(RedmineMessages.confirm).map(Right(_))
 
   private def checkProjectAlreadyExists(
       input: String,
@@ -261,7 +261,7 @@ object R2BCli extends BacklogConfiguration with Logging {
   private def userMappingMessage(str: String): Task[Either[AppError, Unit]] =
     ConsoleDSL[Task]
       .println(
-        s"""${Messages("cli.mapping.show", MessageResources.userMappingItemName)}
+        s"""${Messages("cli.mapping.show", RedmineMessages.userMappingItemName)}
             |--------------------------------------------------
             |$str
             |--------------------------------------------------
@@ -272,7 +272,7 @@ object R2BCli extends BacklogConfiguration with Logging {
   private def priorityMappingMessage(str: String): Task[Either[AppError, Unit]] =
     ConsoleDSL[Task]
       .println(
-        s"""${Messages("cli.mapping.show", MessageResources.priorityMappingItemName)}
+        s"""${Messages("cli.mapping.show", RedmineMessages.priorityMappingItemName)}
             |--------------------------------------------------
             |$str
             |--------------------------------------------------""".stripMargin
@@ -282,7 +282,7 @@ object R2BCli extends BacklogConfiguration with Logging {
   private def statusMappingMessage(str: String): Task[Either[AppError, Unit]] =
     ConsoleDSL[Task]
       .println(
-        s"""${Messages("cli.mapping.show", MessageResources.statusMappingItemName)}
+        s"""${Messages("cli.mapping.show", RedmineMessages.statusMappingItemName)}
             |--------------------------------------------------
             |$str
             |--------------------------------------------------""".stripMargin
@@ -303,7 +303,7 @@ object R2BCli extends BacklogConfiguration with Logging {
   }
 
   def help(): Task[Either[AppError, Unit]] =
-    consoleDSL.println(MessageResources.helpMessage).map(Right(_))
+    consoleDSL.println(RedmineMessages.helpMessage).map(Right(_))
 
   private def finalize(config: BacklogApiConfiguration) = {
     if (!versionName.contains("SNAPSHOT")) {

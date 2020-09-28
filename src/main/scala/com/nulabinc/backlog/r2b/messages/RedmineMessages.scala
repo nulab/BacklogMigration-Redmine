@@ -1,9 +1,9 @@
-package com.nulabinc.backlog.r2b.core
+package com.nulabinc.backlog.r2b.messages
 
 import com.nulabinc.backlog.migration.common.utils.Logging
 import com.osinka.i18n.Messages
 
-object MessageResources extends Logging {
+object RedmineMessages extends Logging {
 
   val priorityMappingItemName: String = Messages("common.priorities")
   val statusMappingItemName: String   = Messages("common.statuses")

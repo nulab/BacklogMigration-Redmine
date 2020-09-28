@@ -6,8 +6,8 @@ import better.files.{File => Path}
 import com.nulabinc.backlog.migration.common.conf.BacklogConstantValue
 import com.nulabinc.backlog.migration.common.domain.{BacklogChangeLog, BacklogComment, BacklogIssue}
 import com.nulabinc.backlog.migration.common.utils.{FileUtil, IOUtil, Logging, StringUtil}
-import com.nulabinc.backlog.r2b.core.MessageResources
 import com.nulabinc.backlog.r2b.exporter.core.ExportContext
+import com.nulabinc.backlog.r2b.messages.RedmineMessages
 import com.osinka.i18n.Messages
 import com.taskadapter.redmineapi.bean.Attachment
 
@@ -42,26 +42,26 @@ private[exporter] class ChangeLogReducer(
       case BacklogConstantValue.ChangeLog.ATTACHMENT =>
         ReducedChangeLogWithMessage(AttachmentReducer.reduce(changeLog), "")
       case "done_ratio" =>
-        val message = MessageResources.changeCommentDoneRatio(
+        val message = RedmineMessages.changeCommentDoneRatio(
           getValue(changeLog.optOriginalValue),
           getValue(changeLog.optNewValue)
         )
         ReducedChangeLogWithMessage.createMessageOnly(s"$message\n")
       case "relates" =>
-        val message = MessageResources.changeCommentRelation(
+        val message = RedmineMessages.changeCommentRelation(
           getValue(changeLog.optOriginalValue),
           getValue(changeLog.optNewValue)
         )
         ReducedChangeLogWithMessage.createMessageOnly(s"$message\n")
       case "is_private" =>
         val message =
-          MessageResources.changeCommentPrivate(
+          RedmineMessages.changeCommentPrivate(
             getValue(privateValue(changeLog.optOriginalValue)),
             getValue(privateValue(changeLog.optNewValue))
           )
         ReducedChangeLogWithMessage.createMessageOnly(s"$message\n")
       case "project_id" =>
-        val message = MessageResources.changeCommentProject(
+        val message = RedmineMessages.changeCommentProject(
           getProjectName(changeLog.optOriginalValue),
           getProjectName(changeLog.optNewValue)
         )
@@ -91,10 +91,10 @@ private[exporter] class ChangeLogReducer(
             )
           case Left(error) =>
             logger.warn(s"Non Fatal. Reduce change log failed. Message: ${error.getMessage}")
-            val oldValue = optOriginal.map(_ => MessageResources.deleted)
-            val newValue = optNew.map(_ => MessageResources.deleted)
+            val oldValue = optOriginal.map(_ => RedmineMessages.deleted)
+            val newValue = optNew.map(_ => RedmineMessages.deleted)
             val message =
-              MessageResources.changeCommentParentIssue(getValue(oldValue), getValue(newValue))
+              RedmineMessages.changeCommentParentIssue(getValue(oldValue), getValue(newValue))
             ReducedChangeLogWithMessage(None, s"$message\n")
         }
       case _ =>

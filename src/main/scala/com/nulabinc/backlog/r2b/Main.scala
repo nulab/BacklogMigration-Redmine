@@ -1,4 +1,4 @@
-package com.nulabinc.backlog.r2b.core
+package com.nulabinc.backlog.r2b
 
 import java.util.Locale
 
@@ -14,9 +14,9 @@ import com.nulabinc.backlog.migration.common.messages.ConsoleMessages
 import com.nulabinc.backlog.migration.common.utils.{ConsoleOut, Logging}
 import com.nulabinc.backlog.r2b.cli.R2BCli
 import com.nulabinc.backlog.r2b.conf._
+import com.nulabinc.backlog.r2b.messages.RedmineMessages
 import com.nulabinc.backlog.r2b.redmine.conf.RedmineApiConfiguration
 import com.nulabinc.backlog.r2b.utils.{ClassVersion, DisableSSLCertificateCheckUtil}
-import com.nulabinc.backlog.r2b.{AppError, MappingError, OperationCanceled, ValidationError}
 import com.osinka.i18n.Messages
 import monix.eval.Task
 import monix.execution.Scheduler
@@ -27,114 +27,6 @@ import spray.json._
 
 import scala.concurrent.Await
 import scala.concurrent.duration.Duration
-
-class CommandLineInterface(arguments: Seq[String])
-    extends ScallopConf(arguments)
-    with BacklogConfiguration
-    with Logging {
-
-  banner("""Usage: Backlog Migration for Redmine [OPTION]....
-      | """.stripMargin)
-  footer("\n " + Messages("cli.help"))
-
-  val help    = opt[String]("help", descr = Messages("cli.help.show_help"))
-  val version = opt[String]("version", descr = Messages("cli.help.show_version"))
-
-  val execute = new Subcommand("execute") {
-    val backlogKey = opt[String](
-      "backlog.key",
-      descr = Messages("cli.help.backlog.key"),
-      required = true,
-      noshort = true
-    )
-    val backlogUrl = opt[String](
-      "backlog.url",
-      descr = Messages("cli.help.backlog.url"),
-      required = true,
-      noshort = true
-    )
-    val redmineKey = opt[String](
-      "redmine.key",
-      descr = Messages("cli.help.redmine.key"),
-      required = true,
-      noshort = true
-    )
-    val redmineUrl = opt[String](
-      "redmine.url",
-      descr = Messages("cli.help.redmine.url"),
-      required = true,
-      noshort = true
-    )
-
-    val projectKey =
-      opt[String]("projectKey", descr = Messages("cli.help.projectKey"), required = true)
-    val importOnly =
-      opt[Boolean]("importOnly", descr = Messages("cli.help.importOnly"), required = true)
-    val exclude =
-      opt[List[String]]("exclude", descr = Messages("cli.help.exclude"), required = false)
-    val retryCount =
-      opt[Int](name = "retryCount", descr = Messages("cli.help.retryCount"), required = false)
-    val help = opt[String]("help", descr = Messages("cli.help.show_help"))
-  }
-
-  val init = new Subcommand("init") {
-    val backlogKey = opt[String](
-      "backlog.key",
-      descr = Messages("cli.help.backlog.key"),
-      required = true,
-      noshort = true
-    )
-    val backlogUrl = opt[String](
-      "backlog.url",
-      descr = Messages("cli.help.backlog.url"),
-      required = true,
-      noshort = true
-    )
-    val redmineKey = opt[String](
-      "redmine.key",
-      descr = Messages("cli.help.redmine.key"),
-      required = true,
-      noshort = true
-    )
-    val redmineUrl = opt[String](
-      "redmine.url",
-      descr = Messages("cli.help.redmine.url"),
-      required = true,
-      noshort = true
-    )
-    val exclude =
-      opt[List[String]]("exclude", descr = Messages("cli.help.exclude"), required = false)
-    val projectKey =
-      opt[String]("projectKey", descr = Messages("cli.help.projectKey"), required = true)
-    val help = opt[String]("help", descr = Messages("cli.help.show_help"))
-  }
-
-  val destroy = new Subcommand("destroy") {
-    val backlogKey: ScallopOption[String] = opt[String](
-      "backlog.key",
-      descr = Messages("cli.help.backlog.key"),
-      required = true,
-      noshort = true
-    )
-    val backlogUrl: ScallopOption[String] = opt[String](
-      "backlog.url",
-      descr = Messages("cli.help.backlog.url"),
-      required = true,
-      noshort = true
-    )
-    val projectKey: ScallopOption[String] =
-      opt[String]("projectKey", descr = Messages("cli.help.projectKey"), required = true)
-    val dryRun: ScallopOption[Boolean] =
-      opt[Boolean]("dryRun", descr = Messages("destroy.help.dryRun"), required = false)
-    val help: ScallopOption[String] = opt[String]("help", descr = Messages("cli.help.show_help"))
-  }
-
-  addSubcommand(destroy)
-  addSubcommand(execute)
-  addSubcommand(init)
-
-  verify()
-}
 
 object R2B extends BacklogConfiguration with Logging {
 
@@ -158,7 +50,7 @@ object R2B extends BacklogConfiguration with Logging {
             case Right(_) =>
               Task(Right(()))
             case Left(error: ValidationError) =>
-              ConsoleDSL[Task].errorln(MessageResources.validationError(error.errors))
+              ConsoleDSL[Task].errorln(RedmineMessages.validationError(error.errors))
             case Left(error: MappingError) =>
               error.inner match {
                 case _: MappingFileNotFound =>
@@ -169,7 +61,7 @@ object R2B extends BacklogConfiguration with Logging {
                   ConsoleDSL[Task].errorln(e.toString)
               }
             case Left(OperationCanceled) =>
-              ConsoleDSL[Task].errorln(MessageResources.cancel)
+              ConsoleDSL[Task].errorln(RedmineMessages.cancel)
           }
         } yield ()
 
@@ -322,4 +214,112 @@ object R2B extends BacklogConfiguration with Logging {
     }
   }
 
+}
+
+class CommandLineInterface(arguments: Seq[String])
+    extends ScallopConf(arguments)
+    with BacklogConfiguration
+    with Logging {
+
+  banner("""Usage: Backlog Migration for Redmine [OPTION]....
+           | """.stripMargin)
+  footer("\n " + Messages("cli.help"))
+
+  val help    = opt[String]("help", descr = Messages("cli.help.show_help"))
+  val version = opt[String]("version", descr = Messages("cli.help.show_version"))
+
+  val execute = new Subcommand("execute") {
+    val backlogKey = opt[String](
+      "backlog.key",
+      descr = Messages("cli.help.backlog.key"),
+      required = true,
+      noshort = true
+    )
+    val backlogUrl = opt[String](
+      "backlog.url",
+      descr = Messages("cli.help.backlog.url"),
+      required = true,
+      noshort = true
+    )
+    val redmineKey = opt[String](
+      "redmine.key",
+      descr = Messages("cli.help.redmine.key"),
+      required = true,
+      noshort = true
+    )
+    val redmineUrl = opt[String](
+      "redmine.url",
+      descr = Messages("cli.help.redmine.url"),
+      required = true,
+      noshort = true
+    )
+
+    val projectKey =
+      opt[String]("projectKey", descr = Messages("cli.help.projectKey"), required = true)
+    val importOnly =
+      opt[Boolean]("importOnly", descr = Messages("cli.help.importOnly"), required = true)
+    val exclude =
+      opt[List[String]]("exclude", descr = Messages("cli.help.exclude"), required = false)
+    val retryCount =
+      opt[Int](name = "retryCount", descr = Messages("cli.help.retryCount"), required = false)
+    val help = opt[String]("help", descr = Messages("cli.help.show_help"))
+  }
+
+  val init = new Subcommand("init") {
+    val backlogKey = opt[String](
+      "backlog.key",
+      descr = Messages("cli.help.backlog.key"),
+      required = true,
+      noshort = true
+    )
+    val backlogUrl = opt[String](
+      "backlog.url",
+      descr = Messages("cli.help.backlog.url"),
+      required = true,
+      noshort = true
+    )
+    val redmineKey = opt[String](
+      "redmine.key",
+      descr = Messages("cli.help.redmine.key"),
+      required = true,
+      noshort = true
+    )
+    val redmineUrl = opt[String](
+      "redmine.url",
+      descr = Messages("cli.help.redmine.url"),
+      required = true,
+      noshort = true
+    )
+    val exclude =
+      opt[List[String]]("exclude", descr = Messages("cli.help.exclude"), required = false)
+    val projectKey =
+      opt[String]("projectKey", descr = Messages("cli.help.projectKey"), required = true)
+    val help = opt[String]("help", descr = Messages("cli.help.show_help"))
+  }
+
+  val destroy = new Subcommand("destroy") {
+    val backlogKey: ScallopOption[String] = opt[String](
+      "backlog.key",
+      descr = Messages("cli.help.backlog.key"),
+      required = true,
+      noshort = true
+    )
+    val backlogUrl: ScallopOption[String] = opt[String](
+      "backlog.url",
+      descr = Messages("cli.help.backlog.url"),
+      required = true,
+      noshort = true
+    )
+    val projectKey: ScallopOption[String] =
+      opt[String]("projectKey", descr = Messages("cli.help.projectKey"), required = true)
+    val dryRun: ScallopOption[Boolean] =
+      opt[Boolean]("dryRun", descr = Messages("destroy.help.dryRun"), required = false)
+    val help: ScallopOption[String] = opt[String]("help", descr = Messages("cli.help.show_help"))
+  }
+
+  addSubcommand(destroy)
+  addSubcommand(execute)
+  addSubcommand(init)
+
+  verify()
 }
