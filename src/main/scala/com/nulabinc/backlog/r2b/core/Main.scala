@@ -157,7 +157,8 @@ object R2B extends BacklogConfiguration with Logging {
           _ <- result match {
             case Right(_) =>
               Task(Right(()))
-            case Left(error: ValidationError) => ???
+            case Left(error: ValidationError) =>
+              ConsoleDSL[Task].errorln(MessageResources.validationError(error.errors))
             case Left(error: MappingError) =>
               error.inner match {
                 case _: MappingFileNotFound =>

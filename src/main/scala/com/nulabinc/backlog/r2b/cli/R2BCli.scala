@@ -126,7 +126,9 @@ object R2BCli extends BacklogConfiguration with Logging {
           .mapError(MappingError)
           .handleError
       mappingContainer = MappingContainer(userMappings, priorityMappings, statusMappings)
-      _ <- confirmImport(config, mappingContainer).handleError
+      _     <- confirmImport(config, mappingContainer).handleError
+      input <- readConfirm().handleError
+      _     <- confirmStartMigration(input).handleError
     } yield {
 
       if (backlogPaths.outputPath.exists) {
@@ -163,18 +165,14 @@ object R2BCli extends BacklogConfiguration with Logging {
       Right(())
     }
 
-  private def validateParam(config: AppConfiguration): Task[Either[AppError, Unit]] = {
-    val validator = new ParameterValidator(config)
-    val errors    = validator.validate()
+  private def validateParam(config: AppConfiguration): Task[Either[AppError, Unit]] =
+    Task {
+      val validator = new ParameterValidator(config)
+      val errors    = validator.validate()
 
-    if (errors.isEmpty)
-      Task(Right(()))
-    else {
-      for {
-        _ <- consoleDSL.errorln(MessageResources.validationError(errors))
-      } yield Left(ValidationError(errors))
+      if (errors.isEmpty) Right(())
+      else Left(ValidationError(errors))
     }
-  }
 
   private def confirmProject(config: AppConfiguration): Task[Either[AppError, (String, String)]] = {
     val injector       = BacklogInjector.createInjector(config.backlogConfig)
@@ -201,6 +199,9 @@ object R2BCli extends BacklogConfiguration with Logging {
   ): Task[Either[AppError, String]] =
     ConsoleDSL[Task].read(MessageResources.projectAlreadyExists(config.projectKey)).map(Right(_))
 
+  private def readConfirm(): Task[Either[AppError, String]] =
+    ConsoleDSL[Task].read(MessageResources.confirm).map(Right(_))
+
   private def checkProjectAlreadyExists(
       input: String,
       redmineConfig: RedmineApiConfiguration,
@@ -209,6 +210,11 @@ object R2BCli extends BacklogConfiguration with Logging {
     Task {
       if (input.toLowerCase == "y") Right((redmineConfig.projectKey, backlogConfig.projectKey))
       else Left(OperationCanceled)
+    }
+
+  private def confirmStartMigration(input: String): Task[Either[AppError, Unit]] =
+    Task {
+      if (input.toLowerCase == "y") Right(()) else Left(OperationCanceled)
     }
 
   private def confirmImport(
