@@ -15,7 +15,10 @@ import scala.concurrent.duration._
 /**
   * @author uchida
   */
-private[collector] class WikisActor(mappingContext: MappingContext) extends Actor with BacklogConfiguration with Logging {
+private[collector] class WikisActor(mappingContext: MappingContext)
+    extends Actor
+    with BacklogConfiguration
+    with Logging {
 
   private[this] val strategy = OneForOneStrategy(maxNrOfRetries = 5, withinTimeRange = 10 seconds) {
     case _ => Restart
@@ -23,12 +26,17 @@ private[collector] class WikisActor(mappingContext: MappingContext) extends Acto
 
   private[this] val wikis      = mappingContext.wikiService.allWikis()
   private[this] val completion = new CountDownLatch(wikis.size)
-  private[this] val console    = (ProgressBar.progress _)(Messages("common.wikis"), Messages("message.analyzing"), Messages("message.analyzed"))
+  private[this] val console = (ProgressBar.progress _)(
+    Messages("common.wikis"),
+    Messages("message.analyzing"),
+    Messages("message.analyzed")
+  )
 
   def receive: Receive = {
     case WikisActor.Do(mappingData: MappingData) =>
-      val router    = SmallestMailboxPool(akkaMailBoxPool, supervisorStrategy = strategy)
-      val wikiActor = context.actorOf(router.props(Props(new WikiActor(mappingContext.wikiService, mappingData))))
+      val router = SmallestMailboxPool(akkaMailBoxPool, supervisorStrategy = strategy)
+      val wikiActor =
+        context.actorOf(router.props(Props(new WikiActor(mappingContext.wikiService, mappingData))))
 
       wikis.foreach(wiki => wikiActor ! WikiActor.Do(wiki, completion, wikis.size, console))
 

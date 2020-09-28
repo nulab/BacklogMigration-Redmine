@@ -14,7 +14,10 @@ import com.taskadapter.redmineapi.bean.IssuePriority
 /**
   * @author uchida
   */
-class PriorityMappingFile(redmineApiConfig: RedmineApiConfiguration, backlogApiConfig: BacklogApiConfiguration) extends Logging {
+class PriorityMappingFile(
+    redmineApiConfig: RedmineApiConfiguration,
+    backlogApiConfig: BacklogApiConfiguration
+) extends Logging {
 
   private[this] val redmineItems = getRedmineItems()
   private[this] val backlogItems = getBacklogItems()
@@ -48,11 +51,23 @@ class PriorityMappingFile(redmineApiConfig: RedmineApiConfiguration, backlogApiC
     val NORMAL_EN: String = Messages("mapping.priority.backlog.normal")(Lang("en"))
     val HIGH_EN: String   = Messages("mapping.priority.backlog.high")(Lang("en"))
 
-    def low(): String = backlogs.map(_.name).find(_ == LOW_JA).getOrElse(backlogs.map(_.name).find(_ == LOW_EN).getOrElse(""))
+    def low(): String =
+      backlogs
+        .map(_.name)
+        .find(_ == LOW_JA)
+        .getOrElse(backlogs.map(_.name).find(_ == LOW_EN).getOrElse(""))
 
-    def normal(): String = backlogs.map(_.name).find(_ == NORMAL_JA).getOrElse(backlogs.map(_.name).find(_ == NORMAL_EN).getOrElse(""))
+    def normal(): String =
+      backlogs
+        .map(_.name)
+        .find(_ == NORMAL_JA)
+        .getOrElse(backlogs.map(_.name).find(_ == NORMAL_EN).getOrElse(""))
 
-    def high(): String = backlogs.map(_.name).find(_ == HIGH_JA).getOrElse(backlogs.map(_.name).find(_ == HIGH_EN).getOrElse(""))
+    def high(): String =
+      backlogs
+        .map(_.name)
+        .find(_ == HIGH_JA)
+        .getOrElse(backlogs.map(_.name).find(_ == HIGH_EN).getOrElse(""))
   }
 
   private object Redmine {

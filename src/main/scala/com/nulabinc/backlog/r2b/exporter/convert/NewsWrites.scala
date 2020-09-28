@@ -11,8 +11,10 @@ import javax.inject.Inject
 /**
   * @author uchida
   */
-private[exporter] class NewsWrites @Inject() (implicit val userWrites: UserWrites, backlogTextFormattingRule: BacklogTextFormattingRule)
-    extends Writes[News, BacklogWiki]
+private[exporter] class NewsWrites @Inject() (implicit
+    val userWrites: UserWrites,
+    backlogTextFormattingRule: BacklogTextFormattingRule
+) extends Writes[News, BacklogWiki]
     with Logging {
   override def writes(news: News): BacklogWiki = {
     BacklogWiki(

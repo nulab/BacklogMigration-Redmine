@@ -27,7 +27,15 @@ object Boot extends Logging {
   ): PrintStream = {
     try {
       val injector =
-        Guice.createInjector(new RedmineModule(apiConfig, mappingContainer, backlogProjectKey, backlogTextFormattingRule, ExportConfig(exclude)))
+        Guice.createInjector(
+          new RedmineModule(
+            apiConfig,
+            mappingContainer,
+            backlogProjectKey,
+            backlogTextFormattingRule,
+            ExportConfig(exclude)
+          )
+        )
 
       ConsoleOut.println(s"""
                             |${Messages("export.start")}

@@ -1,6 +1,9 @@
 package com.nulabinc.backlog.r2b.domain.mappings
 
-import com.nulabinc.backlog.migration.common.domain.mappings.{BacklogPriorityMappingItem, ValidatedPriorityMapping}
+import com.nulabinc.backlog.migration.common.domain.mappings.{
+  BacklogPriorityMappingItem,
+  ValidatedPriorityMapping
+}
 
 case class RedminePriorityMappingItem(value: String)
 

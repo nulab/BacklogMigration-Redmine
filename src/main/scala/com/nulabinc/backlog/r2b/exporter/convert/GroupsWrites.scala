@@ -12,8 +12,10 @@ import scala.jdk.CollectionConverters._
 /**
   * @author uchida
   */
-private[exporter] class GroupsWrites @Inject() (implicit val userWrites: UserWrites, propertyValue: PropertyValue)
-    extends Writes[Seq[Membership], Seq[BacklogGroup]] {
+private[exporter] class GroupsWrites @Inject() (implicit
+    val userWrites: UserWrites,
+    propertyValue: PropertyValue
+) extends Writes[Seq[Membership], Seq[BacklogGroup]] {
 
   override def writes(memberships: Seq[Membership]): Seq[BacklogGroup] = {
     val users = propertyValue.users
@@ -30,6 +32,7 @@ private[exporter] class GroupsWrites @Inject() (implicit val userWrites: UserWri
 
   def condition(membership: Membership) = Option(membership.getGroup).isDefined
 
-  def condition(name: String, user: User) = user.getGroups.asScala.toSeq.map(_.getName).contains(name)
+  def condition(name: String, user: User) =
+    user.getGroups.asScala.toSeq.map(_.getName).contains(name)
 
 }

@@ -1,6 +1,9 @@
 package com.nulabinc.backlog.r2b.domain.mappings
 
-import com.nulabinc.backlog.migration.common.domain.mappings.{BacklogStatusMappingItem, ValidatedStatusMapping}
+import com.nulabinc.backlog.migration.common.domain.mappings.{
+  BacklogStatusMappingItem,
+  ValidatedStatusMapping
+}
 
 case class RedmineStatusMappingItem(value: String)
 

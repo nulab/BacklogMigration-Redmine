@@ -36,7 +36,11 @@ private[collector] class MappingCollector @Inject() (
     memberships.foreach(membership => parse(membership, mappingData))
 
     //news
-    val console = (ProgressBar.progress _)(Messages("common.news"), Messages("message.analyzing"), Messages("message.analyzed"))
+    val console = (ProgressBar.progress _)(
+      Messages("common.news"),
+      Messages("message.analyzing"),
+      Messages("message.analyzed")
+    )
     val allNews = newsService.allNews()
     allNews.zipWithIndex.foreach {
       case (news, index) =>
@@ -55,7 +59,9 @@ private[collector] class MappingCollector @Inject() (
   }
 
   private[this] def parse(group: Group, user: User, mappingData: MappingData): Unit = {
-    user.getGroups.asScala.foreach(userGroup => if (group.getId == userGroup.getId) mappingData.users += user)
+    user.getGroups.asScala.foreach(userGroup =>
+      if (group.getId == userGroup.getId) mappingData.users += user
+    )
   }
 
 }

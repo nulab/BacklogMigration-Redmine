@@ -9,7 +9,11 @@ import com.nulabinc.backlog.r2b.redmine.service.{ProjectService, UserService => 
 import com.nulabinc.backlog4j.BacklogAPIException
 import com.osinka.i18n.Messages
 import com.taskadapter.redmineapi.bean.Project
-import com.taskadapter.redmineapi.{NotAuthorizedException, RedmineAuthenticationException, RedmineTransportException}
+import com.taskadapter.redmineapi.{
+  NotAuthorizedException,
+  RedmineAuthenticationException,
+  RedmineTransportException
+}
 
 /**
   * @author uchida
@@ -22,7 +26,11 @@ class ParameterValidator(config: AppConfiguration) extends Logging {
     ConsoleOut.println(Messages("cli.param.get.project", Messages("common.src")))
     val optRedmineProject = optProject()
 
-    val messages = Seq(validateBacklog, validProjectKey(config.backlogConfig.projectKey), validateAuthBacklog(validateBacklog)).flatten
+    val messages = Seq(
+      validateBacklog,
+      validProjectKey(config.backlogConfig.projectKey),
+      validateAuthBacklog(validateBacklog)
+    ).flatten
 
     if (config.importOnly) {
       messages
@@ -33,8 +41,9 @@ class ParameterValidator(config: AppConfiguration) extends Logging {
 
   private[this] def validateProject(optRedmineProject: Option[Project]): Option[String] = {
     optRedmineProject match {
-      case None => Some(s"- ${Messages("cli.param.error.disable.project", config.redmineConfig.projectKey)}")
-      case _    => None
+      case None =>
+        Some(s"- ${Messages("cli.param.error.disable.project", config.redmineConfig.projectKey)}")
+      case _ => None
     }
   }
 
@@ -50,7 +59,9 @@ class ParameterValidator(config: AppConfiguration) extends Logging {
       } catch {
         case unknown: BacklogAPIException if unknown.getStatusCode == 404 =>
           logger.error(unknown.getMessage, unknown)
-          Some(s"- ${Messages("cli.param.error.disable.host", Messages("common.dst"), config.backlogConfig.url)}")
+          Some(
+            s"- ${Messages("cli.param.error.disable.host", Messages("common.dst"), config.backlogConfig.url)}"
+          )
         case e: Throwable =>
           logger.error(e.getMessage, e)
           Some(s"- ${Messages("cli.param.error.disable.access", Messages("common.dst"))}")
@@ -87,7 +98,9 @@ class ParameterValidator(config: AppConfiguration) extends Logging {
         Some(s"- ${Messages("cli.param.error.auth.not.auth", noauth.getMessage)}")
       case transport: RedmineTransportException =>
         logger.error(transport.getMessage, transport)
-        Some(s"- ${Messages("cli.param.error.disable.host", Messages("common.src"), config.redmineConfig.url)}")
+        Some(
+          s"- ${Messages("cli.param.error.disable.host", Messages("common.src"), config.redmineConfig.url)}"
+        )
       case e: Throwable =>
         logger.error(e.getMessage, e)
         Some(s"- ${Messages("cli.param.error.disable.access", Messages("common.src"))}")

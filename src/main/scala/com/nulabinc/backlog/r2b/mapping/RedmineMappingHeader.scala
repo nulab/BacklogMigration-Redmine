@@ -1,6 +1,11 @@
 package com.nulabinc.backlog.r2b.mapping
 
-import com.nulabinc.backlog.migration.common.domain.mappings.{MappingHeader, PriorityMapping, StatusMapping, UserMapping}
+import com.nulabinc.backlog.migration.common.domain.mappings.{
+  MappingHeader,
+  PriorityMapping,
+  StatusMapping,
+  UserMapping
+}
 
 object RedmineMappingHeader {
 

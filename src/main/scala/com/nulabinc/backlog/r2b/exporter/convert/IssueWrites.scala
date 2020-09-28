@@ -4,7 +4,10 @@ import javax.inject.Inject
 import com.nulabinc.backlog.migration.common.convert.{Convert, Writes}
 import com.nulabinc.backlog.migration.common.domain._
 import com.nulabinc.backlog.migration.common.utils.DateUtil
-import com.nulabinc.backlog.r2b.mapping.converters.{MappingPriorityConverter, MappingStatusConverter}
+import com.nulabinc.backlog.r2b.mapping.converters.{
+  MappingPriorityConverter,
+  MappingStatusConverter
+}
 import com.nulabinc.backlog.r2b.mapping.core.MappingContainer
 import com.nulabinc.backlog.r2b.utils.TextileUtil
 import com.taskadapter.redmineapi.bean.Issue
@@ -39,7 +42,8 @@ private[exporter] class IssueWrites @Inject() (
       categoryNames = Option(issue.getCategory).map(_.getName).toSeq,
       versionNames = Seq.empty[String],
       milestoneNames = Option(issue.getTargetVersion).map(_.getName).toSeq,
-      priorityName = MappingPriorityConverter.convert(mappingContainer.priority, issue.getPriorityText),
+      priorityName =
+        MappingPriorityConverter.convert(mappingContainer.priority, issue.getPriorityText),
       optAssignee = Option(issue.getAssignee).map(Convert.toBacklog(_)),
       attachments = Seq.empty[BacklogAttachment],
       sharedFiles = Seq.empty[BacklogSharedFile],

@@ -5,7 +5,10 @@ import com.nulabinc.backlog.r2b.domain.mappings.RedminePriorityMappingItem
 
 object MappingPriorityConverter {
 
-  def convert(mappings: Seq[ValidatedPriorityMapping[RedminePriorityMappingItem]], value: String): String =
+  def convert(
+      mappings: Seq[ValidatedPriorityMapping[RedminePriorityMappingItem]],
+      value: String
+  ): String =
     if (mappings.isEmpty) value
     else findFromMappings(mappings, value).getOrElse(value)
 

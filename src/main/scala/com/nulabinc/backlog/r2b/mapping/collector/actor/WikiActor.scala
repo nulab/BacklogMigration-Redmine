@@ -15,7 +15,9 @@ import scala.concurrent.duration._
 /**
   * @author uchida
   */
-private[collector] class WikiActor(wikiService: WikiService, mappingData: MappingData) extends Actor with Logging {
+private[collector] class WikiActor(wikiService: WikiService, mappingData: MappingData)
+    extends Actor
+    with Logging {
 
   override def preRestart(reason: Throwable, message: Option[Any]) = {
     logger.debug(s"preRestart: reason: ${reason}, message: ${message}")
@@ -27,7 +29,12 @@ private[collector] class WikiActor(wikiService: WikiService, mappingData: Mappin
   private[this] val users = mutable.Set.empty[Option[User]]
 
   def receive: Receive = {
-    case WikiActor.Do(wiki: WikiPage, completion: CountDownLatch, allCount: Int, console: ((Int, Int) => Unit)) =>
+    case WikiActor.Do(
+          wiki: WikiPage,
+          completion: CountDownLatch,
+          allCount: Int,
+          console: ((Int, Int) => Unit)
+        ) =>
       wikiService.optWikiDetail(wiki.getTitle).foreach { wikiDetail =>
         parse(wikiDetail)
         mappingData.users ++= users.flatten
@@ -43,6 +50,11 @@ private[collector] class WikiActor(wikiService: WikiService, mappingData: Mappin
 
 private[collector] object WikiActor {
 
-  case class Do(wiki: WikiPage, completion: CountDownLatch, allCount: Int, console: ((Int, Int) => Unit))
+  case class Do(
+      wiki: WikiPage,
+      completion: CountDownLatch,
+      allCount: Int,
+      console: ((Int, Int) => Unit)
+  )
 
 }

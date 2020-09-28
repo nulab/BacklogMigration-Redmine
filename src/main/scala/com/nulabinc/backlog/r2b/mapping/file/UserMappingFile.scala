@@ -3,7 +3,11 @@ package com.nulabinc.backlog.r2b.mapping.file
 import java.nio.file.Path
 
 import better.files.File
-import com.nulabinc.backlog.migration.common.conf.{BacklogApiConfiguration, BacklogConfiguration, MappingDirectory}
+import com.nulabinc.backlog.migration.common.conf.{
+  BacklogApiConfiguration,
+  BacklogConfiguration,
+  MappingDirectory
+}
 import com.nulabinc.backlog.migration.common.domain.BacklogUser
 import com.nulabinc.backlog.migration.common.modules.{ServiceInjector => BacklogInjector}
 import com.nulabinc.backlog.migration.common.service.{UserService => BacklogUserService}
@@ -20,8 +24,11 @@ import spray.json.JsonParser
 /**
   * @author uchida
   */
-class UserMappingFile(redmineApiConfig: RedmineApiConfiguration, backlogApiConfig: BacklogApiConfiguration, users: Seq[RedmineUser])
-    extends Logging
+class UserMappingFile(
+    redmineApiConfig: RedmineApiConfiguration,
+    backlogApiConfig: BacklogApiConfiguration,
+    users: Seq[RedmineUser]
+) extends Logging
     with BacklogConfiguration {
 
   private[this] val redmineItems = getRedmineItems()
@@ -73,7 +80,9 @@ class UserMappingFile(redmineApiConfig: RedmineApiConfiguration, backlogApiConfi
       val targetBacklogUser = backlogUsers
         .find(backlogUser => backlogUser.optMailAddress.getOrElse("") == mapping.backlog)
         .getOrElse(throw new NoSuchElementException(s"User ${mapping.backlog} not found"))
-      mapping.copy(backlog = targetBacklogUser.optUserId.getOrElse(s"UserId ${mapping.backlog} not found"))
+      mapping.copy(backlog =
+        targetBacklogUser.optUserId.getOrElse(s"UserId ${mapping.backlog} not found")
+      )
     } else mapping
   }
 

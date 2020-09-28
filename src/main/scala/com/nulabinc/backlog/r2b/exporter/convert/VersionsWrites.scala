@@ -10,7 +10,8 @@ import com.taskadapter.redmineapi.bean.Version
 /**
   * @author uchida
   */
-private[exporter] class VersionsWrites @Inject() () extends Writes[Seq[Version], Seq[BacklogVersion]] {
+private[exporter] class VersionsWrites @Inject() ()
+    extends Writes[Seq[Version], Seq[BacklogVersion]] {
 
   override def writes(versions: Seq[Version]): Seq[BacklogVersion] = {
     versions.map(toBacklog)

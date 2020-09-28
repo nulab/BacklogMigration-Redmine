@@ -13,7 +13,11 @@ import com.taskadapter.redmineapi.bean.IssueStatus
 /**
   * @author uchida
   */
-class StatusMappingFile(redmineApiConfig: RedmineApiConfiguration, backlogApiConfig: BacklogApiConfiguration, statuses: Seq[String]) extends Logging {
+class StatusMappingFile(
+    redmineApiConfig: RedmineApiConfiguration,
+    backlogApiConfig: BacklogApiConfiguration,
+    statuses: Seq[String]
+) extends Logging {
 
   private[this] val redmineItems = getRedmineItems
   private[this] val backlogItems = getBacklogItems
@@ -34,7 +38,11 @@ class StatusMappingFile(redmineApiConfig: RedmineApiConfiguration, backlogApiCon
 
     def collectItems(acc: Seq[MappingItem], status: String): Seq[MappingItem] = {
       if (redmineStatuses.exists(condition(status))) acc
-      else acc :+ MappingItem(Messages("cli.mapping.delete_status", status), Messages("cli.mapping.delete_status", status))
+      else
+        acc :+ MappingItem(
+          Messages("cli.mapping.delete_status", status),
+          Messages("cli.mapping.delete_status", status)
+        )
     }
 
     val redmines    = redmineStatuses.map(createItem)
@@ -61,13 +69,29 @@ class StatusMappingFile(redmineApiConfig: RedmineApiConfiguration, backlogApiCon
     val RESOLVED_EN: String    = Messages("mapping.status.backlog.resolved")(Lang("en"))
     val CLOSED_EN: String      = Messages("mapping.status.backlog.closed")(Lang("en"))
 
-    def open(): String = backlogs.map(_.name).find(_ == OPEN_JA).getOrElse(backlogs.map(_.name).find(_ == OPEN_EN).getOrElse(""))
+    def open(): String =
+      backlogs
+        .map(_.name)
+        .find(_ == OPEN_JA)
+        .getOrElse(backlogs.map(_.name).find(_ == OPEN_EN).getOrElse(""))
 
-    def inProgress(): String = backlogs.map(_.name).find(_ == IN_PROGRESS_JA).getOrElse(backlogs.map(_.name).find(_ == IN_PROGRESS_EN).getOrElse(""))
+    def inProgress(): String =
+      backlogs
+        .map(_.name)
+        .find(_ == IN_PROGRESS_JA)
+        .getOrElse(backlogs.map(_.name).find(_ == IN_PROGRESS_EN).getOrElse(""))
 
-    def resolved(): String = backlogs.map(_.name).find(_ == RESOLVED_JA).getOrElse(backlogs.map(_.name).find(_ == RESOLVED_EN).getOrElse(""))
+    def resolved(): String =
+      backlogs
+        .map(_.name)
+        .find(_ == RESOLVED_JA)
+        .getOrElse(backlogs.map(_.name).find(_ == RESOLVED_EN).getOrElse(""))
 
-    def closed(): String = backlogs.map(_.name).find(_ == CLOSED_JA).getOrElse(backlogs.map(_.name).find(_ == CLOSED_EN).getOrElse(""))
+    def closed(): String =
+      backlogs
+        .map(_.name)
+        .find(_ == CLOSED_JA)
+        .getOrElse(backlogs.map(_.name).find(_ == CLOSED_EN).getOrElse(""))
   }
 
   private[this] object Redmine {

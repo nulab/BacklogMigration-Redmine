@@ -8,10 +8,15 @@ import com.nulabinc.backlog.r2b.exporter.core.ExportContext
 /**
   * @author uchida
   */
-private[exporter] class ContentActor(exportContext: ExportContext, backlogTextFormattingRule: BacklogTextFormattingRule) extends Actor with Logging {
+private[exporter] class ContentActor(
+    exportContext: ExportContext,
+    backlogTextFormattingRule: BacklogTextFormattingRule
+) extends Actor
+    with Logging {
 
-  private[this] val wikisActor  = context.actorOf(Props(new WikisActor(exportContext)))
-  private[this] val issuesActor = context.actorOf(Props(new IssuesActor(exportContext, backlogTextFormattingRule)))
+  private[this] val wikisActor = context.actorOf(Props(new WikisActor(exportContext)))
+  private[this] val issuesActor =
+    context.actorOf(Props(new IssuesActor(exportContext, backlogTextFormattingRule)))
 
   def receive: Receive = {
     case ContentActor.Do =>
