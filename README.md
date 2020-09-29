@@ -74,13 +74,16 @@ The mapping file is created as follows.
     │   ├── backlog-migration-redmine-warn.log
     │   └── backlog-migration-redmine.log
     └── mapping
-        ├── priorities.json
-        ├── statuses.json
-        └── users.json
+        ├── priorities.csv
+        ├── priorities_list.csv
+        ├── statuses.csv
+        ├── statuses_list.csv
+        ├── users.csv
+        └── users_list.csv
 
-- 1.mapping / users.json (users)
-- 2.mapping / priorities.json (priority)
-- 3.mapping / statuses.json (state)
+- 1.mapping / users.csv (users)
+- 2.mapping / priorities.csv (priority)
+- 3.mapping / statuses.csv (state)
 
 #### Exclude wiki
 [**--exclude**] If you set this property, specified initialize will **not** be run by the program.
@@ -102,20 +105,13 @@ Specify the destination project for **--projectKey** option by colon (:).  i.e. 
 
 ### Fix the mapping file
 
-A file in json format will be automatically created.
-The items that could not be automatically associated with Backlog will be blank.
-The blanks need to be filled using the items in the description.
+A file in CSV format will be automatically created.
+The right side is Backlog item.
+For the assignable items from **Name** column, please refer to the following file by reference
 
-     {
-      "Description": "The values accepted for User in Backlog are "admin,tanaka". "
-      "Mappings": [{
-        "redmine": "admin",
-        "backlog": "admin"
-      }, {
-        "redmine": "satou",
-        "backlog": ""
-      }]
-    }
+- mapping/users_list.csv (users)
+- mapping/priorities_list.csv (priority)
+- mapping/statuses_list.csv (state)
 
 ### Run command
 
@@ -145,10 +141,6 @@ When import has been completed, the directory will be created and data file that
     ├── log
     │   ├── backlog-migration-redmine-warn.log
     │   └── backlog-migration-redmine.log
-    └── mapping
-        ├── priorities.json
-        ├── statuses.json
-        └── users.json
 
 #### Import-Only Mode
 [**--importOnly**] If you set this property, only import will be run by the program.
@@ -364,13 +356,16 @@ https://github.com/nulab/BacklogMigration-Redmine/releases
     │   ├── backlog-migration-redmine-warn.log
     │   └── backlog-migration-redmine.log
     └── mapping
-        ├── priorities.json
-        ├── statuses.json
-        └── users.json
+        ├── priorities.csv
+        ├── priorities_list.csv
+        ├── statuses.csv
+        ├── statuses_list.csv
+        ├── users.csv
+        └── users_list.csv
 
-- 1.mapping/users.json(ユーザー)
-- 2.mapping/priorities.json(優先度)
-- 3.mapping/statuses.json(状態)
+- mapping/users.csv (ユーザー)
+- mapping/priorities.csv (優先度)
+- mapping/statuses.csv (状態)
 
 #### Wikiを除外して初期化
 
@@ -393,20 +388,13 @@ https://github.com/nulab/BacklogMigration-Redmine/releases
 
 ### マッピングファイルを修正
 
-自動作成されるファイルは以下のようにjson形式で出力されます。
-Backlog側の空白の項目は自動設定できなかった項目になります。
-descriptionにある項目を使い、空白を埋める必要が有ります。
+自動作成されるファイルは以下のように CSV 形式で出力されます。
+Backlog 側の空白の項目は自動設定できなかった項目になります。
+以下のファイルから **Name** 列の項目をコピーして、空白を埋める必要が有ります。
 
-    {
-      "description": "Backlogに設定可能なユーザーは[admin,tanaka]です。",
-      "mappings": [{
-        "redmine": "admin",
-        "backlog": "admin"
-      }, {
-        "redmine": "satou",
-        "backlog": ""
-      }]
-    }
+- mapping/users_list.csv (ユーザー)
+- mapping/priorities_list.csv (優先度)
+- mapping/statuses_list.csv (状態)
 
 ### 実行コマンド
 
@@ -437,10 +425,6 @@ descriptionにある項目を使い、空白を埋める必要が有ります。
     ├── log
     │   ├── backlog-migration-redmine-warn.log
     │   └── backlog-migration-redmine.log
-    └── mapping
-        ├── priorities.json
-        ├── statuses.json
-        └── users.json
 
 #### インポートのみ実行
 
@@ -589,6 +573,6 @@ MIT License
 
 お問い合わせは下記サイトからご連絡ください。
 
-https://www.backlog.jp/contact/
+https://backlog.com/ja/contact/
 
-[Backlog]: http://www.backlog.jp/
+[backlog]: https://backlog.com/ja/
