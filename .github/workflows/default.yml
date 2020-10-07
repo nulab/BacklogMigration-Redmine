@@ -1,10 +1,10 @@
-name: Default
+name: Build
 
 on: [push]
 
 jobs:
 
-  all:
+  build:
     runs-on: ubuntu-latest
 
     steps:
