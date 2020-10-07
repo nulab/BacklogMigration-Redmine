@@ -78,7 +78,7 @@ jobs:
           TYPETALK_TOKEN: ${{ secrets.TYPETALK_TOKEN }}
         with:
           topic-id: 54145
-          message: "Redmine importer job success :smile: [Result](${{ github.event.repository.url }}/actions/runs/${{ github.run_id }})"
+          message: "Redmine importer [JOB](${{ github.event.repository.url }}/actions/runs/${{ github.run_id }}) success :smile: "
 
       - name: Notify to Typetalk if fail
         if: failure()
