@@ -9,6 +9,7 @@ target/
 app.properties
 
 ## vscode plugin (metals)
+.bsp/
 .metals/
 .bloop/
 .ammonite/
