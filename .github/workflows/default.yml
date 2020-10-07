@@ -68,7 +68,7 @@ jobs:
 
   notify:
     runs-on: ubuntu-latest
-    needs: all
+    needs: build
 
     steps:
       - name: Notify to Typetalk if success
@@ -78,7 +78,7 @@ jobs:
           TYPETALK_TOKEN: ${{ secrets.TYPETALK_TOKEN }}
         with:
           topic-id: 54145
-          message: "Redmine importer job success :smile:"
+          message: "Redmine importer job success :smile: [Result](${{ github.event.repository.url }}/actions/runs/${{ github.run_id }})"
 
       - name: Notify to Typetalk if fail
         if: failure()
