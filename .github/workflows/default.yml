@@ -24,13 +24,8 @@ jobs:
         with:
           version: 1.8
 
-      - name: Set up sbt
-        uses: shomatan/setup-sbt-action@master
-        with:
-          version: 1.3.8
-
       - name: Cache ivy
-        uses: actions/cache@v1
+        uses: actions/cache@v2
         with:
           path: ~/.ivy2/cache
           key: ${{ runner.os }}-sbt-ivy-cache-${{ github.run_id }}
@@ -38,7 +33,7 @@ jobs:
             ${{ runner.os }}-sbt-ivy-cache-
 
       - name: Cache coursier
-        uses: actions/cache@v1
+        uses: actions/cache@v2
         with:
           path: ~/.cache/coursier
           key: ${{ runner.os }}-sbt-coursier-cache-${{ github.run_id }}
@@ -46,7 +41,7 @@ jobs:
             ${{ runner.os }}-sbt-coursier-cache-
 
       - name: Cache sbt
-        uses: actions/cache@v1
+        uses: actions/cache@v2
         with:
           path: ~/.sbt
           key: ${{ runner.os }}-sbt-cache-${{ github.run_id }}
