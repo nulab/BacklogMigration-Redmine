@@ -27,16 +27,9 @@ lazy val root = (project in file("."))
   .settings(commonSettings: _*)
   .settings(
     name := "backlog-migration-redmine",
-    libraryDependencies ++= {
-      val akkaVersion = "2.5.26"
-      Seq(
-        "io.monix"          %% "monix-reactive" % "3.0.0",
-        "com.typesafe.akka" %% "akka-actor"     % akkaVersion,
-        "com.typesafe.akka" %% "akka-slf4j"     % akkaVersion,
-        "org.rogach"        %% "scallop"        % "3.3.1",
-        "org.scalatest"     %% "scalatest"      % "3.0.8" % "test"
-      )
-    },
+    libraryDependencies ++= Seq(
+      "org.rogach" %% "scallop" % "3.3.1"
+    ),
     assemblyJarName in assembly := {
       s"${name.value}-${version.value}.jar"
     },
