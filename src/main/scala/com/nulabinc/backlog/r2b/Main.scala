@@ -2,6 +2,7 @@ package com.nulabinc.backlog.r2b
 
 import java.util.Locale
 
+import akka.actor.ActorSystem
 import com.nulabinc.backlog.migration.common.conf.{
   BacklogApiConfiguration,
   BacklogConfiguration,
@@ -9,8 +10,13 @@ import com.nulabinc.backlog.migration.common.conf.{
 }
 import com.nulabinc.backlog.migration.common.dsl.{ConsoleDSL, StorageDSL}
 import com.nulabinc.backlog.migration.common.errors.{MappingFileNotFound, MappingValidationError}
-import com.nulabinc.backlog.migration.common.interpreters.{JansiConsoleDSL, LocalStorageDSL}
+import com.nulabinc.backlog.migration.common.interpreters.{
+  AkkaHttpDSL,
+  JansiConsoleDSL,
+  LocalStorageDSL
+}
 import com.nulabinc.backlog.migration.common.messages.ConsoleMessages
+import com.nulabinc.backlog.migration.common.services.GitHubReleaseCheckService
 import com.nulabinc.backlog.migration.common.utils.{ConsoleOut, Logging}
 import com.nulabinc.backlog.r2b.cli.R2BCli
 import com.nulabinc.backlog.r2b.conf._
@@ -22,17 +28,17 @@ import monix.eval.Task
 import monix.execution.Scheduler
 import org.fusesource.jansi.AnsiConsole
 import org.rogach.scallop._
-import spray.json.DefaultJsonProtocol._
-import spray.json._
 
 import scala.concurrent.Await
 import scala.concurrent.duration.Duration
 
 object R2B extends BacklogConfiguration with Logging {
 
+  private implicit val system: ActorSystem          = ActorSystem("main")
   private implicit val exc: Scheduler               = monix.execution.Scheduler.Implicits.global
   private implicit val storageDSL: StorageDSL[Task] = LocalStorageDSL()
   private implicit val consoleDSL: ConsoleDSL[Task] = JansiConsoleDSL()
+  private implicit val httpDSL: AkkaHttpDSL         = new AkkaHttpDSL()
 
   def main(args: Array[String]): Unit = {
     ConsoleOut.println(s"""|${applicationName}
@@ -40,51 +46,55 @@ object R2B extends BacklogConfiguration with Logging {
     AnsiConsole.systemInstall()
     setLang()
     DisableSSLCertificateCheckUtil.disableChecks()
-    checkRelease()
-    if (ClassVersion.isValid()) {
-      try {
-        val cli = new CommandLineInterface(args.toIndexedSeq)
-        val asyncResult = for {
-          result <- execute(cli)
-          _ <- result match {
-            case Right(_) =>
-              Task(Right(()))
-            case Left(error: ValidationError) =>
-              ConsoleDSL[Task].errorln(RedmineMessages.validationError(error.errors))
-            case Left(error: MappingError) =>
-              error.inner match {
-                case _: MappingFileNotFound =>
-                  ConsoleDSL[Task].errorln(ConsoleMessages.Mappings.needsSetup)
-                case e: MappingValidationError[_] =>
-                  ConsoleDSL[Task].errorln(ConsoleMessages.Mappings.validationError(e))
-                case e =>
-                  ConsoleDSL[Task].errorln(e.toString)
-              }
-            case Left(OperationCanceled) =>
-              ConsoleDSL[Task].errorln(RedmineMessages.cancel)
-          }
-        } yield ()
-
-        val f = asyncResult.onErrorRecover { ex =>
-          logger.error(ex.getMessage, ex)
-          exit(1, ex)
-        }.runToFuture
-
-        Await.result(f, Duration.Inf)
-        AnsiConsole.systemUninstall()
-        System.exit(0)
-      } catch {
-        case e: Throwable =>
-          logger.error(e.getMessage, e)
-          AnsiConsole.systemUninstall()
-          System.exit(1)
-      }
-    } else {
+    if (!ClassVersion.isValid()) {
       ConsoleOut.error(
         Messages("cli.require_java8", System.getProperty("java.specification.version"))
       )
       AnsiConsole.systemUninstall()
       System.exit(1)
+    }
+
+    try {
+      val cli = new CommandLineInterface(args.toIndexedSeq)
+      val asyncResult = for {
+        _      <- checkRelease()
+        result <- execute(cli)
+        _ <- result match {
+          case Right(_) =>
+            Task(Right(()))
+          case Left(error: ValidationError) =>
+            ConsoleDSL[Task].errorln(RedmineMessages.validationError(error.errors))
+          case Left(error: MappingError) =>
+            error.inner match {
+              case _: MappingFileNotFound =>
+                ConsoleDSL[Task].errorln(ConsoleMessages.Mappings.needsSetup)
+              case e: MappingValidationError[_] =>
+                ConsoleDSL[Task].errorln(ConsoleMessages.Mappings.validationError(e))
+              case e =>
+                ConsoleDSL[Task].errorln(e.toString)
+            }
+          case Left(OperationCanceled) =>
+            ConsoleDSL[Task].errorln(RedmineMessages.cancel)
+        }
+      } yield ()
+
+      val f = asyncResult
+        .flatMap(_ => Task.deferFuture(system.terminate()))
+        .onErrorRecover { ex =>
+          logger.error(ex.getMessage, ex)
+          exit(1, ex)
+        }
+        .runToFuture
+
+      Await.result(f, Duration.Inf)
+      AnsiConsole.systemUninstall()
+      System.exit(0)
+    } catch {
+      case e: Throwable =>
+        logger.error(e.getMessage, e)
+        AnsiConsole.systemUninstall()
+        Await.result(system.terminate(), Duration.Inf)
+        System.exit(1)
     }
   }
 
@@ -161,59 +171,11 @@ object R2B extends BacklogConfiguration with Logging {
     if (language == "ja") Locale.setDefault(Locale.JAPAN)
     else Locale.setDefault(Locale.US)
 
-  private[this] def checkRelease(): Unit = {
-    import java.io._
-    import java.net._
-
-    val url          = new URL("https://api.github.com/repos/nulab/BacklogMigration-Redmine/releases")
-    val http         = url.openConnection().asInstanceOf[HttpURLConnection]
-    val optProxyUser = Option(System.getProperty("https.proxyUser"))
-    val optProxyPass = Option(System.getProperty("https.proxyPassword"))
-
-    (optProxyUser, optProxyPass) match {
-      case (Some(proxyUser), Some(proxyPass)) =>
-        Authenticator.setDefault(new Authenticator() {
-          override def getPasswordAuthentication: PasswordAuthentication = {
-            new PasswordAuthentication(proxyUser, proxyPass.toCharArray)
-          }
-        })
-      case _ => ()
-    }
-
-    try {
-      http.setRequestMethod("GET")
-      http.connect()
-
-      val reader = new BufferedReader(new InputStreamReader(http.getInputStream))
-      val output = new StringBuilder()
-      var line   = ""
-
-      while (line != null) {
-        line = reader.readLine()
-        if (line != null)
-          output.append(line)
-      }
-      reader.close()
-
-      val latest = output.toString().parseJson match {
-        case JsArray(releases) if releases.nonEmpty =>
-          releases(0).asJsObject.fields.apply("tag_name").convertTo[String].replace("v", "")
-        case _ => ""
-      }
-
-      if (latest != versionName) {
-        ConsoleOut.warning(s"""
-             |--------------------------------------------------
-             |${Messages("cli.warn.not.latest", latest, versionName)}
-             |--------------------------------------------------
-        """.stripMargin)
-      }
-    } catch {
-      case ex: Throwable =>
-        logger.error(ex.getMessage, ex)
-    }
-  }
-
+  private def checkRelease(): Task[Unit] =
+    GitHubReleaseCheckService.check[Task](
+      path = "https://api.github.com/repos/nulab/BacklogMigration-Redmine/releases",
+      currentVersion = versionName
+    )
 }
 
 class CommandLineInterface(arguments: Seq[String])
