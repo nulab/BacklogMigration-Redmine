@@ -129,12 +129,8 @@ object R2BCli extends BacklogConfiguration with Logging {
       _     <- confirmImport(config, mappingContainer).handleError
       input <- readConfirm().handleError
       _     <- confirmStartMigration(input).handleError
+      _     <- storageDSL.delete(backlogPaths.outputPath.path).lift[AppError]
     } yield {
-
-      if (backlogPaths.outputPath.exists) {
-        backlogPaths.outputPath.listRecursively.foreach(_.delete(false))
-      }
-
       val backlogTextFormattingRule = fetchBacklogTextFormattingRule(config.backlogConfig)
 
       BootExporter.execute(
