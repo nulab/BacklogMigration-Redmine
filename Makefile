@@ -2,7 +2,7 @@
 
 build:  ## Build a jar file
 	@rm -rf **/target
-	@sbt clean assembly
+	@sbt clean "testOnly com.nulabinc.*" assembly
 
 .PHONY: help
 help:
