@@ -14,16 +14,17 @@ import com.taskadapter.redmineapi.bean.WikiPage
 import scala.concurrent.duration._
 
 /**
-  * @author uchida
-  */
+ * @author uchida
+ */
 private[exporter] class WikisActor(exportContext: ExportContext)
     extends Actor
     with BacklogConfiguration
     with Logging {
 
-  private[this] val strategy = OneForOneStrategy(maxNrOfRetries = 5, withinTimeRange = 10 seconds) {
-    case _ => Restart
-  }
+  private[this] val strategy =
+    OneForOneStrategy(maxNrOfRetries = 5, withinTimeRange = 10 seconds) {
+      case _ => Restart
+    }
 
   private[this] val wikis: Seq[WikiPage] = exportContext.wikiService.allWikis()
   private[this] val completion           = new CountDownLatch(wikis.size)

@@ -7,8 +7,8 @@ import com.nulabinc.backlog.r2b.mapping.collector.core.{MappingContext, MappingD
 import com.taskadapter.redmineapi.bean.User
 
 /**
-  * @author uchida
-  */
+ * @author uchida
+ */
 private[collector] class ContentActor(exclude: ExcludeOption, mappingContext: MappingContext)
     extends Actor
     with Logging {

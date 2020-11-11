@@ -6,8 +6,8 @@ import com.nulabinc.backlog.r2b.mapping.domain.Mapping
 import com.osinka.i18n.{Lang, Messages}
 
 /**
-  * @author uchida
-  */
+ * @author uchida
+ */
 private[file] class MappingValidator(
     redmineMappings: Seq[MappingItem],
     backlogMappings: Seq[MappingItem],

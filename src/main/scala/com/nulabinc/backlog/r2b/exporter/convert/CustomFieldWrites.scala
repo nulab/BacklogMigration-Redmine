@@ -13,8 +13,8 @@ import com.taskadapter.redmineapi.bean.CustomField
 import scala.jdk.CollectionConverters._
 
 /**
-  * @author uchida
-  */
+ * @author uchida
+ */
 private[exporter] class CustomFieldWrites @Inject() (
     propertyValue: PropertyValue,
     customFieldValueWrites: CustomFieldValueWrites
@@ -33,14 +33,13 @@ private[exporter] class CustomFieldWrites @Inject() (
             Some(toNumericCustomField(customField))
           case RedmineConstantValue.FieldFormat.DATE => Some(toDateCustomField(customField))
           case RedmineConstantValue.FieldFormat.BOOL => Some(bool(customField))
-          case RedmineConstantValue.FieldFormat.LIST if (!customFieldDefinition.isMultiple) =>
+          case RedmineConstantValue.FieldFormat.LIST if !customFieldDefinition.isMultiple =>
             Some(toSingleListCustomField(customField))
-          case RedmineConstantValue.FieldFormat.LIST if (customFieldDefinition.isMultiple) =>
+          case RedmineConstantValue.FieldFormat.LIST if customFieldDefinition.isMultiple =>
             Some(toMultipleListCustomField(customField))
-          case RedmineConstantValue.FieldFormat.ENUMERATION
-              if (!customFieldDefinition.isMultiple) =>
+          case RedmineConstantValue.FieldFormat.ENUMERATION if !customFieldDefinition.isMultiple =>
             Some(toSingleListCustomField(customField))
-          case RedmineConstantValue.FieldFormat.ENUMERATION if (customFieldDefinition.isMultiple) =>
+          case RedmineConstantValue.FieldFormat.ENUMERATION if customFieldDefinition.isMultiple =>
             Some(toMultipleListCustomField(customField))
           case RedmineConstantValue.FieldFormat.VERSION => Some(version(customField))
           case RedmineConstantValue.FieldFormat.USER    => Some(user(customField))

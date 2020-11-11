@@ -12,8 +12,8 @@ import com.osinka.i18n.{Lang, Messages}
 import com.taskadapter.redmineapi.bean.IssuePriority
 
 /**
-  * @author uchida
-  */
+ * @author uchida
+ */
 class PriorityMappingFile(
     redmineApiConfig: RedmineApiConfiguration,
     backlogApiConfig: BacklogApiConfiguration

@@ -39,13 +39,13 @@ import spray.json.{JsNumber, JsonParser}
 import scala.jdk.CollectionConverters._
 
 /**
-  * @author uchida
-  */
+ * @author uchida
+ */
 trait SimpleFixture {
 
   implicit val userLang = if (Locale.getDefault.equals(Locale.JAPAN)) Lang("ja") else Lang("en")
 
-  import com.nulabinc.backlog.r2b.deserializers.RedmineMappingDeserializer._
+  import com.nulabinc.backlog.r2b.codec.RedmineMappingDecoder._
 
   private implicit val exc: Scheduler               = monix.execution.Scheduler.Implicits.global
   private implicit val storageDSL: StorageDSL[Task] = LocalStorageDSL()

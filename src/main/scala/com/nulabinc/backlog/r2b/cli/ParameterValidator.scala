@@ -16,8 +16,8 @@ import com.taskadapter.redmineapi.{
 }
 
 /**
-  * @author uchida
-  */
+ * @author uchida
+ */
 class ParameterValidator(config: AppConfiguration) extends Logging {
 
   def validate(): Seq[String] = {

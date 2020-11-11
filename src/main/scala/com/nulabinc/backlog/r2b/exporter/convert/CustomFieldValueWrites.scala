@@ -9,8 +9,8 @@ import com.nulabinc.backlog.r2b.redmine.domain.{PropertyValue, RedmineCustomFiel
 import com.osinka.i18n.Messages
 
 /**
-  * @author uchida
-  */
+ * @author uchida
+ */
 private[exporter] class CustomFieldValueWrites @Inject() (propertyValue: PropertyValue)
     extends Writes[(String, Option[String]), Option[String]]
     with Logging {

@@ -126,12 +126,14 @@ object R2B extends BacklogConfiguration with Logging {
     val backlog = if (keys.length == 2) keys(1) else keys(0).toUpperCase.replaceAll("-", "_")
 
     val retryCount = cli.execute.retryCount.toOption.getOrElse(20)
-    val exclude = cli.execute.exclude.toOption.map { args =>
-      ExcludeOption(
-        issue = args.contains("issue"),
-        wiki = args.contains("wiki")
-      )
-    }.getOrElse(ExcludeOption.default)
+    val exclude = cli.execute.exclude.toOption
+      .map { args =>
+        ExcludeOption(
+          issue = args.contains("issue"),
+          wiki = args.contains("wiki")
+        )
+      }
+      .getOrElse(ExcludeOption.default)
 
     ConsoleOut.println(s"""--------------------------------------------------
      |${Messages("common.src")} ${Messages("common.url")}[${cli.execute.redmineUrl()}]

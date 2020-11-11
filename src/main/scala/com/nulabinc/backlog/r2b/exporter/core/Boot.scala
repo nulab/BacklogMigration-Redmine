@@ -14,8 +14,8 @@ import com.nulabinc.backlog.r2b.redmine.conf.RedmineApiConfiguration
 import com.osinka.i18n.Messages
 
 /**
-  * @author uchida
-  */
+ * @author uchida
+ */
 object Boot extends Logging {
 
   def execute(

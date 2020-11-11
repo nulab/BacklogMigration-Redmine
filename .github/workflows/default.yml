@@ -78,8 +78,8 @@ jobs:
           TYPETALK_TOKEN: ${{ secrets.TYPETALK_TOKEN }}
         with:
           topic-id: 54145
-          message: "Redmine importer [JOB](${{ github.event.repository.url }}/actions/runs/${{ github.run_id }}) success :smile: "
-
+          message: ":tada: Redmine importer job success :smile:\n${{ github.event.repository.url }}/actions/runs/${{ github.run_id }}"
+          
       - name: Notify to Typetalk if fail
         if: failure()
         uses: shomatan/typetalk-action@master
@@ -87,7 +87,7 @@ jobs:
           TYPETALK_TOKEN: ${{ secrets.TYPETALK_TOKEN }}
         with:
           topic-id: 54145
-          message: "Redmine importer job failed"
+          message: ":rage: Redmine importer job failed\n${{ github.event.repository.url }}/actions/runs/${{ github.run_id }}"
 
       - name: Notify to Typetalk if cancelled
         if: cancelled()
@@ -96,4 +96,5 @@ jobs:
           TYPETALK_TOKEN: ${{ secrets.TYPETALK_TOKEN }}
         with:
           topic-id: 54145
-          message: "Redmine importer job cancelled"
+          message: ":no_entry: Redmine importer job cancelled\n${{ github.event.repository.url }}/actions/runs/${{ github.run_id }}"
+

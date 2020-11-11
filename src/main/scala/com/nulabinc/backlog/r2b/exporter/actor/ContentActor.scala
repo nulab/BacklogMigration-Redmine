@@ -6,8 +6,8 @@ import com.nulabinc.backlog.migration.common.utils.Logging
 import com.nulabinc.backlog.r2b.exporter.core.ExportContext
 
 /**
-  * @author uchida
-  */
+ * @author uchida
+ */
 private[exporter] class ContentActor(
     exportContext: ExportContext,
     backlogTextFormattingRule: BacklogTextFormattingRule

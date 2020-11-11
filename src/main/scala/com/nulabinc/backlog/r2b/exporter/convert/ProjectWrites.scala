@@ -8,8 +8,8 @@ import com.nulabinc.backlog4j.Project.TextFormattingRule
 import com.taskadapter.redmineapi.bean._
 
 /**
-  * @author uchida
-  */
+ * @author uchida
+ */
 private[exporter] class ProjectWrites @Inject() (projectKey: BacklogProjectKey)
     extends Writes[Project, BacklogProject] {
 

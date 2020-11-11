@@ -15,8 +15,8 @@ import scala.concurrent.Await
 import scala.concurrent.duration.Duration
 
 /**
-  * @author uchida
-  */
+ * @author uchida
+ */
 private[collector] class MappingCollector @Inject() (
     mappingContextProvider: MappingContextProvider,
     membershipService: MembershipService,

@@ -8,8 +8,8 @@ import com.nulabinc.backlog.r2b.redmine.conf.RedmineApiConfiguration
 import com.nulabinc.backlog.r2b.redmine.modules.RedmineDefaultModule
 
 /**
-  * @author uchida
-  */
+ * @author uchida
+ */
 private[exporter] class RedmineModule(
     apiConfig: RedmineApiConfiguration,
     mappingContainer: MappingContainer,

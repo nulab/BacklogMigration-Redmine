@@ -5,8 +5,8 @@ import com.taskadapter.redmineapi.bean.{Journal, JournalDetail}
 import scala.jdk.CollectionConverters._
 
 /**
-  * @author uchida
-  */
+ * @author uchida
+ */
 private[exporter] class IssueInitialValue(property: String, name: String) {
 
   def findJournalDetail(journals: Seq[Journal]): Option[JournalDetail] =

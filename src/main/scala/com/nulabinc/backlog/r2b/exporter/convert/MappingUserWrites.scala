@@ -8,8 +8,8 @@ import com.nulabinc.backlog.r2b.domain.mappings.RedmineUserMappingItem
 import javax.inject.Inject
 
 /**
-  * @author uchida
-  */
+ * @author uchida
+ */
 private[exporter] class MappingUserWrites @Inject() ()
     extends Writes[ValidatedUserMapping[RedmineUserMappingItem], BacklogUser] {
 

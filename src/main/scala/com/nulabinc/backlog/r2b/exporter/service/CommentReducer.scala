@@ -4,8 +4,8 @@ import com.nulabinc.backlog.migration.common.domain.BacklogComment
 import com.nulabinc.backlog.migration.common.utils.{Logging, StringUtil}
 
 /**
-  * @author uchida
-  */
+ * @author uchida
+ */
 private[exporter] class CommentReducer(issueId: Long, changeLogReducer: ChangeLogReducer)
     extends Logging {
 
@@ -23,7 +23,11 @@ private[exporter] class CommentReducer(issueId: Long, changeLogReducer: ChangeLo
       case None =>
         StringUtil.notEmpty(changeLogContent.result().trim)
     }
-    comment.copy(optIssueId = Some(issueId), optContent = optNewContent, changeLogs = newChangeLogs)
+    comment.copy(
+      optIssueId = Some(issueId),
+      optContent = optNewContent,
+      changeLogs = newChangeLogs
+    )
   }
 
 }

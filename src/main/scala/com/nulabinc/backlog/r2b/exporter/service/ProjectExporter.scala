@@ -21,8 +21,8 @@ import scala.concurrent.Await
 import scala.concurrent.duration.Duration
 
 /**
-  * @author uchida
-  */
+ * @author uchida
+ */
 private[exporter] class ProjectExporter @Inject() (
     implicit val projectWrites: ProjectWrites,
     implicit val customFieldDefinitionsWrites: CustomFieldDefinitionsWrites,

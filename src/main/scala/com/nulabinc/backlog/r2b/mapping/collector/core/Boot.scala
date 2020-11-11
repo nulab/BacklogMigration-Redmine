@@ -12,8 +12,8 @@ import com.taskadapter.redmineapi.bean.User
 import scala.collection.mutable
 
 /**
-  * @author uchida
-  */
+ * @author uchida
+ */
 object Boot extends Logging {
 
   def execute(apiConfig: RedmineApiConfiguration, exclude: ExcludeOption): MappingData = {
