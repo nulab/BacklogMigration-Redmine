@@ -19,7 +19,8 @@ object RedmineFormatter {
       (value.src.value, value.optDst.map(_.value).getOrElse(""))
   }
 
-  implicit object PriorityFormatter extends Formatter[PriorityMapping[RedminePriorityMappingItem]] {
+  implicit object PriorityFormatter
+      extends Formatter[PriorityMapping[RedminePriorityMappingItem]] {
     def format(
         value: PriorityMapping[RedminePriorityMappingItem]
     ): (String, String) =

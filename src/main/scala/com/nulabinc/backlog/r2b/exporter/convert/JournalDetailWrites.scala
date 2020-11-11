@@ -23,8 +23,8 @@ import com.nulabinc.backlog4j.CustomField.FieldType
 import com.taskadapter.redmineapi.bean.JournalDetail
 
 /**
-  * @author uchida
-  */
+ * @author uchida
+ */
 private[exporter] class JournalDetailWrites @Inject() (
     propertyValue: PropertyValue,
     customFieldValueWrites: CustomFieldValueWrites,
@@ -69,8 +69,9 @@ private[exporter] class JournalDetailWrites @Inject() (
                 Some(FieldType.MultipleList.getIntValue)
               case RedmineConstantValue.FieldFormat.VERSION =>
                 Some(FieldType.MultipleList.getIntValue)
-              case RedmineConstantValue.FieldFormat.USER => Some(FieldType.MultipleList.getIntValue)
-              case _                                     => None
+              case RedmineConstantValue.FieldFormat.USER =>
+                Some(FieldType.MultipleList.getIntValue)
+              case _ => None
             }
           case _ => throw new RuntimeException(s"custom field id not found [${detail.getName}]")
         }

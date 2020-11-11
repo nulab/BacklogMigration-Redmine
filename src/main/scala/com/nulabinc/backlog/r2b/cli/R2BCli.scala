@@ -44,8 +44,8 @@ import com.osinka.i18n.Messages
 import monix.eval.Task
 
 /**
-  * @author uchida
-  */
+ * @author uchida
+ */
 object R2BCli extends BacklogConfiguration with Logging {
   import com.nulabinc.backlog.migration.common.shared.syntax._
   import com.nulabinc.backlog.r2b.deserializers.RedmineMappingDeserializer._
@@ -170,7 +170,9 @@ object R2BCli extends BacklogConfiguration with Logging {
       else Left(ValidationError(errors))
     }
 
-  private def confirmProject(config: AppConfiguration): Task[Either[AppError, (String, String)]] = {
+  private def confirmProject(
+      config: AppConfiguration
+  ): Task[Either[AppError, (String, String)]] = {
     val injector       = BacklogInjector.createInjector(config.backlogConfig)
     val projectService = injector.getInstance(classOf[ProjectService])
     val optProject     = projectService.optProject(config.backlogConfig.projectKey)
@@ -179,7 +181,11 @@ object R2BCli extends BacklogConfiguration with Logging {
         for {
           input <- readProjectAlreadyExists(config.backlogConfig).handleError
           answer <-
-            checkProjectAlreadyExists(input, config.redmineConfig, config.backlogConfig).handleError
+            checkProjectAlreadyExists(
+              input,
+              config.redmineConfig,
+              config.backlogConfig
+            ).handleError
         } yield answer
       case None =>
         EitherT.fromEither[Task](

@@ -27,8 +27,8 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration._
 
 /**
-  * @author uchida
-  */
+ * @author uchida
+ */
 private[exporter] class IssueActor(
     exportContext: ExportContext,
     backlogTextFormattingRule: BacklogTextFormattingRule

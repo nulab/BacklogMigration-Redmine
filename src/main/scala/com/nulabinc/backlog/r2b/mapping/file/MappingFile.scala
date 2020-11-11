@@ -9,8 +9,8 @@ import spray.json.{JsonParser, _}
 import scala.collection.mutable.ArrayBuffer
 
 /**
-  * @author uchida
-  */
+ * @author uchida
+ */
 trait MappingFile extends Logging {
 
   def matchItem(redmine: MappingItem): String

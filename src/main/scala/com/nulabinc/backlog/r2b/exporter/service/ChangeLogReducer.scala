@@ -4,7 +4,11 @@ import java.net.URL
 
 import better.files.{File => Path}
 import com.nulabinc.backlog.migration.common.conf.BacklogConstantValue
-import com.nulabinc.backlog.migration.common.domain.{BacklogChangeLog, BacklogComment, BacklogIssue}
+import com.nulabinc.backlog.migration.common.domain.{
+  BacklogChangeLog,
+  BacklogComment,
+  BacklogIssue
+}
 import com.nulabinc.backlog.migration.common.utils.{FileUtil, IOUtil, Logging, StringUtil}
 import com.nulabinc.backlog.r2b.exporter.core.ExportContext
 import com.nulabinc.backlog.r2b.messages.RedmineMessages
@@ -24,8 +28,8 @@ private[exporter] object ReducedChangeLogWithMessage {
 }
 
 /**
-  * @author uchida
-  */
+ * @author uchida
+ */
 private[exporter] class ChangeLogReducer(
     exportContext: ExportContext,
     issueDirPath: Path,

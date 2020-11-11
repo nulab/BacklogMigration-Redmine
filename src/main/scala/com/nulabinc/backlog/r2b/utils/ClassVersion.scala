@@ -1,8 +1,8 @@
 package com.nulabinc.backlog.r2b.utils
 
 /**
-  * @author uchida
-  */
+ * @author uchida
+ */
 object ClassVersion {
 
   private[this] val CLASS_VERSION_8: Double = 52.0

@@ -12,8 +12,8 @@ import com.osinka.i18n.Messages
 import com.taskadapter.redmineapi.bean.User
 
 /**
-  * @author uchida
-  */
+ * @author uchida
+ */
 private[exporter] class UserWrites @Inject() (
     propertyValue: PropertyValue,
     mappingContainer: MappingContainer
@@ -33,7 +33,8 @@ private[exporter] class UserWrites @Inject() (
   private def toBacklog(user: User): BacklogUser =
     BacklogUser(
       optId = Option(user.getId.intValue()),
-      optUserId = Option(user.getLogin).map(MappingUserConverter.convert(mappingContainer.user, _)),
+      optUserId =
+        Option(user.getLogin).map(MappingUserConverter.convert(mappingContainer.user, _)),
       optPassword = Option(user.getPassword),
       name = user.getFullName,
       optMailAddress = Option(user.getMail),

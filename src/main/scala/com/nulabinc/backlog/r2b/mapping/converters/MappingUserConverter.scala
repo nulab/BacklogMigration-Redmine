@@ -5,7 +5,10 @@ import com.nulabinc.backlog.r2b.domain.mappings.RedmineUserMappingItem
 
 object MappingUserConverter {
 
-  def convert(mappings: Seq[ValidatedUserMapping[RedmineUserMappingItem]], target: String): String =
+  def convert(
+      mappings: Seq[ValidatedUserMapping[RedmineUserMappingItem]],
+      target: String
+  ): String =
     if (mappings.isEmpty) target
     else
       mappings.find(_.src.name == target) match {

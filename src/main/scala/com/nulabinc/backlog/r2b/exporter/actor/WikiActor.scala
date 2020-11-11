@@ -16,8 +16,8 @@ import scala.concurrent.duration._
 import scala.jdk.CollectionConverters._
 
 /**
-  * @author uchida
-  */
+ * @author uchida
+ */
 private[exporter] class WikiActor(exportContext: ExportContext) extends Actor with Logging {
 
   import com.nulabinc.backlog.migration.common.formatters.BacklogJsonProtocol._

@@ -7,8 +7,8 @@ import com.nulabinc.backlog.migration.common.domain.BacklogIssueCategory
 import com.taskadapter.redmineapi.bean.IssueCategory
 
 /**
-  * @author uchida
-  */
+ * @author uchida
+ */
 private[exporter] class IssueCategoriesWrites @Inject() ()
     extends Writes[Seq[IssueCategory], Seq[BacklogIssueCategory]] {
 

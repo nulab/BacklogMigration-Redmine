@@ -10,8 +10,8 @@ import com.taskadapter.redmineapi.bean.{Group, Membership, User}
 import scala.jdk.CollectionConverters._
 
 /**
-  * @author uchida
-  */
+ * @author uchida
+ */
 private[exporter] class GroupsWrites @Inject() (implicit
     val userWrites: UserWrites,
     propertyValue: PropertyValue

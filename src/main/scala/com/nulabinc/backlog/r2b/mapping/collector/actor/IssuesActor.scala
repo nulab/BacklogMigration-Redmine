@@ -15,8 +15,8 @@ import com.taskadapter.redmineapi.bean.User
 import scala.concurrent.duration._
 
 /**
-  * @author uchida
-  */
+ * @author uchida
+ */
 private[collector] class IssuesActor(mappingContext: MappingContext)
     extends Actor
     with BacklogConfiguration

@@ -16,8 +16,8 @@ import com.taskadapter.redmineapi.bean._
 import scala.jdk.CollectionConverters._
 
 /**
-  * @author uchida
-  */
+ * @author uchida
+ */
 private[exporter] class IssueInitializer(
     exportContext: ExportContext,
     issueDirPath: Path,

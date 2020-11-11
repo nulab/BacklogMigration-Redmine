@@ -9,8 +9,8 @@ import com.taskadapter.redmineapi.bean.News
 import javax.inject.Inject
 
 /**
-  * @author uchida
-  */
+ * @author uchida
+ */
 private[exporter] class NewsWrites @Inject() (implicit
     val userWrites: UserWrites,
     backlogTextFormattingRule: BacklogTextFormattingRule

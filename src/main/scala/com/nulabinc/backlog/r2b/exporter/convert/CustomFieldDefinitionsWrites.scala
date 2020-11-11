@@ -13,8 +13,8 @@ import com.nulabinc.backlog4j.internal.json.customFields.DateCustomFieldSetting
 import com.osinka.i18n.Messages
 
 /**
-  * @author uchida
-  */
+ * @author uchida
+ */
 private[exporter] class CustomFieldDefinitionsWrites @Inject() (propertyValue: PropertyValue)
     extends Writes[Seq[RedmineCustomFieldDefinition], Seq[BacklogCustomFieldSetting]]
     with Logging {
@@ -103,14 +103,17 @@ private[exporter] class CustomFieldDefinitionsWrites @Inject() (propertyValue: P
   private[this] def initialValueNumeric(
       redmineCustomFieldDefinition: RedmineCustomFieldDefinition
   ): Option[Float] =
-    (redmineCustomFieldDefinition.fieldFormat, redmineCustomFieldDefinition.optDefaultValue) match {
-      case ("int" | "float", Some(defaultValue)) if (defaultValue.nonEmpty) =>
+    (
+      redmineCustomFieldDefinition.fieldFormat,
+      redmineCustomFieldDefinition.optDefaultValue
+    ) match {
+      case ("int" | "float", Some(defaultValue)) if defaultValue.nonEmpty =>
         Some(defaultValue.toFloat)
       case _ => None
     }
 
   private[this] def minNumeric(value: Option[Int]): Option[Float] =
-    value.map(value => math.pow(10, ((value - 1) * (-1)).toDouble).toFloat)
+    value.map(value => math.pow(10, ((value - 1) * -1).toDouble).toFloat)
 
   private[this] def maxNumeric(value: Option[Int]): Option[Float] =
     value.map(value => math.pow(10, value.toDouble).toFloat)
