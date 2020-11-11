@@ -42,16 +42,17 @@ import com.nulabinc.backlog.r2b.redmine.conf.RedmineApiConfiguration
 import com.nulabinc.backlog.r2b.{AppError, MappingError, OperationCanceled, ValidationError}
 import com.osinka.i18n.Messages
 import monix.eval.Task
+import monix.execution.Scheduler
 
 /**
  * @author uchida
  */
 object R2BCli extends BacklogConfiguration with Logging {
   import com.nulabinc.backlog.migration.common.shared.syntax._
-  import com.nulabinc.backlog.r2b.deserializers.RedmineMappingDeserializer._
+  import com.nulabinc.backlog.r2b.codec.RedmineMappingEncoder._
+  import com.nulabinc.backlog.r2b.codec.RedmineMappingDecoder._
   import com.nulabinc.backlog.r2b.formatters.RedmineFormatter._
   import com.nulabinc.backlog.r2b.mapping.RedmineMappingHeader._
-  import com.nulabinc.backlog.r2b.serializers.RedmineMappingSerializer._
 
   private implicit val storageDSL: StorageDSL[Task] = LocalStorageDSL()
   private implicit val consoleDSL: ConsoleDSL[Task] = JansiConsoleDSL()
@@ -91,7 +92,7 @@ object R2BCli extends BacklogConfiguration with Logging {
     } yield Right(())
   }
 
-  def migrate(config: AppConfiguration): Task[Either[AppError, Unit]] = {
+  def migrate(config: AppConfiguration)(implicit s: Scheduler): Task[Either[AppError, Unit]] = {
     val backlogInjector      = BacklogInjector.createInjector(config.backlogConfig)
     val backlogPaths         = backlogInjector.getInstance(classOf[BacklogPaths])
     val backlogStatusService = backlogInjector.getInstance(classOf[BacklogStatusService])
@@ -140,18 +141,19 @@ object R2BCli extends BacklogConfiguration with Logging {
         backlogTextFormattingRule,
         config.exclude
       )
-      BootImporter.execute(
-        config.backlogConfig,
-        fitIssueKey = false,
-        retryCount = config.retryCount
-      )
+      BootImporter
+        .execute(
+          config.backlogConfig,
+          fitIssueKey = false,
+          retryCount = config.retryCount
+        )
       finalize(config.backlogConfig)
       ()
     }
     result.value
   }
 
-  def doImport(config: AppConfiguration): Task[Either[AppError, Unit]] =
+  def doImport(config: AppConfiguration)(implicit s: Scheduler): Task[Either[AppError, Unit]] =
     for {
       _ <- validateParam(config)
     } yield {
@@ -180,12 +182,11 @@ object R2BCli extends BacklogConfiguration with Logging {
       case Some(_) =>
         for {
           input <- readProjectAlreadyExists(config.backlogConfig).handleError
-          answer <-
-            checkProjectAlreadyExists(
-              input,
-              config.redmineConfig,
-              config.backlogConfig
-            ).handleError
+          answer <- checkProjectAlreadyExists(
+            input,
+            config.redmineConfig,
+            config.backlogConfig
+          ).handleError
         } yield answer
       case None =>
         EitherT.fromEither[Task](
