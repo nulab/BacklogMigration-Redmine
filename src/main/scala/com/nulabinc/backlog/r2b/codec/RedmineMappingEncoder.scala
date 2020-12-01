@@ -28,9 +28,8 @@ object RedmineMappingEncoder {
   implicit val userEncoder: UserMappingEncoder[RedmineUserMappingItem] =
     (mapping: UserMapping[RedmineUserMappingItem]) =>
       Seq(
-        mapping.src.name,                          // 0
-        mapping.src.displayName,                   // 1
-        mapping.optDst.map(_.value).getOrElse(""), // 2
-        mapping.mappingType                        // 3
+        mapping.src.name,                         // 0
+        mapping.src.displayName,                  // 1
+        mapping.optDst.map(_.value).getOrElse("") // 2
       )
 }
