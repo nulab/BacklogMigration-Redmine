@@ -10,8 +10,8 @@ import com.nulabinc.backlog.migration.common.conf.{
   MappingDirectory
 }
 import com.nulabinc.backlog.migration.common.domain.{BacklogProjectKey, BacklogTextFormattingRule}
-import com.nulabinc.backlog.migration.common.dsl.{ConsoleDSL, StorageDSL}
-import com.nulabinc.backlog.migration.common.interpreters.{JansiConsoleDSL, LocalStorageDSL}
+import com.nulabinc.backlog.migration.common.dsl.{ConsoleDSL, StorageDSL, StoreDSL}
+import com.nulabinc.backlog.migration.common.interpreters.SQLiteStoreDSL
 import com.nulabinc.backlog.migration.common.modules.{ServiceInjector => BacklogInjector}
 import com.nulabinc.backlog.migration.common.service.{
   ProjectService,
@@ -54,10 +54,12 @@ object R2BCli extends BacklogConfiguration with Logging {
   import com.nulabinc.backlog.r2b.formatters.RedmineFormatter._
   import com.nulabinc.backlog.r2b.mapping.RedmineMappingHeader._
 
-  private implicit val storageDSL: StorageDSL[Task] = LocalStorageDSL()
-  private implicit val consoleDSL: ConsoleDSL[Task] = JansiConsoleDSL()
+  type Result[A] = Task[Either[AppError, A]]
 
-  def init(config: AppConfiguration): Task[Either[AppError, Unit]] = {
+  def init(config: AppConfiguration)(implicit
+      consoleDSL: ConsoleDSL[Task],
+      storageDSL: StorageDSL[Task]
+  ): Result[Unit] = {
     val injector               = BacklogInjector.createInjector(config.backlogConfig)
     val backlogStatusService   = injector.getInstance(classOf[BacklogStatusService])
     val backlogPriorityService = injector.getInstance(classOf[BacklogPriorityService])
@@ -72,7 +74,6 @@ object R2BCli extends BacklogConfiguration with Logging {
         srcItems = mappingFileContainer.status.redmines.map(r => RedmineStatusMappingItem(r.name)),
         dstItems = backlogStatusService.allStatuses()
       )
-
       _ <- PriorityMappingFileService.init[RedminePriorityMappingItem, Task](
         mappingFilePath = MappingDirectory.default.priorityMappingFilePath,
         mappingListPath = MappingDirectory.default.priorityMappingListFilePath,
@@ -80,7 +81,6 @@ object R2BCli extends BacklogConfiguration with Logging {
           mappingFileContainer.priority.redmines.map(r => RedminePriorityMappingItem(r.name)),
         dstItems = backlogPriorityService.allPriorities()
       )
-
       _ <- UserMappingFileService.init[RedmineUserMappingItem, Task](
         mappingFilePath = MappingDirectory.default.userMappingFilePath,
         mappingListPath = MappingDirectory.default.userMappingListFilePath,
@@ -92,13 +92,19 @@ object R2BCli extends BacklogConfiguration with Logging {
     } yield Right(())
   }
 
-  def migrate(config: AppConfiguration)(implicit s: Scheduler): Task[Either[AppError, Unit]] = {
+  def migrate(config: AppConfiguration)(implicit
+      s: Scheduler,
+      consoleDSL: ConsoleDSL[Task],
+      storageDSL: StorageDSL[Task],
+      storeDSL: SQLiteStoreDSL
+  ): Result[Unit] = {
     val backlogInjector      = BacklogInjector.createInjector(config.backlogConfig)
     val backlogPaths         = backlogInjector.getInstance(classOf[BacklogPaths])
     val backlogStatusService = backlogInjector.getInstance(classOf[BacklogStatusService])
     val backlogPriorityService =
       backlogInjector.getInstance(classOf[BacklogPriorityService])
-    val backlogUserService = backlogInjector.getInstance(classOf[BacklogUserService])
+    val backlogUserService        = backlogInjector.getInstance(classOf[BacklogUserService])
+    val backlogTextFormattingRule = fetchBacklogTextFormattingRule(config.backlogConfig)
 
     val result = for {
       _ <- validateParam(config).handleError
@@ -131,39 +137,43 @@ object R2BCli extends BacklogConfiguration with Logging {
       input <- readConfirm().handleError
       _     <- confirmStartMigration(input).handleError
       _     <- storageDSL.delete(backlogPaths.outputPath.path).lift[AppError]
-    } yield {
-      val backlogTextFormattingRule = fetchBacklogTextFormattingRule(config.backlogConfig)
-
-      BootExporter.execute(
+      _ <- storageDSL.createDirectory(backlogPaths.outputPath.path).lift[AppError]
+      _ <- storeDSL.createTable.lift[AppError]
+      _ = BootExporter.execute(
         config.redmineConfig,
         mappingContainer,
         BacklogProjectKey(config.backlogConfig.projectKey),
         backlogTextFormattingRule,
         config.exclude
       )
-      BootImporter
-        .execute(
-          config.backlogConfig,
-          fitIssueKey = false,
-          retryCount = config.retryCount
-        )
-      finalize(config.backlogConfig)
-      ()
-    }
+      _ <- BootImporter
+        .execute[Task](config.backlogConfig, fitIssueKey = false, retryCount = config.retryCount)
+        .mapError[AppError](com.nulabinc.backlog.r2b.UnknownError)
+        .handleError
+    } yield finalize(config.backlogConfig)
+
     result.value
   }
 
-  def doImport(config: AppConfiguration)(implicit s: Scheduler): Task[Either[AppError, Unit]] =
-    for {
-      _ <- validateParam(config)
-    } yield {
-      BootImporter
-        .execute(config.backlogConfig, fitIssueKey = false, retryCount = config.retryCount)
-      finalize(config.backlogConfig)
-      Right(())
-    }
+  def doImport(
+      config: AppConfiguration
+  )(implicit
+      s: Scheduler,
+      consoleDSL: ConsoleDSL[Task],
+      storeDSL: StoreDSL[Task]
+  ): Result[Unit] = {
+    val result = for {
+      _ <- validateParam(config).handleError
+      _ <- BootImporter
+        .execute[Task](config.backlogConfig, fitIssueKey = false, retryCount = config.retryCount)
+        .mapError[AppError](com.nulabinc.backlog.r2b.UnknownError)
+        .handleError
+    } yield finalize(config.backlogConfig)
 
-  private def validateParam(config: AppConfiguration): Task[Either[AppError, Unit]] =
+    result.value
+  }
+
+  private def validateParam(config: AppConfiguration): Result[Unit] =
     Task {
       val validator = new ParameterValidator(config)
       val errors    = validator.validate()
@@ -174,7 +184,7 @@ object R2BCli extends BacklogConfiguration with Logging {
 
   private def confirmProject(
       config: AppConfiguration
-  ): Task[Either[AppError, (String, String)]] = {
+  )(implicit consoleDSL: ConsoleDSL[Task]): Result[(String, String)] = {
     val injector       = BacklogInjector.createInjector(config.backlogConfig)
     val projectService = injector.getInstance(classOf[ProjectService])
     val optProject     = projectService.optProject(config.backlogConfig.projectKey)
@@ -199,23 +209,23 @@ object R2BCli extends BacklogConfiguration with Logging {
 
   private def readProjectAlreadyExists(
       config: BacklogApiConfiguration
-  ): Task[Either[AppError, String]] =
-    ConsoleDSL[Task].read(RedmineMessages.projectAlreadyExists(config.projectKey)).map(Right(_))
+  )(implicit consoleDSL: ConsoleDSL[Task]): Result[String] =
+    consoleDSL.read(RedmineMessages.projectAlreadyExists(config.projectKey)).map(Right(_))
 
-  private def readConfirm(): Task[Either[AppError, String]] =
-    ConsoleDSL[Task].read(RedmineMessages.confirm).map(Right(_))
+  private def readConfirm()(implicit consoleDSL: ConsoleDSL[Task]): Result[String] =
+    consoleDSL.read(RedmineMessages.confirm).map(Right(_))
 
   private def checkProjectAlreadyExists(
       input: String,
       redmineConfig: RedmineApiConfiguration,
       backlogConfig: BacklogApiConfiguration
-  ): Task[Either[AppError, (String, String)]] =
+  ): Result[(String, String)] =
     Task {
       if (input.toLowerCase == "y") Right((redmineConfig.projectKey, backlogConfig.projectKey))
       else Left(OperationCanceled)
     }
 
-  private def confirmStartMigration(input: String): Task[Either[AppError, Unit]] =
+  private def confirmStartMigration(input: String): Result[Unit] =
     Task {
       if (input.toLowerCase == "y") Right(()) else Left(OperationCanceled)
     }
@@ -223,7 +233,7 @@ object R2BCli extends BacklogConfiguration with Logging {
   private def confirmImport(
       config: AppConfiguration,
       mappingContainer: MappingContainer
-  ): Task[Either[AppError, Unit]] = {
+  )(implicit consoleDSL: ConsoleDSL[Task]): Result[Unit] = {
     val userStr = mappingContainer.user
       .map(item => toMappingRow(item.src.displayName, item.dst.value))
       .mkString("\n")
@@ -248,8 +258,8 @@ object R2BCli extends BacklogConfiguration with Logging {
   private def projectInfoMessage(
       redmineProjectKey: String,
       backlogProjectKey: String
-  ): Task[Either[AppError, Unit]] =
-    ConsoleDSL[Task]
+  )(implicit consoleDSL: ConsoleDSL[Task]): Result[Unit] =
+    consoleDSL
       .println(
         s"""
            |${Messages("cli.mapping.show", Messages("common.projects"))}
@@ -261,8 +271,10 @@ object R2BCli extends BacklogConfiguration with Logging {
       )
       .map(Right(_))
 
-  private def userMappingMessage(str: String): Task[Either[AppError, Unit]] =
-    ConsoleDSL[Task]
+  private def userMappingMessage(
+      str: String
+  )(implicit consoleDSL: ConsoleDSL[Task]): Result[Unit] =
+    consoleDSL
       .println(
         s"""${Messages("cli.mapping.show", RedmineMessages.userMappingItemName)}
             |--------------------------------------------------
@@ -272,8 +284,10 @@ object R2BCli extends BacklogConfiguration with Logging {
       )
       .map(Right(_))
 
-  private def priorityMappingMessage(str: String): Task[Either[AppError, Unit]] =
-    ConsoleDSL[Task]
+  private def priorityMappingMessage(
+      str: String
+  )(implicit consoleDSL: ConsoleDSL[Task]): Result[Unit] =
+    consoleDSL
       .println(
         s"""${Messages("cli.mapping.show", RedmineMessages.priorityMappingItemName)}
             |--------------------------------------------------
@@ -282,8 +296,10 @@ object R2BCli extends BacklogConfiguration with Logging {
       )
       .map(Right(_))
 
-  private def statusMappingMessage(str: String): Task[Either[AppError, Unit]] =
-    ConsoleDSL[Task]
+  private def statusMappingMessage(
+      str: String
+  )(implicit consoleDSL: ConsoleDSL[Task]): Result[Unit] =
+    consoleDSL
       .println(
         s"""${Messages("cli.mapping.show", RedmineMessages.statusMappingItemName)}
             |--------------------------------------------------
@@ -305,10 +321,10 @@ object R2BCli extends BacklogConfiguration with Logging {
     MappingFileContainer(user = userMapping, status = statusMapping, priority = priorityMapping)
   }
 
-  def help(): Task[Either[AppError, Unit]] =
+  def help()(implicit consoleDSL: ConsoleDSL[Task]): Result[Unit] =
     consoleDSL.println(RedmineMessages.helpMessage).map(Right(_))
 
-  private def finalize(config: BacklogApiConfiguration) = {
+  private def finalize(config: BacklogApiConfiguration): Unit =
     if (!versionName.contains("SNAPSHOT")) {
       val url = new URL(s"${config.url}/api/v2/importer/redmine?projectKey=${config.projectKey}")
       url.openConnection match {
@@ -318,10 +334,9 @@ object R2BCli extends BacklogConfiguration with Logging {
           using(http) { connection =>
             connection.getResponseCode
           }
-        case _ => 0
+        case _ => ()
       }
     }
-  }
 
   private def fetchBacklogTextFormattingRule(
       backlogConfig: BacklogApiConfiguration
