@@ -1,5 +1,6 @@
 package com.nulabinc.backlog.r2b
 
+import java.nio.file.Paths
 import java.util.Locale
 
 import akka.actor.ActorSystem
@@ -8,16 +9,16 @@ import com.nulabinc.backlog.migration.common.conf.{
   BacklogConfiguration,
   ExcludeOption
 }
-import com.nulabinc.backlog.migration.common.dsl.{ConsoleDSL, StorageDSL}
 import com.nulabinc.backlog.migration.common.errors.{MappingFileNotFound, MappingValidationError}
 import com.nulabinc.backlog.migration.common.interpreters.{
   AkkaHttpDSL,
   JansiConsoleDSL,
-  LocalStorageDSL
+  LocalStorageDSL,
+  SQLiteStoreDSL
 }
 import com.nulabinc.backlog.migration.common.messages.ConsoleMessages
 import com.nulabinc.backlog.migration.common.services.GitHubReleaseCheckService
-import com.nulabinc.backlog.migration.common.utils.{ConsoleOut, Logging}
+import com.nulabinc.backlog.migration.common.utils.Logging
 import com.nulabinc.backlog.r2b.cli.R2BCli
 import com.nulabinc.backlog.r2b.conf._
 import com.nulabinc.backlog.r2b.messages.RedmineMessages
@@ -34,22 +35,29 @@ import scala.concurrent.duration.Duration
 
 object R2B extends BacklogConfiguration with Logging {
 
-  private implicit val system: ActorSystem          = ActorSystem("main")
-  private implicit val exc: Scheduler               = monix.execution.Scheduler.Implicits.global
-  private implicit val storageDSL: StorageDSL[Task] = LocalStorageDSL()
-  private implicit val consoleDSL: ConsoleDSL[Task] = JansiConsoleDSL()
-  private implicit val httpDSL: AkkaHttpDSL         = new AkkaHttpDSL()
+  private val dbPath = Paths.get("./backlog/data.db")
+
+  private implicit val system: ActorSystem  = ActorSystem("main")
+  private implicit val exc: Scheduler       = monix.execution.Scheduler.Implicits.global
+  private implicit val storageDSL           = LocalStorageDSL()
+  private implicit val consoleDSL           = JansiConsoleDSL()
+  private implicit val storeDSL             = SQLiteStoreDSL(dbPath)
+  private implicit val httpDSL: AkkaHttpDSL = new AkkaHttpDSL()
 
   def main(args: Array[String]): Unit = {
-    ConsoleOut.println(s"""|${applicationName}
+    consoleDSL
+      .println(s"""|${applicationName}
                  |--------------------------------------------------""".stripMargin)
+      .runSyncUnsafe()
     AnsiConsole.systemInstall()
     setLang()
     DisableSSLCertificateCheckUtil.disableChecks()
     if (!ClassVersion.isValid()) {
-      ConsoleOut.error(
-        Messages("cli.require_java8", System.getProperty("java.specification.version"))
-      )
+      consoleDSL
+        .errorln(
+          Messages("cli.require_java8", System.getProperty("java.specification.version"))
+        )
+        .runSyncUnsafe()
       AnsiConsole.systemUninstall()
       System.exit(1)
     }
@@ -63,23 +71,27 @@ object R2B extends BacklogConfiguration with Logging {
           case Right(_) =>
             Task(Right(()))
           case Left(error: ValidationError) =>
-            ConsoleDSL[Task].errorln(RedmineMessages.validationError(error.errors))
+            consoleDSL.errorln(RedmineMessages.validationError(error.errors))
           case Left(error: MappingError) =>
             error.inner match {
               case _: MappingFileNotFound =>
-                ConsoleDSL[Task].errorln(ConsoleMessages.Mappings.needsSetup)
+                consoleDSL.errorln(ConsoleMessages.Mappings.needsSetup)
               case e: MappingValidationError[_] =>
-                ConsoleDSL[Task].errorln(ConsoleMessages.Mappings.validationError(e))
+                consoleDSL.errorln(ConsoleMessages.Mappings.validationError(e))
               case e =>
-                ConsoleDSL[Task].errorln(e.toString)
+                consoleDSL.errorln(e.toString)
             }
+          case Left(UnknownError(error)) =>
+            consoleDSL.errorln(error.getStackTrace.mkString("\n"))
           case Left(OperationCanceled) =>
-            ConsoleDSL[Task].errorln(RedmineMessages.cancel)
+            consoleDSL.errorln(RedmineMessages.cancel)
         }
       } yield ()
 
       val f = asyncResult
-        .flatMap(_ => Task.deferFuture(system.terminate()))
+        .flatMap { _ =>
+          Task.deferFuture(system.terminate()).map(_ => ())
+        }
         .onErrorRecover { ex =>
           logger.error(ex.getMessage, ex)
           exit(1, ex)
@@ -102,25 +114,30 @@ object R2B extends BacklogConfiguration with Logging {
     System.exit(exitCode)
 
   private def exit(exitCode: Int, error: Throwable): Unit = {
-    ConsoleOut.error(
-      "ERROR: " + error.getMessage + "\n" + error.printStackTrace()
-    )
+    consoleDSL
+      .errorln(
+        "ERROR: " + error.getMessage + "\n" + error.printStackTrace()
+      )
+      .runSyncUnsafe()
     exit(exitCode)
   }
 
   private def execute(cli: CommandLineInterface): Task[Either[AppError, Unit]] =
-    cli.subcommand match {
-      case Some(cli.execute) if cli.execute.importOnly() =>
-        R2BCli.doImport(getConfiguration(cli))
-      case Some(cli.execute) =>
-        R2BCli.migrate(getConfiguration(cli))
-      case Some(cli.init) =>
-        R2BCli.init(getConfiguration(cli))
-      case _ =>
-        R2BCli.help()
-    }
+    for {
+      conf <- getConfiguration(cli)
+      result <- cli.subcommand match {
+        case Some(cli.execute) if cli.execute.importOnly() =>
+          R2BCli.doImport(conf)
+        case Some(cli.execute) =>
+          R2BCli.migrate(conf)
+        case Some(cli.init) =>
+          R2BCli.init(conf)
+        case _ =>
+          R2BCli.help()
+      }
+    } yield result
 
-  private[this] def getConfiguration(cli: CommandLineInterface) = {
+  private def getConfiguration(cli: CommandLineInterface): Task[AppConfiguration] = {
     val keys    = cli.execute.projectKey().split(":")
     val redmine = keys(0)
     val backlog = if (keys.length == 2) keys(1) else keys(0).toUpperCase.replaceAll("-", "_")
@@ -135,7 +152,8 @@ object R2B extends BacklogConfiguration with Logging {
       }
       .getOrElse(ExcludeOption.default)
 
-    ConsoleOut.println(s"""--------------------------------------------------
+    consoleDSL
+      .println(s"""--------------------------------------------------
      |${Messages("common.src")} ${Messages("common.url")}[${cli.execute.redmineUrl()}]
      |${Messages("common.src")} ${Messages("common.access_key")}[${cli.execute.redmineKey()}]
      |${Messages("common.src")} ${Messages("common.project_key")}[${redmine}]
@@ -151,22 +169,23 @@ object R2B extends BacklogConfiguration with Logging {
      |https.proxyPassword[${Option(System.getProperty("https.proxyPassword")).getOrElse("")}]
      |--------------------------------------------------
      |""".stripMargin)
-
-    AppConfiguration(
-      redmineConfig = RedmineApiConfiguration(
-        url = cli.execute.redmineUrl(),
-        key = cli.execute.redmineKey(),
-        projectKey = redmine
-      ),
-      backlogConfig = BacklogApiConfiguration(
-        url = cli.execute.backlogUrl(),
-        key = cli.execute.backlogKey(),
-        projectKey = backlog
-      ),
-      exclude = exclude,
-      importOnly = cli.execute.importOnly(),
-      retryCount = retryCount
-    )
+      .map { _ =>
+        AppConfiguration(
+          redmineConfig = RedmineApiConfiguration(
+            url = cli.execute.redmineUrl(),
+            key = cli.execute.redmineKey(),
+            projectKey = redmine
+          ),
+          backlogConfig = BacklogApiConfiguration(
+            url = cli.execute.backlogUrl(),
+            key = cli.execute.backlogKey(),
+            projectKey = backlog
+          ),
+          exclude = exclude,
+          importOnly = cli.execute.importOnly(),
+          retryCount = retryCount
+        )
+      }
   }
 
   private[this] def setLang(): Unit =

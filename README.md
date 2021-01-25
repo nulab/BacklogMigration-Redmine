@@ -260,6 +260,11 @@ Projects with custom fields are supported only for Redmine 2.4 and later.
 | Custom field | 2.4 |
 | Priority | 2.2 |
 
+### Others
+
+- If the space of Backlog is a free plan, it cannot be migrated due to API rate limiting.
+- This tool cannot be used in parallel as it can exceed the API rate limit when run in parallel.
+
 ## Re-importing
 
 When the project key in Backlog and Redmine matches, they will be considered as the same project and data will be imported as follows.
@@ -546,6 +551,11 @@ Backlogで **プレミアムプラン以上** のプランを契約している�
 |グループ|2.1|
 |カスタムフィールド|2.4|
 |優先度|2.2|
+
+### その他
+
+- Backlog のスペースがフリープランの場合はAPIのレート制限により移行できません。
+- 本移行ツールの並列実行は、APIのレート制限を超える可能性があるため動作を保証できません。
 
 ## 再インポートの仕様
 

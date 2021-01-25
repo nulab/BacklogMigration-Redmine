@@ -14,3 +14,5 @@ app.properties
 .bloop/
 .ammonite/
 metals.sbt
+
+data.db
