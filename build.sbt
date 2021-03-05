@@ -2,7 +2,7 @@ import sbt.Keys._
 
 lazy val commonSettings = Seq(
   organization := "com.nulabinc",
-  version := "0.16.0",
+  version := "0.16.1-SNAPSHOT",
   scalaVersion := "2.13.4",
   scalacOptions ++= Seq(
     "-language:reflectiveCalls",
