@@ -29,7 +29,8 @@ private[exporter] class IssueWrites @Inject() (
     BacklogIssue(
       eventType = "issue",
       id = issue.getId.intValue(),
-      optIssueKey = None,
+      issueKey =
+        s"${issue.getProject.getName}-${issue.getId.intValue()}", // to avoid fit issue key
       summary = BacklogIssueSummary(value = issue.getSubject, original = issue.getSubject),
       optParentIssueId = parentIssueId(issue),
       description = TextileUtil.convert(issue.getDescription, backlogTextFormattingRule),

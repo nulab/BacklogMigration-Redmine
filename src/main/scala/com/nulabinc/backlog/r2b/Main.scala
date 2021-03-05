@@ -2,8 +2,8 @@ package com.nulabinc.backlog.r2b
 
 import java.nio.file.Paths
 import java.util.Locale
-
 import akka.actor.ActorSystem
+import com.nulabinc.backlog.migration.common.client.IAAH
 import com.nulabinc.backlog.migration.common.conf.{
   BacklogApiConfiguration,
   BacklogConfiguration,
@@ -36,6 +36,9 @@ import scala.concurrent.duration.Duration
 object R2B extends BacklogConfiguration with Logging {
 
   private val dbPath = Paths.get("./backlog/data.db")
+
+  private final val iaahStr = ""
+  private final val iaah    = IAAH(iaahStr)
 
   private implicit val system: ActorSystem  = ActorSystem("main")
   private implicit val exc: Scheduler       = monix.execution.Scheduler.Implicits.global
@@ -179,7 +182,8 @@ object R2B extends BacklogConfiguration with Logging {
           backlogConfig = BacklogApiConfiguration(
             url = cli.execute.backlogUrl(),
             key = cli.execute.backlogKey(),
-            projectKey = backlog
+            projectKey = backlog,
+            iaah = cli.execute.iaah.getOrElse(iaah)
           ),
           exclude = exclude,
           importOnly = cli.execute.importOnly(),
@@ -245,6 +249,8 @@ class CommandLineInterface(arguments: Seq[String])
       opt[List[String]]("exclude", descr = Messages("cli.help.exclude"), required = false)
     val retryCount =
       opt[Int](name = "retryCount", descr = Messages("cli.help.retryCount"), required = false)
+    val iaah: ScallopOption[IAAH] =
+      opt[String](name = "iaah", descr = "", required = false).map(IAAH(_))
     val help = opt[String]("help", descr = Messages("cli.help.show_help"))
   }
 

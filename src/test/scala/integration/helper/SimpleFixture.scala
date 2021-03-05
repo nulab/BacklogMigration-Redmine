@@ -1,10 +1,11 @@
 package integration.helper
 
+import com.nulabinc.backlog.migration.common.client.IAAH
+
 import java.io.{File, FileInputStream}
 import java.nio.file.Path
 import java.text.SimpleDateFormat
 import java.util.{Date, Locale, Properties}
-
 import com.nulabinc.backlog.migration.common.conf.{
   BacklogApiConfiguration,
   ExcludeOption,
@@ -141,9 +142,13 @@ trait SimpleFixture {
       Some(
         AppConfiguration(
           redmineConfig =
-            new RedmineApiConfiguration(url = redmineUrl, key = redmineKey, projectKey = redmine),
-          backlogConfig =
-            new BacklogApiConfiguration(url = backlogUrl, key = backlogKey, projectKey = backlog),
+            RedmineApiConfiguration(url = redmineUrl, key = redmineKey, projectKey = redmine),
+          backlogConfig = new BacklogApiConfiguration(
+            url = backlogUrl,
+            key = backlogKey,
+            projectKey = backlog,
+            iaah = IAAH.empty
+          ),
           exclude = ExcludeOption.default,
           importOnly = false,
           retryCount = 5
