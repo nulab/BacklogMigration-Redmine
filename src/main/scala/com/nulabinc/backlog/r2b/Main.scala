@@ -4,9 +4,18 @@ import java.nio.file.Paths
 import java.util.Locale
 import akka.actor.ActorSystem
 import com.nulabinc.backlog.migration.common.client.IAAH
-import com.nulabinc.backlog.migration.common.conf.{BacklogApiConfiguration, BacklogConfiguration, ExcludeOption}
+import com.nulabinc.backlog.migration.common.conf.{
+  BacklogApiConfiguration,
+  BacklogConfiguration,
+  ExcludeOption
+}
 import com.nulabinc.backlog.migration.common.errors.{MappingFileNotFound, MappingValidationError}
-import com.nulabinc.backlog.migration.common.interpreters.{AkkaHttpDSL, JansiConsoleDSL, LocalStorageDSL, SQLiteStoreDSL}
+import com.nulabinc.backlog.migration.common.interpreters.{
+  AkkaHttpDSL,
+  JansiConsoleDSL,
+  LocalStorageDSL,
+  SQLiteStoreDSL
+}
 import com.nulabinc.backlog.migration.common.messages.ConsoleMessages
 import com.nulabinc.backlog.migration.common.services.GitHubReleaseCheckService
 import com.nulabinc.backlog.migration.common.utils.Logging

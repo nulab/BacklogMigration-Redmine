@@ -137,8 +137,8 @@ object R2BCli extends BacklogConfiguration with Logging {
       input <- readConfirm().handleError
       _     <- confirmStartMigration(input).handleError
       _     <- storageDSL.delete(backlogPaths.outputPath.path).lift[AppError]
-      _ <- storageDSL.createDirectory(backlogPaths.outputPath.path).lift[AppError]
-      _ <- storeDSL.createTable.lift[AppError]
+      _     <- storageDSL.createDirectory(backlogPaths.outputPath.path).lift[AppError]
+      _     <- storeDSL.createTable.lift[AppError]
       _ = BootExporter.execute(
         config.redmineConfig,
         mappingContainer,
