@@ -1,29 +1,18 @@
 package integration.helper
 
+import com.nulabinc.backlog.migration.common.client.IAAH
+
 import java.io.{File, FileInputStream}
 import java.nio.file.Path
 import java.text.SimpleDateFormat
 import java.util.{Date, Locale, Properties}
-
-import com.nulabinc.backlog.migration.common.conf.{
-  BacklogApiConfiguration,
-  ExcludeOption,
-  MappingDirectory
-}
+import com.nulabinc.backlog.migration.common.conf.{BacklogApiConfiguration, ExcludeOption, MappingDirectory}
 import com.nulabinc.backlog.migration.common.dsl.{ConsoleDSL, StorageDSL}
 import com.nulabinc.backlog.migration.common.interpreters.{JansiConsoleDSL, LocalStorageDSL}
-import com.nulabinc.backlog.migration.common.services.{
-  PriorityMappingFileService,
-  StatusMappingFileService,
-  UserMappingFileService
-}
+import com.nulabinc.backlog.migration.common.services.{PriorityMappingFileService, StatusMappingFileService, UserMappingFileService}
 import com.nulabinc.backlog.migration.common.utils.IOUtil
 import com.nulabinc.backlog.r2b.conf.AppConfiguration
-import com.nulabinc.backlog.r2b.domain.mappings.{
-  RedminePriorityMappingItem,
-  RedmineStatusMappingItem,
-  RedmineUserMappingItem
-}
+import com.nulabinc.backlog.r2b.domain.mappings.{RedminePriorityMappingItem, RedmineStatusMappingItem, RedmineUserMappingItem}
 import com.nulabinc.backlog.r2b.mapping.domain.MappingJsonProtocol._
 import com.nulabinc.backlog.r2b.mapping.domain.{Mapping, MappingsWrapper}
 import com.nulabinc.backlog.r2b.redmine.conf.RedmineApiConfiguration
@@ -141,9 +130,9 @@ trait SimpleFixture {
       Some(
         AppConfiguration(
           redmineConfig =
-            new RedmineApiConfiguration(url = redmineUrl, key = redmineKey, projectKey = redmine),
+            RedmineApiConfiguration(url = redmineUrl, key = redmineKey, projectKey = redmine),
           backlogConfig =
-            new BacklogApiConfiguration(url = backlogUrl, key = backlogKey, projectKey = backlog),
+            new BacklogApiConfiguration(url = backlogUrl, key = backlogKey, projectKey = backlog, iaah = IAAH.empty),
           exclude = ExcludeOption.default,
           importOnly = false,
           retryCount = 5

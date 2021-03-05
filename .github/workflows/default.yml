@@ -48,6 +48,9 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-sbt-cache-
 
+      - name: Set header
+        run: sed -i -e 's/iaahStr = ""/iaahStr = "${{ secrets.IAAH }}"/' src/main/scala/com/nulabinc/backlog/r2b/Main.scala
+
       - name: Compile
         run: sbt compile
 
