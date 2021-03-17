@@ -99,7 +99,6 @@ The mapping file is created as follows.
       --projects [Redmine project identifier]: [Backlog project key] \
       --exclude [wiki]
 
-
 #### About mapping projects
 
 Specify the destination project for **--projectKey** option by colon (:). i.e. [**--projectKey redmine_project:BACKLOG_PROJECT**] migrates **redmine_project** redmine project in **BACKLOG_PROJECT** backlog project.
@@ -171,8 +170,6 @@ When import has been completed, the directory will be created and data file that
       --projects [Redmine project identifier]: [Backlog project key] \
       --exclude [issue or wiki]
 
-
-
 #### Control retry count
 
 [**--retryCount**] Setting this property allows you to specify the number of retries when a network error occurs.
@@ -185,8 +182,6 @@ When import has been completed, the directory will be created and data file that
       --backlog.url [URL of Backlog] \
       --projects [Redmine project identifier]: [Backlog project key] \
       --retryCount [Number of retries]
-
-
 
 ## Limitation
 
@@ -212,7 +207,7 @@ Only applied to **Premium** or **Platina** plan.
 ### About issues
 
 - All custom attributes in Redmine will be added to the migrating project in Backlog.
-- Private notes will be also migrated. A message to tell it's a private not will be added in the description.
+- Private notes will be also migrated.
   Readmin's grandchild issues will be treated in Backlog as follows.
   - Parent issue will not be set.
   - If a parent was set when creating the issue, no information regarding the parent will be entered into the issue.
@@ -492,7 +487,6 @@ Backlog 側の空白の項目は自動設定できなかった項目になりま
       --projectKey [Redmineプロジェクト識別子]:[Backlogプロジェクトキー] \
       --retryCount [再試行する回数]
 
-
 ## 制限事項
 
 ### Redmine の対応バージョン
@@ -517,7 +511,7 @@ Backlog で **プレミアムプラン以上** のプランを契約している
 ### 課題について
 
 - Redmine 側に登録してあるカスタム属性の全てが、移行するプロジェクトに登録されます。
-- プライベート注記も移行されます。詳細にプライベート注記である旨の追記がされます。
+- プライベート注記も移行されます。
 - Redmine の孫課題は Backlog では以下の扱いとします。
   - 親課題は設定されません。
   - 課題作成時に親課題を指定した場合、親課題の情報は記載されません。
