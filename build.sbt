@@ -30,14 +30,18 @@ lazy val root = (project in file("."))
     libraryDependencies ++= Seq(
       "org.rogach" %% "scallop" % "3.3.1"
     ),
-    assemblyJarName in assembly := {
+    assembly / assemblyJarName := {
       s"${name.value}-${version.value}.jar"
     },
-    testOptions in Test ++= Seq(
+    Test / testOptions ++= Seq(
       Tests.Argument(TestFrameworks.ScalaTest, "-u", "target/test-reports"),
       Tests.Argument(TestFrameworks.ScalaTest, "-f", "target/test-reports/output.txt")
     ),
-    test in assembly := {}
+    assembly / test := {}
   )
   .dependsOn(common % "test->test;compile->compile")
   .dependsOn(redmine % "test->test;compile->compile")
+
+ThisBuild / scalafixDependencies += "com.github.liancheng" %% "organize-imports" % "0.5.0"
+
+Global / onChangedBuildSource := ReloadOnSourceChanges
