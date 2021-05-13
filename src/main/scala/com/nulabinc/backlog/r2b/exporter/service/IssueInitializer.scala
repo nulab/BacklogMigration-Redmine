@@ -41,6 +41,7 @@ private[exporter] class IssueInitializer(
 
     val backlogIssue: BacklogIssue = Convert.toBacklog(issue)
     backlogIssue.copy(
+      issueKey = s"${exportContext.backlogProjectKey}-${issue.getId.intValue()}",
       summary = summary(issue),
       optParentIssueId = parentIssueId(issue),
       description = description(issue),
