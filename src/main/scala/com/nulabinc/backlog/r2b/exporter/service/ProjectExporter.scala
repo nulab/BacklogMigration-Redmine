@@ -1,11 +1,11 @@
 package com.nulabinc.backlog.r2b.exporter.service
 
 import javax.inject.Inject
-
 import akka.actor.{ActorSystem, Props}
 import com.nulabinc.backlog.migration.common.conf.BacklogPaths
 import com.nulabinc.backlog.migration.common.convert.Convert
 import com.nulabinc.backlog.migration.common.domain._
+import com.nulabinc.backlog.migration.common.dsl.ConsoleDSL
 import com.nulabinc.backlog.migration.common.utils.{ConsoleOut, IOUtil, Logging, ProgressBar}
 import com.nulabinc.backlog.r2b.exporter.actor.ContentActor
 import com.nulabinc.backlog.r2b.exporter.convert._
@@ -14,6 +14,8 @@ import com.nulabinc.backlog.r2b.mapping.core.MappingContainer
 import com.nulabinc.backlog.r2b.redmine.service.{MembershipService, _}
 import com.osinka.i18n.Messages
 import com.taskadapter.redmineapi.bean._
+import monix.eval.Task
+import monix.execution.Scheduler
 import spray.json._
 
 import scala.collection.mutable
@@ -46,7 +48,9 @@ private[exporter] class ProjectExporter @Inject() (
 ) extends Logging {
   import com.nulabinc.backlog.migration.common.formatters.BacklogJsonProtocol._
 
-  def boot(mappingContainer: MappingContainer): Unit = {
+  def boot(
+      mappingContainer: MappingContainer
+  )(implicit s: Scheduler, consoleDSL: ConsoleDSL[Task]): Unit = {
     val exportContext = exportContextProvider.get()
     val system        = ActorSystem.apply("main-actor-system")
     val contentActor =
@@ -58,7 +62,9 @@ private[exporter] class ProjectExporter @Inject() (
     property(mappingContainer)
   }
 
-  private[this] def property(mappingContainer: MappingContainer): Unit = {
+  private[this] def property(
+      mappingContainer: MappingContainer
+  )(implicit s: Scheduler, consoleDSL: ConsoleDSL[Task]): Unit = {
     val allMemberships: Seq[Membership] = membershipService.allMemberships()
 
     //project

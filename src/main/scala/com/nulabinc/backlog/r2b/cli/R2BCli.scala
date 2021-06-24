@@ -58,7 +58,8 @@ object R2BCli extends BacklogConfiguration with Logging {
 
   def init(config: AppConfiguration)(implicit
       consoleDSL: ConsoleDSL[Task],
-      storageDSL: StorageDSL[Task]
+      storageDSL: StorageDSL[Task],
+      s: Scheduler
   ): Result[Unit] = {
     val injector               = BacklogInjector.createInjector(config.backlogConfig)
     val backlogStatusService   = injector.getInstance(classOf[BacklogStatusService])
@@ -147,7 +148,7 @@ object R2BCli extends BacklogConfiguration with Logging {
         config.exclude
       )
       _ <- BootImporter
-        .execute[Task](config.backlogConfig, fitIssueKey = false, retryCount = config.retryCount)
+        .execute(config.backlogConfig, fitIssueKey = false, retryCount = config.retryCount)
         .mapError[AppError](com.nulabinc.backlog.r2b.UnknownError)
         .handleError
     } yield finalize(config.backlogConfig)
@@ -165,7 +166,7 @@ object R2BCli extends BacklogConfiguration with Logging {
     val result = for {
       _ <- validateParam(config).handleError
       _ <- BootImporter
-        .execute[Task](config.backlogConfig, fitIssueKey = false, retryCount = config.retryCount)
+        .execute(config.backlogConfig, fitIssueKey = false, retryCount = config.retryCount)
         .mapError[AppError](com.nulabinc.backlog.r2b.UnknownError)
         .handleError
     } yield finalize(config.backlogConfig)
@@ -311,7 +312,9 @@ object R2BCli extends BacklogConfiguration with Logging {
   private def toMappingRow(src: String, dst: String): String =
     s"- $src => $dst"
 
-  private def createMapping(config: AppConfiguration): MappingFileContainer = {
+  private def createMapping(
+      config: AppConfiguration
+  )(implicit s: Scheduler, consoleDSL: ConsoleDSL[Task]): MappingFileContainer = {
     val mappingData = BootMapping.execute(config.redmineConfig, config.exclude)
     val userMapping =
       new UserMappingFile(config.redmineConfig, config.backlogConfig, mappingData.users.toSeq)

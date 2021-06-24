@@ -3,12 +3,15 @@ package com.nulabinc.backlog.r2b.mapping.collector.service
 import javax.inject.Inject
 import akka.actor.{ActorSystem, Props}
 import com.nulabinc.backlog.migration.common.conf.ExcludeOption
+import com.nulabinc.backlog.migration.common.dsl.ConsoleDSL
 import com.nulabinc.backlog.migration.common.utils.{Logging, ProgressBar}
 import com.nulabinc.backlog.r2b.mapping.collector.actor.ContentActor
 import com.nulabinc.backlog.r2b.mapping.collector.core.{MappingContextProvider, MappingData}
 import com.nulabinc.backlog.r2b.redmine.service.{MembershipService, NewsService, UserService}
 import com.osinka.i18n.Messages
 import com.taskadapter.redmineapi.bean.{Group, Membership, User}
+import monix.eval.Task
+import monix.execution.Scheduler
 
 import scala.jdk.CollectionConverters._
 import scala.concurrent.Await
@@ -24,7 +27,10 @@ private[collector] class MappingCollector @Inject() (
     newsService: NewsService
 ) extends Logging {
 
-  def boot(exclude: ExcludeOption, mappingData: MappingData): Unit = {
+  def boot(exclude: ExcludeOption, mappingData: MappingData)(implicit
+      s: Scheduler,
+      consoleDSL: ConsoleDSL[Task]
+  ): Unit = {
     val mappingContext = mappingContextProvider.get()
     val system         = ActorSystem.apply("main-actor-system")
     val contentActor   = system.actorOf(Props(new ContentActor(exclude, mappingContext)))
