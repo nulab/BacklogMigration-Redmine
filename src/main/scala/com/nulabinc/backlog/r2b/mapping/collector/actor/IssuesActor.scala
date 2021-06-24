@@ -1,24 +1,28 @@
 package com.nulabinc.backlog.r2b.mapping.collector.actor
 
 import java.util.concurrent.CountDownLatch
-
 import akka.actor.SupervisorStrategy.Restart
 import akka.actor.{Actor, ActorRef, OneForOneStrategy, Props}
 import akka.routing.SmallestMailboxPool
 import com.nulabinc.backlog.migration.common.conf.BacklogConfiguration
+import com.nulabinc.backlog.migration.common.dsl.ConsoleDSL
 import com.nulabinc.backlog.migration.common.utils.{ConsoleOut, Logging, ProgressBar}
 import com.nulabinc.backlog.r2b.mapping.collector.core.{MappingContext, MappingData}
 import com.nulabinc.backlog4j.BacklogAPIException
 import com.osinka.i18n.Messages
 import com.taskadapter.redmineapi.bean.User
+import monix.eval.Task
+import monix.execution.Scheduler
 
 import scala.concurrent.duration._
 
 /**
  * @author uchida
  */
-private[collector] class IssuesActor(mappingContext: MappingContext)
-    extends Actor
+private[collector] class IssuesActor(mappingContext: MappingContext)(implicit
+    s: Scheduler,
+    consoleDSL: ConsoleDSL[Task]
+) extends Actor
     with BacklogConfiguration
     with Logging {
 

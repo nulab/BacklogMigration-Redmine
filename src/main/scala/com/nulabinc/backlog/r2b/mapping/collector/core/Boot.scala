@@ -2,12 +2,15 @@ package com.nulabinc.backlog.r2b.mapping.collector.core
 
 import com.google.inject.Guice
 import com.nulabinc.backlog.migration.common.conf.ExcludeOption
+import com.nulabinc.backlog.migration.common.dsl.ConsoleDSL
 import com.nulabinc.backlog.migration.common.utils.{ConsoleOut, Logging}
 import com.nulabinc.backlog.r2b.mapping.collector.modules.RedmineModule
 import com.nulabinc.backlog.r2b.mapping.collector.service.MappingCollector
 import com.nulabinc.backlog.r2b.redmine.conf.RedmineApiConfiguration
 import com.osinka.i18n.Messages
 import com.taskadapter.redmineapi.bean.User
+import monix.eval.Task
+import monix.execution.Scheduler
 
 import scala.collection.mutable
 
@@ -16,7 +19,10 @@ import scala.collection.mutable
  */
 object Boot extends Logging {
 
-  def execute(apiConfig: RedmineApiConfiguration, exclude: ExcludeOption): MappingData = {
+  def execute(apiConfig: RedmineApiConfiguration, exclude: ExcludeOption)(implicit
+      s: Scheduler,
+      consoleDSL: ConsoleDSL[Task]
+  ): MappingData = {
     try {
       val injector = Guice.createInjector(new RedmineModule(apiConfig))
 

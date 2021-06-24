@@ -2,8 +2,11 @@ package com.nulabinc.backlog.r2b.exporter.actor
 
 import akka.actor.{Actor, Props}
 import com.nulabinc.backlog.migration.common.domain.BacklogTextFormattingRule
+import com.nulabinc.backlog.migration.common.dsl.ConsoleDSL
 import com.nulabinc.backlog.migration.common.utils.Logging
 import com.nulabinc.backlog.r2b.exporter.core.ExportContext
+import monix.eval.Task
+import monix.execution.Scheduler
 
 /**
  * @author uchida
@@ -11,7 +14,8 @@ import com.nulabinc.backlog.r2b.exporter.core.ExportContext
 private[exporter] class ContentActor(
     exportContext: ExportContext,
     backlogTextFormattingRule: BacklogTextFormattingRule
-) extends Actor
+)(implicit s: Scheduler, consoleDSL: ConsoleDSL[Task])
+    extends Actor
     with Logging {
 
   private[this] val wikisActor = context.actorOf(Props(new WikisActor(exportContext)))

@@ -1,23 +1,27 @@
 package com.nulabinc.backlog.r2b.exporter.actor
 
 import java.util.concurrent.CountDownLatch
-
 import akka.actor.SupervisorStrategy.Restart
 import akka.actor.{Actor, OneForOneStrategy, Props}
 import akka.routing.SmallestMailboxPool
 import com.nulabinc.backlog.migration.common.conf.BacklogConfiguration
+import com.nulabinc.backlog.migration.common.dsl.ConsoleDSL
 import com.nulabinc.backlog.migration.common.utils.{Logging, ProgressBar}
 import com.nulabinc.backlog.r2b.exporter.core.ExportContext
 import com.osinka.i18n.Messages
 import com.taskadapter.redmineapi.bean.WikiPage
+import monix.eval.Task
+import monix.execution.Scheduler
 
 import scala.concurrent.duration._
 
 /**
  * @author uchida
  */
-private[exporter] class WikisActor(exportContext: ExportContext)
-    extends Actor
+private[exporter] class WikisActor(exportContext: ExportContext)(implicit
+    s: Scheduler,
+    consoleDSL: ConsoleDSL[Task]
+) extends Actor
     with BacklogConfiguration
     with Logging {
 
