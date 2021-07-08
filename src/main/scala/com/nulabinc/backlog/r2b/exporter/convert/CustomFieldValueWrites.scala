@@ -5,22 +5,30 @@ import javax.inject.Inject
 import com.nulabinc.backlog.migration.common.convert.Writes
 import com.nulabinc.backlog.migration.common.utils.Logging
 import com.nulabinc.backlog.r2b.redmine.conf.RedmineConstantValue
-import com.nulabinc.backlog.r2b.redmine.domain.{PropertyValue, RedmineCustomFieldDefinition}
+import com.nulabinc.backlog.r2b.redmine.domain.{
+  PropertyValue,
+  RedmineCustomFieldDefinition
+}
 import com.osinka.i18n.Messages
 
 /**
- * @author uchida
- */
-private[exporter] class CustomFieldValueWrites @Inject() (propertyValue: PropertyValue)
-    extends Writes[(String, Option[String]), Option[String]]
+  * @author uchida
+  */
+private[exporter] class CustomFieldValueWrites @Inject() (
+    propertyValue: PropertyValue
+) extends Writes[(String, Option[String]), Option[String]]
     with Logging {
 
-  override def writes(customFieldValue: (String, Option[String])): Option[String] = {
-    val (strId, optValue)        = customFieldValue
-    val optCustomFieldDefinition = propertyValue.customFieldDefinitionOfId(strId)
+  override def writes(
+      customFieldValue: (String, Option[String])
+  ): Option[String] = {
+    val (strId, optValue) = customFieldValue
+    val optCustomFieldDefinition =
+      propertyValue.customFieldDefinitionOfId(strId)
     optCustomFieldDefinition match {
-      case Some(customFieldDefinition) => convert(customFieldDefinition, optValue)
-      case _                           => optValue
+      case Some(customFieldDefinition) =>
+        convert(customFieldDefinition, optValue)
+      case _ => optValue
     }
   }
 

@@ -8,8 +8,8 @@ import com.nulabinc.backlog.migration.common.utils.FileUtil
 import com.taskadapter.redmineapi.bean.Attachment
 
 /**
- * @author uchida
- */
+  * @author uchida
+  */
 private[exporter] class AttachmentWrites @Inject() ()
     extends Writes[Attachment, BacklogAttachment] {
 

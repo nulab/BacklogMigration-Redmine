@@ -1,19 +1,27 @@
 package com.nulabinc.backlog.r2b.mapping.file
 
 import com.nulabinc.backlog.migration.common.conf.BacklogApiConfiguration
-import com.nulabinc.backlog.migration.common.modules.{ServiceInjector => BacklogInjector}
-import com.nulabinc.backlog.migration.common.service.{PriorityService => BacklogPriorityService}
+import com.nulabinc.backlog.migration.common.modules.{
+  ServiceInjector => BacklogInjector
+}
+import com.nulabinc.backlog.migration.common.service.{
+  PriorityService => BacklogPriorityService
+}
 import com.nulabinc.backlog.migration.common.utils.Logging
 import com.nulabinc.backlog.r2b.redmine.conf.RedmineApiConfiguration
-import com.nulabinc.backlog.r2b.redmine.modules.{ServiceInjector => RedmineInjector}
-import com.nulabinc.backlog.r2b.redmine.service.{PriorityService => RedminePriorityService}
+import com.nulabinc.backlog.r2b.redmine.modules.{
+  ServiceInjector => RedmineInjector
+}
+import com.nulabinc.backlog.r2b.redmine.service.{
+  PriorityService => RedminePriorityService
+}
 import com.nulabinc.backlog4j.Priority
 import com.osinka.i18n.{Lang, Messages}
 import com.taskadapter.redmineapi.bean.IssuePriority
 
 /**
- * @author uchida
- */
+  * @author uchida
+  */
 class PriorityMappingFile(
     redmineApiConfig: RedmineApiConfiguration,
     backlogApiConfig: BacklogApiConfiguration
@@ -27,8 +35,8 @@ class PriorityMappingFile(
       MappingItem(priority.getName, priority.getName)
     }
 
-    val injector          = RedmineInjector.createInjector(redmineApiConfig)
-    val priorityService   = injector.getInstance(classOf[RedminePriorityService])
+    val injector = RedmineInjector.createInjector(redmineApiConfig)
+    val priorityService = injector.getInstance(classOf[RedminePriorityService])
     val redminePriorities = priorityService.allPriorities()
     redminePriorities.map(createItem)
   }
@@ -37,19 +45,21 @@ class PriorityMappingFile(
     def createItem(priority: Priority): MappingItem = {
       MappingItem(priority.getName, priority.getName)
     }
-    val injector          = BacklogInjector.createInjector(backlogApiConfig)
-    val priorityService   = injector.getInstance(classOf[BacklogPriorityService])
+    val injector = BacklogInjector.createInjector(backlogApiConfig)
+    val priorityService = injector.getInstance(classOf[BacklogPriorityService])
     val backlogPriorities = priorityService.allPriorities()
     backlogPriorities.map(createItem)
   }
 
   private object Backlog {
-    val LOW_JA: String    = Messages("mapping.priority.backlog.low")(Lang("ja"))
-    val NORMAL_JA: String = Messages("mapping.priority.backlog.normal")(Lang("ja"))
-    val HIGH_JA: String   = Messages("mapping.priority.backlog.high")(Lang("ja"))
-    val LOW_EN: String    = Messages("mapping.priority.backlog.low")(Lang("en"))
-    val NORMAL_EN: String = Messages("mapping.priority.backlog.normal")(Lang("en"))
-    val HIGH_EN: String   = Messages("mapping.priority.backlog.high")(Lang("en"))
+    val LOW_JA: String = Messages("mapping.priority.backlog.low")(Lang("ja"))
+    val NORMAL_JA: String =
+      Messages("mapping.priority.backlog.normal")(Lang("ja"))
+    val HIGH_JA: String = Messages("mapping.priority.backlog.high")(Lang("ja"))
+    val LOW_EN: String = Messages("mapping.priority.backlog.low")(Lang("en"))
+    val NORMAL_EN: String =
+      Messages("mapping.priority.backlog.normal")(Lang("en"))
+    val HIGH_EN: String = Messages("mapping.priority.backlog.high")(Lang("en"))
 
     def low(): String =
       backlogs
@@ -71,16 +81,22 @@ class PriorityMappingFile(
   }
 
   private object Redmine {
-    val LOW_JA: String       = Messages("mapping.priority.redmine.low")(Lang("ja"))
-    val NORMAL_JA: String    = Messages("mapping.priority.redmine.normal")(Lang("ja"))
-    val HIGH_JA: String      = Messages("mapping.priority.redmine.high")(Lang("ja"))
-    val URGENT_JA: String    = Messages("mapping.priority.redmine.urgent")(Lang("ja"))
-    val IMMEDIATE_JA: String = Messages("mapping.priority.redmine.immediate")(Lang("ja"))
-    val LOW_EN: String       = Messages("mapping.priority.redmine.low")(Lang("en"))
-    val NORMAL_EN: String    = Messages("mapping.priority.redmine.normal")(Lang("en"))
-    val HIGH_EN: String      = Messages("mapping.priority.redmine.high")(Lang("en"))
-    val URGENT_EN: String    = Messages("mapping.priority.redmine.urgent")(Lang("en"))
-    val IMMEDIATE_EN: String = Messages("mapping.priority.redmine.immediate")(Lang("en"))
+    val LOW_JA: String = Messages("mapping.priority.redmine.low")(Lang("ja"))
+    val NORMAL_JA: String =
+      Messages("mapping.priority.redmine.normal")(Lang("ja"))
+    val HIGH_JA: String = Messages("mapping.priority.redmine.high")(Lang("ja"))
+    val URGENT_JA: String =
+      Messages("mapping.priority.redmine.urgent")(Lang("ja"))
+    val IMMEDIATE_JA: String =
+      Messages("mapping.priority.redmine.immediate")(Lang("ja"))
+    val LOW_EN: String = Messages("mapping.priority.redmine.low")(Lang("en"))
+    val NORMAL_EN: String =
+      Messages("mapping.priority.redmine.normal")(Lang("en"))
+    val HIGH_EN: String = Messages("mapping.priority.redmine.high")(Lang("en"))
+    val URGENT_EN: String =
+      Messages("mapping.priority.redmine.urgent")(Lang("en"))
+    val IMMEDIATE_EN: String =
+      Messages("mapping.priority.redmine.immediate")(Lang("en"))
   }
 
   def matchItem(redmine: MappingItem): String =
@@ -104,7 +120,11 @@ class PriorityMappingFile(
   def itemName: String = Messages("common.priorities")
 
   def description: String =
-    Messages("cli.mapping.configurable", itemName, backlogs.map(_.name).mkString(","))
+    Messages(
+      "cli.mapping.configurable",
+      itemName,
+      backlogs.map(_.name).mkString(",")
+    )
 
   def isDisplayDetail: Boolean = false
 

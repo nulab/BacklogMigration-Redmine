@@ -4,10 +4,12 @@ import com.nulabinc.backlog.migration.common.domain.BacklogComment
 import com.nulabinc.backlog.migration.common.utils.{Logging, StringUtil}
 
 /**
- * @author uchida
- */
-private[exporter] class CommentReducer(issueId: Long, changeLogReducer: ChangeLogReducer)
-    extends Logging {
+  * @author uchida
+  */
+private[exporter] class CommentReducer(
+    issueId: Long,
+    changeLogReducer: ChangeLogReducer
+) extends Logging {
 
   def reduce(comment: BacklogComment): BacklogComment = {
     val changeLogContent = new StringBuilder()

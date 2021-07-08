@@ -25,7 +25,8 @@ object AttachmentService extends Logging {
       rbc.close()
       fos.close()
     } catch {
-      case e: Throwable => logger.warn("Download attachment failed: " + e.getMessage)
+      case e: Throwable =>
+        logger.warn("Download attachment failed: " + e.getMessage)
     }
 
   private def followRedirect(url: URL, count: Int = 0): URL =
@@ -37,7 +38,8 @@ object AttachmentService extends Logging {
           connection.getResponseCode match {
             case 301 | 302 | 303 =>
               val newUrl = new URL(connection.getHeaderField("Location"))
-              if (count < MAX_REDIRECT_COUNT) followRedirect(newUrl, count + 1) else newUrl
+              if (count < MAX_REDIRECT_COUNT) followRedirect(newUrl, count + 1)
+              else newUrl
             case _ =>
               url
           }

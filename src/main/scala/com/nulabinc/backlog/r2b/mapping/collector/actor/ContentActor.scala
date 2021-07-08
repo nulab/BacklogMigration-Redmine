@@ -4,23 +4,30 @@ import akka.actor.{Actor, Props}
 import com.nulabinc.backlog.migration.common.conf.ExcludeOption
 import com.nulabinc.backlog.migration.common.dsl.ConsoleDSL
 import com.nulabinc.backlog.migration.common.utils.Logging
-import com.nulabinc.backlog.r2b.mapping.collector.core.{MappingContext, MappingData}
+import com.nulabinc.backlog.r2b.mapping.collector.core.{
+  MappingContext,
+  MappingData
+}
 import com.taskadapter.redmineapi.bean.User
 import monix.eval.Task
 import monix.execution.Scheduler
 
 /**
- * @author uchida
- */
-private[collector] class ContentActor(exclude: ExcludeOption, mappingContext: MappingContext)(
-    implicit
+  * @author uchida
+  */
+private[collector] class ContentActor(
+    exclude: ExcludeOption,
+    mappingContext: MappingContext
+)(implicit
     s: Scheduler,
     consoleDSL: ConsoleDSL[Task]
 ) extends Actor
     with Logging {
 
-  private[this] val wikisActor  = context.actorOf(Props(new WikisActor(mappingContext)))
-  private[this] val issuesActor = context.actorOf(Props(new IssuesActor(mappingContext)))
+  private[this] val wikisActor =
+    context.actorOf(Props(new WikisActor(mappingContext)))
+  private[this] val issuesActor =
+    context.actorOf(Props(new IssuesActor(mappingContext)))
 
   def receive: Receive = {
     case ContentActor.Do(mappingData: MappingData) =>

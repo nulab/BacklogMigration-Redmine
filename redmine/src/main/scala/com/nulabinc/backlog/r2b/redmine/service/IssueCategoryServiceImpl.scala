@@ -9,11 +9,14 @@ import com.taskadapter.redmineapi.bean.IssueCategory
 
 import scala.jdk.CollectionConverters._
 
-
 /**
   * @author uchida
   */
-class IssueCategoryServiceImpl @Inject()(projectId: RedmineProjectId, redmine: RedmineManager) extends IssueCategoryService with Logging {
+class IssueCategoryServiceImpl @Inject() (
+    projectId: RedmineProjectId,
+    redmine: RedmineManager
+) extends IssueCategoryService
+    with Logging {
 
   override def allCategories(): Seq[IssueCategory] =
     try {

@@ -13,10 +13,12 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration._
 
 /**
- * @author uchida
- */
-private[collector] class WikiActor(wikiService: WikiService, mappingData: MappingData)
-    extends Actor
+  * @author uchida
+  */
+private[collector] class WikiActor(
+    wikiService: WikiService,
+    mappingData: MappingData
+) extends Actor
     with Logging {
 
   override def preRestart(reason: Throwable, message: Option[Any]) = {

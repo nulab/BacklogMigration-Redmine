@@ -27,8 +27,8 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration._
 
 /**
- * @author uchida
- */
+  * @author uchida
+  */
 private[exporter] class IssueActor(
     exportContext: ExportContext,
     backlogTextFormattingRule: BacklogTextFormattingRule
@@ -38,8 +38,9 @@ private[exporter] class IssueActor(
   import com.nulabinc.backlog.migration.common.formatters.BacklogJsonProtocol._
   import IssueActor.ConsoleF
 
-  private implicit val issueWrites: IssueWrites     = exportContext.issueWrites
-  private implicit val journalWrites: JournalWrites = exportContext.journalWrites
+  private implicit val issueWrites: IssueWrites = exportContext.issueWrites
+  private implicit val journalWrites: JournalWrites =
+    exportContext.journalWrites
 
   override def preRestart(reason: Throwable, message: Option[Any]): Unit = {
     logger.debug(s"preRestart: reason: $reason, message: $message")
@@ -50,11 +51,22 @@ private[exporter] class IssueActor(
 
   def receive: Receive = {
     case IssueActor
-          .Do(issueId: Int, completion: CountDownLatch, allCount: Int, console: ConsoleF) =>
-      logger.debug(s"[START ISSUE]$issueId thread numbers:${java.lang.Thread.activeCount()}")
+          .Do(
+            issueId: Int,
+            completion: CountDownLatch,
+            allCount: Int,
+            console: ConsoleF
+          ) =>
+      logger.debug(
+        s"[START ISSUE]$issueId thread numbers:${java.lang.Thread.activeCount()}"
+      )
 
       val issue =
-        exportContext.issueService.issueOfId(issueId, Include.attachments, Include.journals)
+        exportContext.issueService.issueOfId(
+          issueId,
+          Include.attachments,
+          Include.journals
+        )
       val journals = issue.getJournals.asScala.toSeq.sortWith((c1, c2) =>
         c1.getCreatedOn.before(c2.getCreatedOn)
       )
@@ -72,7 +84,8 @@ private[exporter] class IssueActor(
       journals: Seq[Journal],
       attachments: Seq[Attachment]
   ): File = {
-    val issueCreated = DateUtil.tryIsoParse(Option(issue.getCreatedOn).map(DateUtil.isoFormat))
+    val issueCreated =
+      DateUtil.tryIsoParse(Option(issue.getCreatedOn).map(DateUtil.isoFormat))
     val issueDirPath = exportContext.backlogPaths
       .issueDirectoryPath("issue", issue.getId.intValue(), issueCreated, 0)
     val issueInitializer = new IssueInitializer(
@@ -85,7 +98,10 @@ private[exporter] class IssueActor(
     val backlogIssue = issueInitializer.initialize(issue)
 
     IOUtil
-      .output(exportContext.backlogPaths.issueJson(issueDirPath), backlogIssue.toJson.prettyPrint)
+      .output(
+        exportContext.backlogPaths.issueJson(issueDirPath),
+        backlogIssue.toJson.prettyPrint
+      )
   }
 
   private[this] def exportComments(
@@ -93,11 +109,17 @@ private[exporter] class IssueActor(
       journals: Seq[Journal],
       attachments: Seq[Attachment]
   ): Unit = {
-    val backlogIssue    = Convert.toBacklog(issue)
+    val backlogIssue = Convert.toBacklog(issue)
     val backlogComments = journals.map(Convert.toBacklog(_))
     backlogComments.zipWithIndex.foreach {
       case (comment, index) =>
-        exportComment(comment, backlogIssue, backlogComments, attachments, index)
+        exportComment(
+          comment,
+          backlogIssue,
+          backlogComments,
+          attachments,
+          index
+        )
     }
   }
 
@@ -110,13 +132,27 @@ private[exporter] class IssueActor(
   ): File = {
     val commentCreated = DateUtil.tryIsoParse(comment.optCreated)
     val issueDirPath =
-      exportContext.backlogPaths.issueDirectoryPath("comment", issue.id, commentCreated, index)
+      exportContext.backlogPaths.issueDirectoryPath(
+        "comment",
+        issue.id,
+        commentCreated,
+        index
+      )
     val changeLogReducer =
-      new ChangeLogReducer(exportContext, issueDirPath, issue, comments, attachments)
+      new ChangeLogReducer(
+        exportContext,
+        issueDirPath,
+        issue,
+        comments,
+        attachments
+      )
     val commentReducer = new CommentReducer(issue.id, changeLogReducer)
-    val reduced        = commentReducer.reduce(comment)
+    val reduced = commentReducer.reduce(comment)
 
-    IOUtil.output(exportContext.backlogPaths.issueJson(issueDirPath), reduced.toJson.prettyPrint)
+    IOUtil.output(
+      exportContext.backlogPaths.issueJson(issueDirPath),
+      reduced.toJson.prettyPrint
+    )
   }
 
 }
@@ -125,6 +161,11 @@ private[exporter] object IssueActor {
 
   type ConsoleF = (Int, Int) => Unit
 
-  case class Do(issueId: Int, completion: CountDownLatch, allCount: Int, console: ConsoleF)
+  case class Do(
+      issueId: Int,
+      completion: CountDownLatch,
+      allCount: Int,
+      console: ConsoleF
+  )
 
 }

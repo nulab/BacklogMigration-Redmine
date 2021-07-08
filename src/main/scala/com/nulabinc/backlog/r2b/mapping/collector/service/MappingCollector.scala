@@ -6,8 +6,15 @@ import com.nulabinc.backlog.migration.common.conf.ExcludeOption
 import com.nulabinc.backlog.migration.common.dsl.ConsoleDSL
 import com.nulabinc.backlog.migration.common.utils.{Logging, ProgressBar}
 import com.nulabinc.backlog.r2b.mapping.collector.actor.ContentActor
-import com.nulabinc.backlog.r2b.mapping.collector.core.{MappingContextProvider, MappingData}
-import com.nulabinc.backlog.r2b.redmine.service.{MembershipService, NewsService, UserService}
+import com.nulabinc.backlog.r2b.mapping.collector.core.{
+  MappingContextProvider,
+  MappingData
+}
+import com.nulabinc.backlog.r2b.redmine.service.{
+  MembershipService,
+  NewsService,
+  UserService
+}
 import com.osinka.i18n.Messages
 import com.taskadapter.redmineapi.bean.{Group, Membership, User}
 import monix.eval.Task
@@ -18,8 +25,8 @@ import scala.concurrent.Await
 import scala.concurrent.duration.Duration
 
 /**
- * @author uchida
- */
+  * @author uchida
+  */
 private[collector] class MappingCollector @Inject() (
     mappingContextProvider: MappingContextProvider,
     membershipService: MembershipService,
@@ -32,8 +39,9 @@ private[collector] class MappingCollector @Inject() (
       consoleDSL: ConsoleDSL[Task]
   ): Unit = {
     val mappingContext = mappingContextProvider.get()
-    val system         = ActorSystem.apply("main-actor-system")
-    val contentActor   = system.actorOf(Props(new ContentActor(exclude, mappingContext)))
+    val system = ActorSystem.apply("main-actor-system")
+    val contentActor =
+      system.actorOf(Props(new ContentActor(exclude, mappingContext)))
     contentActor ! ContentActor.Do(mappingData)
 
     Await.result(system.whenTerminated, Duration.Inf)
@@ -55,7 +63,10 @@ private[collector] class MappingCollector @Inject() (
     }
   }
 
-  private[this] def parse(membership: Membership, mappingData: MappingData): Unit = {
+  private[this] def parse(
+      membership: Membership,
+      mappingData: MappingData
+  ): Unit = {
     for { user <- Option(membership.getUser) } yield {
       mappingData.users += user
     }
@@ -64,7 +75,11 @@ private[collector] class MappingCollector @Inject() (
     }
   }
 
-  private[this] def parse(group: Group, user: User, mappingData: MappingData): Unit = {
+  private[this] def parse(
+      group: Group,
+      user: User,
+      mappingData: MappingData
+  ): Unit = {
     user.getGroups.asScala.foreach(userGroup =>
       if (group.getId == userGroup.getId) mappingData.users += user
     )

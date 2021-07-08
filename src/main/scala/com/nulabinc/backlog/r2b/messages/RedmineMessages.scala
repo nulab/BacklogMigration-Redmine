@@ -6,8 +6,8 @@ import com.osinka.i18n.Messages
 object RedmineMessages extends Logging {
 
   val priorityMappingItemName: String = Messages("common.priorities")
-  val statusMappingItemName: String   = Messages("common.statuses")
-  val userMappingItemName: String     = Messages("common.users")
+  val statusMappingItemName: String = Messages("common.statuses")
+  val userMappingItemName: String = Messages("common.users")
 
   val deleted: String = Messages("common.deleted")
   val confirm: String = Messages("cli.confirm")
@@ -36,17 +36,45 @@ object RedmineMessages extends Logging {
      """.stripMargin
 
   def changeCommentDoneRatio(originalValue: String, newValue: String): String =
-    Messages("common.change_comment", Messages("common.done_ratio"), originalValue, newValue)
+    Messages(
+      "common.change_comment",
+      Messages("common.done_ratio"),
+      originalValue,
+      newValue
+    )
 
   def changeCommentRelation(originalValue: String, newValue: String): String =
-    Messages("common.change_comment", Messages("common.relation"), originalValue, newValue)
+    Messages(
+      "common.change_comment",
+      Messages("common.relation"),
+      originalValue,
+      newValue
+    )
 
   def changeCommentPrivate(originalValue: String, newValue: String): String =
-    Messages("common.change_comment", Messages("common.private"), originalValue, newValue)
+    Messages(
+      "common.change_comment",
+      Messages("common.private"),
+      originalValue,
+      newValue
+    )
 
   def changeCommentProject(originalValue: String, newValue: String): String =
-    Messages("common.change_comment", Messages("common.project"), originalValue, newValue)
+    Messages(
+      "common.change_comment",
+      Messages("common.project"),
+      originalValue,
+      newValue
+    )
 
-  def changeCommentParentIssue(originalValue: String, newValue: String): String =
-    Messages("common.change_comment", Messages("common.parent_issue"), originalValue, newValue)
+  def changeCommentParentIssue(
+      originalValue: String,
+      newValue: String
+  ): String =
+    Messages(
+      "common.change_comment",
+      Messages("common.parent_issue"),
+      originalValue,
+      newValue
+    )
 }

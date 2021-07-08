@@ -14,12 +14,16 @@ import scala.jdk.CollectionConverters._
 /**
   * @author uchida
   */
-class IssueServiceImpl @Inject()(apiConfig: RedmineApiConfiguration, projectId: RedmineProjectId, redmine: RedmineManager)
-    extends IssueService
+class IssueServiceImpl @Inject() (
+    apiConfig: RedmineApiConfiguration,
+    projectId: RedmineProjectId,
+    redmine: RedmineManager
+) extends IssueService
     with Logging {
 
   override def countIssues(): Int = {
-    val url    = s"${apiConfig.url}/issues.json?limit=1&subproject_id=!*&project_id=${projectId.value}&key=${apiConfig.key}&status_id=*"
+    val url =
+      s"${apiConfig.url}/issues.json?limit=1&subproject_id=!*&project_id=${projectId.value}&key=${apiConfig.key}&status_id=*"
     val string = scala.io.Source.fromURL(url, "UTF-8").mkString
     JsonParser(string).asJsObject.getFields("total_count") match {
       case Seq(JsNumber(totalCount)) => totalCount.intValue
@@ -35,7 +39,10 @@ class IssueServiceImpl @Inject()(apiConfig: RedmineApiConfiguration, projectId: 
     redmine.getIssueManager.getIssueById(id, include: _*)
   }
 
-  override def tryIssueOfId(id: Integer, include: Include*): Either[Throwable, Issue] =
+  override def tryIssueOfId(
+      id: Integer,
+      include: Include*
+  ): Either[Throwable, Issue] =
     try {
       Right(redmine.getIssueManager.getIssueById(id, include: _*))
     } catch {

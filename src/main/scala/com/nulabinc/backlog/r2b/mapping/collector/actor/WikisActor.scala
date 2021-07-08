@@ -7,7 +7,10 @@ import akka.routing.SmallestMailboxPool
 import com.nulabinc.backlog.migration.common.conf.BacklogConfiguration
 import com.nulabinc.backlog.migration.common.dsl.ConsoleDSL
 import com.nulabinc.backlog.migration.common.utils.{Logging, ProgressBar}
-import com.nulabinc.backlog.r2b.mapping.collector.core.{MappingContext, MappingData}
+import com.nulabinc.backlog.r2b.mapping.collector.core.{
+  MappingContext,
+  MappingData
+}
 import com.osinka.i18n.Messages
 import monix.eval.Task
 import monix.execution.Scheduler
@@ -15,8 +18,8 @@ import monix.execution.Scheduler
 import scala.concurrent.duration._
 
 /**
- * @author uchida
- */
+  * @author uchida
+  */
 private[collector] class WikisActor(mappingContext: MappingContext)(implicit
     s: Scheduler,
     consoleDSL: ConsoleDSL[Task]
@@ -29,7 +32,7 @@ private[collector] class WikisActor(mappingContext: MappingContext)(implicit
       case _ => Restart
     }
 
-  private[this] val wikis      = mappingContext.wikiService.allWikis()
+  private[this] val wikis = mappingContext.wikiService.allWikis()
   private[this] val completion = new CountDownLatch(wikis.size)
   private[this] val console = (ProgressBar.progress _)(
     Messages("common.wikis"),
@@ -39,13 +42,18 @@ private[collector] class WikisActor(mappingContext: MappingContext)(implicit
 
   def receive: Receive = {
     case WikisActor.Do(mappingData: MappingData) =>
-      val router = SmallestMailboxPool(akkaMailBoxPool, supervisorStrategy = strategy)
+      val router =
+        SmallestMailboxPool(akkaMailBoxPool, supervisorStrategy = strategy)
       val wikiActor =
         context.actorOf(
-          router.props(Props(new WikiActor(mappingContext.wikiService, mappingData)))
+          router.props(
+            Props(new WikiActor(mappingContext.wikiService, mappingData))
+          )
         )
 
-      wikis.foreach(wiki => wikiActor ! WikiActor.Do(wiki, completion, wikis.size, console))
+      wikis.foreach(wiki =>
+        wikiActor ! WikiActor.Do(wiki, completion, wikis.size, console)
+      )
 
       completion.await
       sender() ! WikisActor.Done(mappingData)

@@ -11,7 +11,9 @@ import scala.jdk.CollectionConverters._
 /**
   * @author uchida
   */
-class UserServiceImpl @Inject()(redmine: RedmineManager) extends UserService with Logging {
+class UserServiceImpl @Inject() (redmine: RedmineManager)
+    extends UserService
+    with Logging {
 
   override def allUsers(): Seq[User] = {
     def addInfo(user: User): Option[User] = {

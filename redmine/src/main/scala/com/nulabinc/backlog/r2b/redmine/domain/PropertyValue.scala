@@ -21,8 +21,9 @@ case class PropertyValue(
     optValue match {
       case Some(value) =>
         StringUtil.safeStringToInt(value) match {
-          case Some(intValue) => versions.find(version => version.getId.intValue() == intValue)
-          case _              => None
+          case Some(intValue) =>
+            versions.find(version => version.getId.intValue() == intValue)
+          case _ => None
         }
       case _ => None
     }
@@ -31,8 +32,9 @@ case class PropertyValue(
     optValue match {
       case Some(value) =>
         StringUtil.safeStringToInt(value) match {
-          case Some(intValue) => priorities.find(priority => priority.getId.intValue() == intValue)
-          case _              => None
+          case Some(intValue) =>
+            priorities.find(priority => priority.getId.intValue() == intValue)
+          case _ => None
         }
       case _ => None
     }
@@ -41,8 +43,9 @@ case class PropertyValue(
     optValue match {
       case Some(value) =>
         StringUtil.safeStringToInt(value) match {
-          case Some(intValue) => users.find(user => user.getId.intValue() == intValue)
-          case _              => None
+          case Some(intValue) =>
+            users.find(user => user.getId.intValue() == intValue)
+          case _ => None
         }
       case _ => None
     }
@@ -57,8 +60,9 @@ case class PropertyValue(
     optValue match {
       case Some(value) =>
         StringUtil.safeStringToInt(value) match {
-          case Some(intValue) => users.find(user => user.getId.intValue() == intValue)
-          case _              => None
+          case Some(intValue) =>
+            users.find(user => user.getId.intValue() == intValue)
+          case _ => None
         }
       case _ => None
     }
@@ -67,8 +71,9 @@ case class PropertyValue(
     optValue match {
       case Some(value) =>
         StringUtil.safeStringToInt(value) match {
-          case Some(intValue) => categories.find(category => category.getId.intValue() == intValue)
-          case _              => None
+          case Some(intValue) =>
+            categories.find(category => category.getId.intValue() == intValue)
+          case _ => None
         }
       case _ => None
     }
@@ -77,22 +82,31 @@ case class PropertyValue(
     optValue match {
       case Some(value) =>
         StringUtil.safeStringToInt(value) match {
-          case Some(intValue) => trackers.find(tracker => tracker.getId.intValue() == intValue)
-          case _              => None
+          case Some(intValue) =>
+            trackers.find(tracker => tracker.getId.intValue() == intValue)
+          case _ => None
         }
       case _ => None
     }
 
-  def customFieldDefinitionOfId(strId: String): Option[RedmineCustomFieldDefinition] = {
+  def customFieldDefinitionOfId(
+      strId: String
+  ): Option[RedmineCustomFieldDefinition] = {
     StringUtil.safeStringToInt(strId) match {
       case Some(id) =>
-        customFieldDefinitions.find(customFieldDefinition => customFieldDefinition.id == id)
+        customFieldDefinitions.find(customFieldDefinition =>
+          customFieldDefinition.id == id
+        )
       case _ => None
     }
   }
 
-  def customFieldDefinitionOfName(name: String): Option[RedmineCustomFieldDefinition] = {
-    customFieldDefinitions.find(customFieldDefinition => customFieldDefinition.name == name)
+  def customFieldDefinitionOfName(
+      name: String
+  ): Option[RedmineCustomFieldDefinition] = {
+    customFieldDefinitions.find(customFieldDefinition =>
+      customFieldDefinition.name == name
+    )
   }
 
 }

@@ -7,8 +7,10 @@ import com.nulabinc.backlog.migration.common.domain.mappings.{
 
 case class RedmineUserMappingItem(name: String, displayName: String)
 
-case class ValidatedRedmineUserMapping(src: RedmineUserMappingItem, dst: BacklogUserMappingItem)
-    extends ValidatedUserMapping[RedmineUserMappingItem] {
+case class ValidatedRedmineUserMapping(
+    src: RedmineUserMappingItem,
+    dst: BacklogUserMappingItem
+) extends ValidatedUserMapping[RedmineUserMappingItem] {
   override val srcDisplayValue: String = src.displayName
 }
 

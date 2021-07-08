@@ -6,8 +6,8 @@ import javax.net.ssl._
 import com.nulabinc.backlog.migration.common.utils.Logging
 
 /**
- * @author uchida
- */
+  * @author uchida
+  */
 object DisableSSLCertificateCheckUtil extends Logging {
 
   def disableChecks(): Unit = {
@@ -27,9 +27,15 @@ object DisableSSLCertificateCheckUtil extends Logging {
 
   private[this] class NullX509TrustManager extends X509TrustManager {
 
-    override def checkClientTrusted(chain: Array[X509Certificate], authType: String): Unit = ()
+    override def checkClientTrusted(
+        chain: Array[X509Certificate],
+        authType: String
+    ): Unit = ()
 
-    override def checkServerTrusted(chain: Array[X509Certificate], authType: String): Unit = ()
+    override def checkServerTrusted(
+        chain: Array[X509Certificate],
+        authType: String
+    ): Unit = ()
 
     override def getAcceptedIssuers: Array[X509Certificate] =
       Array.ofDim[X509Certificate](0)

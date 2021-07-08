@@ -15,27 +15,33 @@ import monix.execution.Scheduler
 import scala.collection.mutable
 
 /**
- * @author uchida
- */
+  * @author uchida
+  */
 object Boot extends Logging {
 
-  def execute(apiConfig: RedmineApiConfiguration, exclude: ExcludeOption)(implicit
+  def execute(apiConfig: RedmineApiConfiguration, exclude: ExcludeOption)(
+      implicit
       s: Scheduler,
       consoleDSL: ConsoleDSL[Task]
   ): MappingData = {
     try {
       val injector = Guice.createInjector(new RedmineModule(apiConfig))
 
-      ConsoleOut.println(s"""
+      ConsoleOut.println(
+        s"""
                             |${Messages("cli.project_info.start")}
-                            |--------------------------------------------------""".stripMargin)
+                            |--------------------------------------------------""".stripMargin
+      )
 
-      val mappingData      = MappingData(mutable.Set.empty[User], mutable.Set.empty[String])
+      val mappingData =
+        MappingData(mutable.Set.empty[User], mutable.Set.empty[String])
       val mappingCollector = injector.getInstance(classOf[MappingCollector])
       mappingCollector.boot(exclude, mappingData)
 
       ConsoleOut.println(s"""|--------------------------------------------------
-                             |${Messages("cli.project_info.finish")}""".stripMargin)
+                             |${Messages(
+        "cli.project_info.finish"
+      )}""".stripMargin)
 
       mappingData
     } catch {

@@ -13,7 +13,8 @@ object RedmineMappingHeader {
     val headers: Seq[String] = Seq("Redmine", "Backlog")
   }
 
-  implicit object PriorityMappingHeader extends MappingHeader[PriorityMapping[_]] {
+  implicit object PriorityMappingHeader
+      extends MappingHeader[PriorityMapping[_]] {
     val headers: Seq[String] = Seq("Redmine", "Backlog")
   }
 

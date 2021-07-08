@@ -11,8 +11,8 @@ import com.taskadapter.redmineapi.bean.WikiPageDetail
 import scala.jdk.CollectionConverters._
 
 /**
- * @author uchida
- */
+  * @author uchida
+  */
 private[exporter] class WikiWrites @Inject() (
     implicit val attachmentWrites: AttachmentWrites,
     implicit val userWrites: UserWrites,
@@ -48,7 +48,10 @@ private[exporter] class WikiWrites @Inject() (
     }
     for { parent <- Option(wiki.getParent) } yield {
       sb.append("\n")
-      sb.append(Messages("common.parent_page")).append(":[[").append(parent.getTitle).append("]]")
+      sb.append(Messages("common.parent_page"))
+        .append(":[[")
+        .append(parent.getTitle)
+        .append("]]")
     }
     TextileUtil.convert(sb.toString(), backlogTextFormattingRule)
   }

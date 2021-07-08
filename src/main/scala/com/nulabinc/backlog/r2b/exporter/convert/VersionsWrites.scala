@@ -8,8 +8,8 @@ import com.nulabinc.backlog.migration.common.utils.DateUtil
 import com.taskadapter.redmineapi.bean.Version
 
 /**
- * @author uchida
- */
+  * @author uchida
+  */
 private[exporter] class VersionsWrites @Inject() ()
     extends Writes[Seq[Version], Seq[BacklogVersion]] {
 

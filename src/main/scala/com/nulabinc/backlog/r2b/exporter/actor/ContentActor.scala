@@ -9,8 +9,8 @@ import monix.eval.Task
 import monix.execution.Scheduler
 
 /**
- * @author uchida
- */
+  * @author uchida
+  */
 private[exporter] class ContentActor(
     exportContext: ExportContext,
     backlogTextFormattingRule: BacklogTextFormattingRule
@@ -18,9 +18,12 @@ private[exporter] class ContentActor(
     extends Actor
     with Logging {
 
-  private[this] val wikisActor = context.actorOf(Props(new WikisActor(exportContext)))
+  private[this] val wikisActor =
+    context.actorOf(Props(new WikisActor(exportContext)))
   private[this] val issuesActor =
-    context.actorOf(Props(new IssuesActor(exportContext, backlogTextFormattingRule)))
+    context.actorOf(
+      Props(new IssuesActor(exportContext, backlogTextFormattingRule))
+    )
 
   def receive: Receive = {
     case ContentActor.Do =>
