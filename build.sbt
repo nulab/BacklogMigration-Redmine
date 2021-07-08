@@ -16,7 +16,11 @@ lazy val commonSettings = Seq(
     "-Xlint:unused"
   ),
   resolvers ++= Seq("snapshots", "releases").map(Resolver.sonatypeRepo),
-  javacOptions ++= Seq("-encoding", "UTF-8")
+  javacOptions ++= Seq("-encoding", "UTF-8"),
+  // scalafix
+  addCompilerPlugin(scalafixSemanticdb),
+  semanticdbEnabled := true,
+  semanticdbVersion := scalafixSemanticdb.revision
 )
 
 lazy val common = (project in file("common")).settings(commonSettings: _*)
@@ -41,6 +45,15 @@ lazy val root = (project in file("."))
   )
   .dependsOn(common % "test->test;compile->compile")
   .dependsOn(redmine % "test->test;compile->compile")
+
+addCommandAlias(
+  "fixAll",
+  "all compile:scalafix; test:scalafix; scalafmt; test:scalafmt; scalafmtSbt"
+)
+addCommandAlias(
+  "checkAll",
+  "compile:scalafix --check; test:scalafix --check; scalafmtCheck; test:scalafmtCheck; scalafmtSbtCheck"
+)
 
 ThisBuild / scalafixDependencies += "com.github.liancheng" %% "organize-imports" % "0.5.0"
 
