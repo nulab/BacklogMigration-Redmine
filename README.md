@@ -15,7 +15,7 @@ Migrate your projects from Redmine to [Backlog].
 
 ## DEMO
 
-![Demo](http://www.backlog.jp/backlog-migration/backlog-migration-redmine.gif)
+![Demo](https://backlog.com/ja/backlog-migration/backlog-migration-redmine.gif)
 
 ## Requirements
 
