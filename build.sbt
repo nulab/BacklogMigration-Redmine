@@ -32,7 +32,7 @@ lazy val root = (project in file("."))
   .settings(
     name := "backlog-migration-redmine",
     libraryDependencies ++= Seq(
-      "org.rogach" %% "scallop" % "3.3.1"
+      "org.rogach" %% "scallop" % "3.3.2"
     ),
     assembly / assemblyJarName := {
       s"${name.value}-${version.value}.jar"
