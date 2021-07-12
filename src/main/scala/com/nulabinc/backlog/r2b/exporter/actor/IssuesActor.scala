@@ -8,11 +8,7 @@ import akka.routing.SmallestMailboxPool
 import com.nulabinc.backlog.migration.common.conf.BacklogConfiguration
 import com.nulabinc.backlog.migration.common.domain.BacklogTextFormattingRule
 import com.nulabinc.backlog.migration.common.dsl.ConsoleDSL
-import com.nulabinc.backlog.migration.common.utils.{
-  ConsoleOut,
-  Logging,
-  ProgressBar
-}
+import com.nulabinc.backlog.migration.common.utils.{ConsoleOut, Logging, ProgressBar}
 import com.nulabinc.backlog.r2b.exporter.core.ExportContext
 import com.nulabinc.backlog4j.BacklogAPIException
 import com.osinka.i18n.Messages
@@ -22,8 +18,8 @@ import monix.execution.Scheduler
 import scala.concurrent.duration._
 
 /**
-  * @author uchida
-  */
+ * @author uchida
+ */
 private[exporter] class IssuesActor(
     exportContext: ExportContext,
     backlogTextFormattingRule: BacklogTextFormattingRule
@@ -44,8 +40,8 @@ private[exporter] class IssuesActor(
         sys.exit(2)
     }
 
-  private[this] val limit = exportLimitAtOnce
-  private[this] val allCount = exportContext.issueService.countIssues()
+  private[this] val limit      = exportLimitAtOnce
+  private[this] val allCount   = exportContext.issueService.countIssues()
   private[this] val completion = new CountDownLatch(allCount)
 
   private[this] val console =
@@ -84,10 +80,10 @@ private[exporter] class IssuesActor(
 
   private[this] def issueIds(offset: Int): Seq[Int] = {
     val params = Map(
-      "offset" -> offset.toString,
-      "limit" -> limit.toString,
-      "project_id" -> exportContext.projectId.value.toString,
-      "status_id" -> "*",
+      "offset"        -> offset.toString,
+      "limit"         -> limit.toString,
+      "project_id"    -> exportContext.projectId.value.toString,
+      "status_id"     -> "*",
       "subproject_id" -> "!*"
     )
     val ids =

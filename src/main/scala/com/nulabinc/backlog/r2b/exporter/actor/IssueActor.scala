@@ -27,8 +27,8 @@ import scala.concurrent.duration._
 import scala.jdk.CollectionConverters._
 
 /**
-  * @author uchida
-  */
+ * @author uchida
+ */
 private[exporter] class IssueActor(
     exportContext: ExportContext,
     backlogTextFormattingRule: BacklogTextFormattingRule
@@ -109,7 +109,7 @@ private[exporter] class IssueActor(
       journals: Seq[Journal],
       attachments: Seq[Attachment]
   ): Unit = {
-    val backlogIssue = Convert.toBacklog(issue)
+    val backlogIssue    = Convert.toBacklog(issue)
     val backlogComments = journals.map(Convert.toBacklog(_))
     backlogComments.zipWithIndex.foreach {
       case (comment, index) =>
@@ -147,7 +147,7 @@ private[exporter] class IssueActor(
         attachments
       )
     val commentReducer = new CommentReducer(issue.id, changeLogReducer)
-    val reduced = commentReducer.reduce(comment)
+    val reduced        = commentReducer.reduce(comment)
 
     IOUtil.output(
       exportContext.backlogPaths.issueJson(issueDirPath),

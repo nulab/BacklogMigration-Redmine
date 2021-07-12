@@ -7,15 +7,8 @@ import com.nulabinc.backlog.migration.common.conf.ExcludeOption
 import com.nulabinc.backlog.migration.common.dsl.ConsoleDSL
 import com.nulabinc.backlog.migration.common.utils.{Logging, ProgressBar}
 import com.nulabinc.backlog.r2b.mapping.collector.actor.ContentActor
-import com.nulabinc.backlog.r2b.mapping.collector.core.{
-  MappingContextProvider,
-  MappingData
-}
-import com.nulabinc.backlog.r2b.redmine.service.{
-  MembershipService,
-  NewsService,
-  UserService
-}
+import com.nulabinc.backlog.r2b.mapping.collector.core.{MappingContextProvider, MappingData}
+import com.nulabinc.backlog.r2b.redmine.service.{MembershipService, NewsService, UserService}
 import com.osinka.i18n.Messages
 import com.taskadapter.redmineapi.bean.{Group, Membership, User}
 import monix.eval.Task
@@ -26,8 +19,8 @@ import scala.concurrent.duration.Duration
 import scala.jdk.CollectionConverters._
 
 /**
-  * @author uchida
-  */
+ * @author uchida
+ */
 private[collector] class MappingCollector @Inject() (
     mappingContextProvider: MappingContextProvider,
     membershipService: MembershipService,
@@ -40,7 +33,7 @@ private[collector] class MappingCollector @Inject() (
       consoleDSL: ConsoleDSL[Task]
   ): Unit = {
     val mappingContext = mappingContextProvider.get()
-    val system = ActorSystem.apply("main-actor-system")
+    val system         = ActorSystem.apply("main-actor-system")
     val contentActor =
       system.actorOf(Props(new ContentActor(exclude, mappingContext)))
     contentActor ! ContentActor.Do(mappingData)

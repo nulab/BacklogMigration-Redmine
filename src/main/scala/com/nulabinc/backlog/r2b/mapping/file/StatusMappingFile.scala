@@ -1,26 +1,18 @@
 package com.nulabinc.backlog.r2b.mapping.file
 
 import com.nulabinc.backlog.migration.common.conf.BacklogApiConfiguration
-import com.nulabinc.backlog.migration.common.modules.{
-  ServiceInjector => BacklogInjector
-}
-import com.nulabinc.backlog.migration.common.service.{
-  StatusService => BacklogStatusService
-}
+import com.nulabinc.backlog.migration.common.modules.{ServiceInjector => BacklogInjector}
+import com.nulabinc.backlog.migration.common.service.{StatusService => BacklogStatusService}
 import com.nulabinc.backlog.migration.common.utils.{Logging, StringUtil}
 import com.nulabinc.backlog.r2b.redmine.conf.RedmineApiConfiguration
-import com.nulabinc.backlog.r2b.redmine.modules.{
-  ServiceInjector => RedmineInjector
-}
-import com.nulabinc.backlog.r2b.redmine.service.{
-  StatusService => RedmineStatusService
-}
+import com.nulabinc.backlog.r2b.redmine.modules.{ServiceInjector => RedmineInjector}
+import com.nulabinc.backlog.r2b.redmine.service.{StatusService => RedmineStatusService}
 import com.osinka.i18n.{Lang, Messages}
 import com.taskadapter.redmineapi.bean.IssueStatus
 
 /**
-  * @author uchida
-  */
+ * @author uchida
+ */
 class StatusMappingFile(
     redmineApiConfig: RedmineApiConfiguration,
     backlogApiConfig: BacklogApiConfiguration,
@@ -32,8 +24,8 @@ class StatusMappingFile(
 
   private[this] def getRedmineItems: Seq[MappingItem] = {
 
-    val injector = RedmineInjector.createInjector(redmineApiConfig)
-    val statusService = injector.getInstance(classOf[RedmineStatusService])
+    val injector        = RedmineInjector.createInjector(redmineApiConfig)
+    val statusService   = injector.getInstance(classOf[RedmineStatusService])
     val redmineStatuses = statusService.allStatuses()
 
     def createItem(status: IssueStatus): MappingItem = {
@@ -56,14 +48,14 @@ class StatusMappingFile(
         )
     }
 
-    val redmines = redmineStatuses.map(createItem)
+    val redmines    = redmineStatuses.map(createItem)
     val deleteItems = statuses.foldLeft(Seq.empty[MappingItem])(collectItems)
     redmines concat deleteItems
   }
 
   private[this] def getBacklogItems: Seq[MappingItem] = {
-    val injector = BacklogInjector.createInjector(backlogApiConfig)
-    val statusService = injector.getInstance(classOf[BacklogStatusService])
+    val injector        = BacklogInjector.createInjector(backlogApiConfig)
+    val statusService   = injector.getInstance(classOf[BacklogStatusService])
     val backlogStatuses = statusService.allStatuses()
     backlogStatuses.map { backlogStatus =>
       MappingItem(backlogStatus.name.trimmed, backlogStatus.name.trimmed)

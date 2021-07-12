@@ -15,8 +15,8 @@ import org.scalatest.{FlatSpec, Matchers}
 import scala.jdk.CollectionConverters._
 
 /**
-  * @author uchida
-  */
+ * @author uchida
+ */
 class R2BSpec extends FlatSpec with Matchers with SimpleFixture {
 
   for { appConfiguration <- optAppConfiguration } yield {
@@ -81,9 +81,7 @@ class R2BSpec extends FlatSpec with Matchers with SimpleFixture {
         redmine.getProjectManager.getVersions(redmineProject.getId).asScala
       redmineVersions.foreach(redmineVersion => {
         val optBacklogVersion =
-          backlogVersions.find(backlogVersion =>
-            redmineVersion.getName == backlogVersion.getName
-          )
+          backlogVersions.find(backlogVersion => redmineVersion.getName == backlogVersion.getName)
         optBacklogVersion.isDefined should be(true)
         for { backlogVersion <- optBacklogVersion } yield {
           redmineVersion.getName should equal(backlogVersion.getName)
@@ -105,9 +103,7 @@ class R2BSpec extends FlatSpec with Matchers with SimpleFixture {
       val redmineTrackers = redmine.getIssueManager.getTrackers.asScala
       redmineTrackers.foreach(redmineTracker => {
         val backlogIssueType = backlogIssueTypes
-          .find(backlogIssueType =>
-            redmineTracker.getName == backlogIssueType.getName
-          )
+          .find(backlogIssueType => redmineTracker.getName == backlogIssueType.getName)
           .get
         redmineTracker.getName should equal(backlogIssueType.getName)
       })
@@ -200,11 +196,9 @@ class R2BSpec extends FlatSpec with Matchers with SimpleFixture {
 
   private[this] def testIssues(appConfiguration: AppConfiguration) = {
     val allCount = redmineIssueCount(appConfiguration)
-    val COUNT = 100
+    val COUNT    = 100
 
-    (0 until (allCount, COUNT)).foreach(offset =>
-      issues(appConfiguration, COUNT, offset)
-    )
+    (0 until (allCount, COUNT)).foreach(offset => issues(appConfiguration, COUNT, offset))
   }
 
   private[this] def issues(
@@ -225,9 +219,7 @@ class R2BSpec extends FlatSpec with Matchers with SimpleFixture {
       "Issue" should s"match: ${redmineIssue.getSubject}[${redmineIssue.getId}]" in {
 
         val optBacklogIssue =
-          backlogIssues.find(backlogIssue =>
-            redmineIssue.getSubject == backlogIssue.getSummary
-          )
+          backlogIssues.find(backlogIssue => redmineIssue.getSubject == backlogIssue.getSummary)
 
         withClue(s"""
             |redmine subject:${redmineIssue.getSubject}

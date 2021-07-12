@@ -9,8 +9,8 @@ import com.nulabinc.backlog.migration.common.domain.mappings.ValidatedUserMappin
 import com.nulabinc.backlog.r2b.domain.mappings.RedmineUserMappingItem
 
 /**
-  * @author uchida
-  */
+ * @author uchida
+ */
 private[exporter] class MappingUserWrites @Inject() ()
     extends Writes[ValidatedUserMapping[RedmineUserMappingItem], BacklogUser] {
 

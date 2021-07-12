@@ -7,17 +7,14 @@ import com.nulabinc.backlog.migration.common.convert.Writes
 import com.nulabinc.backlog.migration.common.domain._
 import com.nulabinc.backlog.migration.common.utils.Logging
 import com.nulabinc.backlog.r2b.redmine.conf.RedmineConstantValue
-import com.nulabinc.backlog.r2b.redmine.domain.{
-  PropertyValue,
-  RedmineCustomFieldDefinition
-}
+import com.nulabinc.backlog.r2b.redmine.domain.{PropertyValue, RedmineCustomFieldDefinition}
 import com.nulabinc.backlog4j.CustomField.FieldType
 import com.nulabinc.backlog4j.internal.json.customFields.DateCustomFieldSetting
 import com.osinka.i18n.Messages
 
 /**
-  * @author uchida
-  */
+ * @author uchida
+ */
 private[exporter] class CustomFieldDefinitionsWrites @Inject() (
     propertyValue: PropertyValue
 ) extends Writes[Seq[RedmineCustomFieldDefinition], Seq[
@@ -49,19 +46,15 @@ private[exporter] class CustomFieldDefinitionsWrites @Inject() (
       redmineCustomFieldDefinition: RedmineCustomFieldDefinition
   ): BacklogCustomFieldProperty =
     redmineCustomFieldDefinition.fieldFormat match {
-      case RedmineConstantValue.FieldFormat.STRING |
-          RedmineConstantValue.FieldFormat.LINK |
+      case RedmineConstantValue.FieldFormat.STRING | RedmineConstantValue.FieldFormat.LINK |
           RedmineConstantValue.FieldFormat.TEXT =>
         textProperty()
-      case RedmineConstantValue.FieldFormat.INT |
-          RedmineConstantValue.FieldFormat.FLOAT =>
+      case RedmineConstantValue.FieldFormat.INT | RedmineConstantValue.FieldFormat.FLOAT =>
         numericProperty(redmineCustomFieldDefinition)
       case RedmineConstantValue.FieldFormat.DATE =>
         dateProperty(redmineCustomFieldDefinition)
-      case RedmineConstantValue.FieldFormat.LIST |
-          RedmineConstantValue.FieldFormat.USER |
-          RedmineConstantValue.FieldFormat.VERSION |
-          RedmineConstantValue.FieldFormat.BOOL |
+      case RedmineConstantValue.FieldFormat.LIST | RedmineConstantValue.FieldFormat.USER |
+          RedmineConstantValue.FieldFormat.VERSION | RedmineConstantValue.FieldFormat.BOOL |
           RedmineConstantValue.FieldFormat.ENUMERATION =>
         multipleProperty(redmineCustomFieldDefinition)
     }
@@ -135,13 +128,10 @@ private[exporter] class CustomFieldDefinitionsWrites @Inject() (
   private[this] def optInitialValueDate(
       redmineCustomFieldDefinition: RedmineCustomFieldDefinition
   ): Option[BacklogCustomFieldInitialDate] =
-    if (
-      redmineCustomFieldDefinition.fieldFormat == RedmineConstantValue.FieldFormat.DATE
-    ) {
+    if (redmineCustomFieldDefinition.fieldFormat == RedmineConstantValue.FieldFormat.DATE) {
       val initialDate =
         BacklogCustomFieldInitialDate(
-          typeId =
-            DateCustomFieldSetting.InitialValueType.FixedDate.getIntValue.toLong,
+          typeId = DateCustomFieldSetting.InitialValueType.FixedDate.getIntValue.toLong,
           optDate = redmineCustomFieldDefinition.optDefaultValue,
           optShift = None
         )
@@ -158,11 +148,9 @@ private[exporter] class CustomFieldDefinitionsWrites @Inject() (
       redmineCustomFieldDefinition: RedmineCustomFieldDefinition
   ): Int =
     redmineCustomFieldDefinition.fieldFormat match {
-      case RedmineConstantValue.FieldFormat.STRING |
-          RedmineConstantValue.FieldFormat.LINK =>
+      case RedmineConstantValue.FieldFormat.STRING | RedmineConstantValue.FieldFormat.LINK =>
         FieldType.Text.getIntValue
-      case RedmineConstantValue.FieldFormat.INT |
-          RedmineConstantValue.FieldFormat.FLOAT =>
+      case RedmineConstantValue.FieldFormat.INT | RedmineConstantValue.FieldFormat.FLOAT =>
         FieldType.Numeric.getIntValue
       case RedmineConstantValue.FieldFormat.DATE => FieldType.Date.getIntValue
       case RedmineConstantValue.FieldFormat.TEXT =>
@@ -171,8 +159,7 @@ private[exporter] class CustomFieldDefinitionsWrites @Inject() (
         if (redmineCustomFieldDefinition.isMultiple)
           FieldType.MultipleList.getIntValue
         else FieldType.SingleList.getIntValue
-      case RedmineConstantValue.FieldFormat.USER |
-          RedmineConstantValue.FieldFormat.VERSION =>
+      case RedmineConstantValue.FieldFormat.USER | RedmineConstantValue.FieldFormat.VERSION =>
         if (redmineCustomFieldDefinition.isMultiple)
           FieldType.MultipleList.getIntValue
         else FieldType.SingleList.getIntValue

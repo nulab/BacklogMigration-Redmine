@@ -10,12 +10,7 @@ import com.nulabinc.backlog.migration.common.domain.{
   BacklogChangeLog,
   BacklogTextFormattingRule
 }
-import com.nulabinc.backlog.migration.common.utils.{
-  DateUtil,
-  FileUtil,
-  Logging,
-  StringUtil
-}
+import com.nulabinc.backlog.migration.common.utils.{DateUtil, FileUtil, Logging, StringUtil}
 import com.nulabinc.backlog.r2b.mapping.converters.{
   MappingPriorityConverter,
   MappingStatusConverter,
@@ -29,8 +24,8 @@ import com.nulabinc.backlog4j.CustomField.FieldType
 import com.taskadapter.redmineapi.bean.JournalDetail
 
 /**
-  * @author uchida
-  */
+ * @author uchida
+ */
 private[exporter] class JournalDetailWrites @Inject() (
     propertyValue: PropertyValue,
     customFieldValueWrites: CustomFieldValueWrites,
@@ -69,18 +64,15 @@ private[exporter] class JournalDetailWrites @Inject() (
               case RedmineConstantValue.FieldFormat.STRING |
                   RedmineConstantValue.FieldFormat.LINK =>
                 Some(FieldType.TextArea.getIntValue)
-              case RedmineConstantValue.FieldFormat.INT |
-                  RedmineConstantValue.FieldFormat.FLOAT =>
+              case RedmineConstantValue.FieldFormat.INT | RedmineConstantValue.FieldFormat.FLOAT =>
                 Some(FieldType.Numeric.getIntValue)
               case RedmineConstantValue.FieldFormat.DATE =>
                 Some(FieldType.Date.getIntValue)
               case RedmineConstantValue.FieldFormat.BOOL =>
                 Some(FieldType.SingleList.getIntValue)
-              case RedmineConstantValue.FieldFormat.LIST
-                  if !customFieldDefinition.isMultiple =>
+              case RedmineConstantValue.FieldFormat.LIST if !customFieldDefinition.isMultiple =>
                 Some(FieldType.SingleList.getIntValue)
-              case RedmineConstantValue.FieldFormat.LIST
-                  if customFieldDefinition.isMultiple =>
+              case RedmineConstantValue.FieldFormat.LIST if customFieldDefinition.isMultiple =>
                 Some(FieldType.MultipleList.getIntValue)
               case RedmineConstantValue.FieldFormat.VERSION =>
                 Some(FieldType.MultipleList.getIntValue)
@@ -93,9 +85,7 @@ private[exporter] class JournalDetailWrites @Inject() (
               s"custom field id not found [${detail.getName}]"
             )
         }
-        optTypeId.map(typeId =>
-          BacklogAttributeInfo(optId = None, typeId = typeId.toString)
-        )
+        optTypeId.map(typeId => BacklogAttributeInfo(optId = None, typeId = typeId.toString))
       case _ => None
     }
   }
@@ -141,9 +131,7 @@ private[exporter] class JournalDetailWrites @Inject() (
           .map(_.name.trimmed)
       case RedmineConstantValue.Attr.PRIORITY =>
         propertyValue.priorities
-          .find(priority =>
-            StringUtil.safeEquals(priority.getId.intValue(), value)
-          )
+          .find(priority => StringUtil.safeEquals(priority.getId.intValue(), value))
           .map(_.getName)
           .map(MappingPriorityConverter.convert(mappingContainer.priority, _))
       case RedmineConstantValue.Attr.ASSIGNED =>
@@ -153,21 +141,15 @@ private[exporter] class JournalDetailWrites @Inject() (
           .map(MappingUserConverter.convert(mappingContainer.user, _))
       case RedmineConstantValue.Attr.VERSION =>
         propertyValue.versions
-          .find(version =>
-            StringUtil.safeEquals(version.getId.intValue(), value)
-          )
+          .find(version => StringUtil.safeEquals(version.getId.intValue(), value))
           .map(_.getName)
       case RedmineConstantValue.Attr.TRACKER =>
         propertyValue.trackers
-          .find(tracker =>
-            StringUtil.safeEquals(tracker.getId.intValue(), value)
-          )
+          .find(tracker => StringUtil.safeEquals(tracker.getId.intValue(), value))
           .map(_.getName)
       case RedmineConstantValue.Attr.CATEGORY =>
         propertyValue.categories
-          .find(category =>
-            StringUtil.safeEquals(category.getId.intValue(), value)
-          )
+          .find(category => StringUtil.safeEquals(category.getId.intValue(), value))
           .map(_.getName)
       case _ => Option(TextileUtil.convert(value, backlogTextFormattingRule))
     }

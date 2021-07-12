@@ -15,12 +15,11 @@ import monix.execution.Scheduler
 import scala.collection.mutable
 
 /**
-  * @author uchida
-  */
+ * @author uchida
+ */
 object Boot extends Logging {
 
-  def execute(apiConfig: RedmineApiConfiguration, exclude: ExcludeOption)(
-      implicit
+  def execute(apiConfig: RedmineApiConfiguration, exclude: ExcludeOption)(implicit
       s: Scheduler,
       consoleDSL: ConsoleDSL[Task]
   ): MappingData = {

@@ -1,18 +1,11 @@
 package com.nulabinc.backlog.r2b.cli
 
-import com.nulabinc.backlog.migration.common.modules.{
-  ServiceInjector => BacklogInjector
-}
+import com.nulabinc.backlog.migration.common.modules.{ServiceInjector => BacklogInjector}
 import com.nulabinc.backlog.migration.common.service.SpaceService
 import com.nulabinc.backlog.migration.common.utils.{ConsoleOut, Logging}
 import com.nulabinc.backlog.r2b.conf.AppConfiguration
-import com.nulabinc.backlog.r2b.redmine.modules.{
-  ServiceInjector => RedmineInjector
-}
-import com.nulabinc.backlog.r2b.redmine.service.{
-  ProjectService,
-  UserService => RedmineUserService
-}
+import com.nulabinc.backlog.r2b.redmine.modules.{ServiceInjector => RedmineInjector}
+import com.nulabinc.backlog.r2b.redmine.service.{ProjectService, UserService => RedmineUserService}
 import com.nulabinc.backlog4j.BacklogAPIException
 import com.osinka.i18n.Messages
 import com.taskadapter.redmineapi.bean.Project
@@ -23,8 +16,8 @@ import com.taskadapter.redmineapi.{
 }
 
 /**
-  * @author uchida
-  */
+ * @author uchida
+ */
 class ParameterValidator(config: AppConfiguration) extends Logging {
 
   def validate(): Seq[String] = {
@@ -69,7 +62,7 @@ class ParameterValidator(config: AppConfiguration) extends Logging {
     )
     val messages =
       try {
-        val injector = BacklogInjector.createInjector(config.backlogConfig)
+        val injector     = BacklogInjector.createInjector(config.backlogConfig)
         val spaceService = injector.getInstance(classOf[SpaceService])
         spaceService.space()
         ConsoleOut.println(
@@ -96,7 +89,7 @@ class ParameterValidator(config: AppConfiguration) extends Logging {
   ): Option[String] = {
     if (resultValidateConfig.isEmpty) {
       ConsoleOut.println(Messages("cli.param.check.admin"))
-      val injector = BacklogInjector.createInjector(config.backlogConfig)
+      val injector     = BacklogInjector.createInjector(config.backlogConfig)
       val spaceService = injector.getInstance(classOf[SpaceService])
       if (spaceService.hasAdmin()) {
         ConsoleOut.println(Messages("cli.param.ok.admin"))
@@ -110,7 +103,7 @@ class ParameterValidator(config: AppConfiguration) extends Logging {
       Messages("cli.param.check.access", Messages("common.src"))
     )
     try {
-      val injector = RedmineInjector.createInjector(config.redmineConfig)
+      val injector    = RedmineInjector.createInjector(config.redmineConfig)
       val userService = injector.getInstance(classOf[RedmineUserService])
       userService.allUsers()
       ConsoleOut.println(
@@ -145,7 +138,7 @@ class ParameterValidator(config: AppConfiguration) extends Logging {
   }
 
   private[this] def optProject(): Option[Project] = {
-    val injector = RedmineInjector.createInjector(config.redmineConfig)
+    val injector       = RedmineInjector.createInjector(config.redmineConfig)
     val projectService = injector.getInstance(classOf[ProjectService])
     projectService.optProjectOfKey(config.redmineConfig.projectKey)
   }

@@ -5,12 +5,7 @@ import java.net.URL
 import better.files.{File => Path}
 import com.nulabinc.backlog.migration.common.convert.Convert
 import com.nulabinc.backlog.migration.common.domain._
-import com.nulabinc.backlog.migration.common.utils.{
-  DateUtil,
-  IOUtil,
-  Logging,
-  StringUtil
-}
+import com.nulabinc.backlog.migration.common.utils.{DateUtil, IOUtil, Logging, StringUtil}
 import com.nulabinc.backlog.r2b.exporter.core.ExportContext
 import com.nulabinc.backlog.r2b.mapping.converters.MappingPriorityConverter
 import com.nulabinc.backlog.r2b.redmine.conf.RedmineConstantValue
@@ -21,8 +16,8 @@ import com.taskadapter.redmineapi.bean._
 import scala.jdk.CollectionConverters._
 
 /**
-  * @author uchida
-  */
+ * @author uchida
+ */
 private[exporter] class IssueInitializer(
     exportContext: ExportContext,
     issueDirPath: Path,
@@ -31,23 +26,22 @@ private[exporter] class IssueInitializer(
     backlogTextFormattingRule: BacklogTextFormattingRule
 ) extends Logging {
 
-  implicit val issueWrites = exportContext.issueWrites
-  implicit val attachmentWrites = exportContext.attachmentWrites
-  implicit val userWrites = exportContext.userWrites
-  implicit val customFieldWrites = exportContext.customFieldWrites
+  implicit val issueWrites            = exportContext.issueWrites
+  implicit val attachmentWrites       = exportContext.attachmentWrites
+  implicit val userWrites             = exportContext.userWrites
+  implicit val customFieldWrites      = exportContext.customFieldWrites
   implicit val customFieldValueWrites = exportContext.customFieldValueWrites
 
   def initialize(issue: Issue): BacklogIssue = {
     //attachments
-    val attachmentFilter = new AttachmentFilter(journals)
+    val attachmentFilter    = new AttachmentFilter(journals)
     val filteredAttachments = attachmentFilter.filter(attachments)
-    val backlogAttachments = filteredAttachments.map(Convert.toBacklog(_))
+    val backlogAttachments  = filteredAttachments.map(Convert.toBacklog(_))
     filteredAttachments.foreach(attachment)
 
     val backlogIssue: BacklogIssue = Convert.toBacklog(issue)
     backlogIssue.copy(
-      issueKey =
-        s"${exportContext.backlogProjectKey}-${issue.getId.intValue()}",
+      issueKey = s"${exportContext.backlogProjectKey}-${issue.getId.intValue()}",
       summary = summary(issue),
       optParentIssueId = parentIssueId(issue),
       description = description(issue),

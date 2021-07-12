@@ -7,12 +7,7 @@ import com.nulabinc.backlog.migration.common.conf.BacklogPaths
 import com.nulabinc.backlog.migration.common.convert.Convert
 import com.nulabinc.backlog.migration.common.domain._
 import com.nulabinc.backlog.migration.common.dsl.ConsoleDSL
-import com.nulabinc.backlog.migration.common.utils.{
-  ConsoleOut,
-  IOUtil,
-  Logging,
-  ProgressBar
-}
+import com.nulabinc.backlog.migration.common.utils.{ConsoleOut, IOUtil, Logging, ProgressBar}
 import com.nulabinc.backlog.r2b.exporter.actor.ContentActor
 import com.nulabinc.backlog.r2b.exporter.convert._
 import com.nulabinc.backlog.r2b.exporter.core.ExportContextProvider
@@ -29,8 +24,8 @@ import scala.concurrent.Await
 import scala.concurrent.duration.Duration
 
 /**
-  * @author uchida
-  */
+ * @author uchida
+ */
 private[exporter] class ProjectExporter @Inject() (
     implicit val projectWrites: ProjectWrites,
     implicit val customFieldDefinitionsWrites: CustomFieldDefinitionsWrites,
@@ -58,7 +53,7 @@ private[exporter] class ProjectExporter @Inject() (
       mappingContainer: MappingContainer
   )(implicit s: Scheduler, consoleDSL: ConsoleDSL[Task]): Unit = {
     val exportContext = exportContextProvider.get()
-    val system = ActorSystem.apply("main-actor-system")
+    val system        = ActorSystem.apply("main-actor-system")
     val contentActor =
       system.actorOf(
         Props(new ContentActor(exportContext, backlogTextFormattingRule))
@@ -91,7 +86,7 @@ private[exporter] class ProjectExporter @Inject() (
 
     //memberships
     val allProjectUser = mutable.Set.empty[BacklogUser]
-    val projectUsers = Convert.toBacklog(allMemberships)(membershipWrites)
+    val projectUsers   = Convert.toBacklog(allMemberships)(membershipWrites)
 
     projectUsers.foreach(projectUser => allProjectUser += projectUser)
 

@@ -6,8 +6,8 @@ import com.nulabinc.backlog.r2b.mapping.domain.Mapping
 import com.osinka.i18n.{Lang, Messages}
 
 /**
-  * @author uchida
-  */
+ * @author uchida
+ */
 private[file] class MappingValidator(
     redmineMappings: Seq[MappingItem],
     backlogMappings: Seq[MappingItem],
@@ -35,27 +35,26 @@ private[file] class MappingValidator(
       mappings: Seq[Mapping],
       checkService: String
   ): Seq[String] = {
-    mappings.foldLeft(Seq.empty[String])(
-      (errors: Seq[String], mapping: Mapping) =>
-        if (checkService == CHECK_REDMINE) {
-          itemExists(
-            mapping.redmine,
-            redmineMappings,
-            Messages("common.src")
-          ) match {
-            case Some(error) => errors :+ error
-            case None        => errors
-          }
-        } else {
-          itemExists(
-            mapping.backlog,
-            backlogMappings,
-            Messages("common.dst")
-          ) match {
-            case Some(error) => errors :+ error
-            case None        => errors
-          }
+    mappings.foldLeft(Seq.empty[String])((errors: Seq[String], mapping: Mapping) =>
+      if (checkService == CHECK_REDMINE) {
+        itemExists(
+          mapping.redmine,
+          redmineMappings,
+          Messages("common.src")
+        ) match {
+          case Some(error) => errors :+ error
+          case None        => errors
         }
+      } else {
+        itemExists(
+          mapping.backlog,
+          backlogMappings,
+          Messages("common.dst")
+        ) match {
+          case Some(error) => errors :+ error
+          case None        => errors
+        }
+      }
     )
   }
 
@@ -75,14 +74,12 @@ private[file] class MappingValidator(
       mappings: Seq[Mapping],
       checkService: String
   ): Seq[String] = {
-    mappings.foldLeft(Seq.empty[String])(
-      (errors: Seq[String], mapping: Mapping) => {
-        itemRequired(mapping, checkService) match {
-          case Some(error) => errors :+ error
-          case None        => errors
-        }
+    mappings.foldLeft(Seq.empty[String])((errors: Seq[String], mapping: Mapping) => {
+      itemRequired(mapping, checkService) match {
+        case Some(error) => errors :+ error
+        case None        => errors
       }
-    )
+    })
   }
 
   private[this] def itemRequired(

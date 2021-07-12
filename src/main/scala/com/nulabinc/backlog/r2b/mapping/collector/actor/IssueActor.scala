@@ -16,8 +16,8 @@ import scala.concurrent.duration._
 import scala.jdk.CollectionConverters._
 
 /**
-  * @author uchida
-  */
+ * @author uchida
+ */
 private[collector] class IssueActor(
     issueService: IssueService,
     mappingData: MappingData,
@@ -32,7 +32,7 @@ private[collector] class IssueActor(
     }
   }
 
-  private[this] val users = mutable.Set.empty[Option[User]]
+  private[this] val users    = mutable.Set.empty[Option[User]]
   private[this] val statuses = mutable.Set.empty[Option[String]]
 
   def receive: Receive = {

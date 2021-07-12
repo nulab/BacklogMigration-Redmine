@@ -4,8 +4,8 @@ import com.nulabinc.backlog.migration.common.domain.BacklogComment
 import com.nulabinc.backlog.migration.common.utils.{Logging, StringUtil}
 
 /**
-  * @author uchida
-  */
+ * @author uchida
+ */
 private[exporter] class CommentReducer(
     issueId: Long,
     changeLogReducer: ChangeLogReducer

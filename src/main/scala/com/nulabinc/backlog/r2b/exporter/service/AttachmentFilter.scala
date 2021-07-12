@@ -7,8 +7,8 @@ import com.taskadapter.redmineapi.bean.{Attachment, Journal, JournalDetail}
 import scala.jdk.CollectionConverters._
 
 /**
-  * @author uchida
-  */
+ * @author uchida
+ */
 private[exporter] class AttachmentFilter(journals: Seq[Journal]) {
 
   def filter(attachments: Seq[Attachment]): Seq[Attachment] = {

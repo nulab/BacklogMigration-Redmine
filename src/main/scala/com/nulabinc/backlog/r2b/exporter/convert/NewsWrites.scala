@@ -3,18 +3,15 @@ package com.nulabinc.backlog.r2b.exporter.convert
 import javax.inject.Inject
 
 import com.nulabinc.backlog.migration.common.convert.{Convert, Writes}
-import com.nulabinc.backlog.migration.common.domain.{
-  BacklogTextFormattingRule,
-  BacklogWiki
-}
+import com.nulabinc.backlog.migration.common.domain.{BacklogTextFormattingRule, BacklogWiki}
 import com.nulabinc.backlog.migration.common.utils.{DateUtil, Logging}
 import com.nulabinc.backlog.r2b.utils.TextileUtil
 import com.osinka.i18n.Messages
 import com.taskadapter.redmineapi.bean.News
 
 /**
-  * @author uchida
-  */
+ * @author uchida
+ */
 private[exporter] class NewsWrites @Inject() (implicit
     val userWrites: UserWrites,
     backlogTextFormattingRule: BacklogTextFormattingRule
@@ -23,8 +20,7 @@ private[exporter] class NewsWrites @Inject() (implicit
   override def writes(news: News): BacklogWiki = {
     BacklogWiki(
       optId = None,
-      name =
-        s"${Messages("common.news")}/${Option(news.getTitle).getOrElse("")}",
+      name = s"${Messages("common.news")}/${Option(news.getTitle).getOrElse("")}",
       optContent = Some(content(news)),
       attachments = Seq(),
       sharedFiles = Seq(),

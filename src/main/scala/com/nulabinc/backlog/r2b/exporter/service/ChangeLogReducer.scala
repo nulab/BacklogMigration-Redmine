@@ -9,12 +9,7 @@ import com.nulabinc.backlog.migration.common.domain.{
   BacklogComment,
   BacklogIssue
 }
-import com.nulabinc.backlog.migration.common.utils.{
-  FileUtil,
-  IOUtil,
-  Logging,
-  StringUtil
-}
+import com.nulabinc.backlog.migration.common.utils.{FileUtil, IOUtil, Logging, StringUtil}
 import com.nulabinc.backlog.r2b.exporter.core.ExportContext
 import com.nulabinc.backlog.r2b.messages.RedmineMessages
 import com.osinka.i18n.Messages
@@ -35,8 +30,8 @@ private[exporter] object ReducedChangeLogWithMessage {
 }
 
 /**
-  * @author uchida
-  */
+ * @author uchida
+ */
 private[exporter] class ChangeLogReducer(
     exportContext: ExportContext,
     issueDirPath: Path,
@@ -79,7 +74,7 @@ private[exporter] class ChangeLogReducer(
         ReducedChangeLogWithMessage.createMessageOnly(s"$message\n")
       case BacklogConstantValue.ChangeLog.PARENT_ISSUE =>
         val optOriginal = changeLog.optOriginalValue
-        val optNew = changeLog.optNewValue
+        val optNew      = changeLog.optNewValue
 
         val result = (optOriginal, optNew) match {
           case (Some(originalId), Some(newId)) =>
@@ -98,9 +93,7 @@ private[exporter] class ChangeLogReducer(
         result match {
           case Right(_) =>
             ReducedChangeLogWithMessage.createWithChangeLog(
-              changeLog.copy(optNewValue =
-                ValueReducer.reduce(targetComment, changeLog)
-              )
+              changeLog.copy(optNewValue = ValueReducer.reduce(targetComment, changeLog))
             )
           case Left(error) =>
             logger.warn(
@@ -117,9 +110,7 @@ private[exporter] class ChangeLogReducer(
         }
       case _ =>
         ReducedChangeLogWithMessage.createWithChangeLog(
-          changeLog.copy(optNewValue =
-            ValueReducer.reduce(targetComment, changeLog)
-          )
+          changeLog.copy(optNewValue = ValueReducer.reduce(targetComment, changeLog))
         )
     }
 
@@ -196,13 +187,10 @@ private[exporter] class ChangeLogReducer(
         changeLog: BacklogChangeLog
     ): Option[String] = {
       changeLog.field match {
-        case BacklogConstantValue.ChangeLog.VERSION |
-            BacklogConstantValue.ChangeLog.MILESTONE |
-            BacklogConstantValue.ChangeLog.COMPONENT |
-            BacklogConstantValue.ChangeLog.ISSUE_TYPE =>
+        case BacklogConstantValue.ChangeLog.VERSION | BacklogConstantValue.ChangeLog.MILESTONE |
+            BacklogConstantValue.ChangeLog.COMPONENT | BacklogConstantValue.ChangeLog.ISSUE_TYPE =>
           findProperty(comments)(changeLog.field) match {
-            case Some(lastComment)
-                if lastComment.optCreated == targetComment.optCreated =>
+            case Some(lastComment) if lastComment.optCreated == targetComment.optCreated =>
               changeLog.field match {
                 case BacklogConstantValue.ChangeLog.VERSION =>
                   val issueValue = issue.versionNames.mkString(", ")

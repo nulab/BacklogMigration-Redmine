@@ -4,10 +4,7 @@ import java.io.PrintStream
 
 import com.google.inject.Guice
 import com.nulabinc.backlog.migration.common.conf.ExcludeOption
-import com.nulabinc.backlog.migration.common.domain.{
-  BacklogProjectKey,
-  BacklogTextFormattingRule
-}
+import com.nulabinc.backlog.migration.common.domain.{BacklogProjectKey, BacklogTextFormattingRule}
 import com.nulabinc.backlog.migration.common.dsl.ConsoleDSL
 import com.nulabinc.backlog.migration.common.utils.{ConsoleOut, Logging}
 import com.nulabinc.backlog.r2b.exporter.conf.ExportConfig
@@ -20,8 +17,8 @@ import monix.eval.Task
 import monix.execution.Scheduler
 
 /**
-  * @author uchida
-  */
+ * @author uchida
+ */
 object Boot extends Logging {
 
   def execute(

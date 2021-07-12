@@ -12,10 +12,7 @@ import com.nulabinc.backlog.migration.common.conf.{
   MappingDirectory
 }
 import com.nulabinc.backlog.migration.common.dsl.{ConsoleDSL, StorageDSL}
-import com.nulabinc.backlog.migration.common.interpreters.{
-  JansiConsoleDSL,
-  LocalStorageDSL
-}
+import com.nulabinc.backlog.migration.common.interpreters.{JansiConsoleDSL, LocalStorageDSL}
 import com.nulabinc.backlog.migration.common.services.{
   PriorityMappingFileService,
   StatusMappingFileService,
@@ -43,8 +40,8 @@ import spray.json.{JsNumber, JsonParser}
 import scala.jdk.CollectionConverters._
 
 /**
-  * @author uchida
-  */
+ * @author uchida
+ */
 trait SimpleFixture {
 
   implicit val userLang =
@@ -57,7 +54,7 @@ trait SimpleFixture {
   private implicit val storageDSL: StorageDSL[Task] = LocalStorageDSL()
   private implicit val consoleDSL: ConsoleDSL[Task] = JansiConsoleDSL()
 
-  val dateFormat = new SimpleDateFormat("yyyy-MM-dd")
+  val dateFormat      = new SimpleDateFormat("yyyy-MM-dd")
   val timestampFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ")
 
   val optAppConfiguration = getAppConfiguration
@@ -158,7 +155,7 @@ trait SimpleFixture {
       val projectKey: String = prop.getProperty("projectKey")
 
       val keys: Array[String] = projectKey.split(":")
-      val redmine: String = keys(0)
+      val redmine: String     = keys(0)
       val backlog: String =
         if (keys.length == 2) keys(1)
         else keys(0).toUpperCase.replaceAll("-", "_")
@@ -210,10 +207,10 @@ trait SimpleFixture {
 
   def allRedmineIssues(count: Int, offset: Long) = {
     val params = Map(
-      "offset" -> offset.toString,
-      "limit" -> count.toString,
-      "project_id" -> redmineProject.getId.toString,
-      "status_id" -> "*",
+      "offset"        -> offset.toString,
+      "limit"         -> count.toString,
+      "project_id"    -> redmineProject.getId.toString,
+      "status_id"     -> "*",
       "subproject_id" -> "!*"
     )
     redmine.getIssueManager.getIssues(params.asJava).asScala

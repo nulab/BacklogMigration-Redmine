@@ -16,8 +16,8 @@ import com.taskadapter.redmineapi.bean.Issue
 import scala.jdk.CollectionConverters._
 
 /**
-  * @author uchida
-  */
+ * @author uchida
+ */
 private[exporter] class IssueWrites @Inject() (
     implicit val attachmentWrites: AttachmentWrites,
     implicit val userWrites: UserWrites,
@@ -37,8 +37,7 @@ private[exporter] class IssueWrites @Inject() (
         original = issue.getSubject
       ),
       optParentIssueId = parentIssueId(issue),
-      description =
-        TextileUtil.convert(issue.getDescription, backlogTextFormattingRule),
+      description = TextileUtil.convert(issue.getDescription, backlogTextFormattingRule),
       optStartDate = Option(issue.getStartDate).map(DateUtil.dateFormat),
       optDueDate = Option(issue.getDueDate).map(DateUtil.dateFormat),
       optEstimatedHours = Option(issue.getEstimatedHours).map(_.floatValue()),
@@ -54,8 +53,7 @@ private[exporter] class IssueWrites @Inject() (
       optAssignee = Option(issue.getAssignee).map(Convert.toBacklog(_)),
       attachments = Seq.empty[BacklogAttachment],
       sharedFiles = Seq.empty[BacklogSharedFile],
-      customFields =
-        issue.getCustomFields.asScala.toSeq.flatMap(Convert.toBacklog(_)),
+      customFields = issue.getCustomFields.asScala.toSeq.flatMap(Convert.toBacklog(_)),
       notifiedUsers = Seq.empty[BacklogUser],
       operation = toBacklogOperation(issue)
     )

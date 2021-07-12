@@ -17,8 +17,8 @@ import monix.execution.Scheduler
 import scala.concurrent.duration._
 
 /**
-  * @author uchida
-  */
+ * @author uchida
+ */
 private[exporter] class WikisActor(exportContext: ExportContext)(implicit
     s: Scheduler,
     consoleDSL: ConsoleDSL[Task]
@@ -32,7 +32,7 @@ private[exporter] class WikisActor(exportContext: ExportContext)(implicit
     }
 
   private[this] val wikis: Seq[WikiPage] = exportContext.wikiService.allWikis()
-  private[this] val completion = new CountDownLatch(wikis.size)
+  private[this] val completion           = new CountDownLatch(wikis.size)
   private[this] val console = (ProgressBar.progress _)(
     Messages("common.wikis"),
     Messages("message.exporting"),
@@ -45,9 +45,7 @@ private[exporter] class WikisActor(exportContext: ExportContext)(implicit
         SmallestMailboxPool(akkaMailBoxPool, supervisorStrategy = strategy)
       val wikiActor =
         context.actorOf(router.props(Props(new WikiActor(exportContext))))
-      wikis.foreach(wiki =>
-        wikiActor ! WikiActor.Do(wiki, completion, wikis.size, console)
-      )
+      wikis.foreach(wiki => wikiActor ! WikiActor.Do(wiki, completion, wikis.size, console))
       completion.await
       sender() ! WikisActor.Done
   }

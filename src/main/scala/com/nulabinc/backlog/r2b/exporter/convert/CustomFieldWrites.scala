@@ -13,8 +13,8 @@ import com.taskadapter.redmineapi.bean.CustomField
 import scala.jdk.CollectionConverters._
 
 /**
-  * @author uchida
-  */
+ * @author uchida
+ */
 private[exporter] class CustomFieldWrites @Inject() (
     propertyValue: PropertyValue,
     customFieldValueWrites: CustomFieldValueWrites
@@ -29,26 +29,20 @@ private[exporter] class CustomFieldWrites @Inject() (
         customFieldDefinition.fieldFormat match {
           case RedmineConstantValue.FieldFormat.TEXT =>
             Some(toTextCustomField(customField))
-          case RedmineConstantValue.FieldFormat.STRING |
-              RedmineConstantValue.FieldFormat.LINK =>
+          case RedmineConstantValue.FieldFormat.STRING | RedmineConstantValue.FieldFormat.LINK =>
             Some(toTextAreaCustomField(customField))
-          case RedmineConstantValue.FieldFormat.INT |
-              RedmineConstantValue.FieldFormat.FLOAT =>
+          case RedmineConstantValue.FieldFormat.INT | RedmineConstantValue.FieldFormat.FLOAT =>
             Some(toNumericCustomField(customField))
           case RedmineConstantValue.FieldFormat.DATE =>
             Some(toDateCustomField(customField))
           case RedmineConstantValue.FieldFormat.BOOL => Some(bool(customField))
-          case RedmineConstantValue.FieldFormat.LIST
-              if !customFieldDefinition.isMultiple =>
+          case RedmineConstantValue.FieldFormat.LIST if !customFieldDefinition.isMultiple =>
             Some(toSingleListCustomField(customField))
-          case RedmineConstantValue.FieldFormat.LIST
-              if customFieldDefinition.isMultiple =>
+          case RedmineConstantValue.FieldFormat.LIST if customFieldDefinition.isMultiple =>
             Some(toMultipleListCustomField(customField))
-          case RedmineConstantValue.FieldFormat.ENUMERATION
-              if !customFieldDefinition.isMultiple =>
+          case RedmineConstantValue.FieldFormat.ENUMERATION if !customFieldDefinition.isMultiple =>
             Some(toSingleListCustomField(customField))
-          case RedmineConstantValue.FieldFormat.ENUMERATION
-              if customFieldDefinition.isMultiple =>
+          case RedmineConstantValue.FieldFormat.ENUMERATION if customFieldDefinition.isMultiple =>
             Some(toMultipleListCustomField(customField))
           case RedmineConstantValue.FieldFormat.VERSION =>
             Some(version(customField))

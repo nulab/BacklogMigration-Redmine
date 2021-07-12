@@ -9,29 +9,21 @@ import com.nulabinc.backlog.migration.common.conf.{
   MappingDirectory
 }
 import com.nulabinc.backlog.migration.common.domain.BacklogUser
-import com.nulabinc.backlog.migration.common.modules.{
-  ServiceInjector => BacklogInjector
-}
-import com.nulabinc.backlog.migration.common.service.{
-  UserService => BacklogUserService
-}
+import com.nulabinc.backlog.migration.common.modules.{ServiceInjector => BacklogInjector}
+import com.nulabinc.backlog.migration.common.service.{UserService => BacklogUserService}
 import com.nulabinc.backlog.migration.common.utils.{IOUtil, Logging, StringUtil}
 import com.nulabinc.backlog.r2b.mapping.domain.MappingJsonProtocol._
 import com.nulabinc.backlog.r2b.mapping.domain.{Mapping, MappingsWrapper}
 import com.nulabinc.backlog.r2b.redmine.conf.RedmineApiConfiguration
-import com.nulabinc.backlog.r2b.redmine.modules.{
-  ServiceInjector => RedmineInjector
-}
-import com.nulabinc.backlog.r2b.redmine.service.{
-  UserService => RedmineUserService
-}
+import com.nulabinc.backlog.r2b.redmine.modules.{ServiceInjector => RedmineInjector}
+import com.nulabinc.backlog.r2b.redmine.service.{UserService => RedmineUserService}
 import com.osinka.i18n.Messages
 import com.taskadapter.redmineapi.bean.{User => RedmineUser}
 import spray.json.JsonParser
 
 /**
-  * @author uchida
-  */
+ * @author uchida
+ */
 class UserMappingFile(
     redmineApiConfig: RedmineApiConfiguration,
     backlogApiConfig: BacklogApiConfiguration,
@@ -43,7 +35,7 @@ class UserMappingFile(
   private[this] val backlogItems = getBacklogItems()
 
   private[this] def getRedmineItems(): Seq[MappingItem] = {
-    val injector = RedmineInjector.createInjector(redmineApiConfig)
+    val injector    = RedmineInjector.createInjector(redmineApiConfig)
     val userService = injector.getInstance(classOf[RedmineUserService])
 
     def resolve(user: RedmineUser): Option[RedmineUser] = {
@@ -78,7 +70,7 @@ class UserMappingFile(
   }
 
   private[this] def allUsers(): Seq[BacklogUser] = {
-    val injector = BacklogInjector.createInjector(backlogApiConfig)
+    val injector    = BacklogInjector.createInjector(backlogApiConfig)
     val userService = injector.getInstance(classOf[BacklogUserService])
     userService.allUsers()
   }
@@ -88,9 +80,7 @@ class UserMappingFile(
   )(mapping: Mapping) = {
     if (backlogApiConfig.url.contains(NaiSpaceDomain)) {
       val targetBacklogUser = backlogUsers
-        .find(backlogUser =>
-          backlogUser.optMailAddress.getOrElse("") == mapping.backlog
-        )
+        .find(backlogUser => backlogUser.optMailAddress.getOrElse("") == mapping.backlog)
         .getOrElse(
           throw new NoSuchElementException(s"User ${mapping.backlog} not found")
         )
@@ -103,8 +93,8 @@ class UserMappingFile(
   }
 
   def tryUnmarshal(): Seq[Mapping] = {
-    val path = File(filePath).path.toAbsolutePath
-    val json = IOUtil.input(path).getOrElse("")
+    val path    = File(filePath).path.toAbsolutePath
+    val json    = IOUtil.input(path).getOrElse("")
     val convert = convertForNAI(allUsers()) _
     JsonParser(json).convertTo[MappingsWrapper].mappings.map(convert)
   }

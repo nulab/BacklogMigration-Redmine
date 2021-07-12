@@ -14,8 +14,7 @@ import com.nulabinc.backlog.r2b.domain.mappings.{
 
 object RedmineFormatter {
 
-  implicit object StatusFormatter
-      extends Formatter[StatusMapping[RedmineStatusMappingItem]] {
+  implicit object StatusFormatter extends Formatter[StatusMapping[RedmineStatusMappingItem]] {
     def format(
         value: StatusMapping[RedmineStatusMappingItem]
     ): (String, String) =
@@ -30,8 +29,7 @@ object RedmineFormatter {
       (value.src.value, value.optDst.map(_.value).getOrElse(""))
   }
 
-  implicit object UserFormatter
-      extends Formatter[UserMapping[RedmineUserMappingItem]] {
+  implicit object UserFormatter extends Formatter[UserMapping[RedmineUserMappingItem]] {
     def format(value: UserMapping[RedmineUserMappingItem]): (String, String) =
       (value.src.displayName, value.optDst.map(_.value).getOrElse(""))
   }

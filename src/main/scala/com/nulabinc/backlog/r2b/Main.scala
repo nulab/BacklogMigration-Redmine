@@ -10,10 +10,7 @@ import com.nulabinc.backlog.migration.common.conf.{
   BacklogConfiguration,
   ExcludeOption
 }
-import com.nulabinc.backlog.migration.common.errors.{
-  MappingFileNotFound,
-  MappingValidationError
-}
+import com.nulabinc.backlog.migration.common.errors.{MappingFileNotFound, MappingValidationError}
 import com.nulabinc.backlog.migration.common.interpreters.{
   AkkaHttpDSL,
   JansiConsoleDSL,
@@ -27,10 +24,7 @@ import com.nulabinc.backlog.r2b.cli.R2BCli
 import com.nulabinc.backlog.r2b.conf._
 import com.nulabinc.backlog.r2b.messages.RedmineMessages
 import com.nulabinc.backlog.r2b.redmine.conf.RedmineApiConfiguration
-import com.nulabinc.backlog.r2b.utils.{
-  ClassVersion,
-  DisableSSLCertificateCheckUtil
-}
+import com.nulabinc.backlog.r2b.utils.{ClassVersion, DisableSSLCertificateCheckUtil}
 import com.osinka.i18n.Messages
 import monix.eval.Task
 import monix.execution.Scheduler
@@ -45,14 +39,14 @@ object R2B extends BacklogConfiguration with Logging {
   private val dbPath = Paths.get("./backlog/data.db")
 
   private final val iaahStr = ""
-  private final val iaah = IAAH(iaahStr)
+  private final val iaah    = IAAH(iaahStr)
 
   private implicit val system: ActorSystem = ActorSystem("main")
   private implicit val exc: Scheduler =
     monix.execution.Scheduler.Implicits.global
-  private implicit val storageDSL = LocalStorageDSL()
-  private implicit val consoleDSL = JansiConsoleDSL()
-  private implicit val storeDSL = SQLiteStoreDSL(dbPath)
+  private implicit val storageDSL           = LocalStorageDSL()
+  private implicit val consoleDSL           = JansiConsoleDSL()
+  private implicit val storeDSL             = SQLiteStoreDSL(dbPath)
   private implicit val httpDSL: AkkaHttpDSL = new AkkaHttpDSL()
 
   def main(args: Array[String]): Unit = {
@@ -81,7 +75,7 @@ object R2B extends BacklogConfiguration with Logging {
     try {
       val cli = new CommandLineInterface(args.toIndexedSeq)
       val asyncResult = for {
-        _ <- checkRelease()
+        _      <- checkRelease()
         result <- execute(cli)
         _ <- result match {
           case Right(_) =>
@@ -156,7 +150,7 @@ object R2B extends BacklogConfiguration with Logging {
   private def getConfiguration(
       cli: CommandLineInterface
   ): Task[AppConfiguration] = {
-    val keys = cli.execute.projectKey().split(":")
+    val keys    = cli.execute.projectKey().split(":")
     val redmine = keys(0)
     val backlog =
       if (keys.length == 2) keys(1)
@@ -223,8 +217,7 @@ object R2B extends BacklogConfiguration with Logging {
 
   private def checkRelease(): Task[Unit] =
     GitHubReleaseCheckService.check[Task](
-      path =
-        "https://api.github.com/repos/nulab/BacklogMigration-Redmine/releases",
+      path = "https://api.github.com/repos/nulab/BacklogMigration-Redmine/releases",
       currentVersion = versionName
     )
 }

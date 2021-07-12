@@ -21,16 +21,15 @@ object RedmineMappingEncoder {
     (mapping: StatusMapping[RedmineStatusMappingItem]) =>
       Seq(mapping.src.value, mapping.optDst.map(_.value).getOrElse(""))
 
-  implicit val priorityEncoder
-      : PriorityMappingEncoder[RedminePriorityMappingItem] =
+  implicit val priorityEncoder: PriorityMappingEncoder[RedminePriorityMappingItem] =
     (mapping: PriorityMapping[RedminePriorityMappingItem]) =>
       Seq(mapping.src.value, mapping.optDst.map(_.value).getOrElse(""))
 
   implicit val userEncoder: UserMappingEncoder[RedmineUserMappingItem] =
     (mapping: UserMapping[RedmineUserMappingItem]) =>
       Seq(
-        mapping.src.name, // 0
-        mapping.src.displayName, // 1
+        mapping.src.name,                         // 0
+        mapping.src.displayName,                  // 1
         mapping.optDst.map(_.value).getOrElse("") // 2
       )
 }

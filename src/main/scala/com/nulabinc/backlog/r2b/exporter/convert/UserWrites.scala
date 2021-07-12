@@ -13,8 +13,8 @@ import com.osinka.i18n.Messages
 import com.taskadapter.redmineapi.bean.User
 
 /**
-  * @author uchida
-  */
+ * @author uchida
+ */
 private[exporter] class UserWrites @Inject() (
     propertyValue: PropertyValue,
     mappingContainer: MappingContainer

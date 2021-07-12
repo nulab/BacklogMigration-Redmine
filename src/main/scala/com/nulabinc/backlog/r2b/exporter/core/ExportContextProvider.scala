@@ -9,11 +9,7 @@ import com.nulabinc.backlog.r2b.exporter.convert._
 import com.nulabinc.backlog.r2b.mapping.core.MappingContainer
 import com.nulabinc.backlog.r2b.redmine.conf.RedmineApiConfiguration
 import com.nulabinc.backlog.r2b.redmine.domain.{PropertyValue, RedmineProjectId}
-import com.nulabinc.backlog.r2b.redmine.service.{
-  IssueService,
-  ProjectService,
-  WikiService
-}
+import com.nulabinc.backlog.r2b.redmine.service.{IssueService, ProjectService, WikiService}
 
 class ExportContextProvider @Inject() (
     apiConfig: RedmineApiConfiguration,

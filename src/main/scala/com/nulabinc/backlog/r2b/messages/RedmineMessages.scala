@@ -6,8 +6,8 @@ import com.osinka.i18n.Messages
 object RedmineMessages extends Logging {
 
   val priorityMappingItemName: String = Messages("common.priorities")
-  val statusMappingItemName: String = Messages("common.statuses")
-  val userMappingItemName: String = Messages("common.users")
+  val statusMappingItemName: String   = Messages("common.statuses")
+  val userMappingItemName: String     = Messages("common.users")
 
   val deleted: String = Messages("common.deleted")
   val confirm: String = Messages("cli.confirm")
