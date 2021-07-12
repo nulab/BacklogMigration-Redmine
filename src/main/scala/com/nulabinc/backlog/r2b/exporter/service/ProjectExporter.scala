@@ -55,7 +55,9 @@ private[exporter] class ProjectExporter @Inject() (
     val exportContext = exportContextProvider.get()
     val system        = ActorSystem.apply("main-actor-system")
     val contentActor =
-      system.actorOf(Props(new ContentActor(exportContext, backlogTextFormattingRule)))
+      system.actorOf(
+        Props(new ContentActor(exportContext, backlogTextFormattingRule))
+      )
     contentActor ! ContentActor.Do
 
     Await.result(system.whenTerminated, Duration.Inf)
@@ -77,7 +79,9 @@ private[exporter] class ProjectExporter @Inject() (
     //group
     IOUtil.output(
       backlogPaths.groupsJson,
-      BacklogGroupsWrapper(Convert.toBacklog(allMemberships)(groupsWrites)).toJson.prettyPrint
+      BacklogGroupsWrapper(
+        Convert.toBacklog(allMemberships)(groupsWrites)
+      ).toJson.prettyPrint
     )
 
     //memberships
@@ -95,7 +99,11 @@ private[exporter] class ProjectExporter @Inject() (
       BacklogProjectUsersWrapper(allProjectUser.toSeq).toJson.prettyPrint
     )
     ConsoleOut.boldln(
-      Messages("message.executed", Messages("common.project_user"), Messages("message.exported")),
+      Messages(
+        "message.executed",
+        Messages("common.project_user"),
+        Messages("message.exported")
+      ),
       1
     )
 
@@ -103,10 +111,16 @@ private[exporter] class ProjectExporter @Inject() (
     val customFieldDefinitions = customFieldService.allCustomFieldDefinitions()
     IOUtil.output(
       backlogPaths.customFieldSettingsJson,
-      BacklogCustomFieldSettings(Convert.toBacklog(customFieldDefinitions)).toJson.prettyPrint
+      BacklogCustomFieldSettings(
+        Convert.toBacklog(customFieldDefinitions)
+      ).toJson.prettyPrint
     )
     ConsoleOut.boldln(
-      Messages("message.executed", Messages("common.custom_field"), Messages("message.exported")),
+      Messages(
+        "message.executed",
+        Messages("common.custom_field"),
+        Messages("message.exported")
+      ),
       1
     )
 
@@ -117,7 +131,11 @@ private[exporter] class ProjectExporter @Inject() (
       BacklogVersionsWrapper(Convert.toBacklog(versions)).toJson.prettyPrint
     )
     ConsoleOut.boldln(
-      Messages("message.executed", Messages("common.version"), Messages("message.exported")),
+      Messages(
+        "message.executed",
+        Messages("common.version"),
+        Messages("message.exported")
+      ),
       1
     )
 
@@ -128,7 +146,11 @@ private[exporter] class ProjectExporter @Inject() (
       BacklogIssueTypesWrapper(Convert.toBacklog(trackers)).toJson.prettyPrint
     )
     ConsoleOut.boldln(
-      Messages("message.executed", Messages("common.trackers"), Messages("message.exported")),
+      Messages(
+        "message.executed",
+        Messages("common.trackers"),
+        Messages("message.exported")
+      ),
       1
     )
 
@@ -136,10 +158,16 @@ private[exporter] class ProjectExporter @Inject() (
     val categories = issueCategoryService.allCategories()
     IOUtil.output(
       backlogPaths.issueCategoriesJson,
-      BacklogIssueCategoriesWrapper(Convert.toBacklog(categories)).toJson.prettyPrint
+      BacklogIssueCategoriesWrapper(
+        Convert.toBacklog(categories)
+      ).toJson.prettyPrint
     )
     ConsoleOut.boldln(
-      Messages("message.executed", Messages("common.category"), Messages("message.exported")),
+      Messages(
+        "message.executed",
+        Messages("common.category"),
+        Messages("message.exported")
+      ),
       1
     )
 
@@ -153,7 +181,10 @@ private[exporter] class ProjectExporter @Inject() (
     allNews.zipWithIndex.foreach {
       case (news, index) =>
         IOUtil
-          .output(backlogPaths.wikiJson(news.getTitle), Convert.toBacklog(news).toJson.prettyPrint)
+          .output(
+            backlogPaths.wikiJson(news.getTitle),
+            Convert.toBacklog(news).toJson.prettyPrint
+          )
         console(index + 1, allNews.size)
     }
 

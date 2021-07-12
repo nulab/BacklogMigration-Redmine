@@ -12,7 +12,11 @@ import scala.jdk.CollectionConverters._
 /**
   * @author uchida
   */
-class NewsServiceImpl @Inject()(apiConfig: RedmineApiConfiguration, redmine: RedmineManager) extends NewsService with Logging {
+class NewsServiceImpl @Inject() (
+    apiConfig: RedmineApiConfiguration,
+    redmine: RedmineManager
+) extends NewsService
+    with Logging {
 
   override def allNews(): Seq[News] =
     try {

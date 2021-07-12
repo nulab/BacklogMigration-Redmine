@@ -32,7 +32,10 @@ private[exporter] class IssueWrites @Inject() (
       id = issue.getId.intValue(),
       issueKey =
         s"${issue.getProject.getName}-${issue.getId.intValue()}", // to avoid fit issue key
-      summary = BacklogIssueSummary(value = issue.getSubject, original = issue.getSubject),
+      summary = BacklogIssueSummary(
+        value = issue.getSubject,
+        original = issue.getSubject
+      ),
       optParentIssueId = parentIssueId(issue),
       description = TextileUtil.convert(issue.getDescription, backlogTextFormattingRule),
       optStartDate = Option(issue.getStartDate).map(DateUtil.dateFormat),
@@ -40,12 +43,13 @@ private[exporter] class IssueWrites @Inject() (
       optEstimatedHours = Option(issue.getEstimatedHours).map(_.floatValue()),
       optActualHours = Option(issue.getSpentHours).map(_.floatValue()),
       optIssueTypeName = Option(issue.getTracker).map(_.getName),
-      status = MappingStatusConverter.convert(mappingContainer.statuses, issue.getStatusName),
+      status = MappingStatusConverter
+        .convert(mappingContainer.statuses, issue.getStatusName),
       categoryNames = Option(issue.getCategory).map(_.getName).toSeq,
       versionNames = Seq.empty[String],
       milestoneNames = Option(issue.getTargetVersion).map(_.getName).toSeq,
-      priorityName =
-        MappingPriorityConverter.convert(mappingContainer.priority, issue.getPriorityText),
+      priorityName = MappingPriorityConverter
+        .convert(mappingContainer.priority, issue.getPriorityText),
       optAssignee = Option(issue.getAssignee).map(Convert.toBacklog(_)),
       attachments = Seq.empty[BacklogAttachment],
       sharedFiles = Seq.empty[BacklogSharedFile],

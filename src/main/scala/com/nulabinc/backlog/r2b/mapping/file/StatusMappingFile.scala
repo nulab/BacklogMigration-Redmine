@@ -36,7 +36,10 @@ class StatusMappingFile(
       StringUtil.safeEquals(status.getId.intValue(), target)
     }
 
-    def collectItems(acc: Seq[MappingItem], status: String): Seq[MappingItem] = {
+    def collectItems(
+        acc: Seq[MappingItem],
+        status: String
+    ): Seq[MappingItem] = {
       if (redmineStatuses.exists(condition(status))) acc
       else
         acc :+ MappingItem(
@@ -60,14 +63,20 @@ class StatusMappingFile(
   }
 
   private[this] object Backlog {
-    val OPEN_JA: String        = Messages("mapping.status.backlog.open")(Lang("ja"))
-    val IN_PROGRESS_JA: String = Messages("mapping.status.backlog.in_progress")(Lang("ja"))
-    val RESOLVED_JA: String    = Messages("mapping.status.backlog.resolved")(Lang("ja"))
-    val CLOSED_JA: String      = Messages("mapping.status.backlog.closed")(Lang("ja"))
-    val OPEN_EN: String        = Messages("mapping.status.backlog.open")(Lang("en"))
-    val IN_PROGRESS_EN: String = Messages("mapping.status.backlog.in_progress")(Lang("en"))
-    val RESOLVED_EN: String    = Messages("mapping.status.backlog.resolved")(Lang("en"))
-    val CLOSED_EN: String      = Messages("mapping.status.backlog.closed")(Lang("en"))
+    val OPEN_JA: String = Messages("mapping.status.backlog.open")(Lang("ja"))
+    val IN_PROGRESS_JA: String =
+      Messages("mapping.status.backlog.in_progress")(Lang("ja"))
+    val RESOLVED_JA: String =
+      Messages("mapping.status.backlog.resolved")(Lang("ja"))
+    val CLOSED_JA: String =
+      Messages("mapping.status.backlog.closed")(Lang("ja"))
+    val OPEN_EN: String = Messages("mapping.status.backlog.open")(Lang("en"))
+    val IN_PROGRESS_EN: String =
+      Messages("mapping.status.backlog.in_progress")(Lang("en"))
+    val RESOLVED_EN: String =
+      Messages("mapping.status.backlog.resolved")(Lang("en"))
+    val CLOSED_EN: String =
+      Messages("mapping.status.backlog.closed")(Lang("en"))
 
     def open(): String =
       backlogs
@@ -95,18 +104,28 @@ class StatusMappingFile(
   }
 
   private[this] object Redmine {
-    val NEW_JA: String         = Messages("mapping.status.redmine.new")(Lang("ja"))
-    val IN_PROGRESS_JA: String = Messages("mapping.status.redmine.in_progress")(Lang("ja"))
-    val RESOLVED_JA: String    = Messages("mapping.status.redmine.resolved")(Lang("ja"))
-    val FEEDBACK_JA: String    = Messages("mapping.status.redmine.feedback")(Lang("ja"))
-    val CLOSED_JA: String      = Messages("mapping.status.redmine.closed")(Lang("ja"))
-    val REJECTED_JA: String    = Messages("mapping.status.redmine.rejected")(Lang("ja"))
-    val NEW_EN: String         = Messages("mapping.status.redmine.new")(Lang("en"))
-    val IN_PROGRESS_EN: String = Messages("mapping.status.redmine.in_progress")(Lang("en"))
-    val RESOLVED_EN: String    = Messages("mapping.status.redmine.resolved")(Lang("en"))
-    val FEEDBACK_EN: String    = Messages("mapping.status.redmine.feedback")(Lang("en"))
-    val CLOSED_EN: String      = Messages("mapping.status.redmine.closed")(Lang("en"))
-    val REJECTED_EN: String    = Messages("mapping.status.redmine.rejected")(Lang("en"))
+    val NEW_JA: String = Messages("mapping.status.redmine.new")(Lang("ja"))
+    val IN_PROGRESS_JA: String =
+      Messages("mapping.status.redmine.in_progress")(Lang("ja"))
+    val RESOLVED_JA: String =
+      Messages("mapping.status.redmine.resolved")(Lang("ja"))
+    val FEEDBACK_JA: String =
+      Messages("mapping.status.redmine.feedback")(Lang("ja"))
+    val CLOSED_JA: String =
+      Messages("mapping.status.redmine.closed")(Lang("ja"))
+    val REJECTED_JA: String =
+      Messages("mapping.status.redmine.rejected")(Lang("ja"))
+    val NEW_EN: String = Messages("mapping.status.redmine.new")(Lang("en"))
+    val IN_PROGRESS_EN: String =
+      Messages("mapping.status.redmine.in_progress")(Lang("en"))
+    val RESOLVED_EN: String =
+      Messages("mapping.status.redmine.resolved")(Lang("en"))
+    val FEEDBACK_EN: String =
+      Messages("mapping.status.redmine.feedback")(Lang("en"))
+    val CLOSED_EN: String =
+      Messages("mapping.status.redmine.closed")(Lang("en"))
+    val REJECTED_EN: String =
+      Messages("mapping.status.redmine.rejected")(Lang("en"))
   }
 
   def matchItem(redmine: MappingItem): String =
@@ -114,13 +133,14 @@ class StatusMappingFile(
       case Some(backlog) => backlog
       case None =>
         redmine.name match {
-          case Redmine.NEW_JA | Redmine.NEW_EN                 => Backlog.open()
-          case Redmine.IN_PROGRESS_JA | Redmine.IN_PROGRESS_EN => Backlog.inProgress()
-          case Redmine.RESOLVED_JA | Redmine.RESOLVED_EN       => Backlog.resolved()
-          case Redmine.FEEDBACK_JA | Redmine.FEEDBACK_EN       => ""
-          case Redmine.CLOSED_JA | Redmine.CLOSED_EN           => Backlog.closed()
-          case Redmine.REJECTED_JA | Redmine.REJECTED_EN       => ""
-          case _                                               => ""
+          case Redmine.NEW_JA | Redmine.NEW_EN => Backlog.open()
+          case Redmine.IN_PROGRESS_JA | Redmine.IN_PROGRESS_EN =>
+            Backlog.inProgress()
+          case Redmine.RESOLVED_JA | Redmine.RESOLVED_EN => Backlog.resolved()
+          case Redmine.FEEDBACK_JA | Redmine.FEEDBACK_EN => ""
+          case Redmine.CLOSED_JA | Redmine.CLOSED_EN     => Backlog.closed()
+          case Redmine.REJECTED_JA | Redmine.REJECTED_EN => ""
+          case _                                         => ""
         }
     }
 
@@ -131,7 +151,11 @@ class StatusMappingFile(
   def itemName: String = Messages("common.statuses")
 
   def description: String =
-    Messages("cli.mapping.configurable", itemName, backlogs.map(_.name).mkString(","))
+    Messages(
+      "cli.mapping.configurable",
+      itemName,
+      backlogs.map(_.name).mkString(",")
+    )
 
   def isDisplayDetail: Boolean = false
 

@@ -40,10 +40,13 @@ private[collector] class WikisActor(mappingContext: MappingContext)(implicit
 
   def receive: Receive = {
     case WikisActor.Do(mappingData: MappingData) =>
-      val router = SmallestMailboxPool(akkaMailBoxPool, supervisorStrategy = strategy)
+      val router =
+        SmallestMailboxPool(akkaMailBoxPool, supervisorStrategy = strategy)
       val wikiActor =
         context.actorOf(
-          router.props(Props(new WikiActor(mappingContext.wikiService, mappingData)))
+          router.props(
+            Props(new WikiActor(mappingContext.wikiService, mappingData))
+          )
         )
 
       wikis.foreach(wiki => wikiActor ! WikiActor.Do(wiki, completion, wikis.size, console))

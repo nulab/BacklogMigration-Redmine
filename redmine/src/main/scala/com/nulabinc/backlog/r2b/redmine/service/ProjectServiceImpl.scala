@@ -9,7 +9,9 @@ import com.taskadapter.redmineapi.bean.Project
 /**
   * @author uchida
   */
-class ProjectServiceImpl @Inject()(redmine: RedmineManager) extends ProjectService with Logging {
+class ProjectServiceImpl @Inject() (redmine: RedmineManager)
+    extends ProjectService
+    with Logging {
 
   override def tryProjectOfKey(projectKey: String): Project =
     redmine.getProjectManager.getProjectByKey(projectKey)

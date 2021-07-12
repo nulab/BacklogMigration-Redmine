@@ -59,9 +59,12 @@ private[exporter] class IssuesActor(
 
   def receive: Receive = {
     case IssuesActor.Do =>
-      val router = SmallestMailboxPool(akkaMailBoxPool, supervisorStrategy = strategy)
+      val router =
+        SmallestMailboxPool(akkaMailBoxPool, supervisorStrategy = strategy)
       val issueActor = context.actorOf(
-        router.props(Props(new IssueActor(exportContext, backlogTextFormattingRule)))
+        router.props(
+          Props(new IssueActor(exportContext, backlogTextFormattingRule))
+        )
       )
 
       (0 until (allCount, limit))
@@ -83,7 +86,8 @@ private[exporter] class IssuesActor(
       "status_id"     -> "*",
       "subproject_id" -> "!*"
     )
-    val ids = exportContext.issueService.allIssues(params).map(_.getId.intValue())
+    val ids =
+      exportContext.issueService.allIssues(params).map(_.getId.intValue())
     issuesInfoProgress(((offset / limit) + 1), ((allCount / limit) + 1))
     ids
   }

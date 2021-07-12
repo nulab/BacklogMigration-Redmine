@@ -11,7 +11,9 @@ import scala.jdk.CollectionConverters._
 /**
   * @author uchida
   */
-class IssuePriorityServiceImpl @Inject()(redmine: RedmineManager) extends IssuePriorityService with Logging {
+class IssuePriorityServiceImpl @Inject() (redmine: RedmineManager)
+    extends IssuePriorityService
+    with Logging {
 
   override def allIssuePriorities(): Seq[IssuePriority] = {
     try {

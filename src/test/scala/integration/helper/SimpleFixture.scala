@@ -44,11 +44,13 @@ import scala.jdk.CollectionConverters._
  */
 trait SimpleFixture {
 
-  implicit val userLang = if (Locale.getDefault.equals(Locale.JAPAN)) Lang("ja") else Lang("en")
+  implicit val userLang =
+    if (Locale.getDefault.equals(Locale.JAPAN)) Lang("ja") else Lang("en")
 
   import com.nulabinc.backlog.r2b.codec.RedmineMappingDecoder._
 
-  private implicit val exc: Scheduler               = monix.execution.Scheduler.Implicits.global
+  private implicit val exc: Scheduler =
+    monix.execution.Scheduler.Implicits.global
   private implicit val storageDSL: StorageDSL[Task] = LocalStorageDSL()
   private implicit val consoleDSL: ConsoleDSL[Task] = JansiConsoleDSL()
 
@@ -61,20 +63,26 @@ trait SimpleFixture {
     optAppConfiguration match {
       case Some(appConfiguration) =>
         RedmineManagerFactory
-          .createWithApiKey(appConfiguration.redmineConfig.url, appConfiguration.redmineConfig.key)
+          .createWithApiKey(
+            appConfiguration.redmineConfig.url,
+            appConfiguration.redmineConfig.key
+          )
       case _ => throw new RuntimeException("App configuration is missing")
     }
 
   def backlog: BacklogClient =
     optAppConfiguration match {
-      case Some(appConfiguration) => getBacklogClient(appConfiguration.backlogConfig)
-      case _                      => throw new RuntimeException("App configuration is missing")
+      case Some(appConfiguration) =>
+        getBacklogClient(appConfiguration.backlogConfig)
+      case _ => throw new RuntimeException("App configuration is missing")
     }
 
   def redmineProject: Project =
     optAppConfiguration match {
       case Some(appConfiguration) =>
-        redmine.getProjectManager.getProjectByKey(appConfiguration.redmineConfig.projectKey)
+        redmine.getProjectManager.getProjectByKey(
+          appConfiguration.redmineConfig.projectKey
+        )
       case _ => throw new RuntimeException()
     }
 
@@ -84,9 +92,13 @@ trait SimpleFixture {
         path = MappingDirectory.default.userMappingFilePath
       )
       .runSyncUnsafe()
-      .getOrElse(throw new RuntimeException("cannot convert status. target: " + target))
+      .getOrElse(
+        throw new RuntimeException("cannot convert status. target: " + target)
+      )
       .find(_.src.name == target)
-      .getOrElse(throw new RuntimeException("cannot resolve status. target: " + target))
+      .getOrElse(
+        throw new RuntimeException("cannot resolve status. target: " + target)
+      )
       .optDst
       .map(_.value)
       .getOrElse("")
@@ -98,9 +110,13 @@ trait SimpleFixture {
         path = MappingDirectory.default.statusMappingFilePath
       )
       .runSyncUnsafe()
-      .getOrElse(throw new RuntimeException("cannot convert status. target: " + target))
+      .getOrElse(
+        throw new RuntimeException("cannot convert status. target: " + target)
+      )
       .find(_.src.value == target)
-      .getOrElse(throw new RuntimeException("cannot resolve status. target: " + target))
+      .getOrElse(
+        throw new RuntimeException("cannot resolve status. target: " + target)
+      )
       .optDst
       .map(_.value)
       .getOrElse("")
@@ -111,9 +127,13 @@ trait SimpleFixture {
         path = MappingDirectory.default.priorityMappingFilePath
       )
       .runSyncUnsafe()
-      .getOrElse(throw new RuntimeException("cannot convert priority. target: " + target))
+      .getOrElse(
+        throw new RuntimeException("cannot convert priority. target: " + target)
+      )
       .find(_.src.value == target)
-      .getOrElse(throw new RuntimeException("cannot resolve priority. target: " + target))
+      .getOrElse(
+        throw new RuntimeException("cannot resolve priority. target: " + target)
+      )
       .optDst
       .map(_.value)
       .getOrElse("")
@@ -137,12 +157,16 @@ trait SimpleFixture {
       val keys: Array[String] = projectKey.split(":")
       val redmine: String     = keys(0)
       val backlog: String =
-        if (keys.length == 2) keys(1) else keys(0).toUpperCase.replaceAll("-", "_")
+        if (keys.length == 2) keys(1)
+        else keys(0).toUpperCase.replaceAll("-", "_")
 
       Some(
         AppConfiguration(
-          redmineConfig =
-            RedmineApiConfiguration(url = redmineUrl, key = redmineKey, projectKey = redmine),
+          redmineConfig = RedmineApiConfiguration(
+            url = redmineUrl,
+            key = redmineKey,
+            projectKey = redmine
+          ),
           backlogConfig = new BacklogApiConfiguration(
             url = backlogUrl,
             key = backlogKey,
@@ -157,11 +181,15 @@ trait SimpleFixture {
     } else None
   }
 
-  private[this] def getBacklogClient(appConfiguration: BacklogApiConfiguration): BacklogClient = {
-    val backlogPackageConfigure: BacklogPackageConfigure = new BacklogPackageConfigure(
-      appConfiguration.url
-    )
-    val configure: BacklogConfigure = backlogPackageConfigure.apiKey(appConfiguration.key)
+  private[this] def getBacklogClient(
+      appConfiguration: BacklogApiConfiguration
+  ): BacklogClient = {
+    val backlogPackageConfigure: BacklogPackageConfigure =
+      new BacklogPackageConfigure(
+        appConfiguration.url
+      )
+    val configure: BacklogConfigure =
+      backlogPackageConfigure.apiKey(appConfiguration.key)
     new BacklogClientFactory(configure).newClient()
   }
 

@@ -12,15 +12,19 @@ import monix.execution.Scheduler
 /**
  * @author uchida
  */
-private[collector] class ContentActor(exclude: ExcludeOption, mappingContext: MappingContext)(
-    implicit
+private[collector] class ContentActor(
+    exclude: ExcludeOption,
+    mappingContext: MappingContext
+)(implicit
     s: Scheduler,
     consoleDSL: ConsoleDSL[Task]
 ) extends Actor
     with Logging {
 
-  private[this] val wikisActor  = context.actorOf(Props(new WikisActor(mappingContext)))
-  private[this] val issuesActor = context.actorOf(Props(new IssuesActor(mappingContext)))
+  private[this] val wikisActor =
+    context.actorOf(Props(new WikisActor(mappingContext)))
+  private[this] val issuesActor =
+    context.actorOf(Props(new IssuesActor(mappingContext)))
 
   def receive: Receive = {
     case ContentActor.Do(mappingData: MappingData) =>

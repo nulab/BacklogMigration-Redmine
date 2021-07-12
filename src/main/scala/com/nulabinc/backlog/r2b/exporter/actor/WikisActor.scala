@@ -41,8 +41,10 @@ private[exporter] class WikisActor(exportContext: ExportContext)(implicit
 
   def receive: Receive = {
     case WikisActor.Do =>
-      val router    = SmallestMailboxPool(akkaMailBoxPool, supervisorStrategy = strategy)
-      val wikiActor = context.actorOf(router.props(Props(new WikiActor(exportContext))))
+      val router =
+        SmallestMailboxPool(akkaMailBoxPool, supervisorStrategy = strategy)
+      val wikiActor =
+        context.actorOf(router.props(Props(new WikiActor(exportContext))))
       wikis.foreach(wiki => wikiActor ! WikiActor.Do(wiki, completion, wikis.size, console))
       completion.await
       sender() ! WikisActor.Done

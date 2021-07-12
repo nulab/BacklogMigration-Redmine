@@ -42,7 +42,9 @@ private[collector] class IssueActor(
           allCount: Int,
           console: ((Int, Int) => Unit)
         ) =>
-      logger.debug(s"[START ISSUE]${issueId} thread numbers:${java.lang.Thread.activeCount()}")
+      logger.debug(
+        s"[START ISSUE]${issueId} thread numbers:${java.lang.Thread.activeCount()}"
+      )
       val issue = issueService.issueOfId(issueId, Include.journals)
       parse(issue)
       mappingData.users ++= users.flatten

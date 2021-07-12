@@ -25,7 +25,8 @@ lazy val commonSettings = Seq(
 
 lazy val common = (project in file("common")).settings(commonSettings: _*)
 
-lazy val redmine = (project in file("redmine")).settings(commonSettings: _*).dependsOn(common)
+lazy val redmine =
+  (project in file("redmine")).settings(commonSettings: _*).dependsOn(common)
 
 lazy val root = (project in file("."))
   .settings(commonSettings: _*)
@@ -39,7 +40,11 @@ lazy val root = (project in file("."))
     },
     Test / testOptions ++= Seq(
       Tests.Argument(TestFrameworks.ScalaTest, "-u", "target/test-reports"),
-      Tests.Argument(TestFrameworks.ScalaTest, "-f", "target/test-reports/output.txt")
+      Tests.Argument(
+        TestFrameworks.ScalaTest,
+        "-f",
+        "target/test-reports/output.txt"
+      )
     ),
     assembly / test := {}
   )

@@ -34,7 +34,8 @@ private[collector] class MappingCollector @Inject() (
   ): Unit = {
     val mappingContext = mappingContextProvider.get()
     val system         = ActorSystem.apply("main-actor-system")
-    val contentActor   = system.actorOf(Props(new ContentActor(exclude, mappingContext)))
+    val contentActor =
+      system.actorOf(Props(new ContentActor(exclude, mappingContext)))
     contentActor ! ContentActor.Do(mappingData)
 
     Await.result(system.whenTerminated, Duration.Inf)
@@ -56,7 +57,10 @@ private[collector] class MappingCollector @Inject() (
     }
   }
 
-  private[this] def parse(membership: Membership, mappingData: MappingData): Unit = {
+  private[this] def parse(
+      membership: Membership,
+      mappingData: MappingData
+  ): Unit = {
     for { user <- Option(membership.getUser) } yield {
       mappingData.users += user
     }
@@ -65,7 +69,11 @@ private[collector] class MappingCollector @Inject() (
     }
   }
 
-  private[this] def parse(group: Group, user: User, mappingData: MappingData): Unit = {
+  private[this] def parse(
+      group: Group,
+      user: User,
+      mappingData: MappingData
+  ): Unit = {
     user.getGroups.asScala.foreach(userGroup =>
       if (group.getId == userGroup.getId) mappingData.users += user
     )

@@ -14,7 +14,9 @@ import com.nulabinc.backlog.r2b.domain.mappings.RedmineUserMappingItem
 private[exporter] class MappingUserWrites @Inject() ()
     extends Writes[ValidatedUserMapping[RedmineUserMappingItem], BacklogUser] {
 
-  override def writes(mapping: ValidatedUserMapping[RedmineUserMappingItem]): BacklogUser =
+  override def writes(
+      mapping: ValidatedUserMapping[RedmineUserMappingItem]
+  ): BacklogUser =
     BacklogUser(
       optId = None,
       optUserId = Some(mapping.dst.value),

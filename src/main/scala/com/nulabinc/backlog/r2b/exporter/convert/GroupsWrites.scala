@@ -23,10 +23,16 @@ private[exporter] class GroupsWrites @Inject() (implicit
   }
 
   private[this] def toBacklog(group: Group)(users: Seq[User]): BacklogGroup = {
-    BacklogGroup(name = group.getName, members = toBacklog(group.getName, users))
+    BacklogGroup(
+      name = group.getName,
+      members = toBacklog(group.getName, users)
+    )
   }
 
-  private[this] def toBacklog(name: String, users: Seq[User]): Seq[BacklogUser] = {
+  private[this] def toBacklog(
+      name: String,
+      users: Seq[User]
+  ): Seq[BacklogUser] = {
     users.filter(user => condition(name, user)).map(Convert.toBacklog(_))
   }
 

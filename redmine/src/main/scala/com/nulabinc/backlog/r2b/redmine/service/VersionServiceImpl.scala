@@ -12,7 +12,11 @@ import scala.jdk.CollectionConverters._
 /**
   * @author uchida
   */
-class VersionServiceImpl @Inject()(projectId: RedmineProjectId, redmine: RedmineManager) extends VersionService with Logging {
+class VersionServiceImpl @Inject() (
+    projectId: RedmineProjectId,
+    redmine: RedmineManager
+) extends VersionService
+    with Logging {
 
   override def allVersions(): Seq[Version] =
     try {

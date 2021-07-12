@@ -57,9 +57,14 @@ private[collector] class IssuesActor(mappingContext: MappingContext)(implicit
 
   def receive: Receive = {
     case IssuesActor.Do(mappingData: MappingData, allUsers: Seq[User]) =>
-      val router = SmallestMailboxPool(akkaMailBoxPool, supervisorStrategy = strategy)
+      val router =
+        SmallestMailboxPool(akkaMailBoxPool, supervisorStrategy = strategy)
       val issueActor = context.actorOf(
-        router.props(Props(new IssueActor(mappingContext.issueService, mappingData, allUsers)))
+        router.props(
+          Props(
+            new IssueActor(mappingContext.issueService, mappingData, allUsers)
+          )
+        )
       )
 
       (0 until (allCount, limit))
@@ -82,7 +87,8 @@ private[collector] class IssuesActor(mappingContext: MappingContext)(implicit
         "status_id"     -> "*",
         "subproject_id" -> "!*"
       )
-    val ids = mappingContext.issueService.allIssues(params).map(_.getId.intValue())
+    val ids =
+      mappingContext.issueService.allIssues(params).map(_.getId.intValue())
     issuesInfoProgress(((offset / limit) + 1), ((allCount / limit) + 1))
     ids
   }

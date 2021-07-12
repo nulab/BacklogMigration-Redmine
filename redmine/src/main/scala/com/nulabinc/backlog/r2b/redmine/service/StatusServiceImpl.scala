@@ -11,7 +11,9 @@ import scala.jdk.CollectionConverters._
 /**
   * @author uchida
   */
-class StatusServiceImpl @Inject()(redmine: RedmineManager) extends StatusService with Logging {
+class StatusServiceImpl @Inject() (redmine: RedmineManager)
+    extends StatusService
+    with Logging {
 
   override def allStatuses(): Seq[IssueStatus] = {
     try {

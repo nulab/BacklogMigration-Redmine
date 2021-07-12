@@ -12,11 +12,18 @@ import scala.jdk.CollectionConverters._
 /**
   * @author uchida
   */
-class MembershipServiceImpl @Inject()(apiConfig: RedmineApiConfiguration, redmine: RedmineManager) extends MembershipService with Logging {
+class MembershipServiceImpl @Inject() (
+    apiConfig: RedmineApiConfiguration,
+    redmine: RedmineManager
+) extends MembershipService
+    with Logging {
 
   override def allMemberships(): Seq[Membership] =
     try {
-      redmine.getMembershipManager.getMemberships(apiConfig.projectKey).asScala.toSeq
+      redmine.getMembershipManager
+        .getMemberships(apiConfig.projectKey)
+        .asScala
+        .toSeq
     } catch {
       case e: Throwable =>
         logger.warn(e.getMessage, e)

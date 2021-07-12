@@ -27,15 +27,18 @@ private[exporter] class UserWrites @Inject() (
       case _ =>
         propertyValue.optUserOfId(user.getId) match {
           case Some(user) => toBacklog(user)
-          case None       => toBacklog(Option(user.getFirstName).getOrElse(Messages("common.anonymous")))
+          case None =>
+            toBacklog(
+              Option(user.getFirstName).getOrElse(Messages("common.anonymous"))
+            )
         }
     }
 
   private def toBacklog(user: User): BacklogUser =
     BacklogUser(
       optId = Option(user.getId.intValue()),
-      optUserId =
-        Option(user.getLogin).map(MappingUserConverter.convert(mappingContainer.user, _)),
+      optUserId = Option(user.getLogin)
+        .map(MappingUserConverter.convert(mappingContainer.user, _)),
       optPassword = Option(user.getPassword),
       name = user.getFullName,
       optMailAddress = Option(user.getMail),

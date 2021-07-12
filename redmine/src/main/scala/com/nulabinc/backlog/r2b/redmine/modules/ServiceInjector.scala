@@ -13,8 +13,11 @@ object ServiceInjector {
   def createInjector(apiConfig: RedmineApiConfiguration): Injector = {
     Guice.createInjector(new AbstractModule() {
       override def configure(): Unit = {
-        val transportConfig = RedmineManagerFactory.createShortTermConfig(RedmineManagerFactory.createInsecureConnectionManager())
-        val redmine         = RedmineManagerFactory.createWithApiKey(apiConfig.url, apiConfig.key, transportConfig)
+        val transportConfig = RedmineManagerFactory.createShortTermConfig(
+          RedmineManagerFactory.createInsecureConnectionManager()
+        )
+        val redmine = RedmineManagerFactory
+          .createWithApiKey(apiConfig.url, apiConfig.key, transportConfig)
 
         bind(classOf[RedmineManager]).toInstance(redmine)
         bind(classOf[PriorityService]).to(classOf[PriorityServiceImpl])

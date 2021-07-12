@@ -4,7 +4,10 @@ import javax.inject.Inject
 
 import com.nulabinc.backlog.migration.common.utils.{Logging, StringUtil}
 import com.nulabinc.backlog.r2b.redmine.conf.RedmineApiConfiguration
-import com.nulabinc.backlog.r2b.redmine.domain.{RedmineCustomFieldDefinition, RedmineTracker}
+import com.nulabinc.backlog.r2b.redmine.domain.{
+  RedmineCustomFieldDefinition,
+  RedmineTracker
+}
 import com.taskadapter.redmineapi.bean.{CustomFieldDefinition, Tracker}
 import com.taskadapter.redmineapi.{RedmineFormatException, RedmineManager}
 import spray.json.DefaultJsonProtocol._
@@ -15,14 +18,19 @@ import scala.jdk.CollectionConverters._
 /**
   * @author uchida
   */
-class CustomFieldServiceImpl @Inject()(apiConfig: RedmineApiConfiguration, redmine: RedmineManager) extends CustomFieldService with Logging {
+class CustomFieldServiceImpl @Inject() (
+    apiConfig: RedmineApiConfiguration,
+    redmine: RedmineManager
+) extends CustomFieldService
+    with Logging {
 
   override def allCustomFieldDefinitions(): Seq[RedmineCustomFieldDefinition] =
     try {
-      redmine.getCustomFieldManager.getCustomFieldDefinitions.asScala.toSeq.map(toCustomFields)
+      redmine.getCustomFieldManager.getCustomFieldDefinitions.asScala.toSeq
+        .map(toCustomFields)
     } catch {
       case _: RedmineFormatException =>
-        val url  = s"${apiConfig.url}/custom_fields.json?key=${apiConfig.key}"
+        val url = s"${apiConfig.url}/custom_fields.json?key=${apiConfig.key}"
         val json = scala.io.Source.fromURL(url, "UTF-8").mkString
         toCustomFields(json)
       case e: Throwable =>
@@ -30,46 +38,76 @@ class CustomFieldServiceImpl @Inject()(apiConfig: RedmineApiConfiguration, redmi
         Seq.empty[RedmineCustomFieldDefinition]
     }
 
-  private[this] def toCustomFields(customFieldDefinition: CustomFieldDefinition): RedmineCustomFieldDefinition =
-    RedmineCustomFieldDefinition(id = customFieldDefinition.getId,
-                                 name = customFieldDefinition.getName,
-                                 customizedType = customFieldDefinition.getCustomizedType,
-                                 fieldFormat = customFieldDefinition.getFieldFormat,
-                                 optRegexp = Option(customFieldDefinition.getRegexp),
-                                 optMinLength = Option(customFieldDefinition.getMinLength).map(_.intValue()),
-                                 optMaxLength = Option(customFieldDefinition.getMaxLength).map(_.intValue()),
-                                 isRequired = customFieldDefinition.isRequired,
-                                 isMultiple = customFieldDefinition.isMultiple,
-                                 optDefaultValue = StringUtil.notEmpty(customFieldDefinition.getDefaultValue),
-                                 trackers = customFieldDefinition.getTrackers.asScala.toSeq.map(toTracker),
-                                 possibleValues = Option(customFieldDefinition.getPossibleValues.asScala.toSeq).getOrElse(Seq.empty[String]))
+  private[this] def toCustomFields(
+      customFieldDefinition: CustomFieldDefinition
+  ): RedmineCustomFieldDefinition =
+    RedmineCustomFieldDefinition(
+      id = customFieldDefinition.getId,
+      name = customFieldDefinition.getName,
+      customizedType = customFieldDefinition.getCustomizedType,
+      fieldFormat = customFieldDefinition.getFieldFormat,
+      optRegexp = Option(customFieldDefinition.getRegexp),
+      optMinLength =
+        Option(customFieldDefinition.getMinLength).map(_.intValue()),
+      optMaxLength =
+        Option(customFieldDefinition.getMaxLength).map(_.intValue()),
+      isRequired = customFieldDefinition.isRequired,
+      isMultiple = customFieldDefinition.isMultiple,
+      optDefaultValue =
+        StringUtil.notEmpty(customFieldDefinition.getDefaultValue),
+      trackers = customFieldDefinition.getTrackers.asScala.toSeq.map(toTracker),
+      possibleValues = Option(
+        customFieldDefinition.getPossibleValues.asScala.toSeq
+      ).getOrElse(Seq.empty[String])
+    )
 
   private[this] def toTracker(tracker: Tracker): RedmineTracker =
     RedmineTracker(tracker.getId, tracker.getName)
 
-  private[this] def toCustomFields(json: String): Seq[RedmineCustomFieldDefinition] = {
+  private[this] def toCustomFields(
+      json: String
+  ): Seq[RedmineCustomFieldDefinition] = {
     JsonParser(json).asJsObject.getFields("custom_fields") match {
       case Seq(JsArray(customFields)) => customFields.map(toCustomField)
       case _                          => Seq.empty[RedmineCustomFieldDefinition]
     }
   }
 
-  private[this] def toCustomField(jsValue: JsValue): RedmineCustomFieldDefinition = {
-    RedmineCustomFieldDefinition(id = jsValue.asJsObject.fields.apply("id").convertTo[Int],
-                                 name = jsValue.asJsObject.fields.apply("name").convertTo[String],
-                                 customizedType = jsValue.asJsObject.fields.apply("customized_type").convertTo[String],
-                                 fieldFormat = jsValue.asJsObject.fields.apply("field_format").convertTo[String],
-                                 optRegexp = jsValue.asJsObject.fields.get("regexp").map(_.convertTo[String]),
-                                 optMinLength = jsValue.asJsObject.fields.get("min_length").map(_.convertTo[Int]),
-                                 optMaxLength = jsValue.asJsObject.fields.get("max_length").map(_.convertTo[Int]),
-                                 isRequired = jsValue.asJsObject.fields.get("is_required").map(_.convertTo[Boolean]).getOrElse(false),
-                                 isMultiple = jsValue.asJsObject.fields.get("multiple").map(_.convertTo[Boolean]).getOrElse(false),
-                                 optDefaultValue = jsValue.asJsObject.fields.get("default_value").map(_.convertTo[String]),
-                                 trackers = toTrackers(jsValue.asJsObject.fields.get("trackers")),
-                                 possibleValues = toPossibleValues(jsValue.asJsObject.fields.get("possible_values")))
+  private[this] def toCustomField(
+      jsValue: JsValue
+  ): RedmineCustomFieldDefinition = {
+    RedmineCustomFieldDefinition(
+      id = jsValue.asJsObject.fields.apply("id").convertTo[Int],
+      name = jsValue.asJsObject.fields.apply("name").convertTo[String],
+      customizedType =
+        jsValue.asJsObject.fields.apply("customized_type").convertTo[String],
+      fieldFormat =
+        jsValue.asJsObject.fields.apply("field_format").convertTo[String],
+      optRegexp =
+        jsValue.asJsObject.fields.get("regexp").map(_.convertTo[String]),
+      optMinLength =
+        jsValue.asJsObject.fields.get("min_length").map(_.convertTo[Int]),
+      optMaxLength =
+        jsValue.asJsObject.fields.get("max_length").map(_.convertTo[Int]),
+      isRequired = jsValue.asJsObject.fields
+        .get("is_required")
+        .map(_.convertTo[Boolean])
+        .getOrElse(false),
+      isMultiple = jsValue.asJsObject.fields
+        .get("multiple")
+        .map(_.convertTo[Boolean])
+        .getOrElse(false),
+      optDefaultValue =
+        jsValue.asJsObject.fields.get("default_value").map(_.convertTo[String]),
+      trackers = toTrackers(jsValue.asJsObject.fields.get("trackers")),
+      possibleValues =
+        toPossibleValues(jsValue.asJsObject.fields.get("possible_values"))
+    )
   }
 
-  private[this] def toPossibleValues(optJsValue: Option[JsValue]): Seq[String] = {
+  private[this] def toPossibleValues(
+      optJsValue: Option[JsValue]
+  ): Seq[String] = {
     optJsValue match {
       case Some(jsValue) =>
         jsValue match {
@@ -84,7 +122,9 @@ class CustomFieldServiceImpl @Inject()(apiConfig: RedmineApiConfiguration, redmi
     jsValue.asJsObject.fields.apply("value").convertTo[String]
   }
 
-  private[this] def toTrackers(optJsValue: Option[JsValue]): Seq[RedmineTracker] = {
+  private[this] def toTrackers(
+      optJsValue: Option[JsValue]
+  ): Seq[RedmineTracker] = {
     optJsValue match {
       case Some(jsValue) =>
         jsValue.asJsObject.fields.get("tracker") match {
@@ -96,7 +136,10 @@ class CustomFieldServiceImpl @Inject()(apiConfig: RedmineApiConfiguration, redmi
   }
 
   private[this] def toTracker(jsValue: JsValue): RedmineTracker = {
-    RedmineTracker(id = jsValue.asJsObject.fields.apply("id").convertTo[Int], name = jsValue.asJsObject.fields.apply("name").convertTo[String])
+    RedmineTracker(
+      id = jsValue.asJsObject.fields.apply("id").convertTo[Int],
+      name = jsValue.asJsObject.fields.apply("name").convertTo[String]
+    )
   }
 
 }

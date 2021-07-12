@@ -12,7 +12,9 @@ import com.taskadapter.redmineapi.bean.IssueCategory
 private[exporter] class IssueCategoriesWrites @Inject() ()
     extends Writes[Seq[IssueCategory], Seq[BacklogIssueCategory]] {
 
-  override def writes(categories: Seq[IssueCategory]): Seq[BacklogIssueCategory] = {
+  override def writes(
+      categories: Seq[IssueCategory]
+  ): Seq[BacklogIssueCategory] = {
     categories.map(toBacklog)
   }
 

@@ -11,7 +11,9 @@ import scala.jdk.CollectionConverters._
 /**
   * @author uchida
   */
-class TrackerServiceImpl @Inject()(redmine: RedmineManager) extends TrackerService with Logging {
+class TrackerServiceImpl @Inject() (redmine: RedmineManager)
+    extends TrackerService
+    with Logging {
 
   override def allTrackers(): Seq[Tracker] = {
     try {

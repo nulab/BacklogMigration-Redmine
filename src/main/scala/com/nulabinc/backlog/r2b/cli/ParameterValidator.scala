@@ -23,7 +23,9 @@ class ParameterValidator(config: AppConfiguration) extends Logging {
   def validate(): Seq[String] = {
     val validateRedmine = validateConfigRedmine()
     val validateBacklog = validateConfigBacklog()
-    ConsoleOut.println(Messages("cli.param.get.project", Messages("common.src")))
+    ConsoleOut.println(
+      Messages("cli.param.get.project", Messages("common.src"))
+    )
     val optRedmineProject = optProject()
 
     val messages = Seq(
@@ -35,26 +37,37 @@ class ParameterValidator(config: AppConfiguration) extends Logging {
     if (config.importOnly) {
       messages
     } else {
-      messages concat Seq(validateRedmine, validateProject(optRedmineProject)).flatten
+      messages concat Seq(
+        validateRedmine,
+        validateProject(optRedmineProject)
+      ).flatten
     }
   }
 
-  private[this] def validateProject(optRedmineProject: Option[Project]): Option[String] = {
+  private[this] def validateProject(
+      optRedmineProject: Option[Project]
+  ): Option[String] = {
     optRedmineProject match {
       case None =>
-        Some(s"- ${Messages("cli.param.error.disable.project", config.redmineConfig.projectKey)}")
+        Some(
+          s"- ${Messages("cli.param.error.disable.project", config.redmineConfig.projectKey)}"
+        )
       case _ => None
     }
   }
 
   private[this] def validateConfigBacklog(): Option[String] = {
-    ConsoleOut.println(Messages("cli.param.check.access", Messages("common.dst")))
+    ConsoleOut.println(
+      Messages("cli.param.check.access", Messages("common.dst"))
+    )
     val messages =
       try {
         val injector     = BacklogInjector.createInjector(config.backlogConfig)
         val spaceService = injector.getInstance(classOf[SpaceService])
         spaceService.space()
-        ConsoleOut.println(Messages("cli.param.ok.access", Messages("common.dst")))
+        ConsoleOut.println(
+          Messages("cli.param.ok.access", Messages("common.dst"))
+        )
         None
       } catch {
         case unknown: BacklogAPIException if unknown.getStatusCode == 404 =>
@@ -64,12 +77,16 @@ class ParameterValidator(config: AppConfiguration) extends Logging {
           )
         case e: Throwable =>
           logger.error(e.getMessage, e)
-          Some(s"- ${Messages("cli.param.error.disable.access", Messages("common.dst"))}")
+          Some(
+            s"- ${Messages("cli.param.error.disable.access", Messages("common.dst"))}"
+          )
       }
     messages
   }
 
-  private[this] def validateAuthBacklog(resultValidateConfig: Option[String]): Option[String] = {
+  private[this] def validateAuthBacklog(
+      resultValidateConfig: Option[String]
+  ): Option[String] = {
     if (resultValidateConfig.isEmpty) {
       ConsoleOut.println(Messages("cli.param.check.admin"))
       val injector     = BacklogInjector.createInjector(config.backlogConfig)
@@ -82,12 +99,16 @@ class ParameterValidator(config: AppConfiguration) extends Logging {
   }
 
   private[this] def validateConfigRedmine(): Option[String] = {
-    ConsoleOut.println(Messages("cli.param.check.access", Messages("common.src")))
+    ConsoleOut.println(
+      Messages("cli.param.check.access", Messages("common.src"))
+    )
     try {
       val injector    = RedmineInjector.createInjector(config.redmineConfig)
       val userService = injector.getInstance(classOf[RedmineUserService])
       userService.allUsers()
-      ConsoleOut.println(Messages("cli.param.ok.access", Messages("common.src")))
+      ConsoleOut.println(
+        Messages("cli.param.ok.access", Messages("common.src"))
+      )
       None
     } catch {
       case auth: RedmineAuthenticationException =>
@@ -95,7 +116,9 @@ class ParameterValidator(config: AppConfiguration) extends Logging {
         Some(s"- ${Messages("cli.param.error.auth", Messages("common.src"))}")
       case noauth: NotAuthorizedException =>
         logger.error(noauth.getMessage, noauth)
-        Some(s"- ${Messages("cli.param.error.auth.not.auth", noauth.getMessage)}")
+        Some(
+          s"- ${Messages("cli.param.error.auth.not.auth", noauth.getMessage)}"
+        )
       case transport: RedmineTransportException =>
         logger.error(transport.getMessage, transport)
         Some(
@@ -103,7 +126,9 @@ class ParameterValidator(config: AppConfiguration) extends Logging {
         )
       case e: Throwable =>
         logger.error(e.getMessage, e)
-        Some(s"- ${Messages("cli.param.error.disable.access", Messages("common.src"))}")
+        Some(
+          s"- ${Messages("cli.param.error.disable.access", Messages("common.src"))}"
+        )
     }
   }
 

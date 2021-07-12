@@ -27,8 +27,9 @@ private[exporter] class JournalWrites @Inject() (
     BacklogComment(
       eventType = "comment",
       optIssueId = None,
-      optContent =
-        StringUtil.notEmpty(TextileUtil.convert(journal.getNotes, backlogTextFormattingRule)),
+      optContent = StringUtil.notEmpty(
+        TextileUtil.convert(journal.getNotes, backlogTextFormattingRule)
+      ),
       changeLogs = journal.getDetails.asScala.toSeq.map(Convert.toBacklog(_)),
       notifications = Seq.empty[BacklogNotification],
       optCreatedUser = Option(journal.getUser).map(Convert.toBacklog(_)),

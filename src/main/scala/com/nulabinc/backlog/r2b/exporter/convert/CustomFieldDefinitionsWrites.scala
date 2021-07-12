@@ -15,8 +15,11 @@ import com.osinka.i18n.Messages
 /**
  * @author uchida
  */
-private[exporter] class CustomFieldDefinitionsWrites @Inject() (propertyValue: PropertyValue)
-    extends Writes[Seq[RedmineCustomFieldDefinition], Seq[BacklogCustomFieldSetting]]
+private[exporter] class CustomFieldDefinitionsWrites @Inject() (
+    propertyValue: PropertyValue
+) extends Writes[Seq[RedmineCustomFieldDefinition], Seq[
+      BacklogCustomFieldSetting
+    ]]
     with Logging {
 
   override def writes(
@@ -48,7 +51,8 @@ private[exporter] class CustomFieldDefinitionsWrites @Inject() (propertyValue: P
         textProperty()
       case RedmineConstantValue.FieldFormat.INT | RedmineConstantValue.FieldFormat.FLOAT =>
         numericProperty(redmineCustomFieldDefinition)
-      case RedmineConstantValue.FieldFormat.DATE => dateProperty(redmineCustomFieldDefinition)
+      case RedmineConstantValue.FieldFormat.DATE =>
+        dateProperty(redmineCustomFieldDefinition)
       case RedmineConstantValue.FieldFormat.LIST | RedmineConstantValue.FieldFormat.USER |
           RedmineConstantValue.FieldFormat.VERSION | RedmineConstantValue.FieldFormat.BOOL |
           RedmineConstantValue.FieldFormat.ENUMERATION =>
@@ -93,9 +97,12 @@ private[exporter] class CustomFieldDefinitionsWrites @Inject() (propertyValue: P
       redmineCustomFieldDefinition: RedmineCustomFieldDefinition
   ): Seq[String] =
     redmineCustomFieldDefinition.fieldFormat match {
-      case RedmineConstantValue.FieldFormat.VERSION => propertyValue.versions.map(_.getName)
+      case RedmineConstantValue.FieldFormat.VERSION =>
+        propertyValue.versions.map(_.getName)
       case RedmineConstantValue.FieldFormat.USER =>
-        propertyValue.memberships.filter(_.getUser != null).map(_.getUser.getFullName)
+        propertyValue.memberships
+          .filter(_.getUser != null)
+          .map(_.getUser.getFullName)
       case RedmineConstantValue.FieldFormat.BOOL => booleanPossibleValues()
       case _                                     => redmineCustomFieldDefinition.possibleValues
     }
@@ -137,28 +144,35 @@ private[exporter] class CustomFieldDefinitionsWrites @Inject() (propertyValue: P
   private[this] def toBacklogItem(name: String): BacklogItem =
     BacklogItem(optId = None, name = name)
 
-  private[this] def typeId(redmineCustomFieldDefinition: RedmineCustomFieldDefinition): Int =
+  private[this] def typeId(
+      redmineCustomFieldDefinition: RedmineCustomFieldDefinition
+  ): Int =
     redmineCustomFieldDefinition.fieldFormat match {
       case RedmineConstantValue.FieldFormat.STRING | RedmineConstantValue.FieldFormat.LINK =>
         FieldType.Text.getIntValue
       case RedmineConstantValue.FieldFormat.INT | RedmineConstantValue.FieldFormat.FLOAT =>
         FieldType.Numeric.getIntValue
       case RedmineConstantValue.FieldFormat.DATE => FieldType.Date.getIntValue
-      case RedmineConstantValue.FieldFormat.TEXT => FieldType.TextArea.getIntValue
+      case RedmineConstantValue.FieldFormat.TEXT =>
+        FieldType.TextArea.getIntValue
       case RedmineConstantValue.FieldFormat.LIST =>
-        if (redmineCustomFieldDefinition.isMultiple) FieldType.MultipleList.getIntValue
+        if (redmineCustomFieldDefinition.isMultiple)
+          FieldType.MultipleList.getIntValue
         else FieldType.SingleList.getIntValue
       case RedmineConstantValue.FieldFormat.USER | RedmineConstantValue.FieldFormat.VERSION =>
-        if (redmineCustomFieldDefinition.isMultiple) FieldType.MultipleList.getIntValue
+        if (redmineCustomFieldDefinition.isMultiple)
+          FieldType.MultipleList.getIntValue
         else FieldType.SingleList.getIntValue
-      case RedmineConstantValue.FieldFormat.BOOL        => FieldType.Radio.getIntValue
-      case RedmineConstantValue.FieldFormat.ENUMERATION => FieldType.SingleList.getIntValue
+      case RedmineConstantValue.FieldFormat.BOOL => FieldType.Radio.getIntValue
+      case RedmineConstantValue.FieldFormat.ENUMERATION =>
+        FieldType.SingleList.getIntValue
     }
 
   private[this] def multipleTypeId(
       redmineCustomFieldDefinition: RedmineCustomFieldDefinition
   ): Int = {
-    if (redmineCustomFieldDefinition.isMultiple) BacklogConstantValue.CustomField.MultipleList
+    if (redmineCustomFieldDefinition.isMultiple)
+      BacklogConstantValue.CustomField.MultipleList
     else BacklogConstantValue.CustomField.SingleList
   }
 

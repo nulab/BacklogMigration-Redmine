@@ -36,9 +36,10 @@ object RedmineMappingDecoder {
   implicit val priorityDecoder: PriorityMappingDecoder[RedminePriorityMappingItem] =
     (record: CSVRecord) =>
       new PriorityMapping[RedminePriorityMappingItem] {
-        override val src: RedminePriorityMappingItem = RedminePriorityMappingItem(
-          record.get(0)
-        )
+        override val src: RedminePriorityMappingItem =
+          RedminePriorityMappingItem(
+            record.get(0)
+          )
         override val srcDisplayValue: String =
           src.value
         override val optDst: Option[BacklogPriorityMappingItem] =

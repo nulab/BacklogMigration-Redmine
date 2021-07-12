@@ -23,7 +23,9 @@ private[exporter] case class ReducedChangeLogWithMessage(
 private[exporter] object ReducedChangeLogWithMessage {
   def createMessageOnly(message: String): ReducedChangeLogWithMessage =
     ReducedChangeLogWithMessage(None, s"$message\n")
-  def createWithChangeLog(changeLog: BacklogChangeLog): ReducedChangeLogWithMessage =
+  def createWithChangeLog(
+      changeLog: BacklogChangeLog
+  ): ReducedChangeLogWithMessage =
     ReducedChangeLogWithMessage(Some(changeLog), "")
 }
 
@@ -94,11 +96,16 @@ private[exporter] class ChangeLogReducer(
               changeLog.copy(optNewValue = ValueReducer.reduce(targetComment, changeLog))
             )
           case Left(error) =>
-            logger.warn(s"Non Fatal. Reduce change log failed. Message: ${error.getMessage}")
+            logger.warn(
+              s"Non Fatal. Reduce change log failed. Message: ${error.getMessage}"
+            )
             val oldValue = optOriginal.map(_ => RedmineMessages.deleted)
             val newValue = optNew.map(_ => RedmineMessages.deleted)
             val message =
-              RedmineMessages.changeCommentParentIssue(getValue(oldValue), getValue(newValue))
+              RedmineMessages.changeCommentParentIssue(
+                getValue(oldValue),
+                getValue(newValue)
+              )
             ReducedChangeLogWithMessage(None, s"$message\n")
         }
       case _ =>
@@ -113,7 +120,9 @@ private[exporter] class ChangeLogReducer(
         StringUtil
           .safeStringToInt(strId)
           .map(Right(_))
-          .getOrElse(Left(new RuntimeException(s"cannot parse id. Input: $strId")))
+          .getOrElse(
+            Left(new RuntimeException(s"cannot parse id. Input: $strId"))
+          )
       parentId <- exportContext.issueService.tryIssueOfId(id).map(_.getId)
       result <-
         if (parentId > 0) Right(parentId)
@@ -152,8 +161,11 @@ private[exporter] class ChangeLogReducer(
           )
           optAttachment match {
             case Some(attachment) =>
-              val dir  = exportContext.backlogPaths.issueAttachmentDirectoryPath(issueDirPath)
-              val path = exportContext.backlogPaths.issueAttachmentPath(dir, attachmentInfo.name)
+              val dir = exportContext.backlogPaths.issueAttachmentDirectoryPath(
+                issueDirPath
+              )
+              val path = exportContext.backlogPaths
+                .issueAttachmentPath(dir, attachmentInfo.name)
               IOUtil.createDirectory(dir)
 
               val url: URL = new URL(
@@ -170,7 +182,10 @@ private[exporter] class ChangeLogReducer(
   }
 
   object ValueReducer {
-    def reduce(targetComment: BacklogComment, changeLog: BacklogChangeLog): Option[String] = {
+    def reduce(
+        targetComment: BacklogComment,
+        changeLog: BacklogChangeLog
+    ): Option[String] = {
       changeLog.field match {
         case BacklogConstantValue.ChangeLog.VERSION | BacklogConstantValue.ChangeLog.MILESTONE |
             BacklogConstantValue.ChangeLog.COMPONENT | BacklogConstantValue.ChangeLog.ISSUE_TYPE =>
@@ -179,16 +194,20 @@ private[exporter] class ChangeLogReducer(
               changeLog.field match {
                 case BacklogConstantValue.ChangeLog.VERSION =>
                   val issueValue = issue.versionNames.mkString(", ")
-                  if (issueValue.trim.isEmpty) changeLog.optNewValue else Some(issueValue)
+                  if (issueValue.trim.isEmpty) changeLog.optNewValue
+                  else Some(issueValue)
                 case BacklogConstantValue.ChangeLog.MILESTONE =>
                   val issueValue = issue.milestoneNames.mkString(", ")
-                  if (issueValue.trim.isEmpty) changeLog.optNewValue else Some(issueValue)
+                  if (issueValue.trim.isEmpty) changeLog.optNewValue
+                  else Some(issueValue)
                 case BacklogConstantValue.ChangeLog.COMPONENT =>
                   val issueValue = issue.categoryNames.mkString(", ")
-                  if (issueValue.trim.isEmpty) changeLog.optNewValue else Some(issueValue)
+                  if (issueValue.trim.isEmpty) changeLog.optNewValue
+                  else Some(issueValue)
                 case BacklogConstantValue.ChangeLog.ISSUE_TYPE =>
                   val issueValue = issue.optIssueTypeName.getOrElse("")
-                  if (issueValue.trim.isEmpty) changeLog.optNewValue else Some(issueValue)
+                  if (issueValue.trim.isEmpty) changeLog.optNewValue
+                  else Some(issueValue)
                 case _ => throw new RuntimeException
               }
             case _ => changeLog.optNewValue
@@ -202,10 +221,14 @@ private[exporter] class ChangeLogReducer(
     )(field: String): Option[BacklogComment] =
       comments.reverse.find(comment => findProperty(comment)(field))
 
-    private[this] def findProperty(comment: BacklogComment)(field: String): Boolean =
+    private[this] def findProperty(
+        comment: BacklogComment
+    )(field: String): Boolean =
       comment.changeLogs.map(findProperty).exists(_(field))
 
-    private[this] def findProperty(changeLog: BacklogChangeLog)(field: String): Boolean =
+    private[this] def findProperty(
+        changeLog: BacklogChangeLog
+    )(field: String): Boolean =
       changeLog.field == field
   }
 

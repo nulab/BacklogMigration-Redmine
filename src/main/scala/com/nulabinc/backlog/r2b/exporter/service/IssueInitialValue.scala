@@ -15,7 +15,9 @@ private[exporter] class IssueInitialValue(property: String, name: String) {
   def findJournalDetails(journals: Seq[Journal]): Option[Seq[JournalDetail]] =
     journals.find(isTargetjournal).map(targetJournalDetails)
 
-  private[this] def targetJournalDetail(journal: Journal): Option[JournalDetail] =
+  private[this] def targetJournalDetail(
+      journal: Journal
+  ): Option[JournalDetail] =
     journal.getDetails.asScala.find(isTargetJournalDetail)
 
   private[this] def isTargetjournal(journal: Journal): Boolean =

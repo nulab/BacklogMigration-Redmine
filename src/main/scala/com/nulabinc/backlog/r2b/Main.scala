@@ -41,8 +41,9 @@ object R2B extends BacklogConfiguration with Logging {
   private final val iaahStr = ""
   private final val iaah    = IAAH(iaahStr)
 
-  private implicit val system: ActorSystem  = ActorSystem("main")
-  private implicit val exc: Scheduler       = monix.execution.Scheduler.Implicits.global
+  private implicit val system: ActorSystem = ActorSystem("main")
+  private implicit val exc: Scheduler =
+    monix.execution.Scheduler.Implicits.global
   private implicit val storageDSL           = LocalStorageDSL()
   private implicit val consoleDSL           = JansiConsoleDSL()
   private implicit val storeDSL             = SQLiteStoreDSL(dbPath)
@@ -50,8 +51,10 @@ object R2B extends BacklogConfiguration with Logging {
 
   def main(args: Array[String]): Unit = {
     consoleDSL
-      .println(s"""|${applicationName}
-                 |--------------------------------------------------""".stripMargin)
+      .println(
+        s"""|${applicationName}
+                 |--------------------------------------------------""".stripMargin
+      )
       .runSyncUnsafe()
     AnsiConsole.systemInstall()
     setLang()
@@ -59,7 +62,10 @@ object R2B extends BacklogConfiguration with Logging {
     if (!ClassVersion.isValid()) {
       consoleDSL
         .errorln(
-          Messages("cli.require_java8", System.getProperty("java.specification.version"))
+          Messages(
+            "cli.require_java8",
+            System.getProperty("java.specification.version")
+          )
         )
         .runSyncUnsafe()
       AnsiConsole.systemUninstall()
@@ -141,10 +147,14 @@ object R2B extends BacklogConfiguration with Logging {
       }
     } yield result
 
-  private def getConfiguration(cli: CommandLineInterface): Task[AppConfiguration] = {
+  private def getConfiguration(
+      cli: CommandLineInterface
+  ): Task[AppConfiguration] = {
     val keys    = cli.execute.projectKey().split(":")
     val redmine = keys(0)
-    val backlog = if (keys.length == 2) keys(1) else keys(0).toUpperCase.replaceAll("-", "_")
+    val backlog =
+      if (keys.length == 2) keys(1)
+      else keys(0).toUpperCase.replaceAll("-", "_")
 
     val retryCount = cli.execute.retryCount.toOption.getOrElse(20)
     val exclude = cli.execute.exclude.toOption
@@ -158,19 +168,27 @@ object R2B extends BacklogConfiguration with Logging {
 
     consoleDSL
       .println(s"""--------------------------------------------------
-     |${Messages("common.src")} ${Messages("common.url")}[${cli.execute.redmineUrl()}]
-     |${Messages("common.src")} ${Messages("common.access_key")}[${cli.execute.redmineKey()}]
+     |${Messages("common.src")} ${Messages("common.url")}[${cli.execute
+        .redmineUrl()}]
+     |${Messages("common.src")} ${Messages("common.access_key")}[${cli.execute
+        .redmineKey()}]
      |${Messages("common.src")} ${Messages("common.project_key")}[${redmine}]
-     |${Messages("common.dst")} ${Messages("common.url")}[${cli.execute.backlogUrl()}]
-     |${Messages("common.dst")} ${Messages("common.access_key")}[${cli.execute.backlogKey()}]
+     |${Messages("common.dst")} ${Messages("common.url")}[${cli.execute
+        .backlogUrl()}]
+     |${Messages("common.dst")} ${Messages("common.access_key")}[${cli.execute
+        .backlogKey()}]
      |${Messages("common.dst")} ${Messages("common.project_key")}[${backlog}]
      |${Messages("common.importOnly")}[${cli.execute.importOnly()}]
      |${Messages("common.retryCount")}[$retryCount]
      |exclude[${exclude.toString}]
-     |https.proxyHost[${Option(System.getProperty("https.proxyHost")).getOrElse("")}]
-     |https.proxyPort[${Option(System.getProperty("https.proxyPort")).getOrElse("")}]
-     |https.proxyUser[${Option(System.getProperty("https.proxyUser")).getOrElse("")}]
-     |https.proxyPassword[${Option(System.getProperty("https.proxyPassword")).getOrElse("")}]
+     |https.proxyHost[${Option(System.getProperty("https.proxyHost"))
+        .getOrElse("")}]
+     |https.proxyPort[${Option(System.getProperty("https.proxyPort"))
+        .getOrElse("")}]
+     |https.proxyUser[${Option(System.getProperty("https.proxyUser"))
+        .getOrElse("")}]
+     |https.proxyPassword[${Option(System.getProperty("https.proxyPassword"))
+        .getOrElse("")}]
      |--------------------------------------------------
      |""".stripMargin)
       .map { _ =>
@@ -213,8 +231,9 @@ class CommandLineInterface(arguments: Seq[String])
            | """.stripMargin)
   footer("\n " + Messages("cli.help"))
 
-  val help    = opt[String]("help", descr = Messages("cli.help.show_help"))
-  val version = opt[String]("version", descr = Messages("cli.help.show_version"))
+  val help = opt[String]("help", descr = Messages("cli.help.show_help"))
+  val version =
+    opt[String]("version", descr = Messages("cli.help.show_version"))
 
   val execute = new Subcommand("execute") {
     val backlogKey = opt[String](
@@ -243,13 +262,29 @@ class CommandLineInterface(arguments: Seq[String])
     )
 
     val projectKey =
-      opt[String]("projectKey", descr = Messages("cli.help.projectKey"), required = true)
+      opt[String](
+        "projectKey",
+        descr = Messages("cli.help.projectKey"),
+        required = true
+      )
     val importOnly =
-      opt[Boolean]("importOnly", descr = Messages("cli.help.importOnly"), required = true)
+      opt[Boolean](
+        "importOnly",
+        descr = Messages("cli.help.importOnly"),
+        required = true
+      )
     val exclude =
-      opt[List[String]]("exclude", descr = Messages("cli.help.exclude"), required = false)
+      opt[List[String]](
+        "exclude",
+        descr = Messages("cli.help.exclude"),
+        required = false
+      )
     val retryCount =
-      opt[Int](name = "retryCount", descr = Messages("cli.help.retryCount"), required = false)
+      opt[Int](
+        name = "retryCount",
+        descr = Messages("cli.help.retryCount"),
+        required = false
+      )
     val iaah: ScallopOption[IAAH] =
       opt[String](name = "iaah", descr = "", required = false).map(IAAH(_))
     val help = opt[String]("help", descr = Messages("cli.help.show_help"))
@@ -281,9 +316,17 @@ class CommandLineInterface(arguments: Seq[String])
       noshort = true
     )
     val exclude =
-      opt[List[String]]("exclude", descr = Messages("cli.help.exclude"), required = false)
+      opt[List[String]](
+        "exclude",
+        descr = Messages("cli.help.exclude"),
+        required = false
+      )
     val projectKey =
-      opt[String]("projectKey", descr = Messages("cli.help.projectKey"), required = true)
+      opt[String](
+        "projectKey",
+        descr = Messages("cli.help.projectKey"),
+        required = true
+      )
     val help = opt[String]("help", descr = Messages("cli.help.show_help"))
   }
 
@@ -301,10 +344,19 @@ class CommandLineInterface(arguments: Seq[String])
       noshort = true
     )
     val projectKey: ScallopOption[String] =
-      opt[String]("projectKey", descr = Messages("cli.help.projectKey"), required = true)
+      opt[String](
+        "projectKey",
+        descr = Messages("cli.help.projectKey"),
+        required = true
+      )
     val dryRun: ScallopOption[Boolean] =
-      opt[Boolean]("dryRun", descr = Messages("destroy.help.dryRun"), required = false)
-    val help: ScallopOption[String] = opt[String]("help", descr = Messages("cli.help.show_help"))
+      opt[Boolean](
+        "dryRun",
+        descr = Messages("destroy.help.dryRun"),
+        required = false
+      )
+    val help: ScallopOption[String] =
+      opt[String]("help", descr = Messages("cli.help.show_help"))
   }
 
   addSubcommand(destroy)

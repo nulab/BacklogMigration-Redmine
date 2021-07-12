@@ -20,9 +20,11 @@ private[exporter] class RedmineModule(
 
   override def configure() = {
     super.configure()
-    bind(classOf[BacklogPaths]).toInstance(new BacklogPaths(backlogProjectKey.value))
+    bind(classOf[BacklogPaths])
+      .toInstance(new BacklogPaths(backlogProjectKey.value))
     bind(classOf[BacklogProjectKey]).toInstance(backlogProjectKey)
-    bind(classOf[BacklogTextFormattingRule]).toInstance(backlogTextFormattingRule)
+    bind(classOf[BacklogTextFormattingRule])
+      .toInstance(backlogTextFormattingRule)
 
     //mapping service
     bind(classOf[MappingContainer]).toInstance(mappingContainer)

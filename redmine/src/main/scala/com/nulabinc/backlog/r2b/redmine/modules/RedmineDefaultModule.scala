@@ -11,21 +11,24 @@ import com.taskadapter.redmineapi.{RedmineManager, RedmineManagerFactory}
 import scala.annotation.tailrec
 import scala.jdk.CollectionConverters._
 
-
 /**
   * @author uchida
   */
-class RedmineDefaultModule(apiConfig: RedmineApiConfiguration) extends AbstractModule with Logging {
+class RedmineDefaultModule(apiConfig: RedmineApiConfiguration)
+    extends AbstractModule
+    with Logging {
 
   override def configure() = {
 
     //base
     val redmine = createRedmineClient()
-    val project = redmine.getProjectManager.getProjectByKey(apiConfig.projectKey)
+    val project =
+      redmine.getProjectManager.getProjectByKey(apiConfig.projectKey)
     bind(classOf[RedmineManager]).toInstance(redmine)
     bind(classOf[Project]).toInstance(project)
     bind(classOf[RedmineApiConfiguration]).toInstance(apiConfig)
-    bind(classOf[PropertyValue]).toInstance(createPropertyValue(redmine, project))
+    bind(classOf[PropertyValue])
+      .toInstance(createPropertyValue(redmine, project))
     bind(classOf[RedmineProjectId]).toInstance(RedmineProjectId(project.getId))
 
     //service
@@ -45,65 +48,98 @@ class RedmineDefaultModule(apiConfig: RedmineApiConfiguration) extends AbstractM
   }
 
   private[this] def createRedmineClient(): RedmineManager = {
-    val transportConfig = RedmineManagerFactory.createShortTermConfig(RedmineManagerFactory.createInsecureConnectionManager())
-    RedmineManagerFactory.createWithApiKey(apiConfig.url, apiConfig.key, transportConfig)
+    val transportConfig = RedmineManagerFactory.createShortTermConfig(
+      RedmineManagerFactory.createInsecureConnectionManager()
+    )
+    RedmineManagerFactory.createWithApiKey(
+      apiConfig.url,
+      apiConfig.key,
+      transportConfig
+    )
   }
 
-  private[this] def createPropertyValue(redmine: RedmineManager, project: Project): PropertyValue = {
-    val versions = try {
-      redmine.getProjectManager.getVersions(project.getId).asScala.toSeq
-    } catch {
-      case e: Exception =>
-        logger.warn(e.getMessage, e)
-        Seq.empty[Version]
-    }
-    val categories = try {
-      redmine.getIssueManager.getCategories(project.getId).asScala.toSeq
-    } catch {
-      case e: Exception =>
-        logger.warn(e.getMessage, e)
-        Seq.empty[IssueCategory]
-    }
-    val priorities = try {
-      redmine.getIssueManager.getIssuePriorities.asScala.toSeq
-    } catch {
-      case e: Exception =>
-        logger.warn(e.getMessage, e)
-        Seq.empty[IssuePriority]
-    }
-    val trackers = try {
-      redmine.getIssueManager.getTrackers.asScala.toSeq
-    } catch {
-      case e: Exception =>
-        logger.warn(e.getMessage, e)
-        Seq.empty[Tracker]
-    }
-    val memberships = try {
-      redmine.getMembershipManager.getMemberships(apiConfig.projectKey).asScala.toSeq
-    } catch {
-      case e: Exception =>
-        logger.warn(e.getMessage, e)
-        Seq.empty[Membership]
-    }
-    val statuses = try {
-      redmine.getIssueManager.getStatuses.asScala.toSeq
-    } catch {
-      case e: Exception =>
-        logger.warn(e.getMessage, e)
-        Seq.empty[IssueStatus]
-    }
+  private[this] def createPropertyValue(
+      redmine: RedmineManager,
+      project: Project
+  ): PropertyValue = {
+    val versions =
+      try {
+        redmine.getProjectManager.getVersions(project.getId).asScala.toSeq
+      } catch {
+        case e: Exception =>
+          logger.warn(e.getMessage, e)
+          Seq.empty[Version]
+      }
+    val categories =
+      try {
+        redmine.getIssueManager.getCategories(project.getId).asScala.toSeq
+      } catch {
+        case e: Exception =>
+          logger.warn(e.getMessage, e)
+          Seq.empty[IssueCategory]
+      }
+    val priorities =
+      try {
+        redmine.getIssueManager.getIssuePriorities.asScala.toSeq
+      } catch {
+        case e: Exception =>
+          logger.warn(e.getMessage, e)
+          Seq.empty[IssuePriority]
+      }
+    val trackers =
+      try {
+        redmine.getIssueManager.getTrackers.asScala.toSeq
+      } catch {
+        case e: Exception =>
+          logger.warn(e.getMessage, e)
+          Seq.empty[Tracker]
+      }
+    val memberships =
+      try {
+        redmine.getMembershipManager
+          .getMemberships(apiConfig.projectKey)
+          .asScala
+          .toSeq
+      } catch {
+        case e: Exception =>
+          logger.warn(e.getMessage, e)
+          Seq.empty[Membership]
+      }
+    val statuses =
+      try {
+        redmine.getIssueManager.getStatuses.asScala.toSeq
+      } catch {
+        case e: Exception =>
+          logger.warn(e.getMessage, e)
+          Seq.empty[IssueStatus]
+      }
     val activeUsers = redmine.getUserManager.getUsers.asScala.toSeq
     val lockedUsers = getLockedUsers(redmine, Seq.empty, 25, 0)
     val allUsers = activeUsers ++ lockedUsers
 
     val customFieldServiceImpl = new CustomFieldServiceImpl(apiConfig, redmine)
-    val customFieldDefinitions = customFieldServiceImpl.allCustomFieldDefinitions()
+    val customFieldDefinitions =
+      customFieldServiceImpl.allCustomFieldDefinitions()
 
-    PropertyValue(allUsers, versions, categories, priorities, trackers, memberships, statuses, customFieldDefinitions)
+    PropertyValue(
+      allUsers,
+      versions,
+      categories,
+      priorities,
+      trackers,
+      memberships,
+      statuses,
+      customFieldDefinitions
+    )
   }
 
   @tailrec
-  private[this] def getLockedUsers(redmine: RedmineManager, beforeUsers: Seq[User], limit: Int, offset: Int): Seq[User] = {
+  private[this] def getLockedUsers(
+      redmine: RedmineManager,
+      beforeUsers: Seq[User],
+      limit: Int,
+      offset: Int
+  ): Seq[User] = {
     /*
       http://www.redmine.org/projects/redmine/wiki/Rest_Users
       status: get only users with the given status. See app/models/principal.rb for a list of available statuses. Default is 1 (active users). Possible values are:
@@ -111,13 +147,12 @@ class RedmineDefaultModule(apiConfig: RedmineApiConfiguration) extends AbstractM
         2: Registered (User has registered but not yet confirmed their email address or was not yet activated by an administrator. User can not login)
         3: Locked (User was once active and is now locked, User can not login)
      */
-    val users = redmine
-      .getUserManager
+    val users = redmine.getUserManager
       .getUsers(
         Map(
           "status" -> "3", // Locked
           "offset" -> offset.toString,
-          "limit"  -> limit.toString
+          "limit" -> limit.toString
         ).asJava
       )
       .asScala

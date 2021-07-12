@@ -34,7 +34,12 @@ private[exporter] class WikiActor(exportContext: ExportContext) extends Actor wi
 
   def receive: Receive = {
     case WikiActor
-          .Do(wiki: WikiPage, completion: CountDownLatch, allCount: Int, console: ConsoleF) =>
+          .Do(
+            wiki: WikiPage,
+            completion: CountDownLatch,
+            allCount: Int,
+            console: ConsoleF
+          ) =>
       exportContext.wikiService.optWikiDetail(wiki.getTitle).foreach { wikiDetail =>
         val backlogWiki = Convert.toBacklog(wikiDetail)
         IOUtil.output(
@@ -43,13 +48,17 @@ private[exporter] class WikiActor(exportContext: ExportContext) extends Actor wi
         )
 
         wikiDetail.getAttachments.asScala.foreach { attachment =>
-          val dir = exportContext.backlogPaths.wikiAttachmentDirectoryPath(backlogWiki.name)
+          val dir = exportContext.backlogPaths
+            .wikiAttachmentDirectoryPath(backlogWiki.name)
           val path =
-            exportContext.backlogPaths.wikiAttachmentPath(backlogWiki.name, attachment.getFileName)
+            exportContext.backlogPaths
+              .wikiAttachmentPath(backlogWiki.name, attachment.getFileName)
 
           IOUtil.createDirectory(dir)
 
-          val url: URL = new URL(s"${attachment.getContentURL}?key=${exportContext.apiConfig.key}")
+          val url: URL = new URL(
+            s"${attachment.getContentURL}?key=${exportContext.apiConfig.key}"
+          )
 
           AttachmentService.download(url, path.path.toFile)
         }
@@ -65,6 +74,11 @@ private[exporter] object WikiActor {
 
   type ConsoleF = (Int, Int) => Unit
 
-  case class Do(wiki: WikiPage, completion: CountDownLatch, allCount: Int, console: ConsoleF)
+  case class Do(
+      wiki: WikiPage,
+      completion: CountDownLatch,
+      allCount: Int,
+      console: ConsoleF
+  )
 
 }

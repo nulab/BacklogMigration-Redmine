@@ -44,12 +44,14 @@ class PriorityMappingFile(
   }
 
   private object Backlog {
-    val LOW_JA: String    = Messages("mapping.priority.backlog.low")(Lang("ja"))
-    val NORMAL_JA: String = Messages("mapping.priority.backlog.normal")(Lang("ja"))
-    val HIGH_JA: String   = Messages("mapping.priority.backlog.high")(Lang("ja"))
-    val LOW_EN: String    = Messages("mapping.priority.backlog.low")(Lang("en"))
-    val NORMAL_EN: String = Messages("mapping.priority.backlog.normal")(Lang("en"))
-    val HIGH_EN: String   = Messages("mapping.priority.backlog.high")(Lang("en"))
+    val LOW_JA: String = Messages("mapping.priority.backlog.low")(Lang("ja"))
+    val NORMAL_JA: String =
+      Messages("mapping.priority.backlog.normal")(Lang("ja"))
+    val HIGH_JA: String = Messages("mapping.priority.backlog.high")(Lang("ja"))
+    val LOW_EN: String  = Messages("mapping.priority.backlog.low")(Lang("en"))
+    val NORMAL_EN: String =
+      Messages("mapping.priority.backlog.normal")(Lang("en"))
+    val HIGH_EN: String = Messages("mapping.priority.backlog.high")(Lang("en"))
 
     def low(): String =
       backlogs
@@ -71,16 +73,22 @@ class PriorityMappingFile(
   }
 
   private object Redmine {
-    val LOW_JA: String       = Messages("mapping.priority.redmine.low")(Lang("ja"))
-    val NORMAL_JA: String    = Messages("mapping.priority.redmine.normal")(Lang("ja"))
-    val HIGH_JA: String      = Messages("mapping.priority.redmine.high")(Lang("ja"))
-    val URGENT_JA: String    = Messages("mapping.priority.redmine.urgent")(Lang("ja"))
-    val IMMEDIATE_JA: String = Messages("mapping.priority.redmine.immediate")(Lang("ja"))
-    val LOW_EN: String       = Messages("mapping.priority.redmine.low")(Lang("en"))
-    val NORMAL_EN: String    = Messages("mapping.priority.redmine.normal")(Lang("en"))
-    val HIGH_EN: String      = Messages("mapping.priority.redmine.high")(Lang("en"))
-    val URGENT_EN: String    = Messages("mapping.priority.redmine.urgent")(Lang("en"))
-    val IMMEDIATE_EN: String = Messages("mapping.priority.redmine.immediate")(Lang("en"))
+    val LOW_JA: String = Messages("mapping.priority.redmine.low")(Lang("ja"))
+    val NORMAL_JA: String =
+      Messages("mapping.priority.redmine.normal")(Lang("ja"))
+    val HIGH_JA: String = Messages("mapping.priority.redmine.high")(Lang("ja"))
+    val URGENT_JA: String =
+      Messages("mapping.priority.redmine.urgent")(Lang("ja"))
+    val IMMEDIATE_JA: String =
+      Messages("mapping.priority.redmine.immediate")(Lang("ja"))
+    val LOW_EN: String = Messages("mapping.priority.redmine.low")(Lang("en"))
+    val NORMAL_EN: String =
+      Messages("mapping.priority.redmine.normal")(Lang("en"))
+    val HIGH_EN: String = Messages("mapping.priority.redmine.high")(Lang("en"))
+    val URGENT_EN: String =
+      Messages("mapping.priority.redmine.urgent")(Lang("en"))
+    val IMMEDIATE_EN: String =
+      Messages("mapping.priority.redmine.immediate")(Lang("en"))
   }
 
   def matchItem(redmine: MappingItem): String =
@@ -104,7 +112,11 @@ class PriorityMappingFile(
   def itemName: String = Messages("common.priorities")
 
   def description: String =
-    Messages("cli.mapping.configurable", itemName, backlogs.map(_.name).mkString(","))
+    Messages(
+      "cli.mapping.configurable",
+      itemName,
+      backlogs.map(_.name).mkString(",")
+    )
 
   def isDisplayDetail: Boolean = false
 

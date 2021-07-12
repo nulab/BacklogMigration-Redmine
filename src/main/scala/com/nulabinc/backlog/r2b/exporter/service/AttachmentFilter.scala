@@ -18,13 +18,21 @@ private[exporter] class AttachmentFilter(journals: Seq[Journal]) {
   private[this] def condition(attachment: Attachment): Boolean =
     journals.exists(journal => condition(journal, attachment))
 
-  private[this] def condition(journal: Journal, attachment: Attachment): Boolean =
+  private[this] def condition(
+      journal: Journal,
+      attachment: Attachment
+  ): Boolean =
     journal.getDetails.asScala.exists(detail => condition(detail, attachment))
 
-  private[this] def condition(detail: JournalDetail, attachment: Attachment): Boolean = {
+  private[this] def condition(
+      detail: JournalDetail,
+      attachment: Attachment
+  ): Boolean = {
     detail.getProperty match {
       case RedmineConstantValue.ATTACHMENT =>
-        FileUtil.normalize(attachment.getFileName) == FileUtil.normalize(detail.getNewValue)
+        FileUtil.normalize(attachment.getFileName) == FileUtil.normalize(
+          detail.getNewValue
+        )
       case _ => false
     }
   }

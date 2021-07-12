@@ -75,13 +75,19 @@ class UserMappingFile(
     userService.allUsers()
   }
 
-  private[this] def convertForNAI(backlogUsers: Seq[BacklogUser])(mapping: Mapping) = {
+  private[this] def convertForNAI(
+      backlogUsers: Seq[BacklogUser]
+  )(mapping: Mapping) = {
     if (backlogApiConfig.url.contains(NaiSpaceDomain)) {
       val targetBacklogUser = backlogUsers
         .find(backlogUser => backlogUser.optMailAddress.getOrElse("") == mapping.backlog)
-        .getOrElse(throw new NoSuchElementException(s"User ${mapping.backlog} not found"))
+        .getOrElse(
+          throw new NoSuchElementException(s"User ${mapping.backlog} not found")
+        )
       mapping.copy(backlog =
-        targetBacklogUser.optUserId.getOrElse(s"UserId ${mapping.backlog} not found")
+        targetBacklogUser.optUserId.getOrElse(
+          s"UserId ${mapping.backlog} not found"
+        )
       )
     } else mapping
   }
@@ -105,7 +111,11 @@ class UserMappingFile(
   def itemName: String = Messages("common.users")
 
   def description: String = {
-    Messages("cli.mapping.configurable", itemName, backlogs.map(_.name).mkString(","))
+    Messages(
+      "cli.mapping.configurable",
+      itemName,
+      backlogs.map(_.name).mkString(",")
+    )
   }
 
   def isDisplayDetail: Boolean = true
