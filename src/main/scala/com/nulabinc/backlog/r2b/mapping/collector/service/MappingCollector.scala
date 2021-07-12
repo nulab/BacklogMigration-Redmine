@@ -1,6 +1,7 @@
 package com.nulabinc.backlog.r2b.mapping.collector.service
 
 import javax.inject.Inject
+
 import akka.actor.{ActorSystem, Props}
 import com.nulabinc.backlog.migration.common.conf.ExcludeOption
 import com.nulabinc.backlog.migration.common.dsl.ConsoleDSL
@@ -20,9 +21,9 @@ import com.taskadapter.redmineapi.bean.{Group, Membership, User}
 import monix.eval.Task
 import monix.execution.Scheduler
 
-import scala.jdk.CollectionConverters._
 import scala.concurrent.Await
 import scala.concurrent.duration.Duration
+import scala.jdk.CollectionConverters._
 
 /**
   * @author uchida
