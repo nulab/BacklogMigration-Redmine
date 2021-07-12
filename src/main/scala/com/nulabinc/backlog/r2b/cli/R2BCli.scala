@@ -14,8 +14,8 @@ import com.nulabinc.backlog.migration.common.dsl.{ConsoleDSL, StorageDSL, StoreD
 import com.nulabinc.backlog.migration.common.interpreters.SQLiteStoreDSL
 import com.nulabinc.backlog.migration.common.modules.{ServiceInjector => BacklogInjector}
 import com.nulabinc.backlog.migration.common.service.{
-  ProjectService,
   PriorityService => BacklogPriorityService,
+  ProjectService,
   StatusService => BacklogStatusService,
   UserService => BacklogUserService
 }

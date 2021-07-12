@@ -10,10 +10,10 @@ import com.nulabinc.backlog.r2b.redmine.service.IssueService
 import com.taskadapter.redmineapi.Include
 import com.taskadapter.redmineapi.bean.{Issue, Journal, JournalDetail, User}
 
-import scala.jdk.CollectionConverters._
 import scala.collection.mutable
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration._
+import scala.jdk.CollectionConverters._
 
 /**
  * @author uchida

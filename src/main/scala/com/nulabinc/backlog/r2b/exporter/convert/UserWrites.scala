@@ -1,6 +1,7 @@
 package com.nulabinc.backlog.r2b.exporter.convert
 
 import javax.inject.Inject
+
 import com.nulabinc.backlog.migration.common.conf.BacklogConstantValue
 import com.nulabinc.backlog.migration.common.convert.Writes
 import com.nulabinc.backlog.migration.common.domain.BacklogUser
