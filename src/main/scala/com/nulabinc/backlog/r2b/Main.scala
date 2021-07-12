@@ -38,9 +38,6 @@ object R2B extends BacklogConfiguration with Logging {
 
   private val dbPath = Paths.get("./backlog/data.db")
 
-  private final val iaahStr = ""
-  private final val iaah    = IAAH(iaahStr)
-
   private implicit val system: ActorSystem = ActorSystem("main")
   private implicit val exc: Scheduler =
     monix.execution.Scheduler.Implicits.global
@@ -201,8 +198,7 @@ object R2B extends BacklogConfiguration with Logging {
           backlogConfig = BacklogApiConfiguration(
             url = cli.execute.backlogUrl(),
             key = cli.execute.backlogKey(),
-            projectKey = backlog,
-            iaah = cli.execute.iaah.getOrElse(iaah)
+            projectKey = backlog
           ),
           exclude = exclude,
           importOnly = cli.execute.importOnly(),

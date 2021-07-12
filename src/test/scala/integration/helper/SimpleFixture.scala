@@ -5,7 +5,6 @@ import java.nio.file.Path
 import java.text.SimpleDateFormat
 import java.util.{Date, Locale, Properties}
 
-import com.nulabinc.backlog.migration.common.client.IAAH
 import com.nulabinc.backlog.migration.common.conf.{
   BacklogApiConfiguration,
   ExcludeOption,
@@ -167,11 +166,10 @@ trait SimpleFixture {
             key = redmineKey,
             projectKey = redmine
           ),
-          backlogConfig = new BacklogApiConfiguration(
+          backlogConfig = BacklogApiConfiguration(
             url = backlogUrl,
             key = backlogKey,
-            projectKey = backlog,
-            iaah = IAAH.empty
+            projectKey = backlog
           ),
           exclude = ExcludeOption.default,
           importOnly = false,
