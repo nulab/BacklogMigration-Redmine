@@ -16,3 +16,4 @@ app.properties
 metals.sbt
 
 data.db
+local.conf
