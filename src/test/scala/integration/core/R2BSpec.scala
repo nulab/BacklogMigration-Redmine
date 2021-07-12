@@ -4,12 +4,12 @@ import java.util.Date
 
 import com.nulabinc.backlog.migration.common.utils.FileUtil
 import com.nulabinc.backlog.r2b.conf.AppConfiguration
-import integration.helper.SimpleFixture
 import com.nulabinc.backlog4j.api.option.{GetIssuesParams, QueryParams}
-import com.nulabinc.backlog4j.{IssueComment, Issue => BacklogIssue}
+import com.nulabinc.backlog4j.{Issue => BacklogIssue, IssueComment}
 import com.osinka.i18n.Messages
 import com.taskadapter.redmineapi.Include
-import com.taskadapter.redmineapi.bean.{User, Issue => RedmineIssue}
+import com.taskadapter.redmineapi.bean.{Issue => RedmineIssue, User}
+import integration.helper.SimpleFixture
 import org.scalatest.{FlatSpec, Matchers}
 
 import scala.jdk.CollectionConverters._

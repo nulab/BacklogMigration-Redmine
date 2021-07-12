@@ -22,9 +22,9 @@ import com.taskadapter.redmineapi.Include
 import com.taskadapter.redmineapi.bean.{Attachment, _}
 import spray.json._
 
-import scala.jdk.CollectionConverters._
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration._
+import scala.jdk.CollectionConverters._
 
 /**
  * @author uchida
