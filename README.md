@@ -1,6 +1,7 @@
 # Backlog Migration for Redmine
 
 ![](https://github.com/nulab/BacklogMigration-Redmine/workflows/Build/badge.svg)
+![](https://github.com/nulab/BacklogMigration-Redmine/workflows/Test/badge.svg)
 
 Migrate your projects from Redmine to [Backlog].
 (英語の下に日本文が記載されています)

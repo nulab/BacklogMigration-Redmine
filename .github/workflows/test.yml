@@ -1,6 +1,8 @@
-name: Build
+name: Test
 
-on: [push]
+on:
+  pull_request:
+    branches: [ master ]
 
 jobs:
 
@@ -27,26 +29,19 @@ jobs:
       - name: Coursier cache
         uses: coursier/cache-action@v6
 
-      - name: Set header
-        run: sed -i -e 's/iaahStr = ""/iaahStr = "${{ secrets.IAAH }}"/' src/main/scala/com/nulabinc/backlog/r2b/Main.scala
-
-      - name: Compile
-        run: sbt compile
+      - name: Check format
+        run: |
+          mkdir -p dist
+          sbt -no-colors checkAll > dist/result.txt
 
       - name: Test
         run: 'sbt "testOnly com.nulabinc.*"'
 
-      - name: Assembly
-        run: |
-          sbt assembly
-          mkdir -p target/dist
-          mv target/scala-2.13/*.jar target/dist
-
-      - name: Upload jar file
-        uses: actions/upload-artifact@v1
+      - name: Upload sbt result
+        uses: actions/upload-artifact@master
         with:
-          name: backlog-migration-redmine
-          path: target/dist
+          name: sbt-result
+          path: dist
 
   notify:
     runs-on: ubuntu-latest
