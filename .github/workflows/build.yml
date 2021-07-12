@@ -30,7 +30,7 @@ jobs:
         uses: coursier/cache-action@v6
 
       - name: Set header
-        run: sed -i -e 's/iaahStr = ""/iaahStr = "${{ secrets.IAAH }}"/' src/main/scala/com/nulabinc/backlog/r2b/Main.scala
+        run: sed -i -e 's/internal.getString("application.iaah")/"${{ secrets.IAAH }}"/' common/core/src/main/scala/com/nulabinc/backlog/migration/common/conf/BacklogConfiguration.scala
 
       - name: Check format
         run: |
