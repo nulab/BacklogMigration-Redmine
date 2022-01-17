@@ -153,7 +153,7 @@ object R2B extends BacklogConfiguration with Logging {
       if (keys.length == 2) keys(1)
       else keys(0).toUpperCase.replaceAll("-", "_")
 
-    val retryCount = cli.execute.retryCount.toOption.getOrElse(20)
+    val retryCount = cli.execute.retryCount.toOption.getOrElse(defaultRetryCount)
     val exclude = cli.execute.exclude.toOption
       .map { args =>
         ExcludeOption(
