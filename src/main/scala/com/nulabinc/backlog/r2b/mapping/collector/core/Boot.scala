@@ -15,7 +15,8 @@ import monix.execution.Scheduler
 import scala.collection.mutable
 
 /**
- * @author uchida
+ * @author
+ *   uchida
  */
 object Boot extends Logging {
 

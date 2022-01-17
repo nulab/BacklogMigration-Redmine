@@ -9,7 +9,8 @@ import monix.eval.Task
 import monix.execution.Scheduler
 
 /**
- * @author uchida
+ * @author
+ *   uchida
  */
 private[exporter] class ContentActor(
     exportContext: ExportContext,

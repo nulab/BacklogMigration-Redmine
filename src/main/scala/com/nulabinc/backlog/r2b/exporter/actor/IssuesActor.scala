@@ -18,7 +18,8 @@ import monix.execution.Scheduler
 import scala.concurrent.duration._
 
 /**
- * @author uchida
+ * @author
+ *   uchida
  */
 private[exporter] class IssuesActor(
     exportContext: ExportContext,

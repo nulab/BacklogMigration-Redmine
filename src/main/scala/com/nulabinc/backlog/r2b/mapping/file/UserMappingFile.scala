@@ -22,7 +22,8 @@ import com.taskadapter.redmineapi.bean.{User => RedmineUser}
 import spray.json.JsonParser
 
 /**
- * @author uchida
+ * @author
+ *   uchida
  */
 class UserMappingFile(
     redmineApiConfig: RedmineApiConfiguration,

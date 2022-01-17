@@ -1,6 +1,7 @@
 package integration.core
 
 /**
- * @author uchida
+ * @author
+ *   uchida
  */
 class CompareSpec extends R2BSpec {}

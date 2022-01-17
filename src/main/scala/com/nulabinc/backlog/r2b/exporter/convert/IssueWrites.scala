@@ -16,7 +16,8 @@ import com.taskadapter.redmineapi.bean.Issue
 import scala.jdk.CollectionConverters._
 
 /**
- * @author uchida
+ * @author
+ *   uchida
  */
 private[exporter] class IssueWrites @Inject() (
     implicit val attachmentWrites: AttachmentWrites,

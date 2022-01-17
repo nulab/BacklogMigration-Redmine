@@ -3,7 +3,8 @@ package com.nulabinc.backlog.r2b.mapping.domain
 import spray.json.DefaultJsonProtocol
 
 /**
- * @author uchida
+ * @author
+ *   uchida
  */
 case class MappingsWrapper(description: String, mappings: Seq[Mapping])
 

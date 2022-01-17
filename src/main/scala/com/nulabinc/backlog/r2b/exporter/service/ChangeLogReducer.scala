@@ -30,7 +30,8 @@ private[exporter] object ReducedChangeLogWithMessage {
 }
 
 /**
- * @author uchida
+ * @author
+ *   uchida
  */
 private[exporter] class ChangeLogReducer(
     exportContext: ExportContext,

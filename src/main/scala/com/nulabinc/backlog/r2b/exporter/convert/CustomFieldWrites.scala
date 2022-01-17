@@ -13,7 +13,8 @@ import com.taskadapter.redmineapi.bean.CustomField
 import scala.jdk.CollectionConverters._
 
 /**
- * @author uchida
+ * @author
+ *   uchida
  */
 private[exporter] class CustomFieldWrites @Inject() (
     propertyValue: PropertyValue,

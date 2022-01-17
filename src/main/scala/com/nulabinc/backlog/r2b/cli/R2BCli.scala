@@ -45,7 +45,8 @@ import monix.eval.Task
 import monix.execution.Scheduler
 
 /**
- * @author uchida
+ * @author
+ *   uchida
  */
 object R2BCli extends BacklogConfiguration with Logging {
   import com.nulabinc.backlog.migration.common.shared.syntax._

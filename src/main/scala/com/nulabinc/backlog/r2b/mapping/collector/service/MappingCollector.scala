@@ -19,7 +19,8 @@ import scala.concurrent.duration.Duration
 import scala.jdk.CollectionConverters._
 
 /**
- * @author uchida
+ * @author
+ *   uchida
  */
 private[collector] class MappingCollector @Inject() (
     mappingContextProvider: MappingContextProvider,

@@ -1,7 +1,8 @@
 package com.nulabinc.backlog.r2b.utils
 
 /**
- * @author uchida
+ * @author
+ *   uchida
  */
 object ClassVersion {
 

@@ -1,6 +1,7 @@
 package com.nulabinc.backlog.r2b
 
 /**
- * @author uchida
+ * @author
+ *   uchida
  */
 package object exporter {}

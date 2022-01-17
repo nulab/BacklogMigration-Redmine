@@ -13,7 +13,8 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration._
 
 /**
- * @author uchida
+ * @author
+ *   uchida
  */
 private[collector] class WikiActor(
     wikiService: WikiService,
