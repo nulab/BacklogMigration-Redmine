@@ -9,7 +9,8 @@ import spray.json.{JsonParser, _}
 import scala.collection.mutable.ArrayBuffer
 
 /**
- * @author uchida
+ * @author
+ *   uchida
  */
 trait MappingFile extends Logging {
 

@@ -7,7 +7,8 @@ import com.nulabinc.backlog.migration.common.domain.BacklogUser
 import com.taskadapter.redmineapi.bean.Membership
 
 /**
- * @author uchida
+ * @author
+ *   uchida
  */
 private[exporter] class MembershipWrites @Inject() (implicit
     val userWrites: UserWrites

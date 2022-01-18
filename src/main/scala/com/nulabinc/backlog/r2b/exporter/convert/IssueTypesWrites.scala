@@ -8,7 +8,8 @@ import com.nulabinc.backlog.migration.common.domain.BacklogIssueType
 import com.taskadapter.redmineapi.bean.Tracker
 
 /**
- * @author uchida
+ * @author
+ *   uchida
  */
 private[exporter] class IssueTypesWrites @Inject() ()
     extends Writes[Seq[Tracker], Seq[BacklogIssueType]] {

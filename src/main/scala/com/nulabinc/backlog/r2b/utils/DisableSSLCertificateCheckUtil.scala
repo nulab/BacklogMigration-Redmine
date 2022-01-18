@@ -6,7 +6,8 @@ import javax.net.ssl._
 import com.nulabinc.backlog.migration.common.utils.Logging
 
 /**
- * @author uchida
+ * @author
+ *   uchida
  */
 object DisableSSLCertificateCheckUtil extends Logging {
 

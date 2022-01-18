@@ -10,7 +10,8 @@ import com.osinka.i18n.Messages
 import com.taskadapter.redmineapi.bean.News
 
 /**
- * @author uchida
+ * @author
+ *   uchida
  */
 private[exporter] class NewsWrites @Inject() (implicit
     val userWrites: UserWrites,

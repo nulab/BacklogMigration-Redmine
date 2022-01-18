@@ -15,7 +15,8 @@ import org.scalatest.{FlatSpec, Matchers}
 import scala.jdk.CollectionConverters._
 
 /**
- * @author uchida
+ * @author
+ *   uchida
  */
 class R2BSpec extends FlatSpec with Matchers with SimpleFixture {
 

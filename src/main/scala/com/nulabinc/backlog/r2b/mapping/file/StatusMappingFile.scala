@@ -11,7 +11,8 @@ import com.osinka.i18n.{Lang, Messages}
 import com.taskadapter.redmineapi.bean.IssueStatus
 
 /**
- * @author uchida
+ * @author
+ *   uchida
  */
 class StatusMappingFile(
     redmineApiConfig: RedmineApiConfiguration,

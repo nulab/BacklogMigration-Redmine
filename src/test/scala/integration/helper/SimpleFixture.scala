@@ -39,7 +39,8 @@ import spray.json.{JsNumber, JsonParser}
 import scala.jdk.CollectionConverters._
 
 /**
- * @author uchida
+ * @author
+ *   uchida
  */
 trait SimpleFixture {
 

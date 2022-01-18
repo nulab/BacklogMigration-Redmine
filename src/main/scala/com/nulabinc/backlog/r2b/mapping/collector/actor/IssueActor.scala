@@ -16,7 +16,8 @@ import scala.concurrent.duration._
 import scala.jdk.CollectionConverters._
 
 /**
- * @author uchida
+ * @author
+ *   uchida
  */
 private[collector] class IssueActor(
     issueService: IssueService,

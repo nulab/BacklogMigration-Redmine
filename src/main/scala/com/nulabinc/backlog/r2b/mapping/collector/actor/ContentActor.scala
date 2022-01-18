@@ -10,7 +10,8 @@ import monix.eval.Task
 import monix.execution.Scheduler
 
 /**
- * @author uchida
+ * @author
+ *   uchida
  */
 private[collector] class ContentActor(
     exclude: ExcludeOption,

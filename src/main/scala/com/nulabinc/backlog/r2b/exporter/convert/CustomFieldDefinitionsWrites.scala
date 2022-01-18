@@ -13,7 +13,8 @@ import com.nulabinc.backlog4j.internal.json.customFields.DateCustomFieldSetting
 import com.osinka.i18n.Messages
 
 /**
- * @author uchida
+ * @author
+ *   uchida
  */
 private[exporter] class CustomFieldDefinitionsWrites @Inject() (
     propertyValue: PropertyValue
