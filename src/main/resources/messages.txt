@@ -155,6 +155,7 @@ import.error.limit.project=You can not import [{0}] of project.\nYou can not add
 import.error.project.not.join=You dont join [{0}]. If you want to move this project, you need to join this project.
 import.error.issue.attachment=Attachment file [{0}] upload failed. :{1}
 import.error.attachment.too_large=Attachment file upload failed. The size of attached file is too large.:{0}
+import.error.attachment.not_exists=Attachment file {0} upload failed.\nFile does not exist in {1}.
 import.error.failed.import=Could not register project [{0}]. : {1}
 import.error.failed.comment=Could not register comment on issue [{0}]. : {1}
 

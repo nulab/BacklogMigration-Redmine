@@ -156,6 +156,7 @@ import.error.limit.project=プロジェクト[{0}]をインポートできませ
 import.error.project.not.join=[{0}]は参加していないプロジェクトになります。課題を追加する場合はプロジェクトに参加してください。
 import.error.issue.attachment=添付ファイル[{0}]をアップロードできませんでした。:{1}
 import.error.attachment.too_large=添付ファイル[{0}]をアップロードできませんでした。添付ファイルのサイズが大きすぎます。
+import.error.attachment.not_exists=添付ファイル{0}をアップロードできませんでした。ファイルが{1}に存在しません。
 import.error.failed.import=プロジェクト[{0}]を登録できませんでした。:{1}
 import.error.failed.comment=コメントを課題[{0}]に登録できませんでした。:{1}
 
