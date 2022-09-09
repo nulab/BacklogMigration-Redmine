@@ -85,6 +85,7 @@ cli.error.unknown=Unknown error
 cli.cancel=Import has been canceled.
 cli.invalid_setup=Setup is incomplete. Please complete the set up with the sub-command "init". Add "--help" option to know about the "init" command.
 cli.warn.not.latest=The latest version [{0}] has been released. The current version is [{1}].
+cli.warn.rate_limit=The API usage limit has been exceeded. Waiting 1 minute before resuming.
 
 
 # CLI Help
