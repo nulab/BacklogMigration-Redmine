@@ -71,6 +71,13 @@ object R2B extends BacklogConfiguration with Logging {
 
     try {
       val cli = new CommandLineInterface(args.toIndexedSeq)
+
+      if (cli.subcommand.isEmpty) {
+        consoleDSL.println(RedmineMessages.helpMessage).runSyncUnsafe()
+        AnsiConsole.systemUninstall()
+        System.exit(0)
+      }
+
       val asyncResult = for {
         _      <- checkRelease()
         result <- execute(cli)
