@@ -34,7 +34,7 @@ private[exporter] class IssueInitializer(
   implicit val customFieldValueWrites = exportContext.customFieldValueWrites
 
   def initialize(issue: Issue): BacklogIssue = {
-    //attachments
+    // attachments
     val attachmentFilter    = new AttachmentFilter(journals)
     val filteredAttachments = attachmentFilter.filter(attachments)
     val backlogAttachments  = filteredAttachments.map(Convert.toBacklog(_))

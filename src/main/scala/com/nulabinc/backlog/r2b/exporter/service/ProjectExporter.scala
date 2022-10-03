@@ -71,13 +71,13 @@ private[exporter] class ProjectExporter @Inject() (
   )(implicit s: Scheduler, consoleDSL: ConsoleDSL[Task]): Unit = {
     val allMemberships: Seq[Membership] = membershipService.allMemberships()
 
-    //project
+    // project
     IOUtil.output(
       backlogPaths.projectJson,
       BacklogProjectWrapper(Convert.toBacklog(project)).toJson.prettyPrint
     )
 
-    //group
+    // group
     IOUtil.output(
       backlogPaths.groupsJson,
       BacklogGroupsWrapper(
@@ -85,7 +85,7 @@ private[exporter] class ProjectExporter @Inject() (
       ).toJson.prettyPrint
     )
 
-    //memberships
+    // memberships
     val allProjectUser = mutable.Set.empty[BacklogUser]
     val projectUsers   = Convert.toBacklog(allMemberships)(membershipWrites)
 
@@ -108,7 +108,7 @@ private[exporter] class ProjectExporter @Inject() (
       1
     )
 
-    //customFields
+    // customFields
     val customFieldDefinitions = customFieldService.allCustomFieldDefinitions()
     IOUtil.output(
       backlogPaths.customFieldSettingsJson,
@@ -125,7 +125,7 @@ private[exporter] class ProjectExporter @Inject() (
       1
     )
 
-    //versions
+    // versions
     val versions = versionService.allVersions()
     IOUtil.output(
       backlogPaths.versionsJson,
@@ -140,7 +140,7 @@ private[exporter] class ProjectExporter @Inject() (
       1
     )
 
-    //trackers
+    // trackers
     val trackers = trackerService.allTrackers()
     IOUtil.output(
       backlogPaths.issueTypesJson,
@@ -155,7 +155,7 @@ private[exporter] class ProjectExporter @Inject() (
       1
     )
 
-    //categories
+    // categories
     val categories = issueCategoryService.allCategories()
     IOUtil.output(
       backlogPaths.issueCategoriesJson,
@@ -172,7 +172,7 @@ private[exporter] class ProjectExporter @Inject() (
       1
     )
 
-    //news
+    // news
     val console = (ProgressBar.progress _)(
       Messages("common.news"),
       Messages("message.exporting"),

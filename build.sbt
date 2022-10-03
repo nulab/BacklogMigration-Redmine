@@ -20,7 +20,13 @@ lazy val commonSettings = Seq(
   // scalafix
   addCompilerPlugin(scalafixSemanticdb),
   semanticdbEnabled := true,
-  semanticdbVersion := scalafixSemanticdb.revision
+  semanticdbVersion := scalafixSemanticdb.revision,
+  assembly / assemblyMergeStrategy := {
+    case x if x.endsWith("module-info.class") => MergeStrategy.discard
+    case x =>
+      val oldStrategy = (assembly / assemblyMergeStrategy).value
+      oldStrategy(x)
+  }
 )
 
 lazy val common = (project in file("common")).settings(commonSettings: _*)

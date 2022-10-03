@@ -44,7 +44,7 @@ private[collector] class MappingCollector @Inject() (
     val memberships = membershipService.allMemberships()
     memberships.foreach(membership => parse(membership, mappingData))
 
-    //news
+    // news
     val console = (ProgressBar.progress _)(
       Messages("common.news"),
       Messages("message.analyzing"),

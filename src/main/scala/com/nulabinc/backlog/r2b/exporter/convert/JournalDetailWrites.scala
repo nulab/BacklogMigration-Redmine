@@ -184,7 +184,7 @@ private[exporter] class JournalDetailWrites @Inject() (
         BacklogConstantValue.ChangeLog.DESCRIPTION
       case RedmineConstantValue.Attr.CATEGORY =>
         BacklogConstantValue.ChangeLog.COMPONENT
-      //version
+      // version
       case RedmineConstantValue.Attr.VERSION =>
         BacklogConstantValue.ChangeLog.MILESTONE
       case RedmineConstantValue.Attr.STATUS =>
@@ -199,15 +199,15 @@ private[exporter] class JournalDetailWrites @Inject() (
         BacklogConstantValue.ChangeLog.LIMIT_DATE
       case RedmineConstantValue.Attr.PRIORITY =>
         BacklogConstantValue.ChangeLog.PRIORITY
-      //resolution
+      // resolution
       case RedmineConstantValue.Attr.ESTIMATED_HOURS =>
         BacklogConstantValue.ChangeLog.ESTIMATED_HOURS
-      //actualHours
+      // actualHours
       case RedmineConstantValue.Attr.PARENT =>
         BacklogConstantValue.ChangeLog.PARENT_ISSUE
-      //notification
-      //attachment
-      //commit
+      // notification
+      // attachment
+      // commit
       case _ => name
     }
 

@@ -21,7 +21,16 @@ private[exporter] class ProjectWrites @Inject() (projectKey: BacklogProjectKey)
       key = projectKey.value,
       isChartEnabled = true,
       isSubtaskingEnabled = true,
-      textFormattingRule = TextFormattingRule.Markdown.getStrValue
+      textFormattingRule = TextFormattingRule.Markdown.getStrValue,
+      isProjectLeaderCanEditProjectLeader = false,
+      useWiki = true,
+      useFileSharing = true,
+      useDevAttributes = false,
+      useResolvedForChart = false,
+      useWikiTreeView = false,
+      useOriginalImageSizeAtWiki = false,
+      useSubversion = false,
+      useGit = false
     )
   }
 
