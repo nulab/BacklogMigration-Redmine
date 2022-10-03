@@ -27,7 +27,7 @@ private[exporter] class RedmineModule(
     bind(classOf[BacklogTextFormattingRule])
       .toInstance(backlogTextFormattingRule)
 
-    //mapping service
+    // mapping service
     bind(classOf[MappingContainer]).toInstance(mappingContainer)
 
     // export

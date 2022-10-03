@@ -229,15 +229,15 @@ class R2BSpec extends FlatSpec with Matchers with SimpleFixture {
         }
 
         for { backlogIssue <- optBacklogIssue } yield {
-          //description
+          // description
           redmineIssue.getDescription should equal(backlogIssue.getDescription)
 
-          //issue type
+          // issue type
           redmineIssue.getTracker.getName should equal(
             backlogIssue.getIssueType.getName
           )
 
-          //category
+          // category
           for { category <- Option(redmineIssue.getCategory) } yield {
             val optBacklogCategory =
               if (backlogIssue.getCategory.asScala.isEmpty) None
@@ -247,14 +247,14 @@ class R2BSpec extends FlatSpec with Matchers with SimpleFixture {
             )
           }
 
-          //milestone
+          // milestone
           for { version <- Option(redmineIssue.getTargetVersion) } yield {
             version.getName should equal(
               backlogIssue.getMilestone.get(0).getName
             )
           }
 
-          //due date
+          // due date
           (
             Option(redmineIssue.getDueDate),
             Option(backlogIssue.getDueDate)
@@ -267,12 +267,12 @@ class R2BSpec extends FlatSpec with Matchers with SimpleFixture {
               r should equal(b)
           }
 
-          //priority
+          // priority
           convertPriority(redmineIssue.getPriorityText) should equal(
             backlogIssue.getPriority.getName
           )
 
-          //status
+          // status
           withClue(s"""
                |status:${redmineIssue.getStatusName}
                |converted:${convertStatus(redmineIssue.getStatusName)}
@@ -282,7 +282,7 @@ class R2BSpec extends FlatSpec with Matchers with SimpleFixture {
             )
           }
 
-          //assignee
+          // assignee
           if (redmineIssue.getAssignee != null) {
             val redmineUser =
               redmine.getUserManager.getUserById(redmineIssue.getAssignee.getId)
@@ -291,7 +291,7 @@ class R2BSpec extends FlatSpec with Matchers with SimpleFixture {
             )
           }
 
-          //actual hours
+          // actual hours
           val spentHours = BigDecimal(redmineIssue.getSpentHours.toString)
             .setScale(2, BigDecimal.RoundingMode.HALF_UP)
           val actualHours =
@@ -299,30 +299,30 @@ class R2BSpec extends FlatSpec with Matchers with SimpleFixture {
               .setScale(2, BigDecimal.RoundingMode.HALF_UP)
           spentHours should equal(actualHours)
 
-          //start date
+          // start date
           dateToString(redmineIssue.getStartDate) should equal(
             dateToString(backlogIssue.getStartDate)
           )
 
-          //created user
+          // created user
           userIdOfUser(redmineIssue.getAuthor) should equal(
             backlogIssue.getCreatedUser.getUserId
           )
 
-          //created
+          // created
           timestampToString(redmineIssue.getCreatedOn) should equal(
             timestampToString(backlogIssue.getCreated)
           )
 
-          //updated user
+          // updated user
           withClue(s"""
               |redmine:${timestampToString(redmineIssue.getUpdatedOn)}
               |backlog:${timestampToString(updated(backlogIssue))}
             """.stripMargin) {
-            //timestampToString(redmineIssue.getUpdatedOn) should be(timestampToString(updated(backlogIssue)))
+            // timestampToString(redmineIssue.getUpdatedOn) should be(timestampToString(updated(backlogIssue)))
           }
 
-          //comments
+          // comments
           allCommentsOfIssue(backlogIssue.getId)
 //          val comments = allCommentsOfIssue(backlogIssue.getId)
 //          redmineIssue.getJournals.asScala.size should equal(comments.size)
