@@ -77,7 +77,7 @@ mapping.priority.redmine.immediate=今すぐ
 
 # CLI
 cli.confirm=移行を実行しますか？ (y/n [n]):
-cli.require_java8=現在のJavaのバージョンは[{0}]です。Java8以上が必須になります。
+cli.require_java8=現在のJavaのバージョンは[{0}]です。Java8が必須になります。
 cli.help.projectKey=移行したいRedmineプロジェクトのプロジェクト識別子を指定します。(必須オプション)例：--projectKey [Redmineプロジェクト識別子]:[Backlogプロジェクトキー]
 cli.confirm_recreate={0}マッピングファイルが既にあります。上書きしますか？ (y/n [n]):
 cli.backlog_project_already_exist=プロジェクト[{0}]はBacklog内に既に存在します。\nプロジェクト[{0}]に課題とWikiをインポートしますか？（追加インポートの仕様については、詳細READMEを参照ください) (y/n [n]):
