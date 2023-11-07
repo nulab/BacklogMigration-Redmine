@@ -130,6 +130,7 @@ cli.mapping.error.empty.item=Corresponding item for {0} "{1}" in {2} is not spec
 cli.mapping.output_file=The mapping file about {0} is created. Check the mapping file and fix it if necessary.
 cli.mapping.merge_file=The following {0} was added to the mapping file of {0}. Check the mapping file and fix it if necessary.
 cli.mapping.no_change=There was no change in the mapping file of {0}.
+cli.mapping.error.setup=Setup is incomplete. \nPlease complete the set up with the sub-command "init". \nAdd "--help" option to know about the "init" command.
 
 
 # CLI Project Info
