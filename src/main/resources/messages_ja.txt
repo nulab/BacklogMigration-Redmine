@@ -131,6 +131,7 @@ cli.mapping.error.empty.item={0}の{1}[{2}]に対応する項目が指定され�
 cli.mapping.output_file={0}のマッピングファイルを作成しました。マッピングファイルを確認し、必要に応じて修正してください。
 cli.mapping.merge_file={0}のマッピングファイルに次の{0}を追加しました。マッピングファイルを確認し、必要に応じて修正してください。
 cli.mapping.no_change={0}のマッピングファイルに変更はありませんでした。
+cli.mapping.error.setup=セットアップが不十分です。\nサブコマンド[init]を使用しセットアップしてください。\n[init]コマンドについて知るには、[--help]オプションをつけて実行してください。
 
 
 # CLI Project Info
