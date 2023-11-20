@@ -252,6 +252,7 @@ Following items cannot be migrated
 - Use as a filter
 - Searched
 - Display
+- Key/value List
 
 ### About status
 
@@ -556,6 +557,7 @@ Backlog で **プレミアムプラン以上** のプランを契約している
 - フィルタとして使用
 - 検索対象
 - 表示
+- キー・バリュー リスト
 
 ### 状態について
 
