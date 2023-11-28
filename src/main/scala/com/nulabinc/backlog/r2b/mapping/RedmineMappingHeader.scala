@@ -21,8 +21,7 @@ object RedmineMappingHeader {
     val headers: Seq[String] = Seq(
       "Redmine user name",
       "Redmine user display name",
-      "Backlog user name",
-      "Backlog mapping type"
+      "Backlog user name"
     )
   }
 
