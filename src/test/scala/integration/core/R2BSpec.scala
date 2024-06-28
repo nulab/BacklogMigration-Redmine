@@ -183,8 +183,8 @@ class R2BSpec extends FlatSpec with Matchers with SimpleFixture {
           redmineWiki.getAttachments.asScala.foreach(redmineAttachment => {
             withClue(s"name:${redmineAttachment.getFileName}") {
               backlogWiki.getAttachments.asScala.exists(backlogAttachment => {
-                FileUtil.normalize(backlogAttachment.getName) == FileUtil
-                  .normalize(
+                FileUtil.clean(backlogAttachment.getName) == FileUtil
+                  .clean(
                     redmineAttachment.getFileName
                   )
               }) should be(true)
