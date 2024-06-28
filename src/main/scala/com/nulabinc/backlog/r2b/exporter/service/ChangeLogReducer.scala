@@ -158,7 +158,7 @@ private[exporter] class ChangeLogReducer(
       changeLog.optAttachmentInfo match {
         case Some(attachmentInfo) =>
           val optAttachment = attachments.find(attachment =>
-            FileUtil.normalize(attachment.getFileName) == attachmentInfo.name
+            FileUtil.clean(attachment.getFileName) == attachmentInfo.name
           )
           optAttachment match {
             case Some(attachment) =>

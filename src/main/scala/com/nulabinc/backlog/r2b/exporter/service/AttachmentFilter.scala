@@ -31,7 +31,7 @@ private[exporter] class AttachmentFilter(journals: Seq[Journal]) {
   ): Boolean = {
     detail.getProperty match {
       case RedmineConstantValue.ATTACHMENT =>
-        FileUtil.normalize(attachment.getFileName) == FileUtil.normalize(
+        FileUtil.clean(attachment.getFileName) == FileUtil.clean(
           detail.getNewValue
         )
       case _ => false

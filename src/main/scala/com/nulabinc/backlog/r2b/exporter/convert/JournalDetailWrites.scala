@@ -98,7 +98,7 @@ private[exporter] class JournalDetailWrites @Inject() (
       case RedmineConstantValue.ATTACHMENT =>
         val attachment = BacklogAttachment(
           optId = StringUtil.safeStringToLong(detail.getName),
-          name = FileUtil.normalize(detail.getNewValue)
+          name = FileUtil.clean(detail.getNewValue)
         )
         Some(attachment)
       case _ => None

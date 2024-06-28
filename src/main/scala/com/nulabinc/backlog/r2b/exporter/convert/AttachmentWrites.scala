@@ -17,7 +17,7 @@ private[exporter] class AttachmentWrites @Inject() ()
   override def writes(attachment: Attachment): BacklogAttachment = {
     BacklogAttachment(
       optId = Some(attachment.getId.intValue()),
-      name = FileUtil.normalize(attachment.getFileName)
+      name = FileUtil.clean(attachment.getFileName)
     )
   }
 
