@@ -2,7 +2,6 @@ package com.nulabinc.backlog.r2b.exporter.actor
 
 import java.util.concurrent.CountDownLatch
 
-import akka.actor.Actor
 import better.files.File
 import com.nulabinc.backlog.migration.common.convert.Convert
 import com.nulabinc.backlog.migration.common.domain.{
@@ -20,6 +19,7 @@ import com.nulabinc.backlog.r2b.exporter.service.{
 }
 import com.taskadapter.redmineapi.Include
 import com.taskadapter.redmineapi.bean.{Attachment, _}
+import org.apache.pekko.actor.Actor
 import spray.json._
 
 import scala.concurrent.ExecutionContext.Implicits.global

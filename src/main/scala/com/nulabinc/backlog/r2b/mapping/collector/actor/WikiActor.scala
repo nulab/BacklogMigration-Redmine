@@ -2,11 +2,11 @@ package com.nulabinc.backlog.r2b.mapping.collector.actor
 
 import java.util.concurrent.CountDownLatch
 
-import akka.actor.Actor
 import com.nulabinc.backlog.migration.common.utils.Logging
 import com.nulabinc.backlog.r2b.mapping.collector.core.MappingData
 import com.nulabinc.backlog.r2b.redmine.service.WikiService
 import com.taskadapter.redmineapi.bean.{User, WikiPage, WikiPageDetail}
+import org.apache.pekko.actor.Actor
 
 import scala.collection.mutable
 import scala.concurrent.ExecutionContext.Implicits.global

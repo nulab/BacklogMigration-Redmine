@@ -2,9 +2,6 @@ package com.nulabinc.backlog.r2b.mapping.collector.actor
 
 import java.util.concurrent.CountDownLatch
 
-import akka.actor.SupervisorStrategy.Restart
-import akka.actor.{Actor, ActorRef, OneForOneStrategy, Props}
-import akka.routing.SmallestMailboxPool
 import com.nulabinc.backlog.migration.common.conf.BacklogConfiguration
 import com.nulabinc.backlog.migration.common.dsl.ConsoleDSL
 import com.nulabinc.backlog.migration.common.utils.{ConsoleOut, Logging, ProgressBar}
@@ -14,6 +11,9 @@ import com.osinka.i18n.Messages
 import com.taskadapter.redmineapi.bean.User
 import monix.eval.Task
 import monix.execution.Scheduler
+import org.apache.pekko.actor.SupervisorStrategy.Restart
+import org.apache.pekko.actor.{Actor, ActorRef, OneForOneStrategy, Props}
+import org.apache.pekko.routing.SmallestMailboxPool
 
 import scala.concurrent.duration._
 
@@ -59,7 +59,7 @@ private[collector] class IssuesActor(mappingContext: MappingContext)(implicit
   def receive: Receive = {
     case IssuesActor.Do(mappingData: MappingData, allUsers: Seq[User]) =>
       val router =
-        SmallestMailboxPool(akkaMailBoxPool, supervisorStrategy = strategy)
+        SmallestMailboxPool(pekkoMailBoxPool, supervisorStrategy = strategy)
       val issueActor = context.actorOf(
         router.props(
           Props(
