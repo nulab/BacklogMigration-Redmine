@@ -2,7 +2,6 @@ package com.nulabinc.backlog.r2b.mapping.collector.service
 
 import javax.inject.Inject
 
-import akka.actor.{ActorSystem, Props}
 import com.nulabinc.backlog.migration.common.conf.ExcludeOption
 import com.nulabinc.backlog.migration.common.dsl.ConsoleDSL
 import com.nulabinc.backlog.migration.common.utils.{Logging, ProgressBar}
@@ -13,6 +12,7 @@ import com.osinka.i18n.Messages
 import com.taskadapter.redmineapi.bean.{Group, Membership, User}
 import monix.eval.Task
 import monix.execution.Scheduler
+import org.apache.pekko.actor.{ActorSystem, Props}
 
 import scala.concurrent.Await
 import scala.concurrent.duration.Duration

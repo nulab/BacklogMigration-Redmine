@@ -3,12 +3,12 @@ package com.nulabinc.backlog.r2b.exporter.actor
 import java.net.URL
 import java.util.concurrent.CountDownLatch
 
-import akka.actor.Actor
 import com.nulabinc.backlog.migration.common.convert.Convert
 import com.nulabinc.backlog.migration.common.utils.{IOUtil, Logging}
 import com.nulabinc.backlog.r2b.exporter.core.ExportContext
 import com.nulabinc.backlog.r2b.exporter.service.AttachmentService
 import com.taskadapter.redmineapi.bean.WikiPage
+import org.apache.pekko.actor.Actor
 import spray.json._
 
 import scala.concurrent.ExecutionContext.Implicits.global

@@ -3,7 +3,6 @@ package com.nulabinc.backlog.r2b
 import java.nio.file.Paths
 import java.util.Locale
 
-import akka.actor.ActorSystem
 import com.nulabinc.backlog.migration.common.client.IAAH
 import com.nulabinc.backlog.migration.common.conf.{
   BacklogApiConfiguration,
@@ -12,9 +11,9 @@ import com.nulabinc.backlog.migration.common.conf.{
 }
 import com.nulabinc.backlog.migration.common.errors.{MappingFileNotFound, MappingValidationError}
 import com.nulabinc.backlog.migration.common.interpreters.{
-  AkkaHttpDSL,
   JansiConsoleDSL,
   LocalStorageDSL,
+  PekkoHttpDSL,
   SQLiteStoreDSL
 }
 import com.nulabinc.backlog.migration.common.messages.ConsoleMessages
@@ -28,6 +27,7 @@ import com.nulabinc.backlog.r2b.utils.{ClassVersion, DisableSSLCertificateCheckU
 import com.osinka.i18n.Messages
 import monix.eval.Task
 import monix.execution.Scheduler
+import org.apache.pekko.actor.ActorSystem
 import org.fusesource.jansi.AnsiConsole
 import org.rogach.scallop._
 
@@ -41,10 +41,10 @@ object R2B extends BacklogConfiguration with Logging {
   private implicit val system: ActorSystem = ActorSystem("main")
   private implicit val exc: Scheduler =
     monix.execution.Scheduler.Implicits.global
-  private implicit val storageDSL           = LocalStorageDSL()
-  private implicit val consoleDSL           = JansiConsoleDSL()
-  private implicit val storeDSL             = SQLiteStoreDSL(dbPath)
-  private implicit val httpDSL: AkkaHttpDSL = new AkkaHttpDSL()
+  private implicit val storageDSL            = LocalStorageDSL()
+  private implicit val consoleDSL            = JansiConsoleDSL()
+  private implicit val storeDSL              = SQLiteStoreDSL(dbPath)
+  private implicit val httpDSL: PekkoHttpDSL = new PekkoHttpDSL()
 
   def main(args: Array[String]): Unit = {
     consoleDSL

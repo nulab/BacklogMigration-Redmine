@@ -2,9 +2,6 @@ package com.nulabinc.backlog.r2b.exporter.actor
 
 import java.util.concurrent.CountDownLatch
 
-import akka.actor.SupervisorStrategy.Restart
-import akka.actor.{Actor, ActorRef, OneForOneStrategy, Props}
-import akka.routing.SmallestMailboxPool
 import com.nulabinc.backlog.migration.common.conf.BacklogConfiguration
 import com.nulabinc.backlog.migration.common.domain.BacklogTextFormattingRule
 import com.nulabinc.backlog.migration.common.dsl.ConsoleDSL
@@ -14,6 +11,9 @@ import com.nulabinc.backlog4j.BacklogAPIException
 import com.osinka.i18n.Messages
 import monix.eval.Task
 import monix.execution.Scheduler
+import org.apache.pekko.actor.SupervisorStrategy.Restart
+import org.apache.pekko.actor.{Actor, ActorRef, OneForOneStrategy, Props}
+import org.apache.pekko.routing.SmallestMailboxPool
 
 import scala.concurrent.duration._
 
@@ -61,7 +61,7 @@ private[exporter] class IssuesActor(
   def receive: Receive = {
     case IssuesActor.Do =>
       val router =
-        SmallestMailboxPool(akkaMailBoxPool, supervisorStrategy = strategy)
+        SmallestMailboxPool(pekkoMailBoxPool, supervisorStrategy = strategy)
       val issueActor = context.actorOf(
         router.props(
           Props(new IssueActor(exportContext, backlogTextFormattingRule))

@@ -1,6 +1,5 @@
 package com.nulabinc.backlog.r2b.mapping.collector.actor
 
-import akka.actor.{Actor, Props}
 import com.nulabinc.backlog.migration.common.conf.ExcludeOption
 import com.nulabinc.backlog.migration.common.dsl.ConsoleDSL
 import com.nulabinc.backlog.migration.common.utils.Logging
@@ -8,6 +7,7 @@ import com.nulabinc.backlog.r2b.mapping.collector.core.{MappingContext, MappingD
 import com.taskadapter.redmineapi.bean.User
 import monix.eval.Task
 import monix.execution.Scheduler
+import org.apache.pekko.actor.{Actor, Props}
 
 /**
  * @author

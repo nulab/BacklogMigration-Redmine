@@ -1,12 +1,12 @@
 package com.nulabinc.backlog.r2b.exporter.actor
 
-import akka.actor.{Actor, Props}
 import com.nulabinc.backlog.migration.common.domain.BacklogTextFormattingRule
 import com.nulabinc.backlog.migration.common.dsl.ConsoleDSL
 import com.nulabinc.backlog.migration.common.utils.Logging
 import com.nulabinc.backlog.r2b.exporter.core.ExportContext
 import monix.eval.Task
 import monix.execution.Scheduler
+import org.apache.pekko.actor.{Actor, Props}
 
 /**
  * @author
