@@ -2,9 +2,6 @@ package com.nulabinc.backlog.r2b.exporter.actor
 
 import java.util.concurrent.CountDownLatch
 
-import akka.actor.SupervisorStrategy.Restart
-import akka.actor.{Actor, OneForOneStrategy, Props}
-import akka.routing.SmallestMailboxPool
 import com.nulabinc.backlog.migration.common.conf.BacklogConfiguration
 import com.nulabinc.backlog.migration.common.dsl.ConsoleDSL
 import com.nulabinc.backlog.migration.common.utils.{Logging, ProgressBar}
@@ -13,6 +10,9 @@ import com.osinka.i18n.Messages
 import com.taskadapter.redmineapi.bean.WikiPage
 import monix.eval.Task
 import monix.execution.Scheduler
+import org.apache.pekko.actor.SupervisorStrategy.Restart
+import org.apache.pekko.actor.{Actor, OneForOneStrategy, Props}
+import org.apache.pekko.routing.SmallestMailboxPool
 
 import scala.concurrent.duration._
 
@@ -43,7 +43,7 @@ private[exporter] class WikisActor(exportContext: ExportContext)(implicit
   def receive: Receive = {
     case WikisActor.Do =>
       val router =
-        SmallestMailboxPool(akkaMailBoxPool, supervisorStrategy = strategy)
+        SmallestMailboxPool(pekkoMailBoxPool, supervisorStrategy = strategy)
       val wikiActor =
         context.actorOf(router.props(Props(new WikiActor(exportContext))))
       wikis.foreach(wiki => wikiActor ! WikiActor.Do(wiki, completion, wikis.size, console))
