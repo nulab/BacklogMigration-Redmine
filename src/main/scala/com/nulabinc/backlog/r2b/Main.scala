@@ -60,7 +60,7 @@ object R2B extends BacklogConfiguration with Logging {
       consoleDSL
         .errorln(
           Messages(
-            "cli.require_java8",
+            "cli.require_java11",
             System.getProperty("java.specification.version")
           )
         )
