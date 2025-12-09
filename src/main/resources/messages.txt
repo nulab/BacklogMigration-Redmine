@@ -77,7 +77,7 @@ mapping.priority.redmine.immediate=Immediate
 
 # CLI
 cli.confirm=Start migration? (y/n [n]):
-cli.require_java8=The current version of Java is "{0}". Java 8 is required for this program.
+cli.require_java11=The current version of Java is "{0}". Java 11 is required for this program.
 cli.help.projectKey=Your Redmine project identifier.(required) Example:--projectKey [your redmine project identifier1]:[your backllog project key]
 cli.confirm_recreate=The mapping file {0} already exists. Do you want to overwrite it? (y/n [n]):
 cli.backlog_project_already_exist=Project "{0}" already exists. Do you want to import issues and wikis to project "{0}"? (Check the README file for details.)  (y/n [n]):

@@ -76,7 +76,7 @@ object R2BCli extends BacklogConfiguration with Logging {
         mappingFilePath = MappingDirectory.default.statusMappingFilePath,
         mappingListPath = MappingDirectory.default.statusMappingListFilePath,
         srcItems = mappingFileContainer.status.redmines.map(r => RedmineStatusMappingItem(r.name)),
-        dstItems = backlogStatusService.allStatuses()
+        dstItems = backlogStatusService.allStatusesForExport()
       )
       _ <- PriorityMappingFileService.init[RedminePriorityMappingItem, Task](
         mappingFilePath = MappingDirectory.default.priorityMappingFilePath,
