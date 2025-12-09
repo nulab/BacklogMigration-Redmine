@@ -47,7 +47,7 @@ jobs:
           mv target/scala-2.13/*.jar target/dist
 
       - name: Upload jar file
-        uses: actions/upload-artifact@v1
+        uses: actions/upload-artifact@v5
         with:
           name: backlog-migration-redmine
           path: target/dist
