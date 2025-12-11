@@ -20,7 +20,7 @@ Migrate your projects from Redmine to [Backlog].
 
 ## Requirements
 
-- **Java 8**
+- **Java 11**
 - The Backlog Space's **administrator** roles.
 
 https://github.com/nulab/BacklogMigration-Redmine/releases
@@ -324,7 +324,7 @@ Redmine のプロジェクトを[Backlog]に移行するためのツールです
 
 ## 必須要件
 
-- **Java 8**
+- **Java 11**
 - Backlog の **管理者権限**
 
 https://github.com/nulab/BacklogMigration-Redmine/releases
